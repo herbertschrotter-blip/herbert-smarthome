@@ -28,8 +28,16 @@ const { chromium } = require('playwright'); const fs = require('fs');
     return 'ok';
   }, states);
   console.log(r); await p.waitForTimeout(500);
-  const head = await p.evaluate(() => document.querySelector('heidi-panel').shadowRoot.querySelector('.hero .big').textContent.trim());
-  console.log('Kopf:', head, head === 'Wischt Küche' ? 'ok' : 'FEHLER');
+  const head = await p.evaluate(() => { const sr = document.querySelector('heidi-panel').shadowRoot; return { big: sr.querySelector('.hero .big').textContent.trim(), sub: (sr.querySelector('.hero .sub') || {}).textContent?.trim(), btns: Array.from(sr.querySelectorAll('.hero .ctl .btn')).map(b => b.textContent.trim()), chairsInHero: !!sr.querySelector('.hero [data-toggle]'), chairsInMap: !!sr.querySelector('.tools [data-toggle]') }; });
+  console.log('Kopf:', JSON.stringify(head), head.sub === 'Wischt Küche' && head.btns.join() === 'Pause,Stopp,Station' && !head.chairsInHero && head.chairsInMap ? 'ok' : 'FEHLER Kopf');
+  // Zustände: pausiert → Weiter/Stopp/Station, angedockt → Start/Orten
+  for (const [st, want] of [['paused', 'Weiter,Stopp,Station'], ['docked', 'Start,Orten']]) {
+    const got = await p.evaluate((st) => { const el = document.querySelector('heidi-panel'); const s = { ...el._hass.states }; s['vacuum.heidi'] = { ...s['vacuum.heidi'], state: st, last_updated: st }; el.hass = { ...el._hass, states: s }; return Array.from(el.shadowRoot.querySelectorAll('.hero .ctl .btn')).map(b => b.textContent.trim()).join() + ' | ' + el.shadowRoot.querySelector('.hero .big').textContent.trim(); }, st);
+    console.log(st + ':', got, got.startsWith(want) ? 'ok' : 'FEHLER');
+  }
+  await p.evaluate(() => { const el = document.querySelector('heidi-panel'); const s = { ...el._hass.states }; s['vacuum.heidi'] = { ...s['vacuum.heidi'], state: 'cleaning', last_updated: 'c' }; el.hass = { ...el._hass, states: s }; });
+  await p.waitForTimeout(200);
+  await p.locator('heidi-panel .hero').first().screenshot({ path: 'panel_hero.png' });
   const tl = await p.evaluate(() => Array.from(document.querySelector('heidi-panel').shadowRoot.querySelectorAll('.tl .tlr')).map(r => r.textContent.replace(/\s+/g, ' ').trim()));
   console.log('Zeitleiste:'); tl.forEach(x => console.log('  ' + x));
   const api = await p.evaluate(() => window._api); console.log('API-Aufrufe:', api);

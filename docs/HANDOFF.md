@@ -118,6 +118,9 @@ Uhr (10:15). Einrichten im Ordner `heidi/tests`: `npm i` und dann `npx playwrigh
   (Recorder behält standardmäßig 10 Tage) – ältere Einträge zeigen „Kein Verlauf gespeichert“.
 - Ressourcen-Version wurde per WebSocket (`lovelace/resources/update`) live gesetzt – so geht ein
   Karten-Update ohne HA-Neustart (deploy.ps1 schreibt zusätzlich die Datei). Danach Strg+F5.
+- v1.4.1: Kopf zweizeilig (groß Gesamtauftrag, klein Arbeitsschritt), Knöpfe je Zustand
+  (Pause/Stopp/Station beim Reinigen, Weiter bei Pause, Start/Orten angedockt), Stühle-Schalter
+  vom Kopf zur Karte (neben Sperrzonen) verschoben. Test `test-timeline.js` prüft das mit.
 
 ## 4. Offene Punkte (Stand 14.09.2026, Claude-Code-Sitzung)
 Erledigt:

@@ -3,7 +3,7 @@
  * Robotereinstellungen, Einstellungs-Panel, Prognose) als HTML/CSS/JS.
  * Alle Daten kommen live aus Home Assistant (hass.states), alle Aktionen laufen über hass.callService.
  */
-const HP_VERSION = "1.4.0";
+const HP_VERSION = "1.4.1";
 
 const E = {
   vac: "vacuum.heidi",
@@ -108,7 +108,9 @@ ha-icon { --mdc-icon-size: 18px; }
 .chip.on { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 50%, var(--line)); }
 .chip.warn { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 50%, var(--line)); }
 .chip.bad { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 50%, var(--line)); }
-.ctl { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.ctl { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; min-width: 150px; }
+.status .sub { font-size: 13px; color: var(--muted); margin-top: -4px; display: flex; align-items: center; gap: 6px; }
+.status .sub ha-icon { --mdc-icon-size: 15px; color: var(--accent); }
 .btn { border: 1px solid var(--line); background: var(--surface-2); color: var(--text); border-radius: 12px; padding: 10px 6px 8px; display: grid; justify-items: center; gap: 4px; font-size: 11px; font-weight: 500; }
 .btn.primary { background: var(--accent); color: var(--bg); border-color: var(--accent); }
 .btn:disabled { opacity: .45; cursor: default; }
@@ -118,6 +120,7 @@ ha-icon { --mdc-icon-size: 18px; }
 .mapwrap .tools { position: absolute; right: 10px; bottom: 10px; display: flex; gap: 6px; z-index: 2; }
 .tb { border: 1px solid var(--line); background: var(--solid); color: var(--text); border-radius: 10px; padding: 7px 10px; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; box-shadow: var(--shadow); }
 .tb ha-icon { --mdc-icon-size: 16px; }
+.tb.warn { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 55%, var(--line)); }
 .rooms { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 10px; }
 @media (max-width: 900px) { .rooms { grid-template-columns: repeat(4, 1fr); } }
 .rooms .btn { padding: 8px 4px 6px; border-radius: 10px; }
@@ -381,7 +384,7 @@ class HeidiPanel extends HTMLElement {
   }
 
   _hero() {
-    const vac = this.st(E.vac), status = this.st("sensor.heidi_status"), err = this.st("sensor.heidi_error");
+    const vac = this.st(E.vac), status = this.st("sensor.heidi_status"), err = this.st("sensor.heidi_error"), task = this.st("sensor.heidi_task_status");
     const col = vac === "cleaning" ? "var(--accent)" : vac === "returning" ? "var(--warn)" : vac === "error" ? "var(--bad)" : "var(--good)";
     const batt = this.num("sensor.heidi_battery_level", 0);
     const persons = E.persons.map((p) => {
@@ -391,35 +394,47 @@ class HeidiPanel extends HTMLElement {
     }).join("");
     const phase = this.st(E.phase), phaseOk = !["unknown", "unavailable", ""].includes(phase);
     const statusTxt = phaseOk ? phase : (STATUS_DE[status] || status.replace(/_/g, " ")).replace(/^./, (c) => c.toUpperCase());
-    const chairs = this.on(E.chairs);
+    // Groß: Gesamtauftrag (Planer-Eintrag oder Auftragsart) bzw. Zustand · klein: aktueller Arbeitsschritt
+    const TASK = { room_cleaning: "Reinigt Räume", zone_cleaning: "Reinigt Zone", spot_cleaning: "Reinigt Punkt", cleaning: "Reinigt", cruising: "Fährt", mapping: "Erstellt Karte", fast_mapping: "Erstellt Karte" };
+    const auto = this.on("input_boolean.heidi_auto_lauf") ? this.st("input_text.heidi_auto_letzter_plan") : "";
+    const job = auto && !["unknown", "unavailable", ""].includes(auto) ? auto : (TASK[task] || "Reinigt");
+    let big = statusTxt, sub = "";
+    if (vac === "error") big = "Fehler";
+    else if (vac === "paused") { big = "Pausiert"; sub = job; }
+    else if (vac === "returning") { big = "Fährt zur Station"; sub = phaseOk && phase !== big ? phase : ""; }
+    else if (vac === "cleaning") { big = job; sub = phaseOk ? phase : ""; }
+    if (sub === big) sub = "";
+    // Knöpfe je nach Zustand
+    const B = (svc, icon, label, primary = false) => `<button class="btn ${primary ? "primary" : ""}" data-svc="vacuum.${svc}">${ic(icon)}${label}</button>`;
+    const ctl = vac === "cleaning" ? B("pause", "mdi:pause", "Pause", true) + B("stop", "mdi:stop", "Stopp") + B("return_to_base", "mdi:home-import-outline", "Station")
+      : vac === "paused" ? B("start", "mdi:play", "Weiter", true) + B("stop", "mdi:stop", "Stopp") + B("return_to_base", "mdi:home-import-outline", "Station")
+      : vac === "returning" ? B("pause", "mdi:pause", "Pause", true) + B("stop", "mdi:stop", "Stopp") + B("locate", "mdi:map-marker", "Orten")
+      : vac === "docked" ? B("start", "mdi:play", "Start", true) + B("locate", "mdi:map-marker", "Orten")
+      : B("start", "mdi:play", "Start", true) + B("return_to_base", "mdi:home-import-outline", "Station") + B("locate", "mdi:map-marker", "Orten");
     const dnd = `${(this.st("time.heidi_dnd_start") || "").slice(0, 5)}–${(this.st("time.heidi_dnd_end") || "").slice(0, 5)}`;
     const room = this.roomName(this.st("sensor.heidi_current_room"));
     return `<div class="card"><div class="hero">
       <button class="ring" style="--p:${batt};--rc:${batt <= 20 ? "var(--bad)" : "var(--accent)"};border:0;padding:0" data-more="sensor.heidi_battery_level"><div class="num">${batt}<small>Akku</small></div></button>
       <div class="status">
-        <button class="big" data-more="${E.vac}" style="border:0;background:transparent;padding:0;text-align:left"><span class="dot" style="background:${col};box-shadow:0 0 0 4px color-mix(in srgb, ${col} 25%, transparent)"></span>${esc(statusTxt)}</button>
+        <button class="big" data-more="${E.vac}" style="border:0;background:transparent;padding:0;text-align:left"><span class="dot" style="background:${col};box-shadow:0 0 0 4px color-mix(in srgb, ${col} 25%, transparent)"></span>${esc(big)}</button>
+        ${sub ? `<div class="sub">${ic("mdi:subdirectory-arrow-right")}${esc(sub)}</div>` : ""}
         <div class="chips">${persons}
           ${room !== "–" && vac === "cleaning" && !phaseOk ? `<span class="chip on">${ic("mdi:floor-plan")}${esc(room)}</span>` : ""}
           ${err !== "no_error" && err !== "unavailable" ? `<span class="chip bad">${ic("mdi:alert")}${esc(err.replace(/_/g, " "))}</span>` : ""}
-          <button class="chip ${chairs ? "warn" : ""}" data-toggle="${E.chairs}" title="Sperrzone um den Esstisch">${ic("mdi:chair-rolling")}Stühle${chairs ? " · Sperrzone" : ""}</button>
           <span class="chip" title="Nicht stören">${ic("mdi:sleep")}${esc(dnd)}</span>
         </div>
       </div>
-      <div class="ctl">
-        <button class="btn primary" data-svc="vacuum.start">${ic("mdi:play")}Start</button>
-        <button class="btn" data-svc="vacuum.pause">${ic("mdi:pause")}Pause</button>
-        <button class="btn" data-svc="vacuum.return_to_base">${ic("mdi:home-import-outline")}Station</button>
-        <button class="btn" data-svc="vacuum.locate">${ic("mdi:map-marker")}Orten</button>
-      </div></div></div>`;
+      <div class="ctl">${ctl}</div></div></div>`;
   }
 
   _mapCard() {
     const sel = this._selRooms || new Set();
     const rooms = ROOMS.map((r) => `<button class="btn ${sel.has(r.id) ? "sel" : ""}" data-room="${r.id}">${ic(r.icon)}${r.short}</button>`).join("");
     const zc = this._rectsFromAttr(this.attr(E.map, "no_go_areas")).length + this._rectsFromAttr(this.attr(E.map, "no_mopping_areas")).length;
+    const chairs = this.on(E.chairs);
     return `<div class="card"><h2>${ic("mdi:map")}Karte <span class="r">${esc(this.st(E.karte))}</span></h2>
       <div class="mapwrap"><div id="mapSlot"></div>
-        <div class="tools"><button class="tb" data-act="zones">${ic("mdi:cancel")}Sperrzonen${zc ? ` · ${zc}` : ""}</button></div></div>
+        <div class="tools"><button class="tb" data-act="zones">${ic("mdi:cancel")}Sperrzonen${zc ? ` · ${zc}` : ""}</button><button class="tb ${chairs ? "warn" : ""}" data-toggle="${E.chairs}" title="Sperrzone um den Esstisch ein/aus">${ic("mdi:chair-rolling")}Stühle am Boden${chairs ? " · gesperrt" : ""}</button></div></div>
       <div class="rooms" id="rooms">${rooms}</div>
       <div class="roomrun" id="roomrun" ${sel.size ? "" : "hidden"}><button class="btn primary" data-act="cleanrooms">${ic("mdi:play")}${sel.size} ${sel.size === 1 ? "Raum" : "Räume"} reinigen</button><button class="btn" data-act="clearrooms">${ic("mdi:close")}</button></div></div>`;
   }
@@ -891,7 +906,7 @@ class HeidiPanel extends HTMLElement {
     if (t.dataset.toggle) { await this.toggle(t.dataset.toggle); return; }
     if (t.dataset.option) { const id = t.dataset.option, v = t.dataset.value; if (id === E.dark) await this.call("input_boolean", v === "on" ? "turn_on" : "turn_off", { entity_id: id }); else await this.call(id.split(".")[0], "select_option", { entity_id: id, option: v }); return; }
     if (t.dataset.more) { this.dispatchEvent(new CustomEvent("hass-more-info", { bubbles: true, composed: true, detail: { entityId: t.dataset.more } })); return; }
-    if (t.dataset.svc) { const [d, s] = t.dataset.svc.split("."); await this.call(d, s, { entity_id: E.vac }); this.toast({ start: "Heidi startet", pause: "Pause", return_to_base: "Heidi fährt zur Station", locate: "Heidi meldet sich" }[s] || s); return; }
+    if (t.dataset.svc) { const [d, s] = t.dataset.svc.split("."); await this.call(d, s, { entity_id: E.vac }); this.toast({ start: "Heidi startet", pause: "Pause", stop: "Heidi stoppt", return_to_base: "Heidi fährt zur Station", locate: "Heidi meldet sich" }[s] || s); return; }
     if (t.dataset.press) { await this.call("button", "press", { entity_id: t.dataset.press }); this.toast("Ausgelöst"); return; }
     if (t.dataset.reset) { if (!window.confirm(`${t.dataset.name}: Zähler zurücksetzen?`)) return; await this.call("button", "press", { entity_id: t.dataset.reset }); this.toast(`${t.dataset.name} zurückgesetzt`); return; }
     if (t.dataset.run) { const n = t.dataset.run; const name = this.st(`input_text.heidi_plan${n}_name`); if (!this.on(`input_boolean.heidi_plan${n}_aktiv`)) { this.toast("Eintrag ist inaktiv"); return; } if (!window.confirm(`„${name}“ jetzt starten?`)) return; await this.call("script", "heidi_plan_starten", { plan: parseInt(n), variante: "normal" }); this.toast("Gestartet: " + name); return; }

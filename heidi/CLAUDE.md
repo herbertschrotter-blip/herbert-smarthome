@@ -42,9 +42,14 @@
   „Läuft gerade“ mit Live-Zeitleiste (wird bei jeder Phasenänderung neu geholt). Cache `this._tl`.
 - Optik: Glas-Kacheln (halbtransparent + Blur), Fonts Sora + IBM Plex Sans (Google Fonts,
   Fallback Roboto), Akzent #2fd1b6. Referenz-Mockups unter `heidi/mockups/`.
-- Bereiche: Kopf (Akku-Ring, Status, Personen-Chips, Stühle-Toggle, DND), Karte + Raum-Chips
-  (Auswahl → vacuum_clean_segment) + Sperrzonen-Editor (Rechteck aufs Kartenbild, Umrechnung
-  über calibration_points), Verschleiß-Ringe, Automatik + Regeln, Planer (4 Einträge, Editor),
+- Bereiche: Kopf (Akku-Ring; groß = Gesamtauftrag: Planer-Name aus `input_text.heidi_auto_letzter_plan`
+  wenn `heidi_auto_lauf` an, sonst Auftragsart aus `sensor.heidi_task_status`, bzw. „Pausiert“ /
+  „Fährt zur Station“ / Ruhephase; klein darunter = `sensor.heidi_phase`; Personen-Chips, DND;
+  Knöpfe je Zustand: cleaning → Pause/Stopp/Station, paused → Weiter/Stopp/Station,
+  returning → Pause/Stopp/Orten, docked → Start/Orten, sonst Start/Station/Orten),
+  Karte + Raum-Chips (Auswahl → vacuum_clean_segment) + Sperrzonen-Editor (Rechteck aufs Kartenbild,
+  Umrechnung über calibration_points) + Knopf „Stühle am Boden“ (Esstisch-Sperrzone),
+  Verschleiß-Ringe, Automatik + Regeln, Planer (4 Einträge, Editor),
   Prognose-Kacheln, Station, Letzter Lauf + Protokoll + Roboter-Einstellungen,
   Einstellungs-Panel (Zahnrad), Prognose-Tab.
 
