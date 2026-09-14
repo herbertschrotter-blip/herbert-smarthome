@@ -156,7 +156,8 @@ ha-icon { --mdc-icon-size: 18px; }
 .strip { display: grid; gap: 6px; padding-top: 10px; margin-top: 12px; border-top: 1px solid var(--line); cursor: pointer; }
 .strip .lab { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; display: flex; gap: 8px; align-items: center; }
 .strip .lab .r { margin-left: auto; text-transform: none; letter-spacing: 0; font-weight: 500; color: var(--accent); display: flex; align-items: center; gap: 2px; }
-.strip .lab .r ha-icon { --mdc-icon-size: 16px; }
+.strip .lab .r ha-icon { --mdc-icon-size: 16px; } .strip .lab > ha-icon { --mdc-icon-size: 16px; color: var(--accent); }
+.strip .chip { padding: 5px 10px; font-size: 13px; } .strip .chip ha-icon { --mdc-icon-size: 16px; color: var(--accent); }
 .chip.k { color: var(--text); } .chip.k b { color: var(--muted); font-weight: 500; }
 /* Untermenü Räume */
 .rlist { display: grid; gap: 8px; }
@@ -488,21 +489,21 @@ class HeidiPanel extends HTMLElement {
     return { modus: RV_HA.modus[m] || m, saug: RV_HA.saug[g("saug")] || "–", wasser: g("wasser") ? RV_HA.wasser[g("wasser")] || g("wasser") : null, route: g("route") ? RV_HA.route[g("route")] || g("route") : null, wdh: (g("wdh") || "1x").replace("x", "") };
   }
 
-  // Streifen "Fährt mit": Zusammenfassung der Raumwerte (laufender Auftrag: nur die aktiven Räume)
+  // Streifen im Kopf, nur während einer Reinigung: Einstellungen des Raums, der gerade dran ist
+  // (Symbole + kurzer Wert), rechts die noch ausstehenden Räume. Tippen → Untermenü Räume.
   _strip() {
-    const vac = this.st(E.vac), running = ["cleaning", "paused", "returning"].includes(vac);
-    const segs = running ? (this.attr(E.vac, "active_segments") || []) : [];
-    const ids = segs.length ? segs : ROOMS.map((r) => r.id);
-    const vals = ids.map((id) => this._roomVals(id)).filter(Boolean);
-    if (!vals.length) return `<div class="strip" data-act="rooms"><div class="lab">Fährt mit <span class="r">Raum-Einstellungen am Roboter aus ${ic("mdi:chevron-right")}</span></div></div>`;
-    const auto = this.on("input_boolean.heidi_auto_lauf") ? this.st("input_text.heidi_auto_letzter_plan") : "";
-    const src = running && auto && !["unknown", "unavailable", ""].includes(auto) ? `Eintrag „${auto}“` : running ? "Roboter-Werte" : "Roboter-Werte · zum Ändern tippen";
-    const uni = (k) => { const s = new Set(vals.map((x) => x[k] ?? "–")); return s.size === 1 ? [...s][0] : null; };
-    const chip = (lab, k, fmt = (x) => x) => { const u = uni(k); return `<span class="chip k"><b>${lab}</b> ${u !== null ? esc(fmt(u)) : "je Raum"}</span>`; };
-    const seq = (this.attr(E.vac, "cleaning_sequence") || []).filter((id) => ids.includes(id)).map((id) => ROOMS.find((r) => r.id === id)?.short).filter(Boolean).join(" → ");
-    const wet = vals.some((x) => x.modus !== "Saugen");
-    return `<div class="strip" data-act="rooms" title="Räume einstellen"><div class="lab">Fährt mit <span class="r">${esc(src)} ${ic("mdi:chevron-right")}</span></div>
-      <div class="chips">${chip("Modus", "modus")}${chip("Saugstufe", "saug")}${wet ? chip("Wasser", "wasser", (x) => x ?? "–") : ""}${chip("Wdh.", "wdh", (x) => x + "×")}${seq ? `<span class="chip k"><b>Reihenfolge</b> ${esc(seq)}</span>` : ""}</div></div>`;
+    const vac = this.st(E.vac); if (!["cleaning", "paused"].includes(vac)) return "";
+    const seg = parseInt(this.attr(E.vac, "current_segment")), room = ROOMS.find((r) => r.id === seg);
+    const v = room ? this._roomVals(seg) : null; if (!v) return "";
+    const active = this.attr(E.vac, "active_segments") || [];
+    const order = (this.attr(E.vac, "cleaning_sequence") || []).filter((id) => active.includes(id));
+    const idx = order.indexOf(seg), rest = idx >= 0 ? order.slice(idx + 1) : [];
+    const restTxt = rest.map((id) => ROOMS.find((r) => r.id === id)?.short).filter(Boolean).join(" → ");
+    const chip = (icon, txt, cls = "k") => `<span class="chip ${cls}" title="${esc(txt)}">${icon}${esc(txt)}</span>`;
+    const modeIc = v.modus === "Saugen" ? ic("mdi:broom") : v.modus === "Nur Wischen" ? ic("mdi:water") : ic("mdi:broom") + ic("mdi:water");
+    const fanIc = ic({ Leise: "mdi:fan-speed-1", Standard: "mdi:fan-speed-2", Stark: "mdi:fan-speed-3", Turbo: "mdi:fan" }[v.saug] || "mdi:fan");
+    return `<div class="strip" data-act="rooms" title="Räume einstellen"><div class="lab">${ic(room.icon)} Jetzt: ${esc(room.short)} <span class="r">${restTxt ? "danach " + esc(restTxt) : "letzter Raum"} ${ic("mdi:chevron-right")}</span></div>
+      <div class="chips">${chip(modeIc, v.modus)}${chip(fanIc, v.saug)}${v.modus !== "Saugen" && v.wasser ? chip(ic("mdi:water-percent"), v.wasser) : ""}${v.modus === "Nur Wischen" && v.route ? chip(ic("mdi:routes"), v.route) : ""}${chip(ic("mdi:repeat"), v.wdh + "×")}</div></div>`;
   }
 
   _mapCard() {

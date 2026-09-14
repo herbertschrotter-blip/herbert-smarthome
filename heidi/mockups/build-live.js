@@ -45,7 +45,10 @@ function roomAvail(id, mode) {
 }
 function setVac(st, segs) {
   const phase = { cleaning: "Saugt und wischt Wohnzimmer", paused: "Pausiert", returning: "Fährt zur Station", idle: "Bereit", docked: "Schläft" }[st];
-  upd("vacuum.heidi", st, { active_segments: segs === undefined ? states["vacuum.heidi"].attributes.active_segments : segs, status: st === "cleaning" ? "Room cleaning" : st });
+  const segsNow = segs === undefined ? states["vacuum.heidi"].attributes.active_segments : segs;
+  const order = segsNow ? (states["vacuum.heidi"].attributes.cleaning_sequence || segsNow).filter((i) => segsNow.includes(i)) : [];
+  const cur = ["cleaning", "paused"].includes(st) && order.length ? (order.includes(states["vacuum.heidi"].attributes.current_segment) ? states["vacuum.heidi"].attributes.current_segment : order[0]) : null;
+  upd("vacuum.heidi", st, { active_segments: segsNow, current_segment: cur, status: st === "cleaning" ? "Room cleaning" : st });
   upd("sensor.heidi_status", st === "cleaning" ? "room_cleaning" : st === "docked" ? "sleeping" : st);
   upd("sensor.heidi_task_status", ["cleaning", "paused"].includes(st) ? "room_cleaning" : "completed");
   upd("sensor.heidi_phase", phase);
@@ -101,6 +104,7 @@ window.addEventListener("DOMContentLoaded", () => {
     else if (s === "plan2") { runPlan(2, "normal"); upd("sensor.heidi_phase", "Saugt und wischt Wohnzimmer"); }
     else if (s === "plan2s") { runPlan(2, "schnell"); upd("sensor.heidi_phase", "Saugt Wohnzimmer"); }
     else if (s === "paused") { setVac("paused"); }
+    else if (s === "next") { const a = states["vacuum.heidi"].attributes, o = (a.cleaning_sequence || []).filter((i) => (a.active_segments || []).includes(i)); const i = o.indexOf(a.current_segment); if (i >= 0 && i + 1 < o.length) { upd("vacuum.heidi", undefined, { current_segment: o[i + 1] }); upd("sensor.heidi_current_room", ROOMN[o[i + 1]]); upd("sensor.heidi_phase", "Saugt und wischt " + ROOMN[o[i + 1]]); } }
     else if (s === "docked") { setVac("docked", null); }
     push();
   });
@@ -132,7 +136,7 @@ const html = `<title>Heidi Live-Mockup</title>
 <heidi-panel></heidi-panel>
 <div class="bar" id="bar">
   <div class="row"><b>Mockup</b><span class="hint">Klicks wirken nur hier auf der Seite. Szenario:</span>
-    <button data-s="docked">Angedockt</button><button data-s="plan2">Plan 2 läuft</button><button data-s="plan2s">Plan 2 als Schnellprogramm</button><button data-s="paused">Pausiert</button><button data-s="reset">Alles zurücksetzen</button></div>
+    <button data-s="docked">Angedockt</button><button data-s="plan2">Plan 2 läuft</button><button data-s="next">Nächster Raum</button><button data-s="plan2s">Plan 2 als Schnellprogramm</button><button data-s="paused">Pausiert</button><button data-s="reset">Alles zurücksetzen</button></div>
   <pre id="log">Was an Home Assistant gesendet würde, erscheint hier.</pre>
 </div>
 <script>${card}</script>

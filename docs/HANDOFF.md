@@ -140,8 +140,10 @@ Uhr (10:15). Einrichten im Ordner `heidi/tests`: `npm i` und dann `npx playwrigh
     global → im Planer entfernen. App-Szene 34 („Wischen nach dem Saugen“) läuft weiter.
 - Umsetzung (v1.5.0, **im Repo, noch NICHT auf dem Pi** – wartet auf Herberts Freigabe nach dem
   Live-Mockup `heidi/mockups/heidi-live.html`, gebaut mit `node heidi/mockups/build-live.js`):
-  - Karte: Streifen „Fährt mit“ im Kopf (Raumwerte zusammengefasst, Quelle Eintrag/Roboter,
-    Reihenfolge; Tippen → Untermenü). Untermenü „Räume“ (`_roomsHtml`/`_rvClick`) mit Modus
+  - Karte: Streifen im Kopf **nur während einer Reinigung**: „Jetzt: <Raum>“ + Symbole mit
+    kurzem Wert (Modus, Saugstufe, Wasser, Route, Wdh) des Raums aus `current_segment`, rechts
+    „danach Küche → Wohnz.“; Tippen → Untermenü. (Herbert wollte keine Zusammenfassung
+    „je Raum“ – die war nichtssagend.) Untermenü „Räume“ (`_roomsHtml`/`_rvClick`) mit Modus
     **Roboter** (schreibt sofort `select.heidi_room_N_*`, Zeile „Alle Räume“) und **Eintrag N**
     (Einzelwerte je Raum im Editor-Objekt `_ed.raum`, gespeichert als
     `input_text.heidi_planN_raumwerte`). Editor: Modus 3 Optionen, Route nur bei „Nur Wischen“,
