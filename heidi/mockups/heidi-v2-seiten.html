@@ -103,8 +103,7 @@
   .strip .lab { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; }
   .strip .lab svg { width: 16px; height: 16px; flex: none; }
   .livemap { margin-top: 12px; cursor: pointer; }
-  .livemap .map { border-radius: var(--r-s); } .livemap .map > svg { height: 360px; width: 100%; }
-  @container (max-width: 520px) { .livemap .map > svg { height: 240px; } }
+  .livemap .map { border-radius: var(--r-s); } .livemap .map > svg { width: 100%; height: auto; }
   .livemap .cap { margin-top: 6px; font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; } .livemap .cap b { color: var(--text); }
   .livemap .cap svg { width: 14px; height: 14px; }
   .strip .lab .r { margin-left: auto; color: var(--muted); font-weight: 500; }
@@ -152,7 +151,7 @@
   .navtile .ic { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; color: #fff; } .navtile .ic svg { width: 20px; height: 20px; }
   .navtile .t { font-size: 17px; font-weight: 700; display: flex; align-items: center; justify-content: space-between; } .navtile .t svg { width: 16px; height: 16px; color: var(--muted-2); }
   .navtile .s { color: var(--muted); font-size: 13px; }
-  .navtile .prog { display: flex; justify-content: space-between; gap: 8px; align-self: end; } .navtile .prog div { font-size: 11px; color: var(--muted); white-space: nowrap; } .navtile .prog b { display: block; font-size: 14px; color: var(--text); }
+  .navtile .prog { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; align-self: end; } .navtile .prog div { font-size: 10px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .navtile .prog b { display: block; font-size: 13px; color: var(--text); }
   .c-teal { background: linear-gradient(135deg, #2fd1b6, #178f7c); } .c-blue { background: linear-gradient(135deg, #5ab0ff, #2f6fd0); } .c-purple { background: linear-gradient(135deg, #b48cff, #6f45d6); }
   .c-orange { background: linear-gradient(135deg, #ffb340, #e2792a); } .c-gray { background: linear-gradient(135deg, #9aa5b5, #5f6c7d); }
 
@@ -376,7 +375,7 @@ function pageStart() {
     : B('play', 'Start', 1, 'Heidi startet') + B('home', 'Station', 0, 'Heidi fährt zur Station') + B('locate', 'Orten', 0, 'Heidi meldet sich');
   const strip = st.cur ? `<div class="strip" data-open="rooms-robot"><div class="lab">${I.chef} Jetzt: Küche <span class="r">danach Wohnz. → Büro ›</span></div><div class="chips">${chip('broom', 'Saugen + Wischen', 'k')}${chip('fan', 'Turbo', 'k')}${chip('water', 'Mittel', 'k')}${chip('repeat', '1×', 'k')}</div></div>
     <div class="livemap" data-nav="reinigen" title="Zur Karte"><div class="map">${mapSvg(new Set([7, 5]), st.cur, false)}</div><div class="cap">${I.map}<b>Live-Karte</b> · Küche · 34 m² · noch Wohnz., Büro · antippen für Karte</div></div>` : '';
-  const pg = S.prognoseAktiv ? `<button class="navtile" data-nav="prognose"><div class="ic c-orange">${I.chart}</div><div class="t">Prognose ${I.chev}</div><div class="prog"><div>Frei<b>9–16½</b></div><div>Rückkehr<b>16:40</b></div><div>Sicher<b>78 %</b></div></div></button>` : '';
+  const pg = S.prognoseAktiv ? `<button class="navtile" data-nav="prognose"><div class="ic c-orange">${I.chart}</div><div class="t">Prognose ${I.chev}</div><div class="prog"><div>Frei<b>9–16½</b></div><div>Zurück<b>16:40</b></div><div>Sicher<b>78 %</b></div></div></button>` : '';
   return `
     <div class="head"><div><h1>Heidi</h1><div class="sub">${st.head}</div></div><button class="iconbtn" data-nav="einstellungen" aria-label="Einstellungen">${I.gear}</button></div>
     <div class="grid"><div class="col">
