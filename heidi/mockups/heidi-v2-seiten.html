@@ -73,6 +73,8 @@
   .grid { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); }
   @container (min-width: 880px) { .grid { grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); } .grid.even { grid-template-columns: 1fr 1fr; } }
   .col { display: grid; gap: 14px; align-content: start; }
+  .col.left { display: flex; flex-direction: column; } .col.left .card.herocard { flex: 1; display: flex; flex-direction: column; }
+  .livemap { flex: 1; display: flex; flex-direction: column; min-height: 0; } .livemap .map { flex: 1; min-height: 260px; display: flex; }
 
   /* Hero */
   .hero { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; }
@@ -103,7 +105,7 @@
   .strip .lab { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; }
   .strip .lab svg { width: 16px; height: 16px; flex: none; }
   .livemap { margin-top: 12px; cursor: pointer; }
-  .livemap .map { border-radius: var(--r-s); } .livemap .map > svg { width: 100%; height: auto; }
+  .livemap .map { border-radius: var(--r-s); } .livemap .map > svg { width: 100%; height: 100%; min-height: 260px; }
   .livemap .cap { margin-top: 6px; font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; } .livemap .cap b { color: var(--text); }
   .livemap .cap svg { width: 14px; height: 14px; }
   .strip .lab .r { margin-left: auto; color: var(--muted); font-weight: 500; }
@@ -373,18 +375,18 @@ function pageStart() {
   const ctl = S.vac === 'cleaning' ? B('pause', 'Pause', 1, 'Pause') + B('stop', 'Stopp', 0, 'Heidi stoppt') + B('home', 'Station', 0, 'Heidi fährt zur Station')
     : S.vac === 'paused' ? B('play', 'Weiter', 1, 'Weiter') + B('stop', 'Stopp', 0, 'Heidi stoppt') + B('home', 'Station', 0, 'Heidi fährt zur Station')
     : B('play', 'Start', 1, 'Heidi startet') + B('home', 'Station', 0, 'Heidi fährt zur Station') + B('locate', 'Orten', 0, 'Heidi meldet sich');
-  const strip = st.cur ? `<div class="strip" data-open="rooms-robot"><div class="lab">${I.chef} Jetzt: Küche <span class="r">danach Wohnz. → Büro ›</span></div><div class="chips">${chip('broom', 'Saugen + Wischen', 'k')}${chip('fan', 'Turbo', 'k')}${chip('water', 'Mittel', 'k')}${chip('repeat', '1×', 'k')}</div></div>
-    <div class="livemap" data-nav="reinigen" title="Zur Karte"><div class="map">${mapSvg(new Set([7, 5]), st.cur, false)}</div><div class="cap">${I.map}<b>Live-Karte</b> · Küche · 34 m² · noch Wohnz., Büro · antippen für Karte</div></div>` : '';
+  const strip = st.cur ? `<div class="strip" data-open="rooms-robot"><div class="lab">${I.chef} Jetzt: Küche <span class="r">danach Wohnz. → Büro ›</span></div><div class="chips">${chip('broom', 'Saugen + Wischen', 'k')}${chip('fan', 'Turbo', 'k')}${chip('water', 'Mittel', 'k')}${chip('repeat', '1×', 'k')}</div></div>` : '';
+  const livemap = `<div class="livemap" data-nav="reinigen" title="Zur Karte"><div class="map">${mapSvg(st.cur ? new Set([7, 5]) : new Set(), st.cur, false)}</div><div class="cap">${I.map}<b>${st.cur ? 'Live-Karte' : 'Karte'}</b> · ${st.cur ? 'Küche · 34 m² · noch Wohnz., Büro' : 'Heidi in der Station · letzter Lauf gestern 09:31'} · antippen für Räume, Zonen, Sperrzonen</div></div>`;
   const pg = S.prognoseAktiv ? `<button class="navtile" data-nav="prognose"><div class="ic c-orange">${I.chart}</div><div class="t">Prognose ${I.chev}</div><div class="prog"><div>Frei<b>9–16½</b></div><div>Zurück<b>16:40</b></div><div>Sicher<b>78 %</b></div></div></button>` : '';
   return `
     <div class="head"><div><h1>Heidi</h1><div class="sub">${st.head}</div></div><button class="iconbtn" data-nav="einstellungen" aria-label="Einstellungen">${I.gear}</button></div>
-    <div class="grid"><div class="col">
-      <div class="card"><div class="hero"><div class="ring" style="--p:${S.batt}"><div class="num">${S.batt}<small>Akku</small></div></div>
+    <div class="grid"><div class="col left">
+      <div class="card herocard"><div class="hero"><div class="ring" style="--p:${S.batt}"><div class="num">${S.batt}<small>Akku</small></div></div>
         <div class="status"><div class="big"><span class="dot" style="background:${st.dot};box-shadow:0 0 0 5px color-mix(in srgb, ${st.dot} 25%, transparent)"></span>${st.big}</div>${st.sub ? `<div class="sub">↳ ${st.sub}</div>` : ''}
         <div class="chips">${chip('user', 'Herbert', 'on')}${chip('user', 'Nicole')}<span class="chip" style="opacity:.6">${I.user}Nina</span>${chip('info', 'Mopps reinigen', 'warn')}${chip('moon', '20:00–07:00')}</div></div></div>
-        <div class="ctl">${ctl}</div>${strip}</div>
-      <div class="card"><div class="crow" style="background:transparent;border:0;padding:0"><div class="ic on">${I.auto}</div><div><div class="t">Automatik</div><div class="s">${S.automatik ? st.auto : 'Aus'}</div></div>${sw('automatik', S.automatik)}</div></div>
+        <div class="ctl">${ctl}</div>${strip}${livemap}</div>
     </div><div class="col">
+      <div class="card"><div class="crow" style="background:transparent;border:0;padding:0"><div class="ic on">${I.auto}</div><div><div class="t">Automatik</div><div class="s">${S.automatik ? st.auto : 'Aus'}</div></div>${sw('automatik', S.automatik)}</div></div>
       <div class="card"><h2>Verschleiß <span class="r">Reset durch Antippen</span></h2><div class="cons">
         ${[['Hauptbürste', 71], ['Seitenbürste', 44], ['Filter', 18], ['Sensoren', 92], ['Räder', 8]].map(([n, p]) => `<button data-confirm="${n}: Zähler zurücksetzen?"><div class="mini" style="--p:${p};--v:${p <= 10 ? 'var(--bad)' : p <= 25 ? 'var(--warn)' : 'var(--accent)'}"><span>${p}</span></div><div class="l">${n}</div></button>`).join('')}</div></div>
       <div class="nav">
