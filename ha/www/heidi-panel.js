@@ -177,7 +177,7 @@ ha-icon { --mdc-icon-size: 18px; }
 .ed .btnrow { display: flex; gap: 8px; flex-wrap: wrap; } .ed .btnrow .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 14px; font-size: 13px; }
 .hint { font-size: 12px; color: var(--muted); }
 /* Dauer & Akku */
-.estline { border: 0; background: transparent; color: var(--muted); padding: 0; font: inherit; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 2px; cursor: pointer; vertical-align: baseline; }
+.estline { border: 0; background: transparent; color: var(--muted); padding: 0; margin-top: 2px; font: inherit; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 2px; cursor: pointer; }
 .estline ha-icon { --mdc-icon-size: 13px; }
 .pr .s ha-icon { --mdc-icon-size: 13px; vertical-align: -2px; }
 .estline.acc { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); } .estline.warn { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 45%, var(--line)); } .estline.bad { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 45%, var(--line)); }
@@ -574,7 +574,7 @@ class HeidiPanel extends HTMLElement {
       const p = this._planRead(n), manual = !p.tage.some(Boolean), today = String(heute) === String(n);
       return `<div class="pr ${today ? "today" : ""} ${p.aktiv ? "" : "off"}">
         <div class="ic">${ic(icons[n - 1])}</div>
-        <div><div class="n">${esc(p.name)}</div><div class="s">${esc(this._roomLabel(p.raeume) === "Alle" ? "Alle Räume" : this._roomLabel(p.raeume))} · ${esc(p.modus)}${p.personen.size ? ` <span title="wartet, bis ${esc([...p.personen].map((x) => x[0].toUpperCase() + x.slice(1)).join(" und "))} weg">${ic("mdi:account-off-outline")}</span>` : ""}${Object.keys(p.raum).length ? ` <span title="Räume einzeln eingestellt">${ic("mdi:floor-plan")}</span>` : ""}${this._estLine(n)}</div></div>
+        <div><div class="n">${esc(p.name)}</div><div class="s">${esc(this._roomLabel(p.raeume) === "Alle" ? "Alle Räume" : this._roomLabel(p.raeume))} · ${esc(p.modus)}${p.personen.size ? ` <span title="wartet, bis ${esc([...p.personen].map((x) => x[0].toUpperCase() + x.slice(1)).join(" und "))} weg">${ic("mdi:account-off-outline")}</span>` : ""}${Object.keys(p.raum).length ? ` <span title="Räume einzeln eingestellt">${ic("mdi:floor-plan")}</span>` : ""}</div>${this._estLine(n)}</div>
         <span class="tag ${today ? "acc" : ""}">${manual ? "Manuell" : esc(this._dayLabel(p.tage) + " " + p.zeit)}</span>
         <button class="ib go" title="Jetzt starten" data-run="${n}">${ic("mdi:play")}</button><button class="ib" title="Bearbeiten" data-edit="${n}">${ic("mdi:pencil")}</button></div>`;
     }).join("");
@@ -1052,7 +1052,7 @@ class HeidiPanel extends HTMLElement {
     const p = this._planVals(n), e = this._estimate(p); if (!e) return "";
     const rest = this._restMin(), fits = e.total <= rest.min;
     // Kurz: Dauer + Haken/Kreuz (reicht bis zur Rückkehr?) + Stecker bei Nachladen – Details im Untermenü
-    return ` · <button class="estline ${fits ? "acc" : "bad"}" data-act="est" data-plan="${n}" title="Dauer & Akku: ${fits ? "reicht bis zur Rückkehr" : "reicht nicht bis zur Rückkehr"}">${this._fmtMin(e.total)} ${ic(fits ? "mdi:check" : "mdi:close")}${e.charges ? ic("mdi:power-plug") : ""}</button>`;
+    return `<button class="estline ${fits ? "acc" : "bad"}" data-act="est" data-plan="${n}" title="Dauer & Akku: ${fits ? "reicht bis zur Rückkehr" : "reicht nicht bis zur Rückkehr"}">${ic("mdi:timer-outline")}${this._fmtMin(e.total)} ${ic(fits ? "mdi:check" : "mdi:close")}${e.charges ? ic("mdi:power-plug") : ""}</button>`;
   }
   _estHtml() {
     const st = this._est, n = st.n, p = this._planVals(n), lern = this._lern();
