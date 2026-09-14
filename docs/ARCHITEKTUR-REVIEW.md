@@ -112,7 +112,7 @@ kostet mehr als die vorige, und Fehler werden später und am Roboter statt im Te
 | 1 | Monolith behalten, intern strukturieren | **Nur als Zwischenschritt** | Ohne Module gibt es keine Unit-Tests für die Fachlogik, und das Render-Modell bleibt. `button-card` ist das abschreckende Beispiel eines „intern strukturierten“ 2000-Zeilen-Monolithen |
 | 2 | ES-Module | **Ja, jetzt** | Voraussetzung für alles Weitere; Fachlogik wird ohne Browser testbar; KI-Edits werden lokal |
 | 3 | TypeScript | **Ja, zusammen mit der Fachlogik-Trennung** | Das Projekt ist Datenabbildung (Entitäts-IDs, Optionsstrings, Kurzcodes) – genau das, was TS fängt. Mit esbuild kostet TS keine Konfiguration. Nicht als eigenes Migrationsprojekt, sondern beim Herausziehen der Domänen-Typen (`Plan`, `RoomValues`, `Estimate`, `LearnValues`) |
-| 4 | Lit | **Ja** | Löst exakt das Kernproblem (Render-Modell). Standard in HA-Frontend und praktisch allen gepflegten Karten (Mushroom, mini-graph-card, xiaomi-/dreame-vacuum-map-card). ~6 KB, wird mit eingebündelt |
+| 4 | Lit | **Ja** | Löst exakt das Kernproblem (Render-Modell). Standard in HA-Frontend und den meisten gepflegten Karten (Mushroom, mini-graph-card, xiaomi-vacuum-map-card; die dreame-vacuum-map-card ist die React-Ausnahme). ~6 KB, wird mit eingebündelt |
 | 5 | Eigene Web Components je Bereich | **Ja, grob** | Ca. 14 Elemente, keine Chip/Tile/Ring-Elemente (das bleiben Template-Funktionen + CSS) |
 | 6 | State-/ViewModel-Schicht | **Ja, als reine Funktionen** | `readPlan(states, n)`, `readRobot(states)` … existieren implizit schon (`_planRead`, `_roomVals`, `_lern`, `_histAttrs`). Kein Store-Framework – `hass` *ist* der Store |
 | 7 | Service-/Controller-Schicht | **Ja, dünn** | Eine Klasse `HeidiApi` mit ~12 Methoden. Testbar, einziger Ort für Entitäts-Namensschema |
@@ -262,8 +262,8 @@ Syntax. Das wäre die zweitbeste Wahl, nicht die schlechteste.
   Knoten-Diffing: Fokus, Scroll, Slider-Zug, das eingebettete Karten-Element bleiben erhalten;
   `<details open>` wird zu `?open=${…}`; `data-*`-Dispatch wird zu `@click=${…}` an der Stelle,
   wo das Element steht.
-- Es ist der Stack des HA-Frontends selbst und der gepflegten Karten (Mushroom, mini-graph-card,
-  dreame-/xiaomi-vacuum-map-card). Beispiele, Fragen und Muster passen direkt.
+- Es ist der Stack des HA-Frontends selbst und der meisten gepflegten Karten (Mushroom,
+  mini-graph-card, xiaomi-vacuum-map-card). Beispiele, Fragen und Muster passen direkt.
 - Reaktives Gating: `shouldUpdate(changed)` vergleicht alte/neue `hass` nur für die relevanten
   Entitäten – dieselbe Idee wie heute, nur automatisch aus den Selektoren.
 - Kosten: Bündeln nötig (daher Build zuerst), ~6 KB, Lernkurve klein (Templates sind
@@ -529,7 +529,8 @@ echter Umbauarbeit, und er ist so geschnitten, dass jeder Bereich einzeln umzieh
 | Projekt | Stack | Was daraus für Heidi relevant ist |
 |---|---|---|
 | **HA-Frontend** (`home-assistant/frontend`) | TS + Lit, Rollup/Webpack | `hass` als Property nach unten reichen, abgeleitete Daten in `willUpdate`, keine globale Store-Schicht; Panels bekommen `narrow` – Karten eben nicht, daher Container Queries |
-| **dreame-vacuum-map-card** (Tasshack) und **xiaomi-vacuum-map-card** (PiotrMachowski) | TS + Lit + Rollup, ein Bundle | Direkte Nachbarn (du bettest sie ein). Beide gliedern in `components/`, `model/`, `utils/` mit `shouldUpdate`-Gating. Deutlich mehr Code als Heidi braucht, aber der Beweis, dass der Stack für Saugroboter-UIs trägt |
+| **xiaomi-vacuum-map-card** (PiotrMachowski, MIT) | TS + Lit + Rollup, ein Bundle | Direkter Nachbar (du bettest sie ein). Gliedert in `src/` mit Modulen je Bereich, `shouldUpdate`-Gating. Deutlich mehr Code als Heidi braucht, aber der Beweis, dass der Stack für Saugroboter-UIs trägt |
+| **dreame-vacuum-map-card** (noambergauz, MIT; **nicht** von Tasshack) | React 19 + TS + Vite + SASS, ein Bundle | Korrektur gegenüber der ersten Fassung dieses Reviews: die Karte ist React-basiert. Sie zeigt, dass React in einer Custom Card technisch geht, bringt aber die React-Laufzeit mit und ist ein Ein-Autor-Projekt (Stand 09/2026: ~110 Sterne). Für Heidi bleibt Lit die richtige Wahl; die Dreame-Karte wird nur eingebettet |
 | **Mushroom** (piitaya) | TS + Lit + Rollup, Monorepo | Muster `src/ha/` (HA-Typen/Helfer), `src/shared/` (geteilte Templates), je Karte `card` + `editor`. Die Ordnerlogik ist übertragbar, die Monorepo-Größe nicht |
 | **mini-graph-card** (kalkih) | JS + Lit + Rollup | Zeigt, dass eine mittelgroße Karte ohne TS auskommt – falls du TS ablehnst, ist das das Vorbild |
 | **button-card** (RomRider) | TS + Lit | Der Gegenbeweis: ein 2000-Zeilen-Element, berüchtigt für schwere Wartung. Das ist Option 1 zu Ende gedacht |
