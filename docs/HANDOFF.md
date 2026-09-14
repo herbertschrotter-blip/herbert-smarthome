@@ -256,3 +256,4 @@ Offen:
   `sensor.heidi_cleaning_history`.
 - Personen: `person.herbert_schrotter`, `person.nicole_2`, `person.nina_2`.
 - Cowork-Projektdoku (claude.ai, Projekt „Mein SmartHome"): `claude/heidi-setup.md`.
+- Architektur-Review der Karte (Zielarchitektur, Refactoring-Plan, Teststrategie): `docs/ARCHITEKTUR-REVIEW.md`.
