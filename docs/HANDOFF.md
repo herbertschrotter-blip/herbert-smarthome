@@ -121,6 +121,26 @@ Uhr (10:15). Einrichten im Ordner `heidi/tests`: `npm i` und dann `npx playwrigh
 - v1.4.1: Kopf zweizeilig (groß Gesamtauftrag, klein Arbeitsschritt), Knöpfe je Zustand
   (Pause/Stopp/Station beim Reinigen, Weiter bei Pause, Start/Orten angedockt), Stühle-Schalter
   vom Kopf zur Karte (neben Sperrzonen) verschoben. Test `test-timeline.js` prüft das mit.
+- v1.4.2: Zeitleiste startet nicht mehr neu bei kurzen Aussetzern (Stopp/Weiter meldet der
+  Roboter als „Bereit“ für Sekunden). Ein Lauf endet erst bei ≥ 3 min Ruhe; Ruhe < 1 min wird
+  ausgeblendet.
+
+## 3c. Entscheidung „Angepasste Reinigung“ (14.09.2026)
+- `switch.heidi_customized_cleaning` (App: Raum-Einstellungen) war **aus** → alle
+  `select.heidi_room_N_*` waren „unavailable“, das Planer-Skript hat die Raumwerte still
+  übersprungen (continue_on_error) und Heidi fuhr mit den globalen Werten (Standard statt Turbo).
+- Herbert hat den Schalter am 14.09. um 08:28 **eingeschaltet** und sich für **Weg 1** entschieden:
+  Schalter bleibt an, Planer wird bereinigt. Regeln des Roboters bei „an“:
+  - global Modus/Saugstufe/Wasser/Route sind unavailable; es gelten die Raumwerte.
+  - je Raum: Modus (sweeping|mopping|sweeping_and_mopping), Saugstufe, Wdh. immer;
+    Wasser (`mop_pad_humidity`) + Feuchte (`number.heidi_room_N_wetness_level` 1–32) nur wenn
+    der Raum wischt; Route (standard|intensive|deep) **nur bei Modus mopping** (Integration:
+    `segment_available_fn`, kein `cleaning_route_v2`).
+  - „Saugen, dann Wischen“ (`mopping_after_sweeping`) und Route „Schnell“ (`quick`) gibt es nur
+    global → im Planer entfernen. App-Szene 34 („Wischen nach dem Saugen“) läuft weiter.
+- Umsetzung geplant nach Mockup `heidi/mockups/heidi-einstellungen.html`: Einstellungs-Streifen
+  im Kopf, Raum-Tabelle im Bereich „Roboter“, Planer-Editor ohne die zwei Optionen; Schnell-/
+  Leise-Profil nur noch Saugstufe + Wdh (+ Modus nur Saugen).
 
 ## 4. Offene Punkte (Stand 14.09.2026, Claude-Code-Sitzung)
 Erledigt:

@@ -1,0 +1,115 @@
+<title>Heidi Einstellungen (Mockup Weg 1)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#0c1219;--solid:#141c25;--card:rgba(255,255,255,.045);--card2:rgba(255,255,255,.06);--card3:rgba(255,255,255,.1);--line:rgba(255,255,255,.09);--ink:#e8edf2;--muted:#94a4b4;--glow1:rgba(47,209,182,.16);--glow2:rgba(90,169,255,.12);--acc:#2fd1b6;--acc-ink:#0f151c;--warn:#f2b544;--bad:#ff6b6b;--blue:#5aa9ff;--shadow:0 20px 50px rgba(0,0,0,.5)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(900px 500px at 8% -10%,var(--glow1),transparent 60%),radial-gradient(800px 500px at 100% 30%,var(--glow2),transparent 60%),var(--bg);color:var(--ink);font:14px/1.4 "IBM Plex Sans",system-ui,sans-serif;padding:24px 16px 48px;font-variant-numeric:tabular-nums}
+h1,h2,h3,.big,.num{font-family:"Sora","IBM Plex Sans",sans-serif}
+.wrap{max-width:680px;margin:0 auto;display:grid;gap:14px}
+.intro{color:var(--muted);font-size:13px;text-align:center}
+.intro b{color:var(--ink)}
+.note{font-size:12px;color:var(--muted);padding:8px 12px;border-left:2px solid var(--acc);background:var(--card2);border-radius:0 10px 10px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;backdrop-filter:blur(16px);box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.06);display:grid;gap:12px}
+.card h2{margin:0;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:8px}
+.card h2 .r{margin-left:auto;text-transform:none;letter-spacing:0;font-weight:500}
+.tag{position:absolute;right:14px;top:-10px;background:var(--acc);color:var(--acc-ink);font:600 10px "IBM Plex Sans";padding:3px 8px;border-radius:999px;letter-spacing:.06em;text-transform:uppercase}
+.rel{position:relative}
+/* Kopf */
+.hero{display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center}
+.ring{width:84px;height:84px;border-radius:50%;display:grid;place-items:center;position:relative;background:conic-gradient(var(--acc) 93%,var(--card3) 0)}
+.ring::after{content:"";position:absolute;inset:8px;border-radius:50%;background:var(--solid)}
+.ring .num{position:relative;z-index:1;font-size:22px;font-weight:700;text-align:center;line-height:1.1}
+.ring .num small{display:block;font-size:11px;font-weight:500;color:var(--muted);font-family:inherit}
+.status{display:grid;gap:6px;min-width:0}
+.big{font-size:22px;font-weight:600;display:flex;align-items:center;gap:10px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 4px rgba(47,209,182,.25)}
+.sub{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.sub i{color:var(--acc);font-style:normal}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--card2);color:var(--muted);border-radius:999px;padding:4px 10px;font-size:12px;font-weight:500;display:inline-flex;align-items:center;gap:6px}
+.chip.on{color:var(--acc);border-color:color-mix(in srgb,var(--acc) 50%,var(--line))}
+.chip.k{color:var(--ink)} .chip.k b{color:var(--muted);font-weight:500}
+.ctl{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:8px;min-width:150px}
+.btn{border:1px solid var(--line);background:var(--card2);color:var(--ink);border-radius:12px;padding:10px 6px 8px;display:grid;justify-items:center;gap:4px;font-size:11px;font-weight:500}
+.btn.primary{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+/* Einstellungs-Streifen */
+.strip{display:grid;gap:6px;padding-top:10px;border-top:1px solid var(--line)}
+.strip .lab{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;display:flex;gap:8px;align-items:center}
+.strip .lab .r{margin-left:auto;text-transform:none;letter-spacing:0;font-weight:500;color:var(--acc)}
+/* Raum-Tabelle */
+table{width:100%;border-collapse:separate;border-spacing:0 4px;font-size:12px}
+th{text-align:left;font-weight:600;color:var(--muted);font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:0 8px 2px}
+td{background:var(--card2);padding:6px 8px;vertical-align:middle}
+tr td:first-child{border-radius:10px 0 0 10px;font-weight:500;color:var(--ink);white-space:nowrap}
+tr td:last-child{border-radius:0 10px 10px 0}
+.sel{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);background:var(--solid);color:var(--ink);border-radius:8px;padding:4px 8px;font:500 12px "IBM Plex Sans";white-space:nowrap}
+.sel::after{content:"▾";color:var(--muted);font-size:10px}
+.sel.off{opacity:.35}
+.sel.acc{color:var(--acc);border-color:color-mix(in srgb,var(--acc) 50%,var(--line))}
+.seg{display:inline-grid;grid-auto-flow:column;gap:2px;background:var(--card3);padding:3px;border-radius:9px}
+.seg span{border-radius:7px;padding:3px 7px;color:var(--muted);font-size:11px;font-weight:500;white-space:nowrap}
+.seg span.on{background:var(--solid);color:var(--ink);box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.seg.big span{padding:8px 10px;font-size:13px}
+.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--muted)}
+.tools .btn{display:inline-flex;gap:6px;padding:8px 12px;font-size:12px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:560px){.two{grid-template-columns:1fr}.hero{grid-template-columns:auto 1fr}.ctl{grid-column:1/-1}table{font-size:11px}}
+.lab2{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.del{text-decoration:line-through;color:var(--bad);opacity:.7}
+</style>
+<div class="wrap">
+  <div class="intro"><b>Mockup Weg 1</b> · Raum-Einstellungen bleiben an. Drei Änderungen: Einstellungs-Streifen im Kopf, Raum-Tabelle im Bereich „Roboter“, bereinigter Planer-Editor.</div>
+
+  <!-- 1. Kopf mit Streifen -->
+  <div class="card rel"><span class="tag">1 · Kopf</span>
+    <div class="hero">
+      <div class="ring"><div class="num">93<small>Akku</small></div></div>
+      <div class="status">
+        <div class="big"><span class="dot"></span>Saugen + Wischen</div>
+        <div class="sub"><i>↳</i>Saugt und wischt Wohnzimmer</div>
+        <div class="chips"><span class="chip on">👤 Herbert</span><span class="chip">👤 Nicole</span><span class="chip">👤 Nina</span><span class="chip">💤 20:00–07:00</span></div>
+      </div>
+      <div class="ctl"><div class="btn primary">⏸<br>Pause</div><div class="btn">⏹<br>Stopp</div><div class="btn">🏠<br>Station</div></div>
+    </div>
+    <div class="strip">
+      <div class="lab">Fährt mit <span class="r">aus Planer-Eintrag 2</span></div>
+      <div class="chips">
+        <span class="chip k"><b>Saugstufe</b> Turbo</span><span class="chip k"><b>Wasser</b> Mittel</span><span class="chip k"><b>Wdh.</b> 1× · Bad 2×</span>
+        <span class="chip k"><b>Reihenfolge</b> Bad → Küche → Wohnz. → Schlafz. → Flur → WC → Büro</span>
+      </div>
+    </div>
+  </div>
+  <div class="note">Läuft nichts, zeigt der Streifen die Raumwerte vom Roboter, z. B. „Alle Räume: Saugen · Turbo · 1× (Bad 2×)“. Sind die Räume unterschiedlich eingestellt, steht „Räume unterschiedlich“ – Tippen springt zur Raum-Tabelle.</div>
+
+  <!-- 2. Raum-Tabelle -->
+  <div class="card rel"><span class="tag">2 · Roboter → Räume</span>
+    <h2>Räume <span class="r">Raum-Einstellungen: an</span></h2>
+    <table>
+      <tr><th>Raum</th><th>Modus</th><th>Saugstufe</th><th>Wasser</th><th>Route</th><th>Wdh.</th></tr>
+      <tr><td>🚿 Bad</td><td><span class="seg"><span>Saugen</span><span>Wischen</span><span class="on">Beides</span></span></td><td><span class="sel">Turbo</span></td><td><span class="sel">Viel</span></td><td><span class="sel off">–</span></td><td><span class="sel acc">2×</span></td></tr>
+      <tr><td>🛏 Schlafzimmer</td><td><span class="seg"><span class="on">Saugen</span><span>Wischen</span><span>Beides</span></span></td><td><span class="sel">Leise</span></td><td><span class="sel off">–</span></td><td><span class="sel off">–</span></td><td><span class="sel">1×</span></td></tr>
+      <tr><td>🚽 WC</td><td><span class="seg"><span>Saugen</span><span class="on">Wischen</span><span>Beides</span></span></td><td><span class="sel off">–</span></td><td><span class="sel">Mittel</span></td><td><span class="sel">Intensiv</span></td><td><span class="sel">1×</span></td></tr>
+      <tr><td>🚪 Flur</td><td><span class="seg"><span>Saugen</span><span>Wischen</span><span class="on">Beides</span></span></td><td><span class="sel">Turbo</span></td><td><span class="sel">Mittel</span></td><td><span class="sel off">–</span></td><td><span class="sel">1×</span></td></tr>
+      <tr><td>🖥 Büro</td><td><span class="seg"><span class="on">Saugen</span><span>Wischen</span><span>Beides</span></span></td><td><span class="sel">Standard</span></td><td><span class="sel off">–</span></td><td><span class="sel off">–</span></td><td><span class="sel">1×</span></td></tr>
+      <tr><td>🍳 Küche</td><td><span class="seg"><span>Saugen</span><span>Wischen</span><span class="on">Beides</span></span></td><td><span class="sel">Turbo</span></td><td><span class="sel">Viel</span></td><td><span class="sel off">–</span></td><td><span class="sel">1×</span></td></tr>
+      <tr><td>🛋 Wohnzimmer</td><td><span class="seg"><span>Saugen</span><span>Wischen</span><span class="on">Beides</span></span></td><td><span class="sel">Turbo</span></td><td><span class="sel">Mittel</span></td><td><span class="sel off">–</span></td><td><span class="sel">1×</span></td></tr>
+    </table>
+    <div class="tools"><span class="btn">Alle Räume gleich setzen …</span><span>Wasser nur bei Wischen · Route nur bei „Nur Wischen“ (Standard / Intensiv / Tief)</span></div>
+  </div>
+  <div class="note">Das sind dieselben Werte wie in der App unter Raum-Einstellungen. Änderungen gehen sofort an den Roboter. Der Planer überschreibt sie beim Start eines Eintrags mit den Werten des Eintrags, nur für die gewählten Räume.</div>
+
+  <!-- 3. Planer-Editor -->
+  <div class="card rel"><span class="tag">3 · Planer-Editor (Ausschnitt)</span>
+    <div class="two">
+      <div><div class="lab2">Modus</div><div class="seg big" style="margin-top:6px;display:grid"><span>Saugen</span><span class="on">Saugen + Wischen</span><span>Nur Wischen</span></div>
+        <div style="font-size:12px;color:var(--muted);margin-top:6px"><span class="del">Saugen, dann Wischen</span> – nur global, entfällt</div></div>
+      <div><div class="lab2">Route <span style="text-transform:none;letter-spacing:0;font-weight:500">· nur bei „Nur Wischen“</span></div><div class="seg big" style="margin-top:6px;display:grid;opacity:.45"><span class="on">Standard</span><span>Intensiv</span><span>Tief</span></div>
+        <div style="font-size:12px;color:var(--muted);margin-top:6px"><span class="del">Schnell</span> – nur global, entfällt</div></div>
+    </div>
+    <div class="two">
+      <div><div class="lab2">Schnellprogramm · Profil</div><div class="chips" style="margin-top:6px"><span class="chip k"><b>Saugstufe</b> Standard</span><span class="chip k"><b>Wdh.</b> 1×</span><span class="chip k"><b>Modus</b> nur Saugen</span></div></div>
+      <div><div class="lab2">Bei Homeoffice · Leise starten</div><div class="chips" style="margin-top:6px"><span class="chip k"><b>Saugstufe</b> Leise</span><span class="chip k"><b>Wdh.</b> 1×</span><span class="chip k"><b>Modus</b> nur Saugen</span></div></div>
+    </div>
+  </div>
+  <div class="note">Schnellprogramm und Leise-Profil verlieren die Route „Schnell“. Zeit spart das Schnellprogramm weiterhin über „nur Saugen“ und 1× – oder optional über eine eigene Raumauswahl (z. B. nur Küche + Wohnzimmer), wenn du das möchtest.</div>
+</div>

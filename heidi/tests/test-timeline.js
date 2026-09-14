@@ -19,7 +19,9 @@ const { chromium } = require('playwright'); const fs = require('fs');
     window._api = [];
     const hist = [[
       { state: 'Schläft', last_changed: m(480) }, { state: 'Wäscht Mopps vor dem Start', last_changed: m(41) },
-      { state: 'Saugt und wischt Wohnzimmer', last_changed: m(36) }, { state: 'Saugt und wischt Wohnzimmer', last_changed: m(30) },
+      { state: 'Saugt und wischt Wohnzimmer', last_changed: m(36) },
+      // Stopp + Weiter: 4 Sekunden „Bereit“ – darf den Lauf nicht neu starten und nicht auftauchen
+      { state: 'Bereit', last_changed: m(30) }, { state: 'Saugt und wischt Wohnzimmer', last_changed: m(29.93) },
       { state: 'Fährt zum Mopp-Waschen', last_changed: m(19) }, { state: 'Wäscht Mopps zwischendurch', last_changed: m(17) },
       { state: 'Saugt und wischt Wohnzimmer', last_changed: m(12) }, { state: 'Wischt Küche', last_changed: m(3) },
     ]];

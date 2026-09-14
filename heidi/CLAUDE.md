@@ -38,7 +38,8 @@
   Screenshot `panel_timeline.png`). `real_states.json` = Abzug echter HA-States.
 - Protokoll (v1.4): jeder Eintrag ist klickbar → Zeitleiste aus der HA-Historie von `sensor.heidi_phase`
   (Zeitfenster: Start bis Start + Dauer + 90 min, gekappt beim nächsten Lauf; nachlaufende Mopp-Wäsche/
-  Trocknung bleibt drin, Ruhezustände werden abgeschnitten). Laufender Auftrag erscheint oben als
+  Trocknung bleibt drin; Lauf endet erst bei ≥ 3 min Ruhe, Ruhe < 1 min = Aussetzer und wird
+  ausgeblendet). Laufender Auftrag erscheint oben als
   „Läuft gerade“ mit Live-Zeitleiste (wird bei jeder Phasenänderung neu geholt). Cache `this._tl`.
 - Optik: Glas-Kacheln (halbtransparent + Blur), Fonts Sora + IBM Plex Sans (Google Fonts,
   Fallback Roboto), Akzent #2fd1b6. Referenz-Mockups unter `heidi/mockups/`.

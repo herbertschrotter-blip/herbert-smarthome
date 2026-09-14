@@ -3,7 +3,7 @@
  * Robotereinstellungen, Einstellungs-Panel, Prognose) als HTML/CSS/JS.
  * Alle Daten kommen live aus Home Assistant (hass.states), alle Aktionen laufen über hass.callService.
  */
-const HP_VERSION = "1.4.1";
+const HP_VERSION = "1.4.2";
 
 const E = {
   vac: "vacuum.heidi",
@@ -564,15 +564,22 @@ class HeidiPanel extends HTMLElement {
       const res = await this._hass.callApi("GET", `history/period/${s}?filter_entity_id=${E.phase}&end_time=${encodeURIComponent(e)}&minimal_response&no_attributes`);
       let rows = ((res && res[0]) || []).map((x) => ({ t: new Date(x.last_changed || x.last_updated).getTime(), state: x.state }));
       rows = rows.filter((r, i) => i === 0 || r.state !== rows[i - 1].state);
+      // Ein Lauf endet erst bei einem Ruhezustand von >= 3 min. Kurze Aussetzer (Stopp/Weiter, Neustart
+      // durch die App: „Bereit“ für ein paar Sekunden) gehören zum Lauf und werden ausgeblendet.
+      const stopAll = Math.min(endSec * 1000, Date.now());
+      rows.forEach((r, i) => { r.dur = ((i + 1 < rows.length ? rows[i + 1].t : stopAll) - r.t) / 60000; r.idle = PHASE_IDLE.includes(r.state); });
+      const longIdle = (r) => r.idle && r.dur >= 3;
       let end = null;
-      if (key === "cur") { // nur das letzte Stück seit dem letzten Ruhezustand
-        let li = -1; rows.forEach((r, i) => { if (PHASE_IDLE.includes(r.state)) li = i; }); rows = rows.slice(li + 1);
+      if (key === "cur") { // nur das letzte Stück seit der letzten längeren Ruhe
+        let li = -1; rows.forEach((r, i) => { if (longIdle(r)) li = i; }); rows = rows.slice(li + 1);
       } else {
-        while (rows.length && PHASE_IDLE.includes(rows[0].state)) rows.shift();
-        const li = rows.findIndex((r, i) => i > 0 && PHASE_IDLE.includes(r.state));
+        while (rows.length && rows[0].idle) rows.shift();
+        const li = rows.findIndex((r, i) => i > 0 && longIdle(r));
         if (li > 0) { end = rows[li].t; rows = rows.slice(0, li); }
       }
-      const stop = end ?? Math.min(endSec * 1000, Date.now());
+      rows = rows.filter((r) => !r.idle || r.dur >= 1);
+      rows = rows.filter((r, i) => i === 0 || r.state !== rows[i - 1].state);
+      const stop = end ?? stopAll;
       rows.forEach((r, i) => { r.dur = ((i + 1 < rows.length ? rows[i + 1].t : stop) - r.t) / 60000; });
       this._tl[key] = { rows, end, lc };
     } catch (err) { this._tl[key] = { error: "Verlauf konnte nicht geladen werden", lc }; }
