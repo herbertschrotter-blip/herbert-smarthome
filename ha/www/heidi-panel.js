@@ -3,7 +3,7 @@
  * Robotereinstellungen, Einstellungs-Panel, Prognose) als HTML/CSS/JS.
  * Alle Daten kommen live aus Home Assistant (hass.states), alle Aktionen laufen über hass.callService.
  */
-const HP_VERSION = "1.5.3";
+const HP_VERSION = "1.5.4";
 
 const E = {
   vac: "vacuum.heidi",
@@ -312,7 +312,8 @@ input[type=range] { accent-color: var(--accent); width: 130px; }
 .crow .t { font-weight: 600; } .crow .s { font-size: 12px; color: var(--muted); }
 .crow .sub { grid-column: 2 / 4; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .crow .sub .chip { padding: 5px 10px; font-size: 12px; }
-.mini { width: 100%; display: grid; gap: 6px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px; }
+/* Mini-Profil im Editor (Schnellprogramm / Leise) – eigener Klassenname, ".mini" ist der Verbrauchsring */
+.mprof { width: 100%; display: grid; gap: 6px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px; }
 .mlab { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
 .mrow { display: grid; grid-template-columns: 110px 1fr; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
 @media (max-width: 480px) { .mrow { grid-template-columns: 1fr; } }
@@ -886,7 +887,7 @@ class HeidiPanel extends HTMLElement {
     const presets = [["Mo–Fr", "1111100"], ["Wochenende", "0000011"], ["Täglich", "1111111"], ["Nur manuell (Szene)", "0000000"]].map(([t, m]) => `<button class="chip" data-ed="preset" data-val="${m}">${t}</button>`).join("");
     const persons = E.persons.map((p) => { const k = p.name.toLowerCase(); return `<button class="chip ${e.personen.has(k) ? "warn" : ""}" data-ed="person" data-val="${k}">${ic("mdi:account")}${p.name}</button>`; }).join("");
     const manual = !e.tage.some(Boolean);
-    const mini = (title, pre, help) => `<div class="mini"><div class="mlab">${title}</div>
+    const mini = (title, pre, help) => `<div class="mprof"><div class="mlab">${title}</div>
       <div class="mrow"><span>Saugstufe</span>${seg(pre + "Saug", OPT.saug3, "s")}</div>
       <div class="mrow"><span>Wiederholungen</span>${seg(pre + "Wdh", OPT.wdh2, "s")}</div>${help ? `<div class="hint" style="margin:0">${help}</div>` : ""}</div>`;
     const schnellMin = this.num("input_number.heidi_schnell_minuten", 90);
