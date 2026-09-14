@@ -16,8 +16,12 @@
   34 Wischen nach Saugen), `vacuum_rename_segment`.
 - Reinigungsprotokoll der App: Attribute von `sensor.heidi_cleaning_history`.
 - Eigene Template-Sensoren (Paket): `binary_sensor.heidi_arbeitszeit`, `binary_sensor.heidi_nicht_storen`
-  (Achtung: ö→o in der ID; spiegelt `time.heidi_dnd_start/_end` des Roboters, aktuell 20:00–08:00),
-  `sensor.heidi_heutiger_plan`, `sensor.heidi_automatik_status`.
+  (Achtung: ö→o in der ID; spiegelt `time.heidi_dnd_start/_end` des Roboters, aktuell 20:00–07:00),
+  `sensor.heidi_heutiger_plan`, `sensor.heidi_automatik_status`,
+  `sensor.heidi_phase` = feiner Arbeitsschritt als Text („Wäscht Mopps vor dem Start“, „Saugt und wischt
+  Küche“, „Fährt zum Mopp-Waschen“, „Trocknet Mopps“, „Saugt Staub ab“, „Schläft“ …), abgeleitet aus
+  den vacuum-Attributen washing/drying/returning_to_wash/mop_pad/cleaning_mode + current_room.
+  Der Recorder speichert jede Änderung → die Karte holt daraus per `history/period` die Zeitleiste.
 - Weitere Sensoren: heidi_status, heidi_battery_level, heidi_error, heidi_task_status,
   heidi_main_brush_left/side_brush_left/filter_left/sensor_dirty_left/wheel_dirty_left,
   heidi_dust_bag_status, heidi_clean/dirty_water_tank_status, heidi_low_water_warning.
@@ -30,7 +34,12 @@
   (Schlüssel `type: module`) hochzählen – deploy.ps1 macht das automatisch. Dann HA-Neustart.
 - Testen ohne HA: `cd heidi/tests && node test-real.js` (Playwright + Chromium, Screenshot
   `panel_real.png`), `node test-editor.js` (Planer-Editor), `node test-zones.js`
-  (Sperrzonen-Editor). `real_states.json` = Abzug echter HA-States.
+  (Sperrzonen-Editor), `node test-timeline.js` (Phase im Kopf + Zeitleiste, `callApi` nachgebildet,
+  Screenshot `panel_timeline.png`). `real_states.json` = Abzug echter HA-States.
+- Protokoll (v1.4): jeder Eintrag ist klickbar → Zeitleiste aus der HA-Historie von `sensor.heidi_phase`
+  (Zeitfenster: Start bis Start + Dauer + 90 min, gekappt beim nächsten Lauf; nachlaufende Mopp-Wäsche/
+  Trocknung bleibt drin, Ruhezustände werden abgeschnitten). Laufender Auftrag erscheint oben als
+  „Läuft gerade“ mit Live-Zeitleiste (wird bei jeder Phasenänderung neu geholt). Cache `this._tl`.
 - Optik: Glas-Kacheln (halbtransparent + Blur), Fonts Sora + IBM Plex Sans (Google Fonts,
   Fallback Roboto), Akzent #2fd1b6. Referenz-Mockups unter `heidi/mockups/`.
 - Bereiche: Kopf (Akku-Ring, Status, Personen-Chips, Stühle-Toggle, DND), Karte + Raum-Chips

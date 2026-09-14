@@ -333,6 +333,38 @@ template:
             ({{ (rest // 60) if rest > 0 else 0 }} h {{ (rest % 60) if rest > 0 else 0 }} min) →
             {{ 'Schnellprogramm' if schnell else 'volles Programm' }}.
 
+      # Feiner Arbeitsschritt als lesbarer Text (Kopfzeile der Karte + Zeitleiste im Protokoll).
+      # HA zeichnet jede Änderung auf (Recorder) – die Karte holt daraus die Zeitleiste je Lauf.
+      - name: Heidi Phase
+        unique_id: heidi_phase
+        icon: mdi:progress-clock
+        state: >-
+          {% set a = states.vacuum.heidi.attributes if states.vacuum.heidi else {} %}
+          {% set s = states('vacuum.heidi') %}
+          {% set task = states('sensor.heidi_task_status') %}
+          {% set laeuft = task not in ['completed','idle','unknown','unavailable',''] %}
+          {% set raum = states('sensor.heidi_current_room') %}
+          {% set raum = '' if raum in ['unknown','unavailable','none',''] else ' ' ~ raum %}
+          {% set mode = a.get('cleaning_mode','') %}
+          {% set mopp = a.get('mop_pad', false) %}
+          {% if s == 'error' or states('sensor.heidi_error') not in ['no_error','unknown','unavailable'] %}Fehler
+          {% elif s == 'paused' or a.get('paused') %}Pausiert
+          {% elif a.get('washing') %}{{ 'Wäscht Mopps vor dem Start' if laeuft and (a.get('cleaned_area',0) | int(0)) == 0 else 'Wäscht Mopps zwischendurch' if laeuft else 'Wäscht Mopps nach dem Lauf' }}
+          {% elif a.get('drying') %}Trocknet Mopps
+          {% elif states('sensor.heidi_auto_empty_status') not in ['idle','unknown','unavailable'] %}Saugt Staub ab
+          {% elif a.get('returning_to_wash') %}Fährt zum Mopp-Waschen
+          {% elif s == 'returning' %}Fährt zur Station
+          {% elif s == 'cleaning' %}{{ 'Saugt' if mode == 'Sweeping' else 'Wischt' if mode == 'Mopping' else 'Saugt und wischt' if mode == 'Sweeping and mopping' else ('Wischt' if mopp else 'Saugt') }}{{ raum }}
+          {% elif a.get('mapping') %}Erstellt Karte
+          {% elif a.get('cruising') %}Fährt
+          {% elif s == 'docked' %}{{ 'Lädt' if a.get('charging') else 'Schläft' if states('sensor.heidi_status') == 'sleeping' else 'Angedockt' }}
+          {% elif s == 'idle' %}Bereit
+          {% else %}{{ s | replace('_',' ') | capitalize }}
+          {% endif %}
+        attributes:
+          raum: "{{ states('sensor.heidi_current_room') if is_state('vacuum.heidi','cleaning') else '' }}"
+          modus: "{{ state_attr('vacuum.heidi','cleaning_mode') }}"
+
 # ── Prognose: Protokoll + Auswertung (Skript unter /config/prognose/) ──
 shell_command:
   heidi_prognose_log: >-

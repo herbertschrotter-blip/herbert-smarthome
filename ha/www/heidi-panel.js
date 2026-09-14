@@ -3,7 +3,7 @@
  * Robotereinstellungen, Einstellungs-Panel, Prognose) als HTML/CSS/JS.
  * Alle Daten kommen live aus Home Assistant (hass.states), alle Aktionen laufen über hass.callService.
  */
-const HP_VERSION = "1.3.1";
+const HP_VERSION = "1.4.0";
 
 const E = {
   vac: "vacuum.heidi",
@@ -25,7 +25,9 @@ const E = {
   raumnamen: "input_select.heidi_raumnamen",
   rotation: "select.heidi_map_rotation",
   jemand: "binary_sensor.heidi_jemand_zu_hause",
+  phase: "sensor.heidi_phase", // feiner Arbeitsschritt (Template-Sensor im Paket), Verlauf = Zeitleiste im Protokoll
 };
+const PHASE_IDLE = ["Schläft", "Lädt", "Angedockt", "Bereit", "unknown", "unavailable", ""];
 
 const ROOMS = [
   { id: 7, short: "Wohnz.", icon: "mdi:sofa-outline" }, { id: 6, short: "Küche", icon: "mdi:chef-hat" }, { id: 5, short: "Büro", icon: "mdi:desk" },
@@ -173,6 +175,11 @@ button.tile { text-align: left; cursor: pointer; }
 .hrow { display: grid; grid-template-columns: 1fr 58px 58px 96px 22px; align-items: center; gap: 8px; font-size: 12px; padding: 6px 8px; border-radius: 8px; background: var(--surface-2); }
 .hrow .hd { color: var(--text); font-weight: 500; }
 .hrow .hm { color: var(--blue); } .hrow .hm ha-icon { --mdc-icon-size: 14px; }
+.hrow[data-tl] { cursor: pointer; } .hrow[data-tl]:hover, .hrow.open { background: var(--surface-3); }
+.tl { display: grid; gap: 2px; margin: 0 0 6px 14px; padding-left: 10px; border-left: 2px solid color-mix(in srgb, var(--accent) 55%, transparent); }
+.tlr { display: grid; grid-template-columns: 42px 1fr auto; gap: 8px; align-items: center; font-size: 12px; padding: 3px 6px; color: var(--muted); }
+.tlr .tt { color: var(--text); font-weight: 500; font-variant-numeric: tabular-nums; } .tlr .tx { color: var(--text); } .tlr .td { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tlr.now .tx { color: var(--accent); }
 /* Klappbereiche */
 details { border-top: 1px solid var(--line); padding-top: 8px; margin-top: 10px; }
 summary { cursor: pointer; color: var(--muted); font-size: 12px; font-weight: 500; list-style: none; display: flex; align-items: center; gap: 6px; }
@@ -293,6 +300,8 @@ class HeidiPanel extends HTMLElement {
     super();
     this.attachShadow({ mode: "open" });
     this._open = new Set(["verbrauch"]);
+    this._tl = {};            // Zeitleisten-Cache je Lauf (Schlüssel = Zeitstempel bzw. "cur")
+    this._tlOpen = new Set(); // aufgeklappte Protokoll-Einträge
     this._view = "main";
     this._sig = "";
     this._mapEls = {};
@@ -324,7 +333,7 @@ class HeidiPanel extends HTMLElement {
 
   _signature() {
     const ids = [E.vac, E.autoStatus, E.heutePlan, E.prognose, E.prognoseAktiv, E.planerBereich, E.dark, E.karte, E.raumnamen, E.rotation, E.jemand, E.chairs, E.automatik,
-      "sensor.heidi_status", "sensor.heidi_battery_level", "sensor.heidi_current_room", "sensor.heidi_error", "sensor.heidi_cleaning_history", "sensor.heidi_cleaned_area", "sensor.heidi_cleaning_time",
+      "sensor.heidi_status", E.phase, "sensor.heidi_battery_level", "sensor.heidi_current_room", "sensor.heidi_error", "sensor.heidi_cleaning_history", "sensor.heidi_cleaned_area", "sensor.heidi_cleaning_time",
       "sensor.heidi_main_brush_left", "sensor.heidi_side_brush_left", "sensor.heidi_filter_left", "sensor.heidi_sensor_dirty_left", "sensor.heidi_wheel_dirty_left",
       "sensor.heidi_dust_bag_status", "sensor.heidi_clean_water_tank_status", "sensor.heidi_dirty_water_tank_status", "sensor.heidi_detergent_status", "sensor.heidi_low_water_warning", "sensor.heidi_auto_empty_status", "sensor.heidi_self_wash_base_status",
       "sensor.heidi_cleaning_count", "sensor.heidi_total_cleaned_area", "sensor.heidi_total_cleaning_time", "sensor.heidi_first_cleaning_date",
@@ -380,7 +389,8 @@ class HeidiPanel extends HTMLElement {
       const home = s.state === "home", counts = !p.optional || this.on(p.optional);
       return `<button class="chip ${home ? "on" : ""}" data-more="${p.id}" title="${home ? "zu Hause" : "abwesend"}${counts ? "" : " · zählt nicht"}" style="${counts ? "" : "opacity:.6"}">${ic(home ? "mdi:account" : "mdi:account-outline")}${p.name}</button>`;
     }).join("");
-    const statusTxt = (STATUS_DE[status] || status.replace(/_/g, " ")).replace(/^./, (c) => c.toUpperCase());
+    const phase = this.st(E.phase), phaseOk = !["unknown", "unavailable", ""].includes(phase);
+    const statusTxt = phaseOk ? phase : (STATUS_DE[status] || status.replace(/_/g, " ")).replace(/^./, (c) => c.toUpperCase());
     const chairs = this.on(E.chairs);
     const dnd = `${(this.st("time.heidi_dnd_start") || "").slice(0, 5)}–${(this.st("time.heidi_dnd_end") || "").slice(0, 5)}`;
     const room = this.roomName(this.st("sensor.heidi_current_room"));
@@ -389,7 +399,7 @@ class HeidiPanel extends HTMLElement {
       <div class="status">
         <button class="big" data-more="${E.vac}" style="border:0;background:transparent;padding:0;text-align:left"><span class="dot" style="background:${col};box-shadow:0 0 0 4px color-mix(in srgb, ${col} 25%, transparent)"></span>${esc(statusTxt)}</button>
         <div class="chips">${persons}
-          ${room !== "–" && vac === "cleaning" ? `<span class="chip on">${ic("mdi:floor-plan")}${esc(room)}</span>` : ""}
+          ${room !== "–" && vac === "cleaning" && !phaseOk ? `<span class="chip on">${ic("mdi:floor-plan")}${esc(room)}</span>` : ""}
           ${err !== "no_error" && err !== "unavailable" ? `<span class="chip bad">${ic("mdi:alert")}${esc(err.replace(/_/g, " "))}</span>` : ""}
           <button class="chip ${chairs ? "warn" : ""}" data-toggle="${E.chairs}" title="Sperrzone um den Esstisch">${ic("mdi:chair-rolling")}Stühle${chairs ? " · Sperrzone" : ""}</button>
           <span class="chip" title="Nicht stören">${ic("mdi:sleep")}${esc(dnd)}</span>
@@ -498,8 +508,60 @@ class HeidiPanel extends HTMLElement {
     const rows = Object.entries(a).filter(([k, v]) => v && typeof v === "object" && v.timestamp).sort((x, y) => y[1].timestamp - x[1].timestamp).slice(0, 30);
     if (!rows.length) return "";
     const fmt = (ts) => { const d = new Date(ts * 1000); return d.toLocaleDateString("de-AT", { weekday: "short", day: "2-digit", month: "2-digit" }) + " " + d.toLocaleTimeString("de-AT", { hour: "2-digit", minute: "2-digit" }); };
-    const li = rows.map(([, v]) => `<div class="hrow"><span class="hd">${esc(fmt(v.timestamp))}</span><span>${esc(String(v.cleaned_area || "").replace(/[^0-9]/g, ""))} m²</span><span>${esc(String(v.cleaning_time || "").replace(/[^0-9]/g, ""))} min</span><span class="chip ${v.completed ? "on" : "warn"}" style="padding:2px 8px">${v.completed ? "fertig" : "abgebrochen"}</span><span class="hm">${v.mop_pad === "Installed" ? ic("mdi:water") : ""}</span></div>`).join("");
-    return `<details data-key="protokoll" ${this._open.has("protokoll") ? "open" : ""}><summary>${ic("mdi:chevron-down", 'class="chev"')}Protokoll (${rows.length})</summary><div class="hist">${li}</div></details>`;
+    const now = Math.floor(Date.now() / 1000);
+    const li = rows.map(([, v], i) => {
+      const ts = Math.floor(v.timestamp), key = String(ts), open = this._tlOpen.has(key);
+      const durMin = parseInt(String(v.cleaning_time || "").replace(/[^0-9]/g, "")) || 0;
+      const next = i > 0 ? Math.floor(rows[i - 1][1].timestamp) : now; // Läufe sind absteigend sortiert
+      const end = Math.min(ts + durMin * 60 + 90 * 60, next, now); // + Mopp-Wäsche/Trocknung nach dem Lauf
+      return `<div class="hrow ${open ? "open" : ""}" data-tl="${key}" data-start="${ts}" data-end="${end}" title="Verlauf anzeigen"><span class="hd">${esc(fmt(v.timestamp))}</span><span>${esc(String(v.cleaned_area || "").replace(/[^0-9]/g, ""))} m²</span><span>${esc(String(v.cleaning_time || "").replace(/[^0-9]/g, ""))} min</span><span class="chip ${v.completed ? "on" : "warn"}" style="padding:2px 8px">${v.completed ? "fertig" : "abgebrochen"}</span><span class="hm">${v.mop_pad === "Installed" ? ic("mdi:water") : ""}</span></div>${open ? this._timelineHtml(key) : ""}`;
+    }).join("");
+    // Laufender Auftrag (noch nicht im App-Protokoll): Zeitleiste live anzeigen
+    const phase = this.st(E.phase), running = !PHASE_IDLE.includes(phase) && phase !== "Fehler";
+    let cur = "";
+    if (running) {
+      const lc = this._hass.states[E.phase]?.last_changed || "";
+      if (!this._tl.cur || this._tl.cur.lc !== lc) this._loadTimeline("cur", now - 8 * 3600, now, lc);
+      cur = `<div class="hrow open" data-tl="cur" data-start="${now - 8 * 3600}" data-end="${now}"><span class="hd">Läuft gerade</span><span>${esc(this.st("sensor.heidi_cleaned_area"))} m²</span><span>${esc(this.st("sensor.heidi_cleaning_time"))} min</span><span class="chip on" style="padding:2px 8px">${esc(phase)}</span><span class="hm"></span></div>${this._timelineHtml("cur")}`;
+    }
+    return `<details data-key="protokoll" ${this._open.has("protokoll") || running ? "open" : ""}><summary>${ic("mdi:chevron-down", 'class="chev"')}Protokoll (${rows.length})</summary><div class="hist">${cur}${li}</div></details>`;
+  }
+
+  // Zeitleiste eines Laufs aus der HA-Historie von sensor.heidi_phase (Aufzeichnung durch den Recorder)
+  _timelineHtml(key) {
+    const c = this._tl[key];
+    const line = (txt) => `<div class="tl"><div class="tlr"><span class="tt"></span><span class="tx" style="color:var(--muted)">${txt}</span><span class="td"></span></div></div>`;
+    if (!c || c.loading) return line("Lade Verlauf …");
+    if (c.error) return line(esc(c.error));
+    if (!c.rows.length) return line("Kein Verlauf gespeichert – die Aufzeichnung läuft erst seit Karte v1.4.");
+    const tm = (t) => new Date(t).toLocaleTimeString("de-AT", { hour: "2-digit", minute: "2-digit" });
+    const dur = (m) => m < 1 ? "&lt; 1 min" : m < 60 ? `${Math.round(m)} min` : `${Math.floor(m / 60)} h ${String(Math.round(m % 60)).padStart(2, "0")} min`;
+    const total = (c.rows[c.rows.length - 1].t + c.rows[c.rows.length - 1].dur * 60000 - c.rows[0].t) / 60000;
+    return `<div class="tl">${c.rows.map((r, i) => `<div class="tlr ${key === "cur" && i === c.rows.length - 1 ? "now" : ""}"><span class="tt">${tm(r.t)}</span><span class="tx">${esc(r.state)}</span><span class="td">${dur(r.dur)}</span></div>`).join("")}
+      <div class="tlr"><span class="tt">${c.end ? tm(c.end) : ""}</span><span class="tx" style="color:var(--muted)">${c.end ? "Ende" : "läuft …"}</span><span class="td" style="color:var(--text);font-weight:500">${dur(total)}</span></div></div>`;
+  }
+
+  async _loadTimeline(key, startSec, endSec, lc = "") {
+    if (this._tl[key] && !(key === "cur" && this._tl[key].lc !== lc)) return;
+    this._tl[key] = { loading: true, lc };
+    try {
+      const s = new Date(startSec * 1000).toISOString(), e = new Date(endSec * 1000).toISOString();
+      const res = await this._hass.callApi("GET", `history/period/${s}?filter_entity_id=${E.phase}&end_time=${encodeURIComponent(e)}&minimal_response&no_attributes`);
+      let rows = ((res && res[0]) || []).map((x) => ({ t: new Date(x.last_changed || x.last_updated).getTime(), state: x.state }));
+      rows = rows.filter((r, i) => i === 0 || r.state !== rows[i - 1].state);
+      let end = null;
+      if (key === "cur") { // nur das letzte Stück seit dem letzten Ruhezustand
+        let li = -1; rows.forEach((r, i) => { if (PHASE_IDLE.includes(r.state)) li = i; }); rows = rows.slice(li + 1);
+      } else {
+        while (rows.length && PHASE_IDLE.includes(rows[0].state)) rows.shift();
+        const li = rows.findIndex((r, i) => i > 0 && PHASE_IDLE.includes(r.state));
+        if (li > 0) { end = rows[li].t; rows = rows.slice(0, li); }
+      }
+      const stop = end ?? Math.min(endSec * 1000, Date.now());
+      rows.forEach((r, i) => { r.dur = ((i + 1 < rows.length ? rows[i + 1].t : stop) - r.t) / 60000; });
+      this._tl[key] = { rows, end, lc };
+    } catch (err) { this._tl[key] = { error: "Verlauf konnte nicht geladen werden", lc }; }
+    this._sig = ""; this._render();
   }
 
   _robot() {
@@ -810,8 +872,9 @@ class HeidiPanel extends HTMLElement {
 
   // ───────── Events ─────────
   async _onClick(e) {
-    const t = e.target.closest("[data-act],[data-view],[data-toggle],[data-more],[data-svc],[data-reset],[data-press],[data-run],[data-app],[data-edit],[data-option],[data-shell],[data-fieldtoggle],[data-ztype],[data-zact],[data-room],[data-ed],summary");
+    const t = e.target.closest("[data-act],[data-view],[data-toggle],[data-more],[data-svc],[data-reset],[data-press],[data-run],[data-app],[data-edit],[data-option],[data-shell],[data-fieldtoggle],[data-ztype],[data-zact],[data-room],[data-ed],[data-tl],summary");
     if (!t) return;
+    if (t.dataset.tl) { const k = t.dataset.tl; if (k === "cur") return; if (this._tlOpen.has(k)) this._tlOpen.delete(k); else { this._tlOpen.add(k); this._loadTimeline(k, parseInt(t.dataset.start), parseInt(t.dataset.end)); } this._sig = ""; this._render(); return; }
     if (t.tagName === "SUMMARY") { const d = t.parentElement; const key = d.dataset.key; setTimeout(() => { if (key) { d.open ? this._open.add(key) : this._open.delete(key); } }, 0); return; }
     if (t.dataset.ed) { if (t.dataset.ed !== "name") this._edClick(t); return; }
     const confirmText = t.dataset.confirm; if (confirmText && !window.confirm(confirmText)) return;

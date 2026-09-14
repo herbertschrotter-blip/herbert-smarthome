@@ -110,6 +110,15 @@ Uhr (10:15). Einrichten im Ordner `heidi/tests`: `npm i` und dann `npx playwrigh
 - Nach YAML-Änderungen an Automationen/Templates reicht `services/automation/reload` bzw.
   `services/template/reload` – kein voller Neustart nötig (neue Helfer brauchen ihn aber).
 
+## 3b. Karte v1.4.0 (14.09.2026): Phase + Zeitleiste
+- Neuer Template-Sensor `sensor.heidi_phase` (Paket): Arbeitsschritt als Text, siehe `heidi/CLAUDE.md`.
+- Kopfzeile der Karte zeigt diese Phase statt des groben Status („Room cleaning“).
+- Protokoll: Einträge klickbar → Zeitleiste (Uhrzeit, Schritt, Dauer) aus der HA-Historie;
+  laufender Auftrag als „Läuft gerade“ live oben. Historie gibt es erst ab dem Update
+  (Recorder behält standardmäßig 10 Tage) – ältere Einträge zeigen „Kein Verlauf gespeichert“.
+- Ressourcen-Version wurde per WebSocket (`lovelace/resources/update`) live gesetzt – so geht ein
+  Karten-Update ohne HA-Neustart (deploy.ps1 schreibt zusätzlich die Datei). Danach Strg+F5.
+
 ## 4. Offene Punkte (Stand 14.09.2026, Claude-Code-Sitzung)
 Erledigt:
 - [x] HA neu gestartet (14.09. 06:33), v1.3.1 + v2-Helfer aktiv, Repo = `H:\`.
