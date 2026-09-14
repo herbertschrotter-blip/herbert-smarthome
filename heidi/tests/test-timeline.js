@@ -17,14 +17,19 @@ const { chromium } = require('playwright'); const fs = require('fs');
     states['sensor.heidi_phase'] = { entity_id: 'sensor.heidi_phase', state: 'Wischt Küche', last_changed: m(3), attributes: {} };
     states['vacuum.heidi'].state = 'cleaning';
     window._api = [];
-    const hist = [[
-      { state: 'Schläft', last_changed: m(480) }, { state: 'Wäscht Mopps vor dem Start', last_changed: m(41) },
-      { state: 'Saugt und wischt Wohnzimmer', last_changed: m(36) },
-      // Stopp + Weiter: 4 Sekunden „Bereit“ – darf den Lauf nicht neu starten und nicht auftauchen
-      { state: 'Bereit', last_changed: m(30) }, { state: 'Saugt und wischt Wohnzimmer', last_changed: m(29.93) },
-      { state: 'Fährt zum Mopp-Waschen', last_changed: m(19) }, { state: 'Wäscht Mopps zwischendurch', last_changed: m(17) },
-      { state: 'Saugt und wischt Wohnzimmer', last_changed: m(12) }, { state: 'Wischt Küche', last_changed: m(3) },
-    ]];
+    // Historie: Phase + Roboterzustand. Vorheriger Lauf endete vor 60 min (Rückkehr → docked), danach
+    // Absaugen/Trocknen in der Station (zählt nicht), neuer Start vor 41 min. Türschwellen-Flackern
+    // Wohnzimmer/Küche/Wohnzimmer (20 s) wird geglättet.
+    const hist = [
+      [{ entity_id: 'sensor.heidi_phase', state: 'Saugt Bad', last_changed: m(90) }, { state: 'Fährt zur Station', last_changed: m(62) }, { state: 'Saugt Staub ab', last_changed: m(60) }, { state: 'Trocknet Mopps', last_changed: m(58) },
+       { state: 'Wäscht Mopps vor dem Start', last_changed: m(41) }, { state: 'Saugt und wischt Wohnzimmer', last_changed: m(36) },
+       { state: 'Saugt und wischt Küche', last_changed: m(30) }, { state: 'Saugt und wischt Wohnzimmer', last_changed: m(29.66) },
+       { state: 'Fährt zum Mopp-Waschen', last_changed: m(19) }, { state: 'Wäscht Mopps zwischendurch', last_changed: m(17) },
+       { state: 'Saugt und wischt Wohnzimmer', last_changed: m(12) }, { state: 'Wischt Küche', last_changed: m(3) }],
+      // Startsequenz des Roboters: cleaning → docked → idle → cleaning innerhalb von 30 s = derselbe Lauf
+      [{ entity_id: 'vacuum.heidi', state: 'cleaning', last_changed: m(90) }, { state: 'returning', last_changed: m(62) }, { state: 'docked', last_changed: m(60) },
+       { state: 'cleaning', last_changed: m(41) }, { state: 'docked', last_changed: m(40.9) }, { state: 'idle', last_changed: m(40.8) }, { state: 'cleaning', last_changed: m(40.5) }],
+    ];
     const el = document.querySelector('heidi-panel'); el.setConfig({});
     el.hass = { states, callService: async () => {}, callApi: async (meth, path) => { window._api.push(path); return hist; } };
     return 'ok';

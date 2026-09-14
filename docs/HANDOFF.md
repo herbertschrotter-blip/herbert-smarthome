@@ -142,6 +142,12 @@ Uhr (10:15). Einrichten im Ordner `heidi/tests`: `npm i` und dann `npx playwrigh
 - v1.4.2: Zeitleiste startet nicht mehr neu bei kurzen Aussetzern (Stopp/Weiter meldet der
   Roboter als „Bereit“ für Sekunden). Ein Lauf endet erst bei ≥ 3 min Ruhe; Ruhe < 1 min wird
   ausgeblendet.
+- v1.5.2/1.5.3 (ersetzt die 3-min-Regel): Laufgrenzen kommen aus `vacuum.heidi` (Historie wird mit
+  Phase + vacuum geholt). Lauf = unterwegs (cleaning/paused/returning), Ende = erster Halt danach;
+  Stationsarbeit nach der Rückkehr gehört nicht dazu, jeder Start ist ein neuer Lauf; Halte < 45 s
+  (Startsequenz cleaning→docked→idle→cleaning) unterbrechen nicht; veralteter Raum in den ersten
+  30 s wird ausgeblendet. „Läuft
+  gerade“ nur, während der Roboter unterwegs ist.
 
 ## 3c. Entscheidung „Angepasste Reinigung“ (14.09.2026)
 - `switch.heidi_customized_cleaning` (App: Raum-Einstellungen) war **aus** → alle

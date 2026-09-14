@@ -89,7 +89,10 @@ async function callService(domain, service, data) {
 }
 async function callApi(m, path) {
   const t = Date.now(), mm = (min) => new Date(t - min * 60000).toISOString();
-  return [[{ state: "Schläft", last_changed: mm(480) }, { state: "Wäscht Mopps vor dem Start", last_changed: mm(41) }, { state: "Saugt und wischt Wohnzimmer", last_changed: mm(36) }, { state: "Fährt zum Mopp-Waschen", last_changed: mm(19) }, { state: "Wäscht Mopps zwischendurch", last_changed: mm(17) }, { state: "Saugt und wischt Küche", last_changed: mm(12) }, { state: "Wischt WC", last_changed: mm(3) }]];
+  return [
+    [{ entity_id: "sensor.heidi_phase", state: "Trocknet Mopps", last_changed: mm(480) }, { state: "Wäscht Mopps vor dem Start", last_changed: mm(41) }, { state: "Saugt und wischt Wohnzimmer", last_changed: mm(36) }, { state: "Fährt zum Mopp-Waschen", last_changed: mm(19) }, { state: "Wäscht Mopps zwischendurch", last_changed: mm(17) }, { state: "Saugt und wischt Küche", last_changed: mm(12) }, { state: "Wischt WC", last_changed: mm(3) }],
+    [{ entity_id: "vacuum.heidi", state: "docked", last_changed: mm(480) }, { state: "cleaning", last_changed: mm(41) }],
+  ];
 }
 let el;
 function push() { el.hass = { states: { ...states }, callService, callApi, language: "de" }; }

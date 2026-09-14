@@ -3,7 +3,7 @@
  * Robotereinstellungen, Einstellungs-Panel, Prognose) als HTML/CSS/JS.
  * Alle Daten kommen live aus Home Assistant (hass.states), alle Aktionen laufen über hass.callService.
  */
-const HP_VERSION = "1.5.1";
+const HP_VERSION = "1.5.3";
 
 const E = {
   vac: "vacuum.heidi",
@@ -28,6 +28,7 @@ const E = {
   phase: "sensor.heidi_phase", // feiner Arbeitsschritt (Template-Sensor im Paket), Verlauf = Zeitleiste im Protokoll
 };
 const PHASE_IDLE = ["Schläft", "Lädt", "Angedockt", "Bereit", "unknown", "unavailable", ""];
+const VAC_RUN = ["cleaning", "paused", "returning"]; // Roboter unterwegs = Lauf aktiv (vacuum.heidi)
 
 const ROOMS = [
   { id: 7, short: "Wohnz.", icon: "mdi:sofa-outline" }, { id: 6, short: "Küche", icon: "mdi:chef-hat" }, { id: 5, short: "Büro", icon: "mdi:desk" },
@@ -613,10 +614,12 @@ class HeidiPanel extends HTMLElement {
       return `<div class="hrow ${open ? "open" : ""}" data-tl="${key}" data-start="${ts}" data-end="${end}" title="Verlauf anzeigen"><span class="hd">${esc(fmt(v.timestamp))}</span><span>${esc(String(v.cleaned_area || "").replace(/[^0-9]/g, ""))} m²</span><span>${esc(String(v.cleaning_time || "").replace(/[^0-9]/g, ""))} min</span><span class="chip ${v.completed ? "on" : "warn"}" style="padding:2px 8px">${v.completed ? "fertig" : "abgebrochen"}</span><span class="hm">${v.mop_pad === "Installed" ? ic("mdi:water") : ""}</span></div>${open ? this._timelineHtml(key) : ""}`;
     }).join("");
     // Laufender Auftrag (noch nicht im App-Protokoll): Zeitleiste live anzeigen
-    const phase = this.st(E.phase), running = !PHASE_IDLE.includes(phase) && phase !== "Fehler";
+    // "Läuft gerade" nur, solange der Roboter unterwegs ist – Absaugen/Mopp-Wäsche/Trocknen in der
+    // Station nach der Rückkehr gehören nicht mehr zum Lauf
+    const phase = this.st(E.phase), running = VAC_RUN.includes(this.st(E.vac));
     let cur = "";
     if (running) {
-      const lc = this._hass.states[E.phase]?.last_changed || "";
+      const lc = (this._hass.states[E.phase]?.last_changed || "") + "|" + (this._hass.states[E.vac]?.last_changed || "");
       if (!this._tl.cur || this._tl.cur.lc !== lc) this._loadTimeline("cur", now - 8 * 3600, now, lc);
       cur = `<div class="hrow open" data-tl="cur" data-start="${now - 8 * 3600}" data-end="${now}"><span class="hd">Läuft gerade</span><span>${esc(this.st("sensor.heidi_cleaned_area"))} m²</span><span>${esc(this.st("sensor.heidi_cleaning_time"))} min</span><span class="chip on" style="padding:2px 8px">${esc(phase)}</span><span class="hm"></span></div>${this._timelineHtml("cur")}`;
     }
@@ -642,25 +645,31 @@ class HeidiPanel extends HTMLElement {
     this._tl[key] = { loading: true, lc };
     try {
       const s = new Date(startSec * 1000).toISOString(), e = new Date(endSec * 1000).toISOString();
-      const res = await this._hass.callApi("GET", `history/period/${s}?filter_entity_id=${E.phase}&end_time=${encodeURIComponent(e)}&minimal_response&no_attributes`);
-      let rows = ((res && res[0]) || []).map((x) => ({ t: new Date(x.last_changed || x.last_updated).getTime(), state: x.state }));
-      rows = rows.filter((r, i) => i === 0 || r.state !== rows[i - 1].state);
-      // Ein Lauf endet erst bei einem Ruhezustand von >= 3 min. Kurze Aussetzer (Stopp/Weiter, Neustart
-      // durch die App: „Bereit“ für ein paar Sekunden) gehören zum Lauf und werden ausgeblendet.
-      const stopAll = Math.min(endSec * 1000, Date.now());
-      rows.forEach((r, i) => { r.dur = ((i + 1 < rows.length ? rows[i + 1].t : stopAll) - r.t) / 60000; r.idle = PHASE_IDLE.includes(r.state); });
-      const longIdle = (r) => r.idle && r.dur >= 3;
-      let end = null;
-      if (key === "cur") { // nur das letzte Stück seit der letzten längeren Ruhe
-        let li = -1; rows.forEach((r, i) => { if (longIdle(r)) li = i; }); rows = rows.slice(li + 1);
-      } else {
-        while (rows.length && rows[0].idle) rows.shift();
-        const li = rows.findIndex((r, i) => i > 0 && longIdle(r));
-        if (li > 0) { end = rows[li].t; rows = rows.slice(0, li); }
+      const res = await this._hass.callApi("GET", `history/period/${s}?filter_entity_id=${E.phase},${E.vac}&end_time=${encodeURIComponent(e)}&minimal_response&no_attributes`);
+      const pick = (id) => ((res || []).find((l) => l && l[0] && l[0].entity_id === id) || []).map((x) => ({ t: new Date(x.last_changed || x.last_updated).getTime(), state: x.state }));
+      let rows = pick(E.phase); const vt = pick(E.vac);
+      // Lauf = Roboter unterwegs (vacuum cleaning/paused/returning). Er endet mit Stopp oder Rückkehr in
+      // die Station (idle/docked/error); Absaugen, Mopp-Wäsche und Trocknen danach zählen nicht mehr.
+      // Der nächste Start ist ein neuer Lauf.
+      // Laufabschnitte aus den Roboterzuständen. Kurze Halte < 45 s (Startsequenz: cleaning → docked →
+      // idle → cleaning) unterbrechen den Lauf nicht; ein längerer Halt beendet ihn.
+      const isRun = (st) => VAC_RUN.includes(st), GAP = 45000, nowMs = Date.now();
+      const periods = []; let ps = null, gap = null;
+      for (const v of vt) {
+        if (isRun(v.state)) { if (ps !== null && gap !== null && v.t - gap >= GAP) { periods.push({ s: ps, e: gap }); ps = null; } if (ps === null) ps = v.t; gap = null; }
+        else if (ps !== null && gap === null) gap = v.t;
       }
-      rows = rows.filter((r) => !r.idle || r.dur >= 1);
+      if (ps !== null) periods.push({ s: ps, e: gap !== null && nowMs - gap >= GAP ? gap : null }); // e = null → läuft noch
+      let p = null;
+      if (key === "cur") p = periods.length ? periods[periods.length - 1] : null;
+      else p = periods.find((x) => x.e === null || x.e > startSec * 1000 - 60000) || null; // Abschnitt zum App-Eintrag
+      const start = p ? p.s : startSec * 1000, stop = p && p.e !== null ? p.e : Math.min(endSec * 1000, nowMs), end = p ? p.e : null;
+      rows = p ? rows.filter((r) => r.t >= start - 5000 && r.t < stop && !PHASE_IDLE.includes(r.state)) : [];
       rows = rows.filter((r, i) => i === 0 || r.state !== rows[i - 1].state);
-      const stop = end ?? stopAll;
+      // Veralteter Raum in den ersten Sekunden (Roboter meldet noch den letzten Raum) ausblenden
+      while (rows.length > 1 && rows[1].t - rows[0].t < 30000) rows.shift();
+      // Flackern zwischen zwei Räumen an der Türschwelle (A B A, B < 45 s) glätten
+      for (let i = 1; i + 1 < rows.length; i++) if (rows[i - 1].state === rows[i + 1].state && rows[i + 1].t - rows[i].t < 45000) { rows.splice(i, 2); i--; }
       rows.forEach((r, i) => { r.dur = ((i + 1 < rows.length ? rows[i + 1].t : stop) - r.t) / 60000; });
       this._tl[key] = { rows, end, lc };
     } catch (err) { this._tl[key] = { error: "Verlauf konnte nicht geladen werden", lc }; }
