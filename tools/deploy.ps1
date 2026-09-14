@@ -14,7 +14,7 @@ function Copy-Utf8($src, $dst) {
   [IO.File]::WriteAllText($dst, [IO.File]::ReadAllText($src, $utf8), $utf8); Write-Host "→ $dst"
 }
 $files = if ($OnlyCard) { @('www\heidi-panel.js') } else {
-  @('configuration.yaml','automations.yaml','scripts.yaml','packages\heidi.yaml','dashboards\heidi.yaml','themes\heidi.yaml','www\heidi-panel.js','prognose\presence.py') }
+  @('configuration.yaml','automations.yaml','scripts.yaml','packages\heidi.yaml','dashboards\heidi.yaml','themes\heidi.yaml','www\heidi-panel.js','prognose\presence.py','prognose\runlog.py') }
 foreach ($f in $files) { Copy-Utf8 (Join-Path $root "ha\$f") (Join-Path $Target $f) }
 # Ressourcen-Version anpassen
 $js = [IO.File]::ReadAllText((Join-Path $root 'ha\www\heidi-panel.js'), $utf8)

@@ -199,6 +199,32 @@ Uhr (10:15). Einrichten im Ordner `heidi/tests`: `npm i` und dann `npx playwrigh
   - Verwaiste `input_select.heidi_planN_ho_route/sp_route` per `config/entity_registry/remove`
     (ha-ws.js) entfernt.
 
+## 3d. Dauer & Akku (v1.6.0, 14.09.2026, live ohne Neustart – shell_command/command_line/automation reload)
+- **Laufprotokoll** `ha/prognose/runlog.py` → `/config/prognose/runlog.csv` (Rohdaten, nie löschen, nie
+  ins Repo). Automation `heidi_laufprotokoll` schreibt bei jedem Phasenwechsel + jede Minute, solange
+  Heidi unterwegs ist, nach dem Lauf in der Station arbeitet (Wäsche/Absaugen) oder lädt (< 100 %):
+  ts, phase, vac, seg, room, batt, area (gereinigt m²), ctime, charging, docked, Raumwerte des aktuellen
+  Raums (mode/suction/water/route/times, HA-Werte), belag, plan, selfclean, mop_pad, carpet,
+  mop_extend, water_temp. Übergabe als JSON in `shell_command.heidi_runlog` (`'{{ zeile }}'`; mit
+  Templates läuft shell_command ohne Shell → shlex, einfache Anführungszeichen sicher).
+- **Lernwerte** `sensor.heidi_lernwerte` (command_line, stündlich + `update_entity` nach jedem Lauf):
+  `raten["Modus/Saugstufe"] = {min_pro_m2, pct_pro_min, laeufe}` aus Raumabschnitten
+  (Phase „Saugt/Wischt <Raum>“, vac cleaning, Flackern < 45 s zusammengelegt), `raeume[id] =
+  {flaeche (Median der letzten 3 Läufe, je Durchgang), belag}`, `laden` (%/min unter/über 80 % aus
+  Ladezeilen, Rückkehr/Weiter-Schwellen 15/80 als Standard), `waesche` (vor Start/zwischendurch,
+  nach_m2 aus number.heidi_self_clean_area). Läufe wie in der Karte: unterwegs = cleaning/paused/
+  returning, Halte < 45 s zählen nicht.
+- **Schätzung** `runlog.py schaetzung '<json>'` (rooms, sequence, modus, saug, wdh, raumwerte, batt,
+  variante, sp_/ho_-Profil) → `{total, charges, used, batt_end, unlearned, gelernt}`; gleiche Logik
+  wie `_estimate()` in der Karte (Raum für Raum, Mopp-Wäschen, Ladestopp bei < Rückkehr-%).
+- **Automatik** `heidi_planer`: ruft die Schätzung für voll + schnell (`response_variable`), Wahl:
+  voll wenn ≤ Rest bis Rückkehr (oder Rückkehrzeit vorbei) → sonst schnell, wenn erlaubt und
+  passt → sonst warten. Ohne Lernwerte (`gelernt: false`) gilt die alte 90-min-Regel.
+- **Karte**: Kurzzeile beim Eintrag (Dauer ✓/✗, Stecker bei Nachladen), Untermenü „Dauer & Akku“
+  (Summe, Ablauf, ein Diagramm + Vergleichslinie), Lernwerte im Zahnrad-Panel. Erscheint erst, wenn
+  `sensor.heidi_lernwerte` Raten hat. Live-Mockup hat Beispielwerte (`build-live.js`).
+- Test der Schätzung ohne Lernwerte: `total 102 min` für Plan 2 (Erfahrungswerte), `gelernt: false`.
+
 ## 4. Offene Punkte (Stand 14.09.2026, Claude-Code-Sitzung)
 Erledigt:
 - [x] HA neu gestartet (14.09. 06:33), v1.3.1 + v2-Helfer aktiv, Repo = `H:\`.

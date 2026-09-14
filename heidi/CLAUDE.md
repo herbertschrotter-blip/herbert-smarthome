@@ -77,6 +77,14 @@ Je Eintrag N = 1–4:
   Erledigt = `input_datetime.heidi_letzte_auto_reinigung` == heute (gesetzt von
   `heidi_lauf_abgeschlossen`). Sperrzone Esstisch über `input_boolean.stuehle_am_boden`.
 
+## Dauer & Akku (ha/prognose/runlog.py, v1.6)
+Automation `heidi_laufprotokoll` → `runlog.csv` (Rohdaten je Minute/Phasenwechsel). `sensor.heidi_lernwerte`
+(command_line) liefert `raten["Modus/Saugstufe"]` (min/m², %/min, Läufe), `raeume` (gemessene Fläche je
+Durchgang, Belag), `laden`, `waesche`. Karte: `_estimate(p, variante, uniform)` simuliert einen Eintrag
+(Kurzzeile beim Eintrag, Untermenü „Dauer & Akku“ `_estHtml`, Lernwerte im Zahnrad-Panel `_lernHtml`).
+Automatik: `shell_command.heidi_schaetzung` mit `response_variable` → Wahl voll/schnell/warten.
+Nicht gefahrene Einstellungen werden aus demselben Modus × Saugstufen-Faktor (0.8/1/1.25/1.6) geschätzt.
+
 ## Prognose (ha/prognose/presence.py)
 Automation protokolliert alle N Minuten (Helfer `heidi_prognose_intervall`) home/not_home je
 Person in `presence_log.csv`; `forecast` liefert JSON für `sensor.heidi_prognose` (tage,

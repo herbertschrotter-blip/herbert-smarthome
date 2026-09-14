@@ -99,11 +99,40 @@
     rest_min: >-
       {% if use_prog %}{{ state_attr('sensor.heidi_prognose','rueckkehr_min') | int(0) }}
       {% else %}{% set rk = states('input_datetime.heidi_rueckkehr') %}{{ (rk[:2] | int) * 60 + (rk[3:5] | int) - now().hour * 60 - now().minute }}{% endif %}
+    # Alte Regel (Rückfall, solange keine Lernwerte da sind): Schnellprogramm unter X Minuten Rest
     schnell: "{{ schnell_erlaubt and (rest_min | int) < (states('input_number.heidi_schnell_minuten') | int(90)) and not blockiert }}"
+    est_args: >-
+      {{ {'rooms': states('input_text.heidi_plan' ~ slot ~ '_raeume').split(',') | map('trim') | reject('eq', '') | map('int') | list,
+          'sequence': state_attr('vacuum.heidi', 'cleaning_sequence') or [],
+          'modus': states('input_select.heidi_plan' ~ slot ~ '_modus'), 'saug': states('input_select.heidi_plan' ~ slot ~ '_saugstufe'),
+          'wdh': states('input_select.heidi_plan' ~ slot ~ '_wiederholungen'), 'raumwerte': states('input_text.heidi_plan' ~ slot ~ '_raumwerte'),
+          'sp_saug': states('input_select.heidi_plan' ~ slot ~ '_sp_saug'), 'sp_wdh': states('input_select.heidi_plan' ~ slot ~ '_sp_wdh'),
+          'batt': states('sensor.heidi_battery_level') | int(100)} }}
   actions:
+    # Dauer-Schätzung aus den Lernwerten (runlog.py). Entscheidung: volles Programm, wenn es bis zur
+    # erwarteten Rückkehr reicht; sonst Schnellprogramm, wenn erlaubt und ausreichend; sonst warten.
+    # Ohne Lernwerte oder bei Fehler gilt die alte Regel (schnell).
+    - action: shell_command.heidi_schaetzung
+      continue_on_error: true
+      response_variable: est_voll
+      data: { args: "{{ dict(est_args, variante='normal') | to_json }}" }
+    - action: shell_command.heidi_schaetzung
+      continue_on_error: true
+      response_variable: est_schnell
+      data: { args: "{{ dict(est_args, variante='schnell') | to_json }}" }
+    - variables:
+        lern_ok: "{{ est_voll is defined and (est_voll.stdout | default('')) is search('\"total\"') and (est_voll.stdout | from_json).gelernt }}"
+        dauer_voll: "{{ (est_voll.stdout | from_json).total if lern_ok else -1 }}"
+        dauer_schnell: "{{ (est_schnell.stdout | from_json).total if lern_ok and est_schnell is defined and (est_schnell.stdout | default('')) is search('\"total\"') else -1 }}"
+        wahl: >-
+          {% if blockiert %}warten
+          {% elif not lern_ok %}{{ 'schnell' if schnell else 'normal' }}
+          {% elif (rest_min | int) <= 0 or (dauer_voll | int) <= (rest_min | int) %}normal
+          {% elif schnell_erlaubt and (dauer_schnell | int) <= (rest_min | int) %}schnell
+          {% else %}warten{% endif %}
     - choose:
-        # Keine störende Person zu Hause → normal (ggf. Schnellprogramm)
-        - conditions: "{{ not blockiert }}"
+        # Keine störende Person zu Hause und Zeit reicht → normal oder Schnellprogramm
+        - conditions: "{{ wahl in ['normal', 'schnell'] }}"
           sequence:
             - action: input_boolean.turn_off
               target: { entity_id: input_boolean.heidi_auto_teil }
@@ -111,9 +140,9 @@
               target: { entity_id: input_boolean.heidi_auto_lauf }
             - action: input_text.set_value
               target: { entity_id: input_text.heidi_auto_letzter_plan }
-              data: { value: "{{ name }}{{ ' (schnell)' if schnell else '' }}" }
+              data: { value: "{{ name }}{{ ' (schnell)' if wahl == 'schnell' else '' }}" }
             - action: script.heidi_plan_starten
-              data: { plan: "{{ slot }}", variante: "{{ 'schnell' if schnell else 'normal' }}" }
+              data: { plan: "{{ slot }}", variante: "{{ wahl }}" }
         # Homeoffice und Eintrag sagt "Leise starten" → leises Profil, gilt danach als erledigt
         - conditions: "{{ ho_leise }}"
           sequence:
@@ -160,6 +189,10 @@
       then:
         - action: script.heidi_raumwerte_wiederherstellen
           continue_on_error: true
+    # c) Lernwerte (Dauer/Akku) aus dem Laufprotokoll neu berechnen
+    - action: homeassistant.update_entity
+      continue_on_error: true
+      target: { entity_id: sensor.heidi_lernwerte }
 
 - id: heidi_heimkehr
   alias: "Heidi: Heimkehr während Reinigung"
@@ -191,6 +224,44 @@
           sequence:
             - action: vacuum.pause
               target: { entity_id: vacuum.heidi }
+
+# ═══════════════════════ Laufprotokoll (Dauer/Akku lernen) ═══════════════════════
+- id: heidi_laufprotokoll
+  alias: "Heidi: Laufprotokoll (Dauer und Akku lernen)"
+  description: >-
+    Schreibt bei jedem Phasenwechsel und jede Minute, solange Heidi unterwegs ist, in der Station nach dem
+    Lauf arbeitet oder lädt, eine Rohdatenzeile in /config/prognose/runlog.csv (runlog.py).
+  mode: queued
+  max: 20
+  triggers:
+    - trigger: state
+      entity_id: sensor.heidi_phase
+    - trigger: time_pattern
+      minutes: "/1"
+  conditions:
+    - condition: template
+      value_template: >-
+        {{ states('vacuum.heidi') in ['cleaning', 'paused', 'returning']
+           or (state_attr('vacuum.heidi', 'charging') and states('sensor.heidi_battery_level') | int(100) < 100)
+           or states('sensor.heidi_phase') in ['Wäscht Mopps nach dem Lauf', 'Saugt Staub ab'] }}
+  actions:
+    - variables:
+        seg: "{{ state_attr('vacuum.heidi', 'current_segment') or '' }}"
+        p: "{{ ('select.heidi_room_' ~ seg ~ '_') if seg else '' }}"
+    - action: shell_command.heidi_runlog
+      data:
+        zeile: >-
+          {{ {'ts': now().strftime('%Y-%m-%dT%H:%M:%S'), 'v': 1, 'phase': states('sensor.heidi_phase'), 'vac': states('vacuum.heidi'),
+              'seg': seg, 'room': states('sensor.heidi_current_room'), 'batt': states('sensor.heidi_battery_level'),
+              'area': state_attr('vacuum.heidi', 'cleaned_area'), 'ctime': state_attr('vacuum.heidi', 'cleaning_time'),
+              'charging': state_attr('vacuum.heidi', 'charging'), 'docked': state_attr('vacuum.heidi', 'docked'),
+              'mode': states(p ~ 'cleaning_mode') if p else '', 'suction': states(p ~ 'suction_level') if p else '',
+              'water': states(p ~ 'mop_pad_humidity') if p else '', 'route': states(p ~ 'cleaning_route') if p else '',
+              'times': states(p ~ 'cleaning_times') if p else '', 'belag': states(p ~ 'floor_material') if p else '',
+              'plan': states('input_text.heidi_auto_letzter_plan') if is_state('input_boolean.heidi_auto_lauf', 'on') else '',
+              'variante': '', 'selfclean': states('number.heidi_self_clean_area'), 'mop_pad': state_attr('vacuum.heidi', 'mop_pad'),
+              'carpet': states('select.heidi_carpet_cleaning'), 'mop_extend': states('switch.heidi_mop_extend'),
+              'water_temp': states('select.heidi_water_temperature')} | to_json }}
 
 # ═══════════════════════ Dashboard & Prognose ═══════════════════════
 - id: heidi_dark_mode

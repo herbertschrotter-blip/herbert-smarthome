@@ -359,6 +359,10 @@ shell_command:
     "{{ states('input_boolean.heidi_prog_herbert') }}" "{{ states('input_boolean.heidi_prog_nicole') }}" "{{ states('input_boolean.heidi_prog_nina') }}"
     "{{ states('input_number.heidi_prognose_wochen') | int(8) }}" "{{ states('input_number.heidi_prognose_halbwert') | int(21) }}" "{{ states('input_number.heidi_prognose_aufloesung') | int(30) }}"
   heidi_prognose_reset: python3 /config/prognose/presence.py reset
+  # Laufprotokoll (Dauer/Akku je Raum und Einstellung): Zeile anhängen bzw. Dauer eines Eintrags schätzen.
+  # Mit Templates läuft shell_command ohne Shell (shlex) – JSON in einfachen Anführungszeichen ist sicher.
+  heidi_runlog: "python3 /config/prognose/runlog.py log '{{ zeile }}'"
+  heidi_schaetzung: "python3 /config/prognose/runlog.py schaetzung '{{ args }}'"
 
 command_line:
   - sensor:
@@ -380,3 +384,19 @@ command_line:
         - aktualisiert
         - aufloesung
         - wochen
+  # Lernwerte aus dem Laufprotokoll (Karte: Untermenü "Dauer & Akku", Automatik: Voll/Schnell/Warten)
+  - sensor:
+      name: Heidi Lernwerte
+      unique_id: heidi_lernwerte
+      command: python3 /config/prognose/runlog.py lernwerte
+      scan_interval: 3600
+      command_timeout: 60
+      value_template: "{{ value_json.state }}"
+      json_attributes:
+        - laeufe_gesamt
+        - raten
+        - raeume
+        - laden
+        - waesche
+        - stand
+        - zeilen

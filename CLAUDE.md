@@ -17,7 +17,10 @@ Cowork-Sitzungen (was gebaut wurde, warum, bekannte Stolpersteine, offene Punkte
 - Nach Änderungen an `packages/`, `automations.yaml`, `scripts.yaml`: Konfiguration prüfen
   (`.\tools\ha.ps1 post config/core/check_config`), dann HA neu starten
   (`.\tools\ha.ps1 post services/homeassistant/restart`). Dashboard danach mit Strg+F5 laden.
-- Nie ins Repo: `H:\.storage\`, `secrets.yaml`, Datenbanken, `prognose/presence_log.csv`.
+- Nie ins Repo: `H:\.storage\`, `secrets.yaml`, Datenbanken, `prognose/presence_log.csv`,
+  `prognose/runlog.csv` (Laufprotokoll, wird nie gelöscht).
+- Ohne Neustart neu laden: `services/automation/reload`, `template/reload`, `shell_command/reload`,
+  `command_line/reload`, `input_*/reload`. Neustart nur für neue Helfer-Domänen oder configuration.yaml.
 
 ## Repo-Aufbau
 - `ha/` – Spiegel der relevanten HA-Dateien (Quelle der Wahrheit; `H:\` ist das Ziel).
