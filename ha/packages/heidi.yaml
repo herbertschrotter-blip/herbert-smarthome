@@ -336,6 +336,7 @@ template:
           {% elif states('sensor.heidi_auto_empty_status') not in ['idle','unknown','unavailable'] %}Saugt Staub ab
           {% elif a.get('returning_to_wash') %}Fährt zum Mopp-Waschen
           {% elif s == 'returning' %}Fährt zur Station
+          {% elif s == 'cleaning' and (a.get('cleaned_area', 0) | int(0)) == 0 %}{% set act = a.get('active_segments') or [] %}{% set order = (a.get('cleaning_sequence') or []) | select('in', act) | list %}{% set ziel = states('select.heidi_room_' ~ order[0] ~ '_name') if order else '' %}Fährt zum Startpunkt{{ ' · ' ~ ziel if ziel not in ['', 'unknown', 'unavailable'] else '' }}
           {% elif s == 'cleaning' and a.get('active_segments') and a.get('current_segment') not in a.get('active_segments') %}Fährt durch{{ raum }}
           {% elif s == 'cleaning' %}{{ 'Saugt' if mode == 'Sweeping' else 'Wischt' if mode == 'Mopping' else 'Saugt und wischt' if mode == 'Sweeping and mopping' else ('Wischt' if mopp else 'Saugt') }}{{ raum }}
           {% elif a.get('mapping') %}Erstellt Karte

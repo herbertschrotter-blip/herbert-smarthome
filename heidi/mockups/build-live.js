@@ -48,7 +48,7 @@ function setVac(st, segs) {
   const segsNow = segs === undefined ? states["vacuum.heidi"].attributes.active_segments : segs;
   const order = segsNow ? (states["vacuum.heidi"].attributes.cleaning_sequence || segsNow).filter((i) => segsNow.includes(i)) : [];
   const cur = ["cleaning", "paused"].includes(st) && order.length ? (order.includes(states["vacuum.heidi"].attributes.current_segment) ? states["vacuum.heidi"].attributes.current_segment : order[0]) : null;
-  upd("vacuum.heidi", st, { active_segments: segsNow, current_segment: cur, status: st === "cleaning" ? "Room cleaning" : st });
+  upd("vacuum.heidi", st, { active_segments: segsNow, current_segment: cur, status: st === "cleaning" ? "Room cleaning" : st, cleaned_area: ["cleaning", "paused", "returning"].includes(st) ? 12 : 0 });
   upd("sensor.heidi_status", st === "cleaning" ? "room_cleaning" : st === "docked" ? "sleeping" : st);
   upd("sensor.heidi_task_status", ["cleaning", "paused"].includes(st) ? "room_cleaning" : "completed");
   upd("sensor.heidi_phase", phase);

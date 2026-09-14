@@ -3,7 +3,7 @@
  * Robotereinstellungen, Einstellungs-Panel, Prognose) als HTML/CSS/JS.
  * Alle Daten kommen live aus Home Assistant (hass.states), alle Aktionen laufen über hass.callService.
  */
-const HP_VERSION = "1.5.5";
+const HP_VERSION = "1.5.6";
 
 const E = {
   vac: "vacuum.heidi",
@@ -503,7 +503,10 @@ class HeidiPanel extends HTMLElement {
     const order = (this.attr(E.vac, "cleaning_sequence") || []).filter((id) => active.includes(id));
     const idx = order.indexOf(seg), rest = idx >= 0 ? order.slice(idx + 1) : order;
     const restTxt = rest.map((id) => ROOMS.find((r) => r.id === id)?.short).filter(Boolean).join(" → ");
-    // Raum gehört nicht zum Auftrag → Heidi fährt nur durch (Hinweg): keine Werte anzeigen
+    // Noch nichts gereinigt (Fläche 0) → auf dem Weg zum Startpunkt; erster Raum der Reihenfolge ist das Ziel
+    const area = parseFloat(this.attr(E.vac, "cleaned_area")) || 0, first = order.length ? ROOMS.find((r) => r.id === order[0]) : null;
+    if (vac === "cleaning" && area === 0) return `<div class="strip" data-act="rooms" title="Räume einstellen"><div class="lab">${ic("mdi:map-marker-path")} Fährt zum Startpunkt <span class="r">${first ? "zu " + esc(first.short) : ""} ${ic("mdi:chevron-right")}</span></div></div>`;
+    // Raum gehört nicht zum Auftrag → Heidi fährt nur durch: keine Werte anzeigen
     if (active.length && !active.includes(seg)) return `<div class="strip" data-act="rooms" title="Räume einstellen"><div class="lab">${ic(room.icon)} Fährt durch ${esc(room.short)} <span class="r">${restTxt ? "zu " + esc(restTxt) : ""} ${ic("mdi:chevron-right")}</span></div></div>`;
     const chip = (icon, txt, cls = "k") => `<span class="chip ${cls}" title="${esc(txt)}">${icon}${esc(txt)}</span>`;
     const modeIc = v.modus === "Saugen" ? ic("mdi:broom") : v.modus === "Nur Wischen" ? ic("mdi:water") : ic("mdi:broom") + ic("mdi:water");

@@ -98,7 +98,9 @@ Uhr (10:15). Einrichten im Ordner `heidi/tests`: `npm i` und dann `npx playwrigh
 - **`sensor.heidi_cleaning_history` ist während eines Laufs „unavailable“** → Protokoll und
   „Letzter Lauf“ verschwanden. Karte (v1.5.5) merkt sich den letzten gültigen Stand
   (`_histAttrs()`/`_histCache`) und zeigt das Protokoll während des Laufs weiter.
-- **Hinweg durch fremde Räume**: Beim Anfahren des ersten Raums meldete die Phase „Saugt Büro“,
+- **Hinweg zum Startpunkt**: Solange `cleaned_area` = 0 und der Roboter unterwegs ist, heißt die
+  Phase „Fährt zum Startpunkt · <erster Raum der Reihenfolge>“ (Herberts Wunsch). Danach: Beim
+  Durchfahren fremder Räume meldete die Phase „Saugt Büro“,
   „Saugt Flur“ … Jetzt „Fährt durch <Raum>“, wenn `current_segment` nicht in `active_segments`
   liegt (Paket + Kopf-Streifen). Bei „ganze Karte“-Starts ist `active_segments` leer → keine
   Unterscheidung möglich.
