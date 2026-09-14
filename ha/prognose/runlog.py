@@ -111,17 +111,23 @@ def room_segments(run):
     i = 0
     while i < n:
         r = run[i]
-        if not (is_room_phase(r.get("phase", "")) and r.get("seg") and r.get("vac") == "cleaning" and r.get("mode") in MODE_DE):
+        if not (is_room_phase(r.get("phase", "")) and r.get("seg") and r.get("vac") == "cleaning"):
             i += 1; continue
-        key = MODE_DE[r["mode"]] + "/" + SUCT_DE.get(r.get("suction"), "Standard")
+        # Modus zuverlässig aus dem Phasentext (die Raum-Selects sind im Lauf teils "unavailable")
+        ph = r.get("phase", "")
+        modus = "Saugen + Wischen" if ph.startswith("Saugt und wischt ") else "Nur Wischen" if ph.startswith("Wischt ") else "Saugen"
+        key = modus + "/" + SUCT_DE.get(r.get("suction"), "Standard")
         j = i
-        while j + 1 < n and run[j + 1].get("seg") == r["seg"] and is_room_phase(run[j + 1].get("phase", "")) and run[j + 1].get("vac") == "cleaning":
+        while j + 1 < n and run[j + 1].get("seg") == r["seg"] and run[j + 1].get("phase", "") == ph and run[j + 1].get("vac") == "cleaning":
             j += 1
         end = run[j + 1] if j + 1 < n else run[j]
         dur = (end["t"] - r["t"]).total_seconds() / 60
         area = max(0.0, end["area_f"] - r["area_f"])
         drop = (r["batt_f"] - end["batt_f"]) if r["batt_f"] >= 0 and end["batt_f"] >= 0 else 0.0
-        times = int(str(r.get("times") or "1").replace("x", "") or 1)
+        try:
+            times = int(str(r.get("times") or "1").replace("x", "") or 1)
+        except Exception:
+            times = 1
         segs.append({"seg": r["seg"], "key": key, "min": dur, "area": area, "drop": max(0.0, drop), "times": max(1, times), "belag": r.get("belag") or ""})
         i = j + 1
     # Flackern: kurze Abschnitte weg, gleiche Nachbarn zusammenlegen

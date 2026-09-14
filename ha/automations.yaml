@@ -248,6 +248,14 @@
     - variables:
         seg: "{{ state_attr('vacuum.heidi', 'current_segment') or '' }}"
         p: "{{ ('select.heidi_room_' ~ seg ~ '_') if seg else '' }}"
+        # Während eines Laufs sind die Raum-Selects teils "unavailable" → Werte aus den Kartendaten des Roboters
+        rm: "{{ (state_attr('camera.heidi_map', 'rooms') or {}).get(seg | string, {}) if seg else {} }}"
+        sel: "{{ {'cleaning_mode': states(p ~ 'cleaning_mode'), 'suction_level': states(p ~ 'suction_level'), 'mop_pad_humidity': states(p ~ 'mop_pad_humidity'), 'cleaning_route': states(p ~ 'cleaning_route'), 'cleaning_times': states(p ~ 'cleaning_times'), 'floor_material': states(p ~ 'floor_material')} if p else {} }}"
+        mode: "{{ sel.cleaning_mode if sel.cleaning_mode is defined and sel.cleaning_mode not in ['unavailable', 'unknown'] else {0: 'sweeping', 1: 'mopping', 2: 'sweeping_and_mopping', 3: 'mopping_after_sweeping'}.get(rm.cleaning_mode, '') }}"
+        suction: "{{ sel.suction_level if sel.suction_level is defined and sel.suction_level not in ['unavailable', 'unknown'] else {0: 'quiet', 1: 'standard', 2: 'strong', 3: 'turbo'}.get(rm.suction_level, '') }}"
+        water: "{{ sel.mop_pad_humidity if sel.mop_pad_humidity is defined and sel.mop_pad_humidity not in ['unavailable', 'unknown'] else {1: 'slightly_dry', 2: 'moist', 3: 'wet'}.get(rm.water_volume, '') }}"
+        times: "{{ sel.cleaning_times if sel.cleaning_times is defined and sel.cleaning_times not in ['unavailable', 'unknown'] else ((rm.cleaning_times ~ 'x') if rm.cleaning_times is defined else '') }}"
+        belag: "{{ sel.floor_material if sel.floor_material is defined and sel.floor_material not in ['unavailable', 'unknown'] else (rm.floor_material | default('') | lower) }}"
     - action: shell_command.heidi_runlog
       data:
         zeile: >-
@@ -255,9 +263,8 @@
               'seg': seg, 'room': states('sensor.heidi_current_room'), 'batt': states('sensor.heidi_battery_level'),
               'area': state_attr('vacuum.heidi', 'cleaned_area'), 'ctime': state_attr('vacuum.heidi', 'cleaning_time'),
               'charging': state_attr('vacuum.heidi', 'charging'), 'docked': state_attr('vacuum.heidi', 'docked'),
-              'mode': states(p ~ 'cleaning_mode') if p else '', 'suction': states(p ~ 'suction_level') if p else '',
-              'water': states(p ~ 'mop_pad_humidity') if p else '', 'route': states(p ~ 'cleaning_route') if p else '',
-              'times': states(p ~ 'cleaning_times') if p else '', 'belag': states(p ~ 'floor_material') if p else '',
+              'mode': mode, 'suction': suction, 'water': water, 'route': sel.cleaning_route if sel.cleaning_route is defined else '',
+              'times': times, 'belag': belag,
               'plan': states('input_text.heidi_auto_letzter_plan') if is_state('input_boolean.heidi_auto_lauf', 'on') else '',
               'variante': '', 'selfclean': states('number.heidi_self_clean_area'), 'mop_pad': state_attr('vacuum.heidi', 'mop_pad'),
               'carpet': states('select.heidi_carpet_cleaning'), 'mop_extend': states('switch.heidi_mop_extend'),
