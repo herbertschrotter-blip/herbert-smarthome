@@ -301,6 +301,8 @@ heidi/card/
 | `prognose` | `heidi-prognose-view` |
 | `einstellungen` | `heidi-settings-panel` als Seite (statt Seitenleiste), `heidi-robot-settings`, Diagnose, Version |
 
+**Design-Referenz (14.09., Herberts Designvorgabe „Automotive Dark Bento“):** `heidi/mockups/heidi-v2-bento.html` zeigt alle sechs Seiten und Dialoge im neuen Look (dunkles Graphit, Bento-Flächen, Seitenleiste auf Desktop, Symbolleiste auf Tablet, Tab-Leiste und Bottom-Sheets auf Smartphone, Design-Tokens `--heidi-*`). Es löst die Glas-Optik der Mockups `heidi-v2-start.html`/`heidi-v2-seiten.html` ab; die Seitenschnitte und Funktionen bleiben. Abnahme durch Herbert offen (Teil von 3.4). Regel 14 gilt: System-Schriftstapel, keine externen Ressourcen.
+
 Jede Komponente: `hass`, ihre Sicht (memoisiert), `api` als Properties; Ereignisse nach oben
 (`heidi-open-overlay`, `heidi-toast`, `heidi-navigate`, `heidi-close`, `heidi-back`). Keine
 Komponente ruft `hass.callService` direkt. Teilen zwei Elemente Zustand, werden sie eines;

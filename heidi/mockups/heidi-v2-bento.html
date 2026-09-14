@@ -1,0 +1,856 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Heidi v2 – Automotive Dark Bento (Mockup, alle Seiten)</title>
+<style>
+/* ───────── Design Tokens (Abschnitt 27 der Designvorgabe) ───────── */
+:root {
+  --heidi-bg: #0b1015; --heidi-bg-elevated: #10171e; --heidi-surface: #111a22; --heidi-surface-raised: #16212a; --heidi-surface-active: #1c2a36;
+  --heidi-text: #e7edf3; --heidi-text-muted: #8a97a6; --heidi-text-faint: #5d6b7a;
+  --heidi-accent: #58b7f6; --heidi-accent-soft: rgba(88,183,246,.14); --heidi-positive: #39d98a; --heidi-positive-soft: rgba(57,217,138,.14);
+  --heidi-warning: #f2b544; --heidi-warning-soft: rgba(242,181,68,.14); --heidi-danger: #ef5b5b; --heidi-danger-soft: rgba(239,91,91,.14);
+  --heidi-border: rgba(255,255,255,.08); --heidi-border-strong: rgba(255,255,255,.14);
+  --heidi-radius-sm: 8px; --heidi-radius-md: 10px; --heidi-radius-lg: 14px; --heidi-radius-xl: 18px;
+  --heidi-space-1: 4px; --heidi-space-2: 8px; --heidi-space-3: 12px; --heidi-space-4: 16px; --heidi-space-5: 24px;
+  --heidi-shadow-float: 0 12px 32px rgba(0,0,0,.45);
+  --heidi-dur: 160ms; --heidi-ease: cubic-bezier(.2,.7,.2,1);
+  /* Kurzformen */
+  --bg: var(--heidi-bg); --s1: var(--heidi-surface); --s2: var(--heidi-surface-raised); --s3: var(--heidi-surface-active);
+  --text: var(--heidi-text); --muted: var(--heidi-text-muted); --faint: var(--heidi-text-faint);
+  --accent: var(--heidi-accent); --good: var(--heidi-positive); --warn: var(--heidi-warning); --bad: var(--heidi-danger); --line: var(--heidi-border);
+  color-scheme: dark;
+}
+[hidden] { display: none !important; }
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body { background: #06090c; color: var(--text); font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 14px; line-height: 1.4; -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+svg { width: 18px; height: 18px; flex: none; }
+h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -.01em; }
+
+/* ───────── Mockup-Leiste (nicht Teil der Karte) ───────── */
+.tools { position: sticky; top: 0; z-index: 50; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 8px 14px; background: rgba(3,5,7,.7); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+.tools b { color: var(--text); margin-right: 4px; }
+.tools .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+.tools .seg button { padding: 5px 11px; font-size: 12px; color: var(--muted); }
+.tools .seg button.on { background: var(--heidi-surface-active); color: var(--text); }
+.tools .note { margin-left: auto; color: var(--faint); }
+
+/* ───────── Geräte-Rahmen ───────── */
+.stage { padding: 18px; display: flex; justify-content: center; }
+.frame { width: 100%; max-width: 1560px; height: max(700px, calc(100vh - 72px)); display: flex; flex-direction: column; background: var(--bg); border: 1px solid var(--heidi-border-strong); border-radius: 22px; overflow: hidden; container-type: inline-size; container-name: app; position: relative; }
+.frame.tablet { width: 1024px; max-width: 100%; height: 768px; }
+.frame.phone { width: 390px; max-width: 100%; height: 844px; border-radius: 40px; }
+
+/* ───────── App-Gerüst: Sidebar + Inhalt ───────── */
+.app { display: grid; grid-template-columns: 220px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); flex: 1; min-height: 0; overflow: hidden; }
+.side { overflow: auto; min-height: 0; border-right: 1px solid var(--line); background: var(--heidi-bg-elevated); padding: var(--heidi-space-5) var(--heidi-space-3); display: flex; flex-direction: column; gap: var(--heidi-space-5); }
+.brand { display: flex; align-items: center; gap: 12px; padding: 0 8px; }
+.brand .logo { width: 36px; height: 36px; border-radius: 50%; border: 3px solid var(--accent); border-right-color: transparent; transform: rotate(-30deg); flex: none; }
+.brand .t { font-size: 20px; font-weight: 700; letter-spacing: -.02em; line-height: 1.1; }
+.brand .s { font-size: 12px; color: var(--muted); }
+.navlist { display: grid; gap: 4px; }
+.navlist button { display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 12px; border-radius: var(--heidi-radius-md); border: 1px solid transparent; color: var(--muted); font-size: 14px; font-weight: 500; text-align: left; transition: background var(--heidi-dur) var(--heidi-ease), color var(--heidi-dur); }
+.navlist button:hover { background: var(--s1); color: var(--text); }
+.navlist button.on { background: var(--heidi-surface-active); color: var(--text); border-color: rgba(88,183,246,.35); box-shadow: inset 3px 0 0 var(--accent); }
+.navlist button svg { width: 20px; height: 20px; opacity: .9; }
+.side .foot { margin-top: auto; display: grid; justify-items: center; gap: 8px; color: var(--muted); font-size: 12px; text-align: center; padding-bottom: 8px; }
+.side .foot .robotpic { width: 120px; height: 120px; }
+.side .foot .v { color: var(--faint); font-size: 11px; }
+.tabbar { display: none; }
+
+.content { overflow: auto; min-height: 0; padding: var(--heidi-space-5); display: grid; gap: var(--heidi-space-4); align-content: start; container-type: inline-size; container-name: content; min-width: 0; }
+.topbar { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.topbar h1 { font-size: 28px; }
+.topbar .sub { color: var(--muted); font-size: 14px; margin-top: 2px; }
+.topbar .back { display: inline-flex; align-items: center; gap: 4px; height: 40px; padding: 0 10px 0 6px; border-radius: var(--heidi-radius-md); color: var(--muted); font-weight: 500; }
+.topbar .back:hover { background: var(--s1); color: var(--text); }
+.topbar .meta { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+.meta .mi { display: flex; align-items: center; gap: 10px; padding: 6px 12px; border-left: 1px solid var(--line); }
+.meta .mi:first-child { border-left: 0; }
+.meta .mi svg { width: 20px; height: 20px; color: var(--muted); }
+.meta .mi b { display: block; font-size: 15px; font-weight: 600; line-height: 1.1; }
+.meta .mi small { color: var(--muted); font-size: 11px; }
+.meta .dotg { width: 7px; height: 7px; border-radius: 50%; background: var(--good); display: inline-block; margin-left: 6px; }
+
+/* ───────── Bento-Flächen ───────── */
+.bento { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--heidi-space-4); grid-auto-rows: min-content; }
+.b { background: var(--s1); border: 1px solid var(--line); border-radius: var(--heidi-radius-lg); padding: var(--heidi-space-4); min-width: 0; display: flex; flex-direction: column; gap: var(--heidi-space-3); }
+.b.raised { background: var(--s2); }
+.b > .hd { display: flex; align-items: center; gap: 8px; min-height: 24px; }
+.b > .hd h2 { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.b > .hd h2 svg { width: 18px; height: 18px; color: var(--muted); }
+.b > .hd .r { margin-left: auto; font-size: 12px; color: var(--muted); display: inline-flex; align-items: center; gap: 4px; }
+.b > .hd .r.link { color: var(--accent); }
+.b > .hd .r svg { width: 14px; height: 14px; }
+.lbl { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.hint { font-size: 12px; color: var(--muted); line-height: 1.45; }
+.span3 { grid-column: span 3; } .span4 { grid-column: span 4; } .span5 { grid-column: span 5; } .span6 { grid-column: span 6; } .span7 { grid-column: span 7; } .span8 { grid-column: span 8; } .span9 { grid-column: span 9; } .span12 { grid-column: span 12; }
+.stack { display: grid; gap: var(--heidi-space-4); align-content: start; min-width: 0; }
+.grow { flex: 1; }
+
+/* Status-Punkt */
+.st { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
+.st i { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
+.st.good i { background: var(--good); } .st.acc i { background: var(--accent); } .st.warn i { background: var(--warn); } .st.bad i { background: var(--bad); }
+.st.good { color: var(--good); } .st.warn { color: var(--warn); } .st.bad { color: var(--bad); }
+.st.pill { padding: 4px 10px; border-radius: 999px; font-size: 12px; background: var(--s2); border: 1px solid var(--line); }
+
+/* Werte */
+.kv { display: flex; align-items: baseline; gap: 10px; }
+.kv .v { font-size: 32px; font-weight: 600; letter-spacing: -.02em; line-height: 1; font-variant-numeric: tabular-nums; }
+.kv .u { font-size: 14px; color: var(--muted); }
+.stat { display: grid; gap: 2px; }
+.stat .v { font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -.01em; line-height: 1.1; }
+.stat .v small { font-size: 12px; color: var(--muted); font-weight: 500; margin-left: 3px; }
+.stat .l { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.stats3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+
+/* Robot-Panel */
+.robot { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: start; }
+.robot .name { font-size: 24px; font-weight: 700; letter-spacing: -.02em; line-height: 1.1; }
+.robot .pic { grid-column: 1; width: 100%; height: auto; max-width: 230px; aspect-ratio: 1; justify-self: center; }
+.robot .batt { grid-column: 2; grid-row: 2; align-self: center; display: grid; gap: 4px; justify-items: start; }
+.battbar { width: 18px; height: 34px; border: 2px solid var(--muted); border-radius: 4px; position: relative; padding: 2px; margin-top: 4px; }
+.battbar::before { content: ""; position: absolute; top: -5px; left: 5px; width: 6px; height: 3px; border-radius: 1px; background: var(--muted); }
+.battbar i { display: block; position: absolute; left: 2px; right: 2px; bottom: 2px; background: var(--good); border-radius: 2px; height: calc(var(--p) * 1%); }
+.battbar.warn i { background: var(--warn); } .battbar.bad i { background: var(--bad); }
+.params { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.param { background: var(--s2); border: 1px solid var(--line); border-radius: var(--heidi-radius-md); padding: 10px; display: grid; gap: 2px; min-height: 44px; text-align: left; }
+.param b { font-size: 14px; font-weight: 600; } .param span { font-size: 11px; color: var(--muted); }
+.param svg { width: 16px; height: 16px; color: var(--muted); margin-bottom: 2px; }
+
+/* Knöpfe */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px; padding: 0 16px; border-radius: var(--heidi-radius-md); background: var(--s2); border: 1px solid var(--line); font-weight: 600; font-size: 14px; color: var(--text); transition: background var(--heidi-dur), border-color var(--heidi-dur), transform 80ms; white-space: nowrap; }
+.btn:hover { background: var(--s3); } .btn:active { transform: scale(.985); }
+.btn.primary { background: var(--good); color: #062014; border-color: transparent; } .btn.primary:hover { filter: brightness(1.06); }
+.btn.primary svg { color: #062014; }
+.btn.danger { color: var(--bad); border-color: rgba(239,91,91,.35); }
+.btn.on { border-color: var(--accent); background: var(--heidi-accent-soft); color: var(--text); }
+.btn.sm { height: 36px; padding: 0 12px; font-size: 13px; }
+.btn.icon { width: 44px; padding: 0; }
+.btn svg { width: 18px; height: 18px; }
+.ctl { display: grid; grid-template-columns: 1.4fr 1fr auto; gap: 8px; }
+.iconbtn { width: 40px; height: 40px; border-radius: var(--heidi-radius-md); display: inline-flex; align-items: center; justify-content: center; color: var(--muted); border: 1px solid transparent; }
+.iconbtn:hover { background: var(--s2); color: var(--text); }
+.ib { width: 40px; height: 40px; border-radius: var(--heidi-radius-sm); display: inline-flex; align-items: center; justify-content: center; color: var(--muted); border: 1px solid var(--line); background: var(--s2); }
+.ib:hover { color: var(--text); background: var(--s3); } .ib.go { color: var(--good); }
+
+/* Chips, Segmente, Schalter */
+.chip { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border-radius: 999px; background: var(--s2); border: 1px solid var(--line); font-size: 12px; font-weight: 500; color: var(--text); white-space: nowrap; }
+.chip svg { width: 14px; height: 14px; color: var(--muted); }
+.chip.on { border-color: rgba(57,217,138,.45); background: var(--heidi-positive-soft); } .chip.on svg { color: var(--good); }
+.chip.acc { border-color: rgba(88,183,246,.5); background: var(--heidi-accent-soft); } .chip.acc svg { color: var(--accent); }
+.chip.warn { border-color: rgba(242,181,68,.5); background: var(--heidi-warning-soft); color: var(--warn); } .chip.warn svg { color: var(--warn); }
+.chip.bad { border-color: rgba(239,91,91,.5); background: var(--heidi-danger-soft); color: var(--bad); }
+.chip.k { height: 26px; font-size: 11px; padding: 0 8px; }
+.chip.dim { opacity: .55; }
+button.chip { cursor: pointer; } button.chip:hover { background: var(--s3); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg2 { display: inline-flex; background: var(--bg); border: 1px solid var(--line); border-radius: var(--heidi-radius-md); padding: 3px; gap: 2px; max-width: 100%; flex-wrap: wrap; }
+.seg2 button { height: 34px; padding: 0 12px; border-radius: 7px; font-size: 13px; font-weight: 500; color: var(--muted); white-space: nowrap; transition: background var(--heidi-dur), color var(--heidi-dur); }
+.seg2 button.on { background: var(--s3); color: var(--text); box-shadow: inset 0 0 0 1px rgba(88,183,246,.5); }
+.seg2.dis { opacity: .4; pointer-events: none; }
+.sw { width: 44px; height: 26px; border-radius: 999px; background: var(--s3); border: 1px solid var(--heidi-border-strong); position: relative; flex: none; transition: background var(--heidi-dur), border-color var(--heidi-dur); }
+.sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--muted); transition: transform var(--heidi-dur) var(--heidi-ease), background var(--heidi-dur); }
+.sw.on { background: var(--heidi-positive-soft); border-color: rgba(57,217,138,.5); } .sw.on::after { transform: translateX(18px); background: var(--good); }
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); overflow-x: auto; }
+.tabs button { height: 40px; padding: 0 12px; color: var(--muted); font-weight: 500; font-size: 13px; border-bottom: 2px solid transparent; margin-bottom: -1px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.tabs button.on { color: var(--text); border-bottom-color: var(--accent); }
+.tabs button svg { width: 16px; height: 16px; }
+
+/* Fortschritt / Balken */
+.bar { height: 6px; border-radius: 999px; background: var(--s3); overflow: hidden; }
+.bar i { display: block; height: 100%; border-radius: inherit; background: var(--good); width: calc(var(--p) * 1%); transition: width 400ms var(--heidi-ease); }
+.bar.warn i { background: var(--warn); } .bar.bad i { background: var(--bad); } .bar.acc i { background: var(--accent); }
+.meter { display: grid; grid-template-columns: minmax(84px, auto) 1fr 44px; align-items: center; gap: 10px; min-height: 32px; font-size: 13px; }
+.meter .n { color: var(--muted); } .meter .p { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+button.meter { width: 100%; text-align: left; border-radius: var(--heidi-radius-sm); padding: 0 4px; } button.meter:hover { background: var(--s2); }
+.note { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: var(--heidi-radius-md); background: var(--s2); border: 1px solid var(--line); font-size: 13px; }
+.note svg { color: var(--good); margin-top: 1px; } .note b { display: block; } .note small { color: var(--muted); font-size: 12px; }
+
+/* Listen */
+.list { display: grid; }
+.row { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 6px 0; border-top: 1px solid var(--line); }
+.row:first-child { border-top: 0; }
+.row .t { font-size: 14px; font-weight: 500; } .row .s { font-size: 12px; color: var(--muted); margin-top: 1px; }
+.row > div:first-child { flex: 1; min-width: 0; }
+.row .v { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
+.row.link { cursor: pointer; } .row.link:hover .v { color: var(--text); }
+.crow { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; padding: 10px 12px; border-radius: var(--heidi-radius-md); background: var(--s2); border: 1px solid var(--line); }
+.crow .ic { width: 38px; height: 38px; border-radius: var(--heidi-radius-sm); background: var(--s3); display: inline-flex; align-items: center; justify-content: center; color: var(--muted); }
+.crow .ic.on { color: var(--good); background: var(--heidi-positive-soft); }
+.crow .t { font-weight: 600; font-size: 14px; } .crow .s { font-size: 12px; color: var(--muted); margin-top: 1px; }
+.crow .sub { grid-column: 1 / -1; }
+input[type=range] { accent-color: var(--accent); width: 130px; }
+input[type=time], input[type=text], select { font: inherit; color: var(--text); background: var(--s2); border: 1px solid var(--line); border-radius: var(--heidi-radius-sm); padding: 9px 10px; min-height: 40px; }
+input[type=text] { width: 100%; }
+.tag { font-size: 11px; font-weight: 600; letter-spacing: .04em; padding: 3px 8px; border-radius: 6px; background: var(--s3); color: var(--muted); white-space: nowrap; }
+.tag.acc { color: var(--accent); background: var(--heidi-accent-soft); }
+
+/* Planer-Zeilen */
+.plan { display: grid; }
+.pr { display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 12px; min-height: 60px; padding: 8px 0; border-top: 1px solid var(--line); }
+.pr:first-child { border-top: 0; }
+.pr .ic { width: 36px; height: 36px; border-radius: var(--heidi-radius-sm); background: var(--s2); display: inline-flex; align-items: center; justify-content: center; color: var(--muted); border: 1px solid var(--line); }
+.pr.today .ic { color: var(--accent); border-color: rgba(88,183,246,.4); }
+.pr .n { font-weight: 600; font-size: 14px; } .pr .s { font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 2px; }
+.pr .s svg { width: 13px; height: 13px; }
+.pr.off .n, .pr.off .s { color: var(--faint); }
+.pr .acts { display: flex; gap: 6px; }
+.pr .when { text-align: right; font-variant-numeric: tabular-nums; } .pr .when b { display: block; font-size: 14px; } .pr .when small { color: var(--muted); font-size: 11px; }
+.pr.compact { grid-template-columns: 1fr auto; min-height: 52px; }
+.estline { display: inline-flex; align-items: center; gap: 4px; color: var(--good); font-weight: 500; }
+.estline.bad { color: var(--warn); } .estline svg { width: 13px; height: 13px; }
+
+/* Karte */
+.map { position: relative; background: var(--heidi-bg); border: 1px solid var(--line); border-radius: var(--heidi-radius-md); overflow: hidden; background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px); background-size: 24px 24px; }
+.map > svg { display: block; width: 100%; height: auto; }
+.map.tall > svg { max-height: 520px; margin: 0 auto; }
+.map .room { fill: #1e2c39; stroke: #33495c; stroke-width: 1.2; cursor: pointer; transition: fill var(--heidi-dur), stroke var(--heidi-dur); }
+.map .room:hover { fill: #253647; }
+.map .room.sel { fill: rgba(88,183,246,.28); stroke: var(--accent); stroke-width: 1.8; }
+.map .room.cur { fill: rgba(57,217,138,.22); stroke: var(--good); }
+.map .room.done { fill: rgba(57,217,138,.1); stroke: rgba(57,217,138,.5); }
+.map text { fill: #c3ced9; font-size: 9px; font-weight: 600; pointer-events: none; }
+.map .zone { fill: rgba(239,91,91,.16); stroke: var(--bad); stroke-width: 1.2; stroke-dasharray: 3 2; }
+.map .nomop { fill: rgba(88,183,246,.12); stroke: var(--accent); stroke-width: 1.2; stroke-dasharray: 3 2; }
+.map .dock { fill: #3b5165; stroke: #6b8299; }
+.map .bot { fill: #e7edf3; stroke: var(--good); stroke-width: 3; }
+.map .path { fill: none; stroke: rgba(57,217,138,.55); stroke-width: 1.2; stroke-dasharray: 2 3; }
+.map .scale { position: absolute; left: 12px; bottom: 10px; font-size: 10px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.map .scale::before { content: ""; width: 34px; height: 1px; background: var(--muted); }
+.maptools { position: absolute; right: 10px; top: 10px; display: grid; gap: 2px; background: var(--s2); border: 1px solid var(--heidi-border-strong); border-radius: var(--heidi-radius-md); padding: 3px; box-shadow: var(--heidi-shadow-float); }
+.maptools button { width: 40px; height: 40px; border-radius: 7px; display: inline-flex; align-items: center; justify-content: center; color: var(--muted); }
+.maptools button:hover { background: var(--s3); color: var(--text); } .maptools button.on { color: var(--accent); background: var(--heidi-accent-soft); }
+.mtools { position: absolute; left: 10px; bottom: 10px; display: flex; gap: 6px; }
+.mtools .btn { box-shadow: var(--heidi-shadow-float); background: var(--s2); }
+.mapcap { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); flex-wrap: wrap; }
+.mapcap b { color: var(--text); font-weight: 600; }
+.mapmodes { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.rooms { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+.rooms button, .qs button { display: grid; justify-items: center; gap: 6px; padding: 12px 6px 10px; min-height: 72px; border-radius: var(--heidi-radius-md); background: var(--s2); border: 1px solid var(--line); font-size: 12px; font-weight: 500; color: var(--muted); transition: background var(--heidi-dur), border-color var(--heidi-dur), color var(--heidi-dur); }
+.rooms button svg, .qs button svg { width: 20px; height: 20px; }
+.rooms button:hover, .qs button:hover { background: var(--s3); color: var(--text); }
+.rooms button.sel, .qs button.sel { border-color: var(--accent); background: var(--heidi-accent-soft); color: var(--text); box-shadow: inset 0 0 0 1px rgba(88,183,246,.35); }
+.rooms button.sel svg, .qs button.sel svg { color: var(--accent); }
+.qs { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 8px; }
+.runbar { display: flex; gap: 8px; align-items: center; }
+.runbar .btn.primary { flex: 1; }
+
+/* Protokoll */
+.hist { display: grid; }
+.hrow { display: grid; grid-template-columns: 1.3fr 1.4fr .7fr .7fr auto; gap: 10px; align-items: center; min-height: 44px; padding: 4px 6px; border-top: 1px solid var(--line); font-size: 13px; font-variant-numeric: tabular-nums; cursor: pointer; border-radius: 6px; }
+.hrow:first-child { border-top: 0; } .hrow:hover { background: var(--s2); }
+.hrow .hd { font-weight: 600; } .hrow .m { color: var(--muted); }
+.hrow.open { background: var(--s2); border-radius: 6px 6px 0 0; }
+.hrow .ok { color: var(--good); } .hrow .nok { color: var(--warn); }
+.hrow svg { width: 16px; height: 16px; }
+.tl { padding: 8px 10px 12px 14px; background: var(--s2); border-radius: 0 0 6px 6px; display: grid; margin-bottom: 4px; }
+.tlr { display: grid; grid-template-columns: 46px 1fr auto; gap: 10px; align-items: center; min-height: 28px; font-size: 13px; position: relative; padding-left: 14px; }
+.tlr::before { content: ""; position: absolute; left: 3px; top: 0; bottom: 0; width: 1px; background: var(--heidi-border-strong); }
+.tlr::after { content: ""; position: absolute; left: 0; top: 50%; width: 7px; height: 7px; border-radius: 50%; background: var(--faint); transform: translateY(-50%); }
+.tlr.now::after { background: var(--good); box-shadow: 0 0 0 3px var(--heidi-positive-soft); }
+.tlr .tt { color: var(--muted); font-variant-numeric: tabular-nums; } .tlr .td { color: var(--muted); font-variant-numeric: tabular-nums; }
+.lr { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 8px; font-size: 12px; padding: 8px 0; border-top: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.lr:first-child { border-top: 0; } .lr span:first-child { font-weight: 600; } .lr span:not(:first-child) { color: var(--muted); }
+
+/* Statistik */
+.spark { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; align-items: end; height: 72px; }
+.spark div { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; height: 100%; }
+.spark i { display: block; width: 100%; max-width: 28px; border-radius: 4px 4px 2px 2px; background: var(--accent); opacity: .85; height: calc(var(--p) * .54px); min-height: 3px; }
+.spark i.today { background: var(--good); opacity: 1; }
+.spark span { font-size: 10px; color: var(--muted); }
+.lastruns { display: grid; }
+.lastruns .lrn { display: grid; grid-template-columns: 1fr 1.4fr auto auto auto; gap: 10px; align-items: center; min-height: 40px; padding: 4px 0; border-top: 1px solid var(--line); font-size: 13px; font-variant-numeric: tabular-nums; cursor: pointer; }
+.lastruns .lrn:first-child { border-top: 0; } .lastruns .m { color: var(--muted); } .lastruns svg { width: 16px; height: 16px; color: var(--good); }
+
+/* Prognose */
+.heat { display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; align-items: center; }
+.heat svg { width: 100%; height: auto; } .heat .n { font-size: 12px; color: var(--muted); }
+.datab { height: 8px; border-radius: 999px; background: var(--s3); overflow: hidden; } .datab i { display: block; height: 100%; background: var(--accent); }
+
+/* Dialoge */
+#overlay { position: absolute; inset: 0; z-index: 30; pointer-events: none; }
+#overlay > * { pointer-events: auto; }
+.scrim { position: absolute; inset: 0; background: rgba(3,6,9,.62); animation: fade var(--heidi-dur) both; }
+.dlg { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(640px, calc(100% - 32px)); max-height: calc(100% - 32px); overflow: auto; background: var(--heidi-bg-elevated); border: 1px solid var(--heidi-border-strong); border-radius: var(--heidi-radius-xl); padding: 18px 20px 20px; box-shadow: var(--heidi-shadow-float); display: grid; gap: 14px; align-content: start; }
+.dlg > h2 { font-size: 18px; display: flex; align-items: center; gap: 8px; position: sticky; top: -18px; background: var(--heidi-bg-elevated); padding: 4px 0; z-index: 1; }
+.dlg > h2 .m { color: var(--muted); font-weight: 500; font-size: 14px; } .dlg > h2 .iconbtn { margin-left: auto; }
+.dlg .foot { display: flex; justify-content: flex-end; gap: 8px; padding-top: 4px; }
+.alert { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(360px, calc(100% - 48px)); background: var(--heidi-bg-elevated); border: 1px solid var(--heidi-border-strong); border-radius: var(--heidi-radius-lg); box-shadow: var(--heidi-shadow-float); overflow: hidden; }
+.alert .m { padding: 20px 18px 16px; font-weight: 600; font-size: 15px; text-align: center; } .alert .m small { display: block; font-weight: 400; color: var(--muted); font-size: 13px; margin-top: 6px; }
+.alert .b { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line); }
+.alert .b button { height: 48px; font-weight: 600; color: var(--muted); } .alert .b button + button { border-left: 1px solid var(--line); color: var(--accent); }
+.fade { animation: fade var(--heidi-dur) var(--heidi-ease) both; }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+.sec { display: grid; gap: 8px; }
+.sec .lab { font-size: 12px; font-weight: 600; color: var(--muted); display: flex; justify-content: space-between; align-items: center; gap: 8px; letter-spacing: .02em; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.days { display: flex; gap: 6px; flex-wrap: wrap; }
+.mprof { background: var(--s2); border: 1px solid var(--line); border-radius: var(--heidi-radius-md); padding: 10px 12px; display: grid; gap: 8px; }
+.mrow { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--muted); flex-wrap: wrap; }
+.rr { background: var(--s2); border: 1px solid var(--line); border-radius: var(--heidi-radius-md); padding: 10px 12px; display: grid; gap: 6px; }
+.rr.std { opacity: .8; } .rr .rn { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; margin-bottom: 2px; } .rr .rn svg { width: 16px; height: 16px; color: var(--muted); }
+.rc { display: grid; grid-template-columns: 76px 1fr; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); } .rc.dim { opacity: .4; }
+.rc .seg2 button { height: 30px; padding: 0 9px; font-size: 12px; }
+.esum { border-radius: var(--heidi-radius-md); padding: 12px 14px; border: 1px solid var(--line); background: var(--s2); display: grid; gap: 3px; font-size: 13px; color: var(--muted); }
+.esum b { color: var(--text); } .esum.ok { border-color: rgba(57,217,138,.35); } .esum.bad { border-color: rgba(242,181,68,.45); }
+.er { display: grid; grid-template-columns: 18px 1fr auto; gap: 10px; align-items: center; font-size: 13px; padding: 5px 0; border-top: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.er:first-child { border-top: 0; } .er small { display: block; color: var(--muted); font-size: 11px; } .er svg { width: 16px; height: 16px; color: var(--muted); }
+.clock { display: grid; justify-items: center; gap: 10px; padding: 8px 0; }
+.clock .hd { font-size: 34px; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+.clock .hd span { padding: 0 6px; border-radius: 8px; cursor: pointer; color: var(--muted); } .clock .hd span.on { color: var(--text); background: var(--s3); }
+.clock .dial { position: relative; width: 240px; height: 240px; border-radius: 50%; background: var(--s2); border: 1px solid var(--line); }
+.clock .dial button { position: absolute; width: 32px; height: 32px; margin: -16px 0 0 -16px; border-radius: 50%; font-size: 12px; font-variant-numeric: tabular-nums; color: var(--muted); }
+.clock .dial button.sel { background: var(--accent); color: #041623; font-weight: 700; }
+.clock .hand { position: absolute; left: 50%; top: 50%; width: 2px; background: var(--accent); transform-origin: top center; margin-left: -1px; opacity: .7; }
+.clock .hub { position: absolute; left: 50%; top: 50%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: var(--accent); }
+.toast { position: fixed; left: 50%; bottom: 28px; transform: translate(-50%, 12px); background: var(--heidi-surface-active); border: 1px solid var(--heidi-border-strong); color: var(--text); padding: 10px 16px; border-radius: var(--heidi-radius-md); font-size: 13px; font-weight: 500; opacity: 0; transition: opacity var(--heidi-dur), transform var(--heidi-dur) var(--heidi-ease); z-index: 60; box-shadow: var(--heidi-shadow-float); pointer-events: none; max-width: min(90vw, 520px); text-align: center; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ───────── Responsive: Sidebar → Rail → Tab-Leiste (im echten Bau Media Query; hier Container des Geräterahmens) ───────── */
+@container app (max-width: 1180px) {
+  .app { grid-template-columns: 72px minmax(0, 1fr); }
+  .side { padding: 20px 10px; }
+  .brand .t, .brand .s, .navlist button span, .side .foot .robotpic, .side .foot .m { display: none; }
+  .navlist button { justify-content: center; padding: 0; width: 52px; margin: 0 auto; }
+  .navlist button.on { box-shadow: none; }
+  .brand { justify-content: center; padding: 0; }
+  .content { padding: 20px; }
+  .topbar h1 { font-size: 24px; }
+}
+@container app (max-width: 760px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .side { display: none; }
+  .tabbar { display: grid; grid-template-columns: repeat(6, 1fr); position: sticky; bottom: 0; z-index: 20; background: rgba(16,23,30,.92); backdrop-filter: blur(10px); border-top: 1px solid var(--line); padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); }
+  .tabbar button { display: grid; justify-items: center; gap: 3px; height: 50px; border-radius: var(--heidi-radius-sm); color: var(--muted); font-size: 10px; font-weight: 500; align-content: center; }
+  .tabbar button svg { width: 20px; height: 20px; } .tabbar button.on { color: var(--accent); background: var(--heidi-accent-soft); }
+  .content { padding: 16px 16px 24px; }
+  .topbar h1 { font-size: 22px; } .topbar .meta { display: none; }
+  .dlg { top: auto; bottom: 0; left: 0; transform: none; width: 100%; max-height: 92%; border-radius: var(--heidi-radius-xl) var(--heidi-radius-xl) 0 0; padding-bottom: calc(20px + env(safe-area-inset-bottom)); animation: up 220ms var(--heidi-ease) both; }
+  .dlg::before { content: ""; width: 38px; height: 4px; border-radius: 2px; background: var(--heidi-border-strong); margin: -6px auto 0; }
+  .alert { top: auto; bottom: 16px; left: 16px; right: 16px; transform: none; width: auto; }
+}
+@keyframes up { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* ───────── Responsive: Bento nach verfügbarem Platz (Container Queries) ───────── */
+@container content (max-width: 1099px) {
+  .bento { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .span3, .span4, .span5 { grid-column: span 3; } .span6, .span7, .span8, .span9 { grid-column: span 6; }
+  .rooms { grid-template-columns: repeat(4, minmax(0, 1fr)); } .qs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .robotpanel { order: -2; } .rightstack { order: -1; } /* Tablet: Roboter + Auftrag nebeneinander, Karte darunter in voller Breite */
+}
+@container content (max-width: 640px) {
+  .bento { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .span3, .span4, .span5, .span6, .span7, .span8, .span9, .span12 { grid-column: span 1; }
+  .two { grid-template-columns: 1fr; }
+  .hrow { grid-template-columns: 1.2fr 1fr .8fr auto; } .hrow .m:nth-child(3) { display: none; }
+  .lr { grid-template-columns: 1fr 1fr; } .lastruns .lrn { grid-template-columns: 1fr 1fr auto auto; } .lastruns .lrn .m:nth-child(3) { display: none; }
+  .robot .pic { max-width: 170px; }
+  .ctl { grid-template-columns: 1fr 1fr auto; }
+  .rc { grid-template-columns: 1fr; gap: 4px; }
+  .stats3 { gap: 8px; }
+}
+@media (hover: none) { .btn:hover, .navlist button:hover, .rooms button:hover { background: var(--s2); } }
+</style>
+</head>
+<body>
+<div class="tools">
+  <b>Mockup</b>
+  <span class="seg" id="segState"><button data-v="docked" class="on">Angedockt</button><button data-v="cleaning">Reinigt</button><button data-v="paused">Pausiert</button></span>
+  <span class="seg" id="segDevice"><button data-v="desktop" class="on">Desktop</button><button data-v="tablet">Tablet 1024</button><button data-v="phone">Phone 390</button></span>
+  <span class="seg" id="segPage"><button data-v="start" class="on">Übersicht</button><button data-v="reinigen">Karte</button><button data-v="planer">Planer</button><button data-v="protokoll">Verlauf</button><button data-v="prognose">Prognose</button><button data-v="einstellungen">Einstellungen</button></span>
+  <span class="note">Designvorgabe „Automotive Dark Bento“ · Beispielwerte aus dem Handoff · Dark ist Referenz</span>
+</div>
+
+<div class="stage"><div class="frame" id="frame">
+  <div class="app">
+    <nav class="side" id="side"></nav>
+    <main class="content" id="inner"></main>
+  </div>
+  <nav class="tabbar" id="tabbar"></nav>
+  <div id="overlay"></div>
+</div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ───────── Symbole ─────────
+const svg = (d, extra = '') => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ${extra}>${d}</svg>`;
+const I = {
+  play: svg('<path d="M7 5l12 7-12 7z"/>'), pause: svg('<path d="M8 5v14M16 5v14"/>'), stop: svg('<rect x="6" y="6" width="12" height="12" rx="2"/>'),
+  home: svg('<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>'), locate: svg('<circle cx="12" cy="10" r="3"/><path d="M12 22s7-7 7-12a7 7 0 1 0-14 0c0 5 7 12 7 12z"/>'),
+  chev: svg('<path d="M9 6l6 6-6 6"/>', 'stroke-width="2.5"'), back: svg('<path d="M15 5l-7 7 7 7"/>', 'stroke-width="2.4"'), close: svg('<path d="M6 6l12 12M18 6L6 18"/>'),
+  gear: svg('<circle cx="12" cy="12" r="3"/><path d="M4 12h2M18 12h2M12 4v2M12 18v2M6.3 6.3l1.4 1.4M16.3 16.3l1.4 1.4M6.3 17.7l1.4-1.4M16.3 7.7l1.4-1.4"/>'),
+  broom: svg('<path d="M3 21l6-6M14 4l6 6-8 8-6-6z"/><path d="M15 3l6 6"/>'), cal: svg('<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/>'),
+  list: svg('<path d="M4 6h16M4 12h16M4 18h10"/>'), chart: svg('<path d="M4 18l5-6 4 3 7-9"/><path d="M20 6v5h-5"/>'), grid: svg('<rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/>'),
+  user: svg('<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>'), userOff: svg('<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0M3 3l18 18"/>'), moon: svg('<path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10z"/>'), info: svg('<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>'),
+  auto: svg('<path d="M12 3v3M12 18v3M3 12h3M18 12h3"/><circle cx="12" cy="12" r="5"/>'), water: svg('<path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/>'), fan: svg('<circle cx="12" cy="12" r="2"/><path d="M12 10c0-4 3-6 5-6-1 3-3 5-5 6zM14 12c4 0 6 3 6 5-3-1-5-3-6-5zM12 14c0 4-3 6-5 6 1-3 3-5 5-6zM10 12c-4 0-6-3-6-5 3 1 5 3 6 5z"/>'),
+  repeat: svg('<path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>'), route: svg('<circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h6a4 4 0 0 0 0-8H10a4 4 0 0 1 0-8h6"/>'),
+  pencil: svg('<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>'), sofa: svg('<path d="M4 11V8a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v3"/><path d="M2 13a2 2 0 0 1 4 0v4h12v-4a2 2 0 0 1 4 0v5H2z"/>'),
+  chef: svg('<path d="M6 13a4 4 0 1 1 1-7.9A5 5 0 0 1 17 5.1 4 4 0 1 1 18 13v7H6z"/><path d="M6 17h12"/>'), desk: svg('<path d="M3 8h18v4H3zM5 12v8M19 12v8M9 12v4h6v-4"/>'), foot: svg('<path d="M8 3c2 0 3 2 3 5s-1 5-3 5-3-2-3-5 1-5 3-5zM8 15c2 0 3 1 3 3s-1 3-3 3-3-1-3-3 1-3 3-3z"/><path d="M16 6c2 0 3 2 3 5s-1 5-3 5-3-2-3-5 1-5 3-5zM16 18c2 0 3 1 3 3H13c0-2 1-3 3-3z"/>'),
+  toilet: svg('<path d="M6 3h8v8H6zM4 11h16a8 8 0 0 1-8 8 8 8 0 0 1-8-8zM10 19v2h4v-2"/>'), bed: svg('<path d="M3 18V8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10M3 13h18M3 18h18M7 10h4v3H7z"/>'), shower: svg('<path d="M4 4h4a4 4 0 0 1 4 4v1M4 4v16M12 9h8M13 13v2M16 13v2M19 13v2M14 17v2M17 17v2"/>'),
+  ban: svg('<circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/>'), chair: svg('<path d="M6 3h12v8H6zM6 11v10M18 11v10M6 15h12"/>'), tray: svg('<path d="M4 15v4h16v-4M12 3v11M8 10l4 4 4-4"/>'), wash: svg('<rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="13" r="4"/><path d="M8 6h2M14 6h2"/>'),
+  wind: svg('<path d="M3 8h10a3 3 0 1 0-3-3M3 12h15a3 3 0 1 1-3 3M3 16h8a2 2 0 1 1-2 2"/>'), timer: svg('<circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/>'), check: svg('<path d="M5 12l5 5L20 7"/>', 'stroke-width="2.6"'), x: svg('<path d="M6 6l12 12M18 6L6 18"/>', 'stroke-width="2.6"'),
+  plug: svg('<path d="M9 2v5M15 2v5M6 7h12v4a6 6 0 0 1-12 0zM12 17v5"/>'), flash: svg('<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>'), brief: svg('<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 12h18"/>'),
+  flag: svg('<path d="M5 21V4h12l-2 4 2 4H5"/>'), map: svg('<path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14"/>'), sleep: svg('<path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10z"/>'), robot: svg('<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3"/>'),
+  school: svg('<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/>'), wrench: svg('<path d="M14.7 6.3a4 4 0 0 0 5 5L9 22l-3-3L16.7 8.3a4 4 0 0 1-2-2z"/>'),
+};
+const ROOMS = [
+  { id: 7, short: 'Wohnz.', name: 'Wohnzimmer', icon: 'sofa', x: 10, y: 10, w: 150, h: 120, area: 30 }, { id: 6, short: 'Küche', name: 'Küche', icon: 'chef', x: 165, y: 10, w: 95, h: 70, area: 12 },
+  { id: 5, short: 'Büro', name: 'Büro', icon: 'desk', x: 165, y: 85, w: 95, h: 75, area: 12 }, { id: 4, short: 'Flur', name: 'Flur', icon: 'foot', x: 10, y: 135, w: 150, h: 40, area: 14 },
+  { id: 3, short: 'WC', name: 'WC', icon: 'toilet', x: 10, y: 180, w: 45, h: 45, area: 3 }, { id: 2, short: 'Schlafz.', name: 'Schlafzimmer', icon: 'bed', x: 130, y: 165, w: 130, h: 60, area: 16 },
+  { id: 1, short: 'Bad', name: 'Bad', icon: 'shower', x: 60, y: 180, w: 65, h: 45, area: 6 },
+];
+const R = (id) => ROOMS.find((r) => r.id === id);
+const DAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+const OPT = { modus: ['Saugen', 'Saugen + Wischen', 'Nur Wischen'], saug: ['Leise', 'Standard', 'Stark', 'Turbo'], wasser: ['Wenig', 'Mittel', 'Viel'], route: ['Standard', 'Intensiv', 'Tief'], wdh: ['1', '2', '3'], ho: ['Warten', 'Leise starten'], saug3: ['Leise', 'Standard', 'Stark'], wdh2: ['1', '2'] };
+
+// ───────── Zustand (Beispieldaten aus dem Handoff) ─────────
+const S = {
+  vac: 'docked', device: 'desktop', page: 'start', batt: 62, automatik: true, dark: true,
+  plans: [
+    { n: 1, name: 'Tägliches Saugen', aktiv: true, raeume: [7, 6, 5, 4, 3, 2, 1], modus: 'Saugen', saug: 'Turbo', wasser: 'Mittel', route: 'Standard', wdh: '1', tage: [0, 1, 1, 0, 1, 1, 1], zeit: '09:30', personen: ['nicole'], ho: 'Warten', hoSaug: 'Leise', hoWdh: '1', schnell: true, spSaug: 'Standard', spWdh: '1', raum: {} },
+    { n: 2, name: 'Saugen + Wischen', aktiv: true, raeume: [7, 6, 5, 4, 3, 2, 1], modus: 'Saugen + Wischen', saug: 'Turbo', wasser: 'Mittel', route: 'Standard', wdh: '1', tage: [1, 0, 0, 1, 0, 0, 0], zeit: '07:00', personen: ['nicole'], ho: 'Leise starten', hoSaug: 'Leise', hoWdh: '1', schnell: true, spSaug: 'Standard', spWdh: '1', raum: { 1: { modus: 'Saugen + Wischen', saug: 'Turbo', wasser: 'Viel', route: null, wdh: '2' } } },
+    { n: 3, name: 'Küche nach dem Kochen', aktiv: true, raeume: [6, 4], modus: 'Saugen', saug: 'Turbo', wasser: 'Mittel', route: 'Standard', wdh: '2', tage: [0, 0, 0, 0, 0, 0, 0], zeit: '19:30', personen: [], ho: 'Warten', hoSaug: 'Leise', hoWdh: '1', schnell: false, spSaug: 'Standard', spWdh: '1', raum: {} },
+    { n: 4, name: 'Bad & WC gründlich', aktiv: false, raeume: [1, 3], modus: 'Nur Wischen', saug: 'Standard', wasser: 'Viel', route: 'Intensiv', wdh: '3', tage: [0, 0, 0, 0, 0, 0, 0], zeit: '10:30', personen: [], ho: 'Warten', hoSaug: 'Leise', hoWdh: '1', schnell: false, spSaug: 'Standard', spWdh: '1', raum: {} },
+  ],
+  robotRooms: { 1: ['Saugen + Wischen', 'Turbo', 'Viel', null, '2'], 2: ['Saugen', 'Leise', null, null, '1'], 3: ['Nur Wischen', 'Standard', 'Mittel', 'Intensiv', '1'], 4: ['Saugen + Wischen', 'Turbo', 'Mittel', null, '1'], 5: ['Saugen', 'Standard', null, null, '1'], 6: ['Saugen + Wischen', 'Turbo', 'Viel', null, '1'], 7: ['Saugen + Wischen', 'Turbo', 'Mittel', null, '1'] },
+  mapMode: 'raeume', goto: false, mapSel: 1, selRooms: new Set(), zones: [[-4200, -4775, -1150, -2075]], noMops: [[-1550, -188, -643, 937]], chairs: true, kind: 'Dreame-App', rotation: '0', raumnamen: 'Deutsch',
+  planerBereich: true, prognoseAktiv: true, ninaZaehlt: false, abweichung: false, prog: { herbert: true, nicole: true, nina: true },
+  az: ['08:00', '17:00'], rueckkehr: '17:00', schnellMin: 90, minAkku: 30, heimkehr: 'Zur Station', prognose: { intervall: 15, aufloesung: 30, wochen: 8, halbwert: 21, mindesttage: 14 },
+  tlOpen: new Set(), overlay: null, draft: null,
+  hist: [
+    { ts: 'Gestern 09:31', area: 84, min: 96, ok: true, mop: true, tl: [['09:31', 'Wäscht Mopps vor dem Start', '4 min'], ['09:35', 'Saugt und wischt Wohnzimmer', '22 min'], ['09:57', 'Saugt und wischt Küche', '11 min'], ['10:08', 'Fährt zum Mopp-Waschen', '2 min'], ['10:10', 'Wäscht Mopps zwischendurch', '5 min'], ['10:15', 'Saugt und wischt Büro', '12 min'], ['10:27', 'Saugt und wischt Flur', '9 min'], ['10:36', 'Saugt und wischt Schlafzimmer', '14 min'], ['10:50', 'Saugt und wischt Bad', '6 min'], ['10:56', 'Saugt und wischt WC', '4 min'], ['11:00', 'Fährt zur Station', '7 min']] },
+    { ts: 'So 13.09. 19:32', area: 26, min: 31, ok: true, mop: false, tl: [['19:32', 'Saugt Küche', '14 min'], ['19:46', 'Saugt Flur', '9 min'], ['19:55', 'Saugt Küche', '5 min'], ['20:00', 'Fährt zur Station', '3 min']] },
+    { ts: 'Sa 12.09. 09:30', area: 82, min: 88, ok: true, mop: false, tl: null }, { ts: 'Fr 11.09. 09:30', area: 80, min: 84, ok: false, mop: false, tl: null },
+    { ts: 'Do 10.09. 07:02', area: 83, min: 101, ok: true, mop: true, tl: null }, { ts: 'Mi 09.09. 09:31', area: 81, min: 86, ok: true, mop: false, tl: null },
+    { ts: 'Di 08.09. 09:30', area: 82, min: 85, ok: true, mop: false, tl: null }, { ts: 'Mo 07.09. 07:01', area: 84, min: 99, ok: true, mop: true, tl: null },
+  ],
+  lern: { raten: { 'Saugen/Standard': [0.90, 0.30, 3], 'Saugen/Turbo': [0.95, 0.55, 5], 'Saugen + Wischen/Turbo': [1.62, 0.42, 4] }, laden: [1.1, 0.5, 15, 80], waesche: [4, 5, 25], laeufe: 12 },
+};
+const STATES = {
+  docked: { big: 'Schläft', sub: '', dot: 'var(--good)', auto: 'Wartet auf „Tägliches Saugen“ um 09:30 · Rückkehr ca. 17:00', head: 'Montag, 14. September · heute: Tägliches Saugen 09:30', phase: 'Schläft', cur: null },
+  cleaning: { big: 'Tägliches Saugen', sub: 'Saugt und wischt Küche', dot: 'var(--accent)', auto: '„Tägliches Saugen“ läuft · seit 09:31 · 34 m²', head: 'Montag, 14. September · läuft seit 09:31', phase: 'Saugt und wischt Küche', cur: 6 },
+  paused: { big: 'Pausiert', sub: 'Tägliches Saugen', dot: 'var(--warn)', auto: '„Tägliches Saugen“ pausiert', head: 'Montag, 14. September · pausiert', phase: 'Pausiert', cur: 6 },
+};
+
+// ───────── Helfer ─────────
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const chip = (icon, txt, cls = '') => `<span class="chip ${cls}">${icon ? I[icon] : ''}${esc(txt)}</span>`;
+const sw = (key, on) => `<button class="sw ${on ? 'on' : ''}" data-sw="${key}" role="switch" aria-checked="${on}"></button>`;
+const seg = (key, opts, cur, cls = '', extra = '') => `<div class="seg2 ${cls}">${opts.map((o) => `<button data-seg="${key}" data-val="${esc(o)}" ${extra} class="${String(cur) === o ? 'on' : ''}">${esc(o)}</button>`).join('')}</div>`;
+const dayLabel = (t) => { const n = t.filter(Boolean).length; if (n === 7) return 'Täglich'; if (!n) return 'Manuell'; if (t.every((v, i) => !!v === (i < 5))) return 'Mo–Fr'; if (t.every((v, i) => !!v === (i >= 5))) return 'Sa + So'; return DAYS.filter((d, i) => t[i]).join(n > 3 ? ' ' : ' + '); };
+const roomLabel = (ids) => ids.length === 7 ? 'Alle Räume' : ids.length ? ROOMS.filter((r) => ids.includes(r.id)).map((r) => r.short).join(', ') : 'keine Räume';
+const fmtMin = (m) => { m = Math.round(m); return m < 60 ? `${m} min` : `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, '0')} min`; };
+let tt; const toast = (msg) => { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), 1900); };
+const nav = (page) => { location.hash = '#/' + page; };
+const confirmDlg = (msg, sub, then) => { S.overlay = { kind: 'confirm', msg, sub, then }; renderOverlay(); };
+
+// Schätzung (vereinfacht wie v1: Raum für Raum)
+function estimate(p, variante = 'normal', uniform = null) {
+  const L = S.lern, F = { Leise: 0.8, Standard: 1, Stark: 1.25, Turbo: 1.6 };
+  const std = variante === 'schnell' ? { modus: 'Saugen', saug: p.spSaug, wdh: p.spWdh } : variante === 'leise' ? { modus: 'Saugen', saug: p.hoSaug, wdh: p.hoWdh } : { modus: p.modus, saug: p.saug, wdh: p.wdh };
+  const setting = (id) => uniform ? { ...std, ...uniform } : variante === 'normal' ? { ...std, ...(p.raum[id] || {}) } : std;
+  const rate = (modus, saug) => { const r = L.raten[modus + '/' + saug]; if (r) return { m: r[0], b: r[1], gelernt: true }; const base = Object.entries(L.raten).find(([k]) => k.startsWith(modus + '/')); const bb = base ? { m: base[1][0], b: base[1][1], f: F[base[0].split('/')[1]] } : { m: modus === 'Saugen' ? 0.9 : 1.6, b: modus === 'Saugen' ? 0.3 : 0.42, f: 1 }; return { m: bb.m, b: bb.b * F[saug] / bb.f, gelernt: false }; };
+  const order = [1, 6, 7, 2, 4, 3, 5].filter((i) => p.raeume.includes(i));
+  const steps = []; let t = 0, batt = S.batt, since = 0, charges = 0, unlearned = 0;
+  const wet = order.some((id) => setting(id).modus !== 'Saugen');
+  if (wet) { steps.push({ typ: 'wasch', text: 'Wäscht Mopps vor dem Start', min: 4, batt }); t += 4; }
+  for (const id of order) {
+    const s = setting(id), r = rate(s.modus, s.saug), area = R(id).area, min = area * r.m * parseInt(s.wdh), drain = min * r.b; if (!r.gelernt) unlearned++;
+    if (batt - drain < 15) { const c = (80 - batt) / 1.1 + 4; steps.push({ typ: 'laden', text: `Lädt ${Math.round(batt)} % → 80 %`, min: c, batt: 80 }); t += c; batt = 80; charges++; }
+    batt -= drain; t += min; since += area;
+    steps.push({ typ: 'raum', id, text: R(id).short, sub: `${s.modus} · ${s.saug} · ${s.wdh}×`, min, batt, area, gelernt: r.gelernt });
+    if (s.modus !== 'Saugen' && since >= 25) { steps.push({ typ: 'wasch', text: 'Wäscht Mopps zwischendurch', min: 5, batt }); t += 5; since = 0; }
+  }
+  steps.push({ typ: 'heim', text: 'Fährt zur Station', min: 3, batt }); t += 3;
+  return { steps, total: t, batt0: S.batt, battEnd: batt, charges, unlearned };
+}
+const restMin = () => 7 * 60 + 10; // Mockup: Rückkehr in 7 h 10 min (16:40 laut Prognose)
+
+
+// ───────── Zusätzliche Symbole (linear, ein Stil) ─────────
+Object.assign(I, {
+  plus: svg('<path d="M12 5v14M5 12h14"/>'), minus: svg('<path d="M5 12h14"/>'), layers: svg('<path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/>'),
+  target: svg('<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>'), clock: svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'),
+  homeS: svg('<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>'), bag: svg('<path d="M6 8h12l-1 12H7z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>'),
+  drop: svg('<path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/>'), dropOff: svg('<path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/><path d="M4 4l16 16"/>'),
+  bottle: svg('<path d="M10 2h4v3l2 3v12a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V8l2-3z"/><path d="M8 13h8"/>'), stats: svg('<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'),
+  leaf: svg('<path d="M4 20c0-9 6-15 16-15 0 10-6 16-16 15z"/><path d="M4 20c3-5 7-8 12-10"/>'), sun: svg('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>'),
+  battery: svg('<rect x="3" y="7" width="16" height="10" rx="2"/><path d="M21 10v4"/>'), zap: svg('<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>'),
+});
+const robotSvg = () => `<svg viewBox="0 0 200 200" class="robotpic" aria-hidden="true">
+  <defs><radialGradient id="rg" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#2a3a48"/><stop offset=".7" stop-color="#131c25"/><stop offset="1" stop-color="#0c1219"/></radialGradient></defs>
+  <ellipse cx="100" cy="176" rx="72" ry="9" fill="rgba(0,0,0,.45)"/>
+  <circle cx="100" cy="100" r="84" fill="url(#rg)" stroke="#33465a" stroke-width="1.5"/>
+  <circle cx="100" cy="100" r="70" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="1"/>
+  <path d="M40 130a66 66 0 0 0 120 0" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="10"/>
+  <circle cx="100" cy="82" r="20" fill="#0d141b" stroke="#3a4f63" stroke-width="1.5"/><circle cx="100" cy="82" r="8" fill="#1a2733" stroke="#58b7f6" stroke-width="1.2"/>
+  <rect x="86" y="118" width="28" height="6" rx="3" fill="#1c2a36"/><circle cx="100" cy="150" r="3" fill="#39d98a"/>
+  <path d="M60 46a56 56 0 0 1 80 0" fill="none" stroke="rgba(88,183,246,.35)" stroke-width="2" stroke-linecap="round"/></svg>`;
+
+// ───────── Navigation ─────────
+const NAV = [
+  ['start', 'Übersicht', 'homeS'], ['reinigen', 'Karte', 'map'], ['rooms', 'Räume', 'grid'], ['planer', 'Planer', 'cal'],
+  ['protokoll', 'Verlauf', 'list'], ['prognose', 'Prognose', 'chart'], ['einstellungen', 'Einstellungen', 'gear'],
+];
+const navItems = () => NAV.filter(([k]) => k !== 'prognose' || S.prognoseAktiv);
+function sideHtml() {
+  const items = navItems().map(([k, t, ic]) => `<button class="${S.page === k ? 'on' : ''}" ${k === 'rooms' ? 'data-open="rooms-robot"' : `data-nav="${k}"`}>${I[ic]}<span>${t}</span></button>`).join('');
+  return `<div class="brand"><span class="logo"></span><div><div class="t">Heidi</div><div class="s">Dein Saugroboter</div></div></div>
+    <div class="navlist">${items}</div>
+    <div class="foot">${robotSvg()}<div class="m">Dreame X60 Ultra</div><div class="v">v2.0.0-alpha · Mockup</div></div>`;
+}
+function tabbarHtml() {
+  return navItems().filter(([k]) => k !== 'rooms').slice(0, 6).map(([k, t, ic]) => `<button class="${S.page === k ? 'on' : ''}" data-nav="${k}">${I[ic]}${t}</button>`).join('');
+}
+
+// ───────── Bausteine ─────────
+const STATUS = { docked: ['Bereit', 'good'], cleaning: ['Reinigt', 'good'], paused: ['Pausiert', 'warn'] };
+const statusDot = (extra = '') => { const [t, c] = STATUS[S.vac]; return `<span class="st ${c} ${extra}"><i></i>${t}</span>`; };
+const box = (cls, title, icon, right, body) => `<section class="b ${cls}"><div class="hd"><h2>${icon ? I[icon] : ''}${title}</h2>${right ? `<span class="r ${right.nav || right.open ? 'link' : ''}">${right.html}</span>` : ''}</div>${body}</section>`;
+const link = (txt, attr) => ({ html: `<button class="r link" ${attr}>${txt}${I.chev}</button>`, nav: 1 });
+function topbar(title, sub, back) {
+  const meta = `<div class="meta"><div class="mi">${I.clock}<div><b>09:24</b><small>Montag, 14. Sep. 2026</small></div></div><div class="mi">${I.homeS}<div><b>Zu Hause<span class="dotg"></span></b><small>Herbert anwesend</small></div></div><div class="mi">${I.moon}<div><b>20:00–07:00</b><small>Nicht stören</small></div></div></div>`;
+  return `<div class="topbar">${back ? `<button class="back" data-nav="start">${I.back}Übersicht</button>` : ''}<div><h1>${title}</h1>${sub ? `<div class="sub">${sub}</div>` : ''}</div>${meta}</div>`;
+}
+const ctlButtons = () => {
+  const B = (icon, label, primary, msg) => `<button class="btn ${primary ? 'primary' : ''}" data-toast="${msg}">${I[icon]}${label}</button>`;
+  const more = `<button class="btn icon" data-toast="Orten: Heidi meldet sich" aria-label="Orten">${I.locate}</button>`;
+  if (S.vac === 'cleaning') return B('pause', 'Pause', 1, 'vacuum.pause') + B('stop', 'Stopp', 0, 'vacuum.stop') + `<button class="btn icon" data-toast="vacuum.return_to_base" aria-label="Zur Station">${I.home}</button>`;
+  if (S.vac === 'paused') return B('play', 'Weiter', 1, 'vacuum.start (weiter)') + B('stop', 'Stopp', 0, 'vacuum.stop') + `<button class="btn icon" data-toast="vacuum.return_to_base" aria-label="Zur Station">${I.home}</button>`;
+  return B('play', 'Starten', 1, 'vacuum.start') + B('home', 'Zur Station', 0, 'vacuum.return_to_base') + more;
+};
+function mapSvg(sel, cur, showZones, done = new Set()) {
+  const rooms = ROOMS.map((r) => `<rect class="room ${sel.has(r.id) ? 'sel' : ''} ${cur === r.id ? 'cur' : ''} ${done.has(r.id) ? 'done' : ''}" data-room="${r.id}" x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" rx="4"/><text x="${r.x + 7}" y="${r.y + 15}">${r.short}</text>`).join('');
+  const zones = showZones ? (S.chairs ? '<rect class="zone" x="40" y="30" width="70" height="55" rx="2"/><text x="44" y="42" style="font-size:7px;fill:var(--bad)">Esstisch</text>' : '') + '<rect class="nomop" x="70" y="185" width="40" height="30" rx="2"/>' : '';
+  const path = cur ? `<path class="path" d="M245 22 L215 60 L190 120 L${R(cur).x + R(cur).w / 2} ${R(cur).y + R(cur).h / 2}"/>` : '';
+  const bot = cur ? `<circle class="bot" cx="${R(cur).x + R(cur).w / 2}" cy="${R(cur).y + R(cur).h / 2}" r="6"/>` : '<circle class="bot" cx="245" cy="22" r="6"/>';
+  return `<svg viewBox="0 0 270 235">${rooms}${zones}${path}<rect class="dock" x="236" y="14" width="18" height="6" rx="2"/>${bot}</svg>`;
+}
+const mapTools = (goto) => `<div class="maptools"><button data-toast="Karte: Zoom + (Xiaomi-Karte)" aria-label="Vergrößern">${I.plus}</button><button data-toast="Karte: Zoom −" aria-label="Verkleinern">${I.minus}</button><button data-toast="Karte zentriert" aria-label="Zentrieren">${I.target}</button><button data-toast="Ebenen: Sperrzonen ein/aus" aria-label="Ebenen">${I.layers}</button></div>`;
+const estLine = (p) => { const e = estimate(p), fits = e.total <= restMin(); return `<button class="estline ${fits ? '' : 'bad'}" data-open="est" data-n="${p.n}">${I.timer}${fmtMin(e.total)} ${fits ? I.check : I.x}${e.charges ? I.plug : ''}</button>`; };
+const swRow = (t, s, key, on) => `<div class="row"><div><div class="t">${t}</div>${s ? `<div class="s">${s}</div>` : ''}</div>${sw(key, on)}</div>`;
+const CONS = [['Hauptbürste', 71], ['Seitenbürste', 44], ['Filter', 18], ['Sensoren', 92], ['Räder', 8]];
+const consHtml = () => CONS.map(([n, p]) => `<button class="meter" data-confirm="${n}: Zähler zurücksetzen? (button.heidi_reset_…)"><span class="n">${n}</span><span class="bar ${p <= 10 ? 'bad' : p <= 25 ? 'warn' : ''}" style="--p:${p}"><i></i></span><span class="p">${p} %</span></button>`).join('');
+const STATION = [['Staubbeutel', 'OK', 'good', 'bag'], ['Frischwasser', 'Leer', 'warn', 'drop'], ['Schmutzwasser', 'OK', 'good', 'dropOff'], ['Reinigungsmittel', 'OK', 'good', 'bottle']];
+const stationRows = () => STATION.map(([n, v, c, ic]) => `<div class="meter" style="grid-template-columns:20px 1fr auto"><span style="color:var(--muted)">${I[ic]}</span><span class="n">${n}</span><span class="st ${c}"><i></i>${v}</span></div>`).join('');
+const stationBtns = () => `<div class="chips"><button class="btn sm" data-toast="button.heidi_start_auto_empty">Absaugen</button><button class="btn sm" data-toast="button.heidi_self_clean">Mopp-Wäsche</button><button class="btn sm" data-toast="button.heidi_manual_drying">Trocknen</button><button class="btn sm" data-confirm="Reinigung der Station starten? (button.heidi_base_station_cleaning)">Station reinigen</button></div>`;
+
+// ───────── Seite: Übersicht ─────────
+function pageStart() {
+  const st = STATES[S.vac], running = S.vac !== 'docked';
+  const sub = running ? `${S.vac === 'paused' ? 'Pausiert' : 'Heidi reinigt'} · ${st.phase} · seit 09:31` : 'Heidi ist bereit · heute: Tägliches Saugen 09:30';
+  const chips = `${chip('user', 'Herbert', 'on')}${chip('user', 'Nicole')}${chip('user', 'Nina', 'dim')}${chip('info', 'Mopps reinigen', 'warn')}`;
+  const cur = S.robotRooms[6];
+  const params = `<div class="params"><button class="param" data-open="rooms-robot">${I.broom}<b>${running ? cur[0] : 'Saugen'}</b><span>Reinigungsmodus</span></button><button class="param" data-open="rooms-robot">${I.fan}<b>${running ? cur[1] : 'Turbo'}</b><span>Saugleistung</span></button><button class="param" data-open="rooms-robot">${I.water}<b>${running && cur[2] ? cur[2] : '–'}</b><span>Wassermenge</span></button></div>`;
+  const robot = `<section class="b span3 robotpanel"><div class="robot"><div><div class="name">Heidi</div><div style="margin-top:6px">${statusDot()}</div>${st.sub && running ? `<div class="hint" style="margin-top:2px">${st.sub}</div>` : ''}</div>
+      <div style="text-align:right"><div class="lbl">Station</div><div style="font-size:13px">${running ? 'unterwegs' : 'angedockt · lädt'}</div></div>
+      ${robotSvg().replace('class="robotpic"', 'class="pic"')}
+      <div class="batt"><div class="kv"><span class="v">${S.batt}<span class="u"> %</span></span></div><div class="lbl">Akku</div><div class="battbar ${S.batt <= 15 ? 'bad' : S.batt <= 30 ? 'warn' : ''}" style="--p:${S.batt}"><i></i></div></div></div>
+    <div class="chips">${chips}</div>${params}<div class="ctl">${ctlButtons()}</div>
+    ${running ? `<button class="note" data-open="rooms-robot" style="text-align:left">${I[R(6).icon]}<div><b>Jetzt: Küche</b><small>danach Wohnzimmer → Büro · ${chip('broom', cur[0], 'k')} ${chip('fan', cur[1], 'k')} ${chip('repeat', cur[4] + '×', 'k')}</small></div></button>` : ''}</section>`;
+  const done = running ? new Set([7, 5]) : new Set();
+  const map = `<section class="b span6 mapcard"><div class="tabs"><button class="on">${I.map}Live-Karte</button><button data-nav="reinigen">${I.grid}Räume</button><button data-open="zones">${I.ban}Sperrzonen</button><button data-nav="protokoll">${I.clock}Reinigungsverlauf</button></div>
+    <div class="map grow" data-nav="reinigen" title="Zur Karte" style="cursor:pointer">${mapSvg(new Set(), st.cur, false, done)}${mapTools()}<span class="scale">5 m</span><div class="mtools"><button class="btn sm" data-nav="reinigen">${I.map}Karte öffnen</button></div></div>
+    <div class="mapcap">${running ? `<b>Live-Karte</b> · Küche · 34 m² · noch Wohnzimmer, Büro` : `<b>Karte</b> · Heidi in der Station · letzter Lauf gestern 09:31`} <span style="margin-left:auto">antippen für Räume, Zone, Punkt, Sperrzonen</span></div></section>`;
+  const auftrag = running ? box('', 'Aktueller Auftrag', null, { html: statusDot('pill') }, `<div><div class="lbl">Wohnzimmer → <b style="color:var(--text)">Küche</b> → Büro</div><div class="kv" style="margin-top:6px"><span class="v">41<span class="u"> min</span></span><span class="u">· 34 m² · seit 09:31</span></div></div>
+      <div><div class="meter" style="grid-template-columns:1fr auto;margin-bottom:6px"><span class="n">Räume</span><span class="p">2 / 7</span></div><div class="bar" style="--p:29"><i></i></div></div>
+      <div class="row" style="border-top:1px solid var(--line)"><div><div class="s">Nächster Raum</div><div class="t">Büro</div></div><span class="tag">Saugen + Wischen</span></div>`)
+    : `<section class="b"><div class="hd"><h2>${I.auto}Automatik</h2>${sw('automatik', S.automatik)}</div><div class="row"><div><div class="t">${S.automatik ? 'Wartet auf „Tägliches Saugen“' : 'Aus'}</div><div class="s">${S.automatik ? 'heute 09:30 · Rückkehr ca. 17:00 · stört: Nicole' : 'Heidi fährt nur manuell'}</div></div></div><button class="btn sm" data-nav="planer" style="justify-self:start">${I.cal}Regeln &amp; Planer</button></section>`;
+  const heute = box('', 'Heute', null, S.prognoseAktiv ? link('Prognose', 'data-nav="prognose"') : null, `<div class="list">
+      <div class="row"><div><div class="s">Heutiger Eintrag</div><div class="t">Tägliches Saugen · 09:30</div></div><span class="st ${running ? 'good' : ''} pill"><i></i>${running ? 'läuft' : 'offen'}</span></div>
+      ${S.prognoseAktiv ? `<div class="row"><div><div class="s">Freies Fenster</div><div class="t">09:00 – 16:30</div></div><span class="tag">78 % sicher</span></div><div class="row"><div><div class="s">Erste Rückkehr</div><div class="t">16:40 · Nicole</div></div></div>` : ''}
+      <div class="row"><div><div class="s">Homeoffice</div><div class="t">Nein · Nicole abwesend</div></div></div></div>`);
+  const right = `<div class="span3 stack rightstack">${auftrag}${heute}</div>`;
+  const icons = ['broom', 'water', 'chef', 'shower'];
+  const planer = box('span3', 'Planer', 'cal', link('Alle 4', 'data-nav="planer"'), `<div class="plan">${S.plans.slice(0, 3).map((p, i) => `<div class="pr compact ${p.n === 1 ? 'today' : ''} ${p.aktiv ? '' : 'off'}"><div><div class="n">${p.tage.some(Boolean) ? esc(dayLabel(p.tage)) + ', ' + p.zeit : 'Manuell'}</div><div class="s">${esc(p.name)}</div></div>${sw('plan:' + p.n, p.aktiv)}</div>`).join('')}</div><button class="btn sm" data-open="editor" data-n="1">${I.pencil}Eintrag bearbeiten</button>`);
+  const cons = box('span3', 'Verschleiß', 'wrench', { html: 'Antippen = Reset' }, `<div class="list">${consHtml()}</div><div class="note">${I.info.replace('currentColor', 'var(--warn)')}<div><b>Räder 8 %, Filter 18 %</b><small>Bald reinigen bzw. wechseln – Reset nach dem Tausch.</small></div></div>`);
+  const station = box('span3', 'Station', null, { html: `<span class="st ${STATION.some((s) => s[2] === 'warn') ? 'warn' : 'good'}"><i></i>${STATION.some((s) => s[2] === 'warn') ? 'Frischwasser leer' : 'Alles in Ordnung'}</span>` }, `<div class="list">${stationRows()}</div>${stationBtns()}`);
+  const week = [[0, 82], [1, 0], [2, 84], [3, 83], [4, 80], [5, 82], [6, 26]];
+  const stats = box('span3', 'Statistik', 'stats', { html: '7 Tage' }, `<div class="spark">${week.map(([d, v]) => `<div><i class="${d === 6 ? 'today' : ''}" style="--p:${v / 84 * 100}"></i><span>${DAYS[d]}</span></div>`).join('')}</div>
+    <div class="stats3"><div class="stat"><div class="v">27</div><div class="l">Läufe</div></div><div class="stat"><div class="v">2.140<small>m²</small></div><div class="l">Fläche</div></div><div class="stat"><div class="v">41<small>h</small></div><div class="l">Zeit</div></div></div>`);
+  const sel = S.selRooms;
+  const qs = `<button class="${sel.size === 7 ? 'sel' : ''}" data-act="allrooms">${I.homeS}Alles</button>` + ROOMS.map((r) => `<button class="${sel.has(r.id) ? 'sel' : ''}" data-room="${r.id}">${I[r.icon]}${r.short}</button>`).join('');
+  const quick = box('span7', 'Schnellstart – Räume auswählen', 'grid', { html: sel.size ? `${sel.size} gewählt` : 'Mehrfachauswahl' }, `<div class="qs">${qs}</div>${sel.size ? `<div class="runbar"><button class="btn primary" data-confirm="Jetzt reinigen: ${esc(ROOMS.filter((r) => sel.has(r.id)).map((r) => r.short).join(', '))}?" data-then="cleanrooms">${I.play}${sel.size === 7 ? 'Ganze Wohnung' : sel.size + (sel.size === 1 ? ' Raum' : ' Räume')} reinigen</button><button class="btn icon" data-act="clearrooms" aria-label="Auswahl aufheben">${I.close}</button></div>` : `<div class="hint">Räume antippen, dann „reinigen“ → dreame_vacuum.vacuum_clean_segment mit den Roboter-Werten je Raum.</div>`}`);
+  const last = box('span5', 'Letzte Läufe', 'clock', link('Alle anzeigen', 'data-nav="protokoll"'), `<div class="lastruns">${S.hist.slice(0, 3).map((h) => `<div class="lrn" data-nav="protokoll"><span>${h.ts}</span><span class="m">${h.mop ? 'Saugen + Wischen' : 'Saugen'} · Alle Räume</span><span class="m">${fmtMin(h.min)}</span><span>${h.area} m²</span>${h.ok ? I.check : I.x.replace('currentColor', 'var(--warn)')}</div>`).join('')}</div>`);
+  return topbar(running ? 'Heidi ist unterwegs' : 'Guten Morgen, Herbert!', sub) + `<div class="bento">${robot}${map}${right}${planer}${cons}${station}${stats}${quick}${last}</div>`;
+}
+
+// ───────── Seite: Karte (Reinigen) ─────────
+function pageReinigen() {
+  const st = STATES[S.vac], sel = S.selRooms, mode = S.goto ? 'goto' : S.mapMode;
+  const chips = ROOMS.map((r) => `<button class="${sel.has(r.id) ? 'sel' : ''}" data-room="${r.id}">${I[r.icon]}${r.short}</button>`).join('');
+  const HINT = { zone: 'Rechteck auf der Karte aufziehen (bis zu 5), dann ▶ → dreame_vacuum.vacuum_clean_zone', punkt: 'Punkt auf der Karte antippen, dann ▶ → dreame_vacuum.vacuum_clean_spot', goto: 'Punkt auf der Karte antippen → dreame_vacuum.vacuum_goto (Heidi fährt hin und wartet)' };
+  const below = mode === 'raeume'
+    ? `<div class="rooms">${chips}</div>${sel.size ? `<div class="runbar fade"><button class="btn primary" data-confirm="Jetzt reinigen: ${esc(ROOMS.filter((r) => sel.has(r.id)).map((r) => r.short).join(', '))}?" data-then="cleanrooms">${I.play}${sel.size} ${sel.size === 1 ? 'Raum' : 'Räume'} reinigen</button><button class="btn icon" data-act="clearrooms" aria-label="Auswahl aufheben">${I.close}</button></div>` : `<div class="hint">Räume in der Karte oder über die Kacheln antippen, dann „reinigen“.</div>`}`
+    : `<div class="hint">${HINT[mode]}</div>`;
+  const maps = `<span class="seg2" style="margin-left:auto"><button class="${S.mapSel === 1 ? 'on' : ''}" data-map="1">Erdgeschoss</button><button class="${S.mapSel === 2 ? 'on' : ''}" data-map="2">Obergeschoss</button></span>`;
+  const card = `<section class="b span8"><div class="hd"><h2>${I.map}Karte</h2>${maps}</div>
+    <div class="map tall">${mapSvg(sel, st.cur, true)}${mapTools()}<span class="scale">5 m</span><div class="mtools"><button class="btn sm ${S.goto ? 'on' : ''}" data-act="goto">${I.locate}Hinfahren</button><button class="btn sm" data-open="zones">${I.ban}Sperrzonen</button></div></div>
+    <div class="mapmodes"><div class="seg2"><button data-mapmode="raeume" class="${mode === 'raeume' ? 'on' : ''}">Räume</button><button data-mapmode="zone" class="${mode === 'zone' ? 'on' : ''}">Zone</button><button data-mapmode="punkt" class="${mode === 'punkt' ? 'on' : ''}">Punkt</button></div><span class="hint" style="flex:1">${mode === 'raeume' ? 'Auswahl per Kachel oder Tipp in die Raumfläche' : ''}</span><button class="btn primary sm" data-confirm="Ganze Wohnung reinigen? (vacuum.start)" data-then="all">${I.play}Alles</button></div>
+    ${below}</section>`;
+  const scenes = box('', 'Dreame-App-Szenen', 'flash', null, `<div class="plan">${[['Eingang reinigen', 'Flur · Saugen + Wischen · 2×', 'foot'], ['Bad Saugen/Wischen', 'Bad · 1×', 'shower'], ['Wischen nach dem Saugen', 'Ganze Wohnung · nur Wischen', 'water']].map(([n, s, ic]) => `<div class="pr"><div class="ic">${I[ic]}</div><div><div class="n">${n}</div><div class="s">${s}</div></div><span class="tag">App</span><div class="acts"><button class="ib go" data-confirm="„${n}“ starten? (script.heidi_app_szene)">${I.play}</button></div></div>`).join('')}</div>`);
+  const chairs = box('', 'Sperrzone Esstisch', null, null, `<div class="crow"><div class="ic ${S.chairs ? 'on' : ''}">${I.chair}</div><div><div class="t">Stühle am Boden</div><div class="s">Setzt eine Sperrzone um den Esstisch (Automation heidi_sperrzone_esstisch)</div></div>${sw('chairs', S.chairs)}</div>`);
+  const rooms = box('', 'Räume (Roboter-Werte)', 'grid', null, `<div class="hint">Modus, Saugstufe, Wasser, Route und Wiederholungen je Raum, wie in der Dreame-App. Änderungen gelten sofort.</div><button class="btn" data-open="rooms-robot" style="align-self:flex-start">${I.grid}Räume einstellen …</button>`);
+  return topbar('Karte', 'Räume, Zone oder Punkt reinigen · Hinfahren · Sperrzonen', true) + `<div class="bento">${card}<div class="span4 stack">${scenes}${chairs}${rooms}</div></div>`;
+}
+
+// ───────── Seite: Planer ─────────
+function pagePlaner() {
+  const icons = ['broom', 'water', 'chef', 'shower'];
+  const rows = S.plans.map((p, i) => { const manual = !p.tage.some(Boolean), today = p.n === 1; return `<div class="pr ${today ? 'today' : ''} ${p.aktiv ? '' : 'off'}"><div class="ic">${I[icons[i]]}</div>
+    <div><div class="n">${esc(p.name)}</div><div class="s"><span>${esc(roomLabel(p.raeume))} · ${esc(p.modus)}</span>${p.personen.length ? `<span title="wartet bis weg">${I.userOff}</span>` : ''}${Object.keys(p.raum).length ? `<span title="Räume einzeln">${I.grid}</span>` : ''}${estLine(p)}</div></div>
+    <div class="when"><b>${manual ? 'Manuell' : p.zeit}</b><small>${manual ? 'nur per ▶' : esc(dayLabel(p.tage))}${today ? ' · heute' : ''}</small></div><div class="acts">${sw('plan:' + p.n, p.aktiv)}<button class="ib go" data-run="${p.n}" aria-label="Jetzt starten">${I.play}</button><button class="ib" data-open="editor" data-n="${p.n}" aria-label="Bearbeiten">${I.pencil}</button></div></div>`; }).join('');
+  const timeRow = (t, v, k) => `<div class="row"><div class="t">${t}</div><input type="time" value="${v}" data-time="${k}"></div>`;
+  const list = box('span7', 'Einträge', 'cal', { html: 'heute: Tägliches Saugen 09:30' }, `<div class="plan">${rows}</div><div class="hint">▶ startet sofort (script.heidi_plan_starten) · ✎ bearbeitet · Dauer-Zeile öffnet „Dauer &amp; Akku“ · Schalter = aktiv/inaktiv</div>`);
+  const auto = `<section class="b span5"><div class="hd"><h2>${I.auto}Automatik</h2>${sw('automatik', S.automatik)}</div>
+      <div class="crow"><div class="ic ${S.automatik ? 'on' : ''}">${I.auto}</div><div><div class="t">${S.automatik ? 'Wartet auf „Tägliches Saugen“ um 09:30' : 'Aus'}</div><div class="s">${S.automatik ? STATES[S.vac].auto : 'Einträge starten nur per ▶'}</div></div><span></span></div>
+      <div class="list">
+        <div class="row"><div><div class="t">Homeoffice-Zeit Mo–Fr</div><div class="s">Störende Person zu Hause = Homeoffice</div></div><div style="display:flex;gap:6px"><input type="time" value="${S.az[0]}"><input type="time" value="${S.az[1]}"></div></div>
+        ${timeRow('Übliche Rückkehr', S.rueckkehr, 'rueckkehr')}
+        <div class="row"><div class="t">Schnellprogramm unter</div><div class="v"><input type="range" min="30" max="240" step="15" value="${S.schnellMin}" data-range="schnellMin"><b style="min-width:52px;text-align:right;color:var(--text)">${S.schnellMin} min</b></div></div>
+        <div class="row"><div class="t">Mindest-Akku</div><div class="v"><input type="range" min="10" max="80" step="5" value="${S.minAkku}" data-range="minAkku"><b style="min-width:52px;text-align:right;color:var(--text)">${S.minAkku} %</b></div></div>
+        <div class="row"><div class="t">Bei Heimkehr</div><select data-select="heimkehr">${['Zur Station', 'Weiterreinigen', 'Pausieren'].map((o) => `<option ${o === S.heimkehr ? 'selected' : ''}>${o}</option>`).join('')}</select></div>
+        <div class="row"><div class="t">Zuletzt automatisch</div><div class="v">Saugen + Wischen · 14.09.</div></div></div></section>`;
+  return topbar('Planer', 'Vier Einträge · Automatik entscheidet voll, schnell oder warten', true) + `<div class="bento">${list}${auto}</div>`;
+}
+
+// ───────── Seite: Verlauf (Protokoll) ─────────
+function timelineHtml(h, live) {
+  if (!h.tl) return `<div class="tl"><div class="tlr"><span class="tt"></span><span class="tx hint">Kein Verlauf gespeichert – die Aufzeichnung läuft erst seit Karte v1.4.</span><span class="td"></span></div></div>`;
+  return `<div class="tl">${h.tl.map((r, i) => `<div class="tlr ${live && i === h.tl.length - 1 ? 'now' : ''}"><span class="tt">${r[0]}</span><span class="tx">${r[1]}</span><span class="td">${r[2]}</span></div>`).join('')}<div class="tlr"><span class="tt">${live ? '' : '11:07'}</span><span class="tx hint">${live ? 'läuft …' : 'Ende'}</span><span class="td" style="color:var(--text);font-weight:600">${live ? '41 min' : fmtMin(h.min)}</span></div></div>`;
+}
+function pageProtokoll() {
+  const running = S.vac !== 'docked';
+  const cur = running ? `<div class="hrow open"><span class="hd">Läuft gerade</span><span class="m">${STATES[S.vac].phase}</span><span class="m">34 m²</span><span class="m">41 min</span><span class="st good"><i></i></span></div>${timelineHtml({ tl: [['09:31', 'Wäscht Mopps vor dem Start', '5 min'], ['09:36', 'Saugt und wischt Wohnzimmer', '17 min'], ['09:53', 'Fährt zum Mopp-Waschen', '2 min'], ['09:55', 'Wäscht Mopps zwischendurch', '5 min'], ['10:00', 'Saugt und wischt Wohnzimmer', '9 min'], ['10:09', 'Saugt und wischt Küche', '3 min']] }, true)}` : '';
+  const rows = S.hist.map((h, i) => { const open = S.tlOpen.has(i); return `<div class="hrow ${open ? 'open' : ''}" data-tl="${i}"><span class="hd">${h.ts}</span><span class="m">${h.mop ? 'Saugen + Wischen' : 'Saugen'} · Alle Räume</span><span class="m">${h.area} m²</span><span class="m">${fmtMin(h.min)}</span><span class="${h.ok ? 'ok' : 'nok'}">${h.ok ? I.check : I.x}</span></div>${open ? timelineHtml(h, false) : ''}`; }).join('');
+  const lr = Object.entries(S.lern.raten).map(([k, v]) => `<div class="lr"><span>${k.replace('/', ' · ')}</span><span>${v[0].toFixed(2)} min/m²</span><span>${v[1].toFixed(2)} %/min</span><span>${v[2]} Läufe</span></div>`).join('');
+  const last = box('', 'Letzter Lauf', null, { html: 'gestern 09:31 · Saugen + Wischen' }, `<div class="stats3"><div class="stat"><div class="v">84<small>m²</small></div><div class="l">Fläche</div></div><div class="stat"><div class="v">96<small>min</small></div><div class="l">Dauer</div></div><div class="stat"><div class="v" style="color:var(--good)">${I.check}</div><div class="l">Fertig</div></div></div>`);
+  const prot = box('', 'Protokoll', 'list', { html: '27 Läufe · 2.140 m² · 41 h' }, `<div class="hist">${cur}${rows}</div><button class="btn sm" data-toast="Weitere 30 Einträge (Mockup)" style="align-self:center">Mehr anzeigen</button><div class="hint">Eintrag antippen → Zeitleiste aus der HA-Historie (sensor.heidi_phase + vacuum.heidi).</div>`);
+  const lern = box('span4', 'Lernwerte', null, { html: `${S.lern.laeufe} Läufe` }, `<div class="list">${lr}<div class="lr"><span>Laden</span><span>1,1 %/min bis 80 %</span><span>0,5 %/min darüber</span><span>Rückkehr 15 % · weiter ab 80 %</span></div><div class="lr"><span>Mopp-Wäsche</span><span>4 min vor Start</span><span>5 min zwischendurch</span><span>alle 25 m²</span></div></div><div class="hint">Aus dem Laufprotokoll (runlog.csv). Grundlage für „Dauer &amp; Akku“ und die Automatik-Entscheidung voll/schnell/warten.</div>`);
+  return topbar('Verlauf', 'Reinigungsprotokoll der App · Zeitleiste je Lauf · Lernwerte', true) + `<div class="bento"><div class="span8 stack">${last}${prot}</div>${lern}</div>`;
+}
+
+// ───────── Seite: Prognose ─────────
+function heatSvg(seed) {
+  let s = seed; const rnd = () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
+  const W = 48, H = 7, cw = 10, ch = 10; let out = '';
+  for (let d = 0; d < H; d++) for (let t = 0; t < W; t++) { const hour = t / 2, home = (hour < 7.5 || hour > 17 + rnd() * 2) ? 0.85 + rnd() * .15 : (d >= 5 ? 0.6 + rnd() * .3 : rnd() * .25); out += `<rect x="${t * cw}" y="${d * ch}" width="${cw - 1}" height="${ch - 1}" rx="1" fill="rgba(88,183,246,${(home * .9).toFixed(2)})"/>`; }
+  return `<svg viewBox="0 0 ${W * cw} ${H * ch}">${out}</svg>`;
+}
+function pagePrognose() {
+  const p = S.prognose, tage = 23;
+  const row = (k, v, c) => `<div class="row"><div><div class="s">${k}</div><div class="t">${v}</div></div>${c ? `<span class="tag acc">${c}</span>` : ''}</div>`;
+  const heute = box('', 'Heute', 'sun', { html: 'Stand 08:30' }, `<div class="list">${row('Freies Fenster (niemand zu Hause)', '09:00 – 16:30', '78 % sicher')}${row('Erste Rückkehr erwartet', '16:40 · Nicole')}${row('Homeoffice-Wahrscheinlichkeit', '12 %')}${row('Empfehlung der Automatik', 'Volles Programm ab 09:30')}</div>`);
+  const lern = box('', 'Lernstatus', null, { html: tage >= p.mindesttage ? `<span class="st good"><i></i>aktiv</span>` : `ab ${p.mindesttage} Tagen` }, `<div class="meter" style="grid-template-columns:1fr auto"><span class="n">${tage} von ${p.wochen * 7} Tagen protokolliert · ${p.aufloesung}-min-Raster</span><span class="p">${Math.round(tage / (p.wochen * 7) * 100)} %</span></div><div class="datab"><i style="width:${Math.min(100, tage / (p.wochen * 7) * 100)}%"></i></div>
+    <div class="list">${swRow('Abweichung heute', 'Urlaub, Feiertag – heute nicht lernen', 'abweichung', S.abweichung)}${swRow('Herbert einbeziehen', 'GPS + WLAN', 'progH', S.prog.herbert)}${swRow('Nicole einbeziehen', 'WLAN', 'progN', S.prog.nicole)}${swRow('Nina einbeziehen', 'WLAN', 'progNi', S.prog.nina)}<div class="row"><div><div class="t">Protokoll zurücksetzen</div><div class="s">shell_command.heidi_prognose_reset</div></div><button class="btn sm danger" data-confirm="Alle gelernten Anwesenheitsdaten löschen?">Löschen …</button></div></div>`);
+  const heat = box('span6', 'Wann ist wer üblicherweise zu Hause?', 'chart', { html: 'Mo–So · 0–24 h' }, `<div class="heat">${['Herbert', 'Nicole', 'Nina'].map((n, i) => `<div class="n">${n}</div>${heatSvg(11 + i * 7)}`).join('')}</div><div class="hint">Zeilen = Wochentage, Spalten = halbe Stunden, hell = meist zu Hause. Bilder /local/prognose_&lt;name&gt;.png.</div>`);
+  return topbar('Prognose', 'Lernende Anwesenheit · Grundlage für Start, Schnellprogramm und Rückkehr', true) + `<div class="bento"><div class="span6 stack">${heute}${lern}</div>${heat}</div>`;
+}
+
+// ───────── Seite: Einstellungen ─────────
+function pageEinstellungen() {
+  const p = S.prognose;
+  const rng = (t, s, key, min, max, step, unit) => `<div class="row"><div><div class="t">${t}</div><div class="s">${s}</div></div><div class="v"><input type="range" min="${min}" max="${max}" step="${step}" value="${p[key]}" data-prange="${key}"><b style="min-width:66px;text-align:right;color:var(--text)">${p[key]}${unit}</b></div></div>`;
+  const sel = (t, opts, cur) => `<div class="row"><div class="t">${t}</div><select>${opts.map((o) => `<option ${o === cur ? 'selected' : ''}>${o}</option>`).join('')}</select></div>`;
+  const look = box('', 'Erscheinungsbild', null, null, `<div class="list"><div class="row"><div><div class="t">Farbschema</div><div class="s">Dunkel ist die Referenz; Hell folgt nach der Abnahme (Abschnitt 28)</div></div>${seg('theme', ['Dunkel', 'Hell'], S.dark ? 'Dunkel' : 'Hell')}</div><div class="row"><div class="t">Kartendarstellung</div>${seg('kind', ['Dreame-App', 'Xiaomi-Karte', 'Nur Bild'], S.kind)}</div><div class="row"><div><div class="t">Ausrichtung</div><div class="s">Drehung der Karte</div></div>${seg('rotation', ['0°', '90°', '180°', '270°'], S.rotation + '°')}</div><div class="row"><div class="t">Raumnamen</div>${seg('raumnamen', ['Original', 'Deutsch'], S.raumnamen)}</div></div>`);
+  const fn = box('', 'Funktionen', null, null, `<div class="list">${swRow('Automatik', '', 'automatik', S.automatik)}${swRow('Planer anzeigen', '', 'planerBereich', S.planerBereich)}${swRow('Prognose', 'Lernende Anwesenheit, eigene Seite', 'prognoseAktiv', S.prognoseAktiv)}${swRow('Nina zählt für Anwesenheit', '', 'ninaZaehlt', S.ninaZaehlt)}</div>`);
+  const prog = box('', 'Prognose', null, null, `<div class="list">${rng('Protokoll-Intervall', 'Wie oft die Anwesenheit gespeichert wird', 'intervall', 5, 60, 5, ' min')}${rng('Auflösung', 'Rasterbreite der Heatmap', 'aufloesung', 15, 60, 15, ' min')}${rng('Lernzeitraum', 'Ältere Daten werden verworfen', 'wochen', 2, 12, 1, ' Wochen')}${rng('Gewichtung', 'Halbwertszeit in Tagen', 'halbwert', 7, 60, 1, ' Tage')}${rng('Aktiv ab', 'Erst dann nutzt die Automatik die Prognose', 'mindesttage', 3, 28, 1, ' Tagen')}</div>`);
+  const robot = box('', 'Roboter', 'robot', null, `<div class="list">${sel('Teppich', ['adaptive', 'avoid', 'ignore'], 'adaptive')}${sel('Wassertemperatur', ['cold', 'warm', 'hot'], 'warm')}${sel('Trocknung', ['2h', '3h', '4h'], '3h')}${sel('Absaugen', ['off', 'standard', 'high'], 'standard')}${sel('Mopp-Wäsche', ['by_room', 'by_area'], 'by_area')}
+      <div class="row"><div class="t">Mopp-Wäsche nach</div><div class="v"><input type="range" min="5" max="50" step="5" value="25"><b style="min-width:52px;text-align:right;color:var(--text)">25 m²</b></div></div>${sel('CleanGenius', ['off', 'routine', 'deep'], 'off')}
+      <div class="row"><div class="t">Lautstärke</div><div class="v"><input type="range" min="0" max="100" step="5" value="60"><b style="min-width:52px;text-align:right;color:var(--text)">60 %</b></div></div>
+      <div class="row"><div class="t">Nicht stören</div><div style="display:flex;gap:6px"><input type="time" value="20:00"><input type="time" value="07:00"></div></div>
+      <div class="row link" data-open="rooms-robot"><div><div class="t">Raum-Einstellungen</div><div class="s">Modus, Saugstufe, Wasser, Route, Wdh. je Raum</div></div><span class="v">Räume … ${I.chev}</span></div></div>`);
+  const diag = box('', 'Diagnose', null, { html: 'Entitäts-Vertrag' }, `<div class="list"><div class="row"><div class="t">Roboter (Dreame)</div><span class="st good"><i></i>82 / 82</span></div><div class="row"><div class="t">Paket (Helfer, Sensoren)</div><span class="st good"><i></i>117 / 117</span></div><div class="row"><div><div class="t">Vorübergehend nicht verfügbar</div><div class="s">select.heidi_room_3_cleaning_route (Roboter im Lauf)</div></div><span class="st warn"><i></i>1</span></div><div class="row"><div class="t">Fehlend (Vertrag gebrochen)</div><span class="st good"><i></i>0</span></div></div><div class="hint">Heidi Panel v2.0.0-alpha.1 · Ressource /local/heidi-panel-v2.js · Home Assistant 2026.7</div>`);
+  return topbar('Einstellungen', 'Darstellung, Funktionen, Prognose, Roboter, Diagnose', true) + `<div class="bento"><div class="span6 stack">${look}${fn}${prog}</div><div class="span6 stack">${robot}${diag}</div></div>`;
+}
+
+// ───────── Rendern ─────────
+const PAGES = { start: pageStart, reinigen: pageReinigen, planer: pagePlaner, protokoll: pageProtokoll, prognose: pagePrognose, einstellungen: pageEinstellungen };
+function render() {
+  const f = $('#frame'); f.className = 'frame ' + (S.device === 'desktop' ? '' : S.device);
+  const p = PAGES[S.page] ? S.page : 'start';
+  $('#side').innerHTML = sideHtml(); $('#tabbar').innerHTML = tabbarHtml();
+  $('#inner').innerHTML = `<div class="fade" style="display:grid;gap:16px">${PAGES[p]()}</div>`;
+  document.querySelectorAll('#segPage button').forEach((b) => b.classList.toggle('on', b.dataset.v === p));
+  document.querySelectorAll('#segState button').forEach((b) => b.classList.toggle('on', b.dataset.v === S.vac));
+  document.querySelectorAll('#segDevice button').forEach((b) => b.classList.toggle('on', b.dataset.v === S.device));
+  renderOverlay();
+}
+function route() { const m = location.hash.match(/^#\/(\w+)/); S.page = m && PAGES[m[1]] ? m[1] : 'start'; S.overlay = null; S.draft = null; render(); $('#inner').scrollTop = 0; }
+window.addEventListener('hashchange', route);
+document.querySelector('.tools').addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b) return; const g = b.parentElement.id, v = b.dataset.v;
+  if (g === 'segState') S.vac = v; else if (g === 'segDevice') S.device = v; else if (g === 'segPage') { nav(v); return; }
+  render();
+});
+// Ereignisse, die es nur in diesem Mockup gibt (Schnellstart „Alles“, Plan-Schalter)
+$('#frame').addEventListener('click', (e) => {
+  const t = e.target.closest('[data-act="allrooms"],[data-sw^="plan:"]'); if (!t) return;
+  if (t.dataset.act === 'allrooms') { S.selRooms = S.selRooms.size === 7 ? new Set() : new Set([1, 2, 3, 4, 5, 6, 7]); render(); }
+  else { const p = S.plans.find((x) => x.n === +t.dataset.sw.slice(5)); p.aktiv = !p.aktiv; toast(`input_boolean.heidi_plan${p.n}_aktiv → ${p.aktiv ? 'an' : 'aus'}`); render(); }
+  e.stopImmediatePropagation();
+}, true);
+// ───────── Dialoge ─────────
+function dlg(title, sub, body, foot, closeAct = 'close', wide = false) {
+  return `<div class="scrim" data-act="${closeAct}"></div><div class="dlg fade" role="dialog" ${wide ? 'style="width:min(900px,calc(100% - 32px))"' : ''}><h2>${title} ${sub ? `<span class="m">${sub}</span>` : ''}<button class="iconbtn" data-act="${closeAct}" aria-label="Schließen">${I.close}</button></h2>${body}${foot ? `<div class="foot">${foot}</div>` : ''}</div>`;
+}
+function clockHtml(c) {
+  const Rr = 100, cx = 120, cy = 120, items = c.mode === 'h' ? [...Array(24).keys()] : [...Array(12).keys()].map((i) => i * 5);
+  const ns = items.map((v, i) => { const r = c.mode === 'h' ? (v < 12 ? Rr : Rr - 36) : Rr; const ang = ((c.mode === 'h' ? v % 12 : i) / 12) * 2 * Math.PI - Math.PI / 2; const sel = c.mode === 'h' ? v === c.H : v === c.M; return `<button class="${sel ? 'sel' : ''}" data-ed="clockval" data-val="${v}" style="left:${(cx + r * Math.cos(ang)).toFixed(1)}px;top:${(cy + r * Math.sin(ang)).toFixed(1)}px">${String(v).padStart(2, '0')}</button>`; }).join('');
+  const selIdx = c.mode === 'h' ? c.H % 12 : c.M / 5, ang = selIdx / 12 * 360, hr = c.mode === 'h' && c.H >= 12 ? Rr - 36 : Rr;
+  return `<div class="clock"><div class="hd"><span class="${c.mode === 'h' ? 'on' : ''}" data-ed="clockmode" data-val="h">${String(c.H).padStart(2, '0')}</span>:<span class="${c.mode === 'm' ? 'on' : ''}" data-ed="clockmode" data-val="m">${String(c.M).padStart(2, '0')}</span></div><div class="dial"><div class="hand" style="height:${hr}px;transform:rotate(${ang + 180}deg)"></div><div class="hub"></div>${ns}</div><div style="display:flex;gap:8px"><button class="btn sm" data-ed="clockcancel">Abbrechen</button><button class="btn sm primary" data-ed="clockok">OK</button></div></div>`;
+}
+function editorHtml() {
+  const e = S.draft;
+  const sg = (key, opts, cls = '') => seg('ed:' + key, opts, e[key], cls);
+  const rooms = ROOMS.map((r) => `<button class="chip ${e.raeume.includes(r.id) ? 'on' : ''}" data-ed="room" data-val="${r.id}">${I[r.icon]}${r.short}${e.raum[r.id] ? '<i class="dotm" style="position:static;display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent)"></i>' : ''}</button>`).join('');
+  const own = Object.keys(e.raum).filter((id) => e.raeume.includes(+id)).length;
+  const days = DAYS.map((d, i) => `<button class="chip ${e.tage[i] ? 'on' : ''}" data-ed="day" data-val="${i}">${d}</button>`).join('');
+  const presets = [['Mo–Fr', '1111100'], ['Wochenende', '0000011'], ['Täglich', '1111111'], ['Nur manuell', '0000000']].map(([t, m]) => `<button class="chip" data-ed="preset" data-val="${m}">${t}</button>`).join('');
+  const persons = ['herbert', 'nicole', 'nina'].map((k) => `<button class="chip ${e.personen.includes(k) ? 'warn' : ''}" data-ed="person" data-val="${k}">${I.user}${k[0].toUpperCase() + k.slice(1)}</button>`).join('');
+  const manual = !e.tage.some(Boolean);
+  const mini = (title, pre, help) => `<div class="mprof"><div style="font-size:12px;font-weight:600">${title}</div><div class="mrow"><span>Saugstufe</span>${sg(pre + 'Saug', OPT.saug3)}</div><div class="mrow"><span>Wiederholungen</span>${sg(pre + 'Wdh', OPT.wdh2)}</div>${help ? `<div class="hint">${help}</div>` : ''}</div>`;
+  const body = `${e.changedOutside ? `<div class="chip warn" style="margin-bottom:8px">${I.info}Eintrag wurde außerhalb geändert – Speichern überschreibt.</div>` : ''}
+    <div class="sec"><div class="lab">Name <span style="color:${e.aktiv ? 'var(--accent)' : 'var(--muted)'};display:inline-flex;align-items:center;gap:8px">${e.aktiv ? 'Aktiv' : 'Inaktiv'} ${sw('ed:aktiv', e.aktiv)}</span></div><input type="text" value="${esc(e.name)}" data-ed="name" maxlength="40"></div>
+    <div class="sec"><div class="lab">Räume <span>${esc(roomLabel(e.raeume))}${own ? ` · ${own} mit eigenen Werten` : ''}</span></div><div class="chips" style="margin:0">${rooms}</div></div>
+    <div class="sec"><div class="lab">Standard für alle gewählten Räume</div>${sg('modus', OPT.modus)}</div>
+    <div class="two"><div class="sec"><div class="lab">Saugstufe</div>${sg('saug', OPT.saug)}</div><div class="sec" style="opacity:${e.modus === 'Saugen' ? .4 : 1}"><div class="lab">Wassermenge</div>${sg('wasser', OPT.wasser)}</div></div>
+    <div class="two"><div class="sec" style="opacity:${e.modus === 'Nur Wischen' ? 1 : .4}"><div class="lab">Route <span>nur bei „Nur Wischen“</span></div>${sg('route', OPT.route)}</div><div class="sec"><div class="lab">Wiederholungen</div>${sg('wdh', OPT.wdh)}</div></div>
+    <div class="chips"><button class="btn sm" data-open="rooms-plan">${I.grid}Räume einzeln …${own ? ` (${own})` : ''}</button><button class="btn sm" data-open="rooms-robot" data-back="editor">${I.robot}Roboter-Werte</button><button class="btn sm" data-open="est" data-n="${e.n}" data-back="editor">${I.timer}Dauer &amp; Akku</button></div>
+    <div class="sec"><div class="lab">Ausführung <span>${esc(dayLabel(e.tage))}</span></div><div class="days">${days}</div><div class="chips" style="margin-top:4px">${presets}</div></div>
+    <div class="sec" ${manual ? 'hidden' : ''}><div class="lab">Uhrzeit</div><div><button class="btn" data-ed="clock" style="display:inline-flex">${I.timer}${e.zeit}<small style="color:var(--muted);font-weight:400">antippen zum Ändern</small></button></div>${e.clock ? clockHtml(e.clock) : ''}</div>
+    <div class="sec"><div class="lab">Bedingungen</div>
+      <div class="crow"><div class="ic on">${I.userOff}</div><div><div class="t">Nicht fahren, wenn zu Hause ist:</div><div class="s">Wartet, bis die gewählten Personen weg sind – heute wird nachgeholt.</div></div><span></span><div class="sub chips" style="margin-top:6px">${persons}</div></div>
+      <div class="crow"><div class="ic ${e.personen.length ? 'on' : ''}">${I.brief}</div><div><div class="t">Bei Homeoffice</div><div class="s">Mo–Fr ${S.az[0]}–${S.az[1]} Uhr ist eine der Personen oben zu Hause</div></div><span></span><div class="sub" style="display:grid;gap:8px;margin-top:6px">${sg('ho', OPT.ho)}${e.ho === 'Leise starten' ? mini('Leise starten mit', 'ho', 'Alle Räume des Eintrags, nur Saugen') : ''}</div></div>
+      <div class="crow"><div class="ic ${e.schnell ? 'on' : ''}">${I.flash}</div><div><div class="t">Schnellprogramm bei wenig Zeit</div><div class="s">Wenn weniger als ${S.schnellMin} min bis zur erwarteten Rückkehr bleiben</div></div>${sw('ed:schnell', e.schnell)}${e.schnell ? `<div class="sub" style="margin-top:6px">${mini('Schnellprogramm läuft mit', 'sp', 'Nur Saugen, gewählte Räume · gilt danach als erledigt')}</div>` : ''}</div>
+    </div>`;
+  return dlg(`Eintrag ${e.n}`, 'bearbeiten', body, `<button class="btn" data-act="close">Abbrechen</button><button class="btn primary" data-act="save">Speichern</button>`);
+}
+function roomsHtml(o) {
+  const plan = o.mode === 'plan', e = S.draft;
+  const rc = (id, k, opts, cur, dis) => `<div class="rc ${dis ? 'dim' : ''}"><span>${{ modus: 'Modus', saug: 'Saugstufe', wasser: 'Wasser', route: 'Route', wdh: 'Wdh.' }[k]}</span>${seg(`rv:${k}`, opts, cur, dis ? 'dis' : '', `data-room="${id}"`)}</div>`;
+  const block = (id, name, icon, v, own) => { const wet = v.modus !== 'Saugen', mopOnly = v.modus === 'Nur Wischen', dis = plan && !own; return `<div class="rr ${dis ? 'std' : ''}"><div class="rn">${I[icon]}${name}${plan && id !== 'all' ? `<button class="chip ${own ? 'on' : ''}" data-rv="own" data-room="${id}" style="margin-left:auto">${own ? 'eigene Werte' : 'Standard des Eintrags'}</button>` : ''}</div>${rc(id, 'modus', OPT.modus, v.modus, dis)}${rc(id, 'saug', OPT.saug, v.saug, dis)}${rc(id, 'wasser', OPT.wasser, v.wasser, dis || !wet)}${rc(id, 'route', OPT.route, v.route, dis || !mopOnly)}${rc(id, 'wdh', OPT.wdh, v.wdh, dis)}</div>`; };
+  const std = () => ({ modus: e.modus, saug: e.saug, wasser: e.wasser, route: e.route, wdh: e.wdh });
+  const rv = (id) => { const a = S.robotRooms[id]; return { modus: a[0], saug: a[1], wasser: a[2], route: a[3], wdh: a[4] }; };
+  const ids = (plan ? ROOMS.filter((r) => e.raeume.includes(r.id)) : ROOMS.slice()).sort((a, b) => a.id - b.id);
+  const rows = ids.map((r) => plan ? block(r.id, r.short, r.icon, e.raum[r.id] || std(), !!e.raum[r.id]) : block(r.id, r.short, r.icon, rv(r.id), true)).join('');
+  let all = '';
+  if (!plan) { const vs = ROOMS.map((r) => rv(r.id)); const uni = (k) => { const s = new Set(vs.map((x) => x[k] ?? '–')); return s.size === 1 ? [...s][0] : '–'; }; all = block('all', 'Alle Räume', 'grid', { modus: uni('modus'), saug: uni('saug'), wasser: uni('wasser'), route: uni('route'), wdh: uni('wdh') }, true); }
+  const modeSeg = o.back === 'editor' ? `<div class="seg2" style="margin-bottom:8px"><button data-act="rooms-mode" data-val="robot" class="${plan ? '' : 'on'}">Roboter-Werte</button><button data-act="rooms-mode" data-val="plan" class="${plan ? 'on' : ''}">Nur Eintrag ${e.n}</button></div>` : '';
+  const hint = plan ? `Räume mit „eigene Werte“ überschreiben beim Start den Standard des Eintrags (${e.modus} · ${e.saug} · ${e.wdh}×). Gespeichert wird mit „Speichern“ im Eintrag.` : 'Das sind die Raum-Einstellungen des Roboters – wie in der Dreame-App. Änderungen gelten sofort. Ein Planer-Eintrag setzt beim Start seine Werte und stellt diese danach wieder her.';
+  const close = o.back === 'editor' ? 'rooms-back' : 'close';
+  const foot = plan ? `<button class="btn" data-rv="own" data-room="none">Alle auf Standard</button><button class="btn primary" data-act="rooms-back">Zurück zum Eintrag</button>` : `<button class="btn primary" data-act="${close}">${o.back === 'editor' ? 'Zurück zum Eintrag' : 'Fertig'}</button>`;
+  return dlg('Räume', plan ? `Eintrag ${e.n}` : 'Roboter', `${modeSeg}<div class="hint">${hint}<br>Wasser nur beim Wischen · Route nur bei „Nur Wischen“.</div><div style="display:grid;gap:8px;margin-top:10px">${all}${rows}</div>`, foot, close);
+}
+function estHtml(o) {
+  const p = S.draft && S.draft.n === o.n ? S.draft : S.plans.find((x) => x.n === o.n), e = estimate(p), rest = restMin(), fits = e.total <= rest, now = new Date(2026, 8, 14, 9, 30);
+  const tm = (d) => d.toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' });
+  const sum = `<div class="esum ${fits ? 'ok' : 'bad'}"><div><b>${fmtMin(e.total)}</b> · fertig um ${tm(new Date(now.getTime() + e.total * 60000))} bei Start jetzt</div><div>Rückkehr in ${fmtMin(rest)} (Prognose) → <b>${fits ? 'reicht' : 'reicht nicht'}</b>${e.charges ? ` · ${e.charges}× Nachladen` : ''} · Akku ${e.batt0} % → ${Math.round(e.battEnd)} %${e.unlearned ? ' · teils geschätzt' : ''}</div>${p.schnell ? `<div>Schnellprogramm: <b>${fmtMin(estimate(p, 'schnell').total)}</b> · reicht</div>` : ''}</div>`;
+  const icon = { wasch: 'wash', laden: 'plug', heim: 'home' };
+  const rows = e.steps.map((s) => s.typ === 'raum' ? `<div class="er">${I[R(s.id).icon]}<span><b>${s.text}</b><small>${s.sub} · ${s.area} m²${s.gelernt ? '' : ' · geschätzt'}</small></span><span>${fmtMin(s.min)}</span></div>` : `<div class="er">${I[icon[s.typ]]}<span>${s.text}</span><span>${fmtMin(s.min)}</span></div>`).join('');
+  const cmpSaug = p.saug === 'Standard' ? 'Turbo' : 'Standard', lines = [{ e, col: 'var(--accent)', w: 3, dash: e.unlearned }]; if (o.cmp) lines.push({ e: estimate(p, 'normal', { saug: cmpSaug }), col: 'var(--blue)', w: 2, dash: true });
+  const maxT = Math.max(60, rest * 1.1, ...lines.map((l) => l.e.total)), Wd = 600, Ht = 190, px = 44, py = 14, X = (m) => px + (m / maxT) * (Wd - px - 10), Y = (b) => py + (1 - b / 100) * (Ht - py - 26);
+  const poly = lines.map((l) => { let pts = [[0, l.e.batt0]], t = 0; l.e.steps.forEach((s) => { t += s.min; pts.push([t, s.batt]); }); return `<polyline points="${pts.map(([m, b]) => `${X(m).toFixed(1)},${Y(b).toFixed(1)}`).join(' ')}" fill="none" stroke="${l.col}" stroke-width="${l.w}" ${l.dash ? 'stroke-dasharray="5 4"' : ''} stroke-linejoin="round"/>`; }).join('');
+  const grid = [0, 25, 50, 75, 100].map((b) => `<line x1="${px}" x2="${Wd - 10}" y1="${Y(b)}" y2="${Y(b)}" stroke="var(--line)"/><text x="${px - 6}" y="${Y(b) + 3}" fill="var(--muted)" font-size="10" text-anchor="end">${b}%</text>`).join('');
+  const xt = []; for (let m = 0; m <= maxT; m += maxT > 240 ? 60 : 30) xt.push(`<text x="${X(m)}" y="${Ht - 6}" fill="var(--muted)" font-size="10" text-anchor="middle">${m >= 60 ? (m / 60).toFixed(m % 60 ? 1 : 0) + ' h' : m + ' min'}</text>`);
+  const ret = rest <= maxT ? `<line x1="${X(rest)}" x2="${X(rest)}" y1="${py}" y2="${Ht - 22}" stroke="var(--bad)" stroke-dasharray="3 3"/><text x="${X(rest) + 4}" y="${py + 10}" fill="var(--bad)" font-size="10">Rückkehr</text>` : '';
+  const close = o.back === 'editor' ? 'est-back' : 'close';
+  return dlg('Dauer & Akku', esc(p.name), `${sum}<div class="sec"><div class="lab">Ablauf in Roboter-Reihenfolge</div><div style="display:grid;gap:4px">${rows}</div></div><div class="sec"><div class="lab">Akku über den Lauf</div><div class="chips" style="margin:0 0 6px"><span class="chip on">${esc(p.modus)} · ${esc(p.saug)}</span><button class="chip ${o.cmp ? 'acc' : ''}" data-act="est-cmp">Vergleich mit ${cmpSaug}</button><span class="hint">gestrichelt = geschätzt</span></div><svg viewBox="0 0 ${Wd} ${Ht}" style="width:100%;height:auto;display:block">${grid}${ret}${poly}${xt.join('')}</svg></div>`, `<button class="btn primary" data-act="${close}">${o.back === 'editor' ? 'Zurück zum Eintrag' : 'Fertig'}</button>`, close);
+}
+function zonesHtml(o) {
+  const T = { zones: ['Sperrzonen', S.zones.length, 'vacuum_set_restricted_zone { zones }'], no_mops: ['Wisch-Sperrzonen', S.noMops.length, 'vacuum_set_restricted_zone { no_mops }'], walls: ['Virtuelle Wände', 0, 'vacuum_set_restricted_zone { walls } – Linien statt Rechtecke'] };
+  const body = `<div class="tabs">${Object.entries(T).map(([k, [t, n]]) => `<button data-act="ztype" data-val="${k}" class="${o.type === k ? 'on' : ''}">${t}${n ? ` (${n})` : ''}</button>`).join('')}</div>
+    <div class="map" style="cursor:crosshair" data-zdraw>${mapSvg(new Set(), null, true)}</div><div class="hint" style="margin-top:8px">${o.type === 'walls' ? 'Linie ziehen = neue Wand' : 'Rechteck aufziehen = neue Zone'} · antippen = auswählen · Speichern ersetzt alle Einträge dieses Typs → ${T[o.type][2]}. Bestehende Einträge lädt Heidi aus camera.heidi_map (Overlay), neue zeichnet die Karte.</div>
+    <div class="chips" style="margin-top:8px"><button class="btn sm danger" data-toast="Ausgewählte Zone gelöscht (Mockup)">Ausgewählte löschen</button><button class="btn sm danger" data-confirm="Wirklich alle Zonen dieses Typs löschen?">Alle löschen</button></div>`;
+  return dlg('Sperrzonen bearbeiten', '', body, `<button class="btn" data-act="close">Abbrechen</button><button class="btn primary" data-act="zsave">Speichern</button>`, 'close', true);
+}
+function renderOverlay() {
+  const o = S.overlay, el = $('#overlay'); if (!o) { el.innerHTML = ''; return; }
+  if (o.kind === 'confirm') { el.innerHTML = `<div class="scrim" data-act="close"></div><div class="alert fade"><div class="m">${esc(o.msg)}${o.sub ? `<small>${esc(o.sub)}</small>` : ''}</div><div class="b"><button data-act="close">Abbrechen</button><button data-act="confirm-ok">OK</button></div></div>`; return; }
+  if (o.kind === 'editor') el.innerHTML = editorHtml();
+  else if (o.kind === 'rooms') el.innerHTML = roomsHtml(o);
+  else if (o.kind === 'est') el.innerHTML = estHtml(o);
+  else if (o.kind === 'zones') el.innerHTML = zonesHtml(o);
+  else if (o.kind === 'saveError') el.innerHTML = `<div class="scrim" data-act="close"></div><div class="alert fade"><div class="m">Speichern unvollständig<small>Nicht übernommen: Wiederholungen, Uhrzeit. Verbindung prüfen und erneut speichern.</small></div><div class="b"><button data-act="close">Schließen</button><button data-act="save">Erneut</button></div></div>`;
+}
+$('#frame').addEventListener('click', async (e) => {
+  const t = e.target.closest('[data-nav],[data-open],[data-toast],[data-confirm],[data-sw],[data-room],[data-act],[data-run],[data-tl],[data-seg],[data-ed],[data-rv]'); if (!t) return;
+  const d = t.dataset;
+  if (d.nav) { nav(d.nav); return; }
+  if (d.open === 'editor') { const p = S.plans.find((x) => x.n === +d.n); S.draft = JSON.parse(JSON.stringify(p)); S.draft.clock = null; S.draft.changedOutside = false; S.overlay = { kind: 'editor' }; renderOverlay(); return; }
+  if (d.open === 'rooms-robot') { S.overlay = { kind: 'rooms', mode: 'robot', back: d.back || null }; renderOverlay(); return; }
+  if (d.open === 'rooms-plan') { S.overlay = { kind: 'rooms', mode: 'plan', back: 'editor' }; renderOverlay(); return; }
+  if (d.open === 'est') { S.overlay = { kind: 'est', n: +d.n, cmp: false, back: d.back || null }; renderOverlay(); return; }
+  if (d.open === 'zones') { S.overlay = { kind: 'zones', type: 'zones' }; renderOverlay(); return; }
+  if (d.rv) { const o = S.overlay; if (o.mode === 'plan') { const e = S.draft, std = () => ({ modus: e.modus, saug: e.saug, wasser: e.wasser, route: e.route, wdh: e.wdh }); if (d.rv === 'own') { if (d.room === 'none') e.raum = {}; else if (e.raum[d.room]) delete e.raum[d.room]; else e.raum[d.room] = std(); } renderOverlay(); } return; }
+  if (d.seg) {
+    const [ns, key] = d.seg.includes(':') ? d.seg.split(':') : [null, d.seg];
+    if (ns === 'ed') { S.draft[key] = d.val; renderOverlay(); return; }
+    if (ns === 'rv') { const o = S.overlay; if (o.mode === 'plan') { const e = S.draft; if (!e.raum[d.room]) e.raum[d.room] = { modus: e.modus, saug: e.saug, wasser: e.wasser, route: e.route, wdh: e.wdh }; e.raum[d.room][key] = d.val; } else { const idx = { modus: 0, saug: 1, wasser: 2, route: 3, wdh: 4 }[key]; const ids = d.room === 'all' ? [1, 2, 3, 4, 5, 6, 7] : [+d.room]; ids.forEach((i) => { S.robotRooms[i][idx] = d.val; }); toast(d.room === 'all' ? 'Alle Räume gesetzt' : 'Gesetzt (select.select_option)'); } renderOverlay(); return; }
+    if (key === 'theme') S.dark = d.val === 'Dunkel'; else if (key === 'kind') S.kind = d.val; else if (key === 'rotation') S.rotation = d.val.replace('°', ''); else if (key === 'raumnamen') S.raumnamen = d.val;
+    toast('Gespeichert: ' + d.val); render(); return;
+  }
+  if (d.ed) {
+    const e = S.draft;
+    if (d.ed === 'room') { const id = +d.val; e.raeume = e.raeume.includes(id) ? e.raeume.filter((x) => x !== id) : [...e.raeume, id]; }
+    else if (d.ed === 'day') e.tage[+d.val] = e.tage[+d.val] ? 0 : 1; else if (d.ed === 'preset') e.tage = [...d.val].map((c) => +c); else if (d.ed === 'person') e.personen = e.personen.includes(d.val) ? e.personen.filter((x) => x !== d.val) : [...e.personen, d.val];
+    else if (d.ed === 'clock') { const [h, m] = e.zeit.split(':').map(Number); e.clock = { mode: 'h', H: h, M: m - (m % 5) }; } else if (d.ed === 'clockmode') e.clock.mode = d.val;
+    else if (d.ed === 'clockval') { if (e.clock.mode === 'h') { e.clock.H = +d.val; e.clock.mode = 'm'; } else e.clock.M = +d.val; }
+    else if (d.ed === 'clockok') { e.zeit = `${String(e.clock.H).padStart(2, '0')}:${String(e.clock.M).padStart(2, '0')}`; e.clock = null; } else if (d.ed === 'clockcancel') e.clock = null;
+    else if (d.ed === 'name') return;
+    const nameEl = $('[data-ed="name"]'); if (nameEl) e.name = nameEl.value; renderOverlay(); return;
+  }
+  if (d.sw) {
+    if (d.sw.startsWith('ed:')) { const k = d.sw.slice(3); S.draft[k] = !S.draft[k]; renderOverlay(); return; }
+    const map = { automatik: 'automatik', chairs: 'chairs', planerBereich: 'planerBereich', prognoseAktiv: 'prognoseAktiv', ninaZaehlt: 'ninaZaehlt', abweichung: 'abweichung' };
+    if (map[d.sw]) S[map[d.sw]] = !S[map[d.sw]]; else if (d.sw === 'progH') S.prog.herbert = !S.prog.herbert; else if (d.sw === 'progN') S.prog.nicole = !S.prog.nicole; else if (d.sw === 'progNi') S.prog.nina = !S.prog.nina;
+    if (d.sw === 'chairs') toast(S.chairs ? 'Sperrzone Esstisch gesetzt' : 'Sperrzone Esstisch entfernt');
+    render(); return;
+  }
+  if (d.room && !d.rv && !d.seg) { const id = +d.room; S.selRooms.has(id) ? S.selRooms.delete(id) : S.selRooms.add(id); render(); return; }
+  if (d.act === 'clearrooms') { S.selRooms = new Set(); render(); return; }
+  if (d.mapmode) { S.mapMode = d.mapmode; S.goto = false; render(); return; }
+  if (d.act === 'goto') { S.goto = !S.goto; render(); return; }
+  if (d.map) { S.mapSel = +d.map; toast('select.heidi_selected_map → Karte ' + d.map); render(); return; }
+  if (d.run) { const p = S.plans.find((x) => x.n === +d.run); if (!p.aktiv) { toast('Eintrag ist inaktiv'); return; } confirmDlg(`„${p.name}“ jetzt starten?`, '', () => { S.vac = 'cleaning'; STATES.cleaning.big = p.name; toast('Gestartet: ' + p.name); render(); }); return; }
+  if (d.tl !== undefined) { const i = +d.tl; S.tlOpen.has(i) ? S.tlOpen.delete(i) : S.tlOpen.add(i); render(); return; }
+  if (d.confirm) { confirmDlg(d.confirm, '', () => { if (d.then === 'cleanrooms') { S.vac = 'cleaning'; STATES.cleaning.big = 'Reinigt Räume'; S.selRooms = new Set(); toast('Gestartet (vacuum_clean_segment)'); render(); } else if (d.then === 'all') { S.vac = 'cleaning'; STATES.cleaning.big = 'Reinigt'; toast('Gestartet (vacuum.start)'); render(); } else toast('Ausgelöst'); }); return; }
+  if (d.act === 'confirm-ok') { const then = S.overlay.then; S.overlay = null; renderOverlay(); then && then(); return; }
+  if (d.act === 'close') { S.overlay = null; S.draft = null; renderOverlay(); return; }
+  if (d.act === 'rooms-back' || d.act === 'est-back') { S.overlay = { kind: 'editor' }; renderOverlay(); return; }
+  if (d.act === 'rooms-mode') { S.overlay.mode = d.val; renderOverlay(); return; }
+  if (d.act === 'est-cmp') { S.overlay.cmp = !S.overlay.cmp; renderOverlay(); return; }
+  if (d.act === 'ztype') { S.overlay.type = d.val; renderOverlay(); return; }
+  if (d.act === 'zsave') { S.overlay = null; toast('Gespeichert: 1 Sperrzone, 1 Wisch-Sperrzone (vacuum_set_restricted_zone)'); renderOverlay(); return; }
+  if (d.act === 'save') {
+    const e = S.draft; const nameEl = $('[data-ed="name"]'); if (nameEl) e.name = nameEl.value.trim();
+    if (!e.name) { toast('Bitte einen Namen vergeben'); return; } if (!e.raeume.length) { toast('Bitte mindestens einen Raum wählen'); return; }
+    if (e.name.toLowerCase().includes('fehler')) { S.overlay = { kind: 'saveError' }; renderOverlay(); return; } // Demo: Teilfehler
+    const i = S.plans.findIndex((x) => x.n === e.n); delete e.clock; delete e.changedOutside; S.plans[i] = e; S.overlay = null; S.draft = null; toast('Eintrag gespeichert (16 Service-Calls)'); render(); return;
+  }
+  if (d.toast) { toast(d.toast); return; }
+});
+$('#frame').addEventListener('input', (e) => {
+  const t = e.target; if (t.dataset.ed === 'name' && S.draft) S.draft.name = t.value;
+  if (t.type === 'range') { const b = t.parentElement.querySelector('b'); if (!b) return; if (t.dataset.range === 'schnellMin') { S.schnellMin = +t.value; b.textContent = t.value + ' min'; } else if (t.dataset.range === 'minAkku') { S.minAkku = +t.value; b.textContent = t.value + ' %'; } else if (t.dataset.prange) { let v = +t.value; if (t.dataset.prange === 'intervall') { v = [5, 10, 15, 20, 30, 60].reduce((a, c) => Math.abs(c - v) < Math.abs(a - v) ? c : a); t.value = v; } S.prognose[t.dataset.prange] = v; b.textContent = v + b.textContent.replace(/^[\d]+/, ''); } else b.textContent = t.value + b.textContent.replace(/^[\d]+/, ''); }
+});
+$('#frame').addEventListener('change', (e) => { const t = e.target; if (t.type === 'range' || t.tagName === 'SELECT' || t.type === 'time') { if (t.dataset.ed) return; toast('Gespeichert'); } });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && S.overlay) { S.overlay = null; S.draft = null; renderOverlay(); } });
+// Zonen zeichnen (Mockup: Rechteck im SVG)
+let zStart = null;
+$('#frame').addEventListener('pointerdown', (e) => { const m = e.target.closest('[data-zdraw]'); if (!m) return; const svg = m.querySelector('svg'), r = svg.getBoundingClientRect(); zStart = [(e.clientX - r.left) / r.width * 270, (e.clientY - r.top) / r.height * 235]; const d = document.createElementNS('http://www.w3.org/2000/svg', 'rect'); d.setAttribute('class', 'zone'); d.id = 'zdraft'; svg.appendChild(d); });
+$('#frame').addEventListener('pointermove', (e) => { if (!zStart) return; const m = e.target.closest('[data-zdraw]'); if (!m) return; const svg = m.querySelector('svg'), r = svg.getBoundingClientRect(), p = [(e.clientX - r.left) / r.width * 270, (e.clientY - r.top) / r.height * 235], d = svg.querySelector('#zdraft'); d.setAttribute('x', Math.min(zStart[0], p[0])); d.setAttribute('y', Math.min(zStart[1], p[1])); d.setAttribute('width', Math.abs(p[0] - zStart[0])); d.setAttribute('height', Math.abs(p[1] - zStart[1])); });
+$('#frame').addEventListener('pointerup', () => { if (!zStart) return; zStart = null; const d = $('#zdraft'); if (d) { d.removeAttribute('id'); toast('Neue Zone (Koordinaten über calibration_points → mm)'); } });
+
+
+route();
+</script>
+</body>
+</html>
