@@ -55,8 +55,11 @@ Kurz-Start in Claude Code:
   `sensor.heidi_heutiger_plan` mit Attribut `stoerer`, Statustexte, `shell_command`s,
   `command_line`-Sensor für die Prognose (`json_attributes` inkl. `aufloesung`, `wochen`).
   Das alte `input_select.heidi_homeoffice_modus` wurde entfernt.
-- `ha/automations.yaml`: `heidi_planer` (blockiert nur durch „stört"-Personen; Homeoffice →
-  warten oder Variante `leise`; Schnellprogramm bei baldiger Rückkehr), `heidi_lauf_abgeschlossen`,
+- `ha/automations.yaml`: `heidi_planer` (Auslöser: alle 10 min, Anwesenheitswechsel, Automatik
+  an, **genau zur Uhrzeit des heutigen Eintrags** (Template-Trigger) und **bei jeder Änderung von
+  `sensor.heidi_heutiger_plan`** (Uhrzeit/erledigt/stört – seit 14.09.); blockiert nur durch
+  „stört"-Personen; Homeoffice → warten oder Variante `leise`; Schnellprogramm bei baldiger
+  Rückkehr), `heidi_lauf_abgeschlossen`,
   `heidi_heimkehr` (nur für „stört"-Personen des heutigen Eintrags), `heidi_dark_mode`,
   `heidi_prognose_protokoll` (`/5` + `minute % intervall == 0`), `heidi_prognose_config`
   (Trigger auch auf die input_numbers, `for: 2 s`, `mode: queued`), `heidi_sperrzone_esstisch`.

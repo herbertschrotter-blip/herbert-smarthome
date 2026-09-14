@@ -55,6 +55,12 @@
     - trigger: state
       entity_id: input_boolean.heidi_automatik
       to: "on"
+    # Genau zur Uhrzeit des heutigen Eintrags (Template mit now() wird jede Minute geprüft)
+    - trigger: template
+      value_template: "{{ now().strftime('%H:%M') == state_attr('sensor.heidi_heutiger_plan', 'zeit') }}"
+    # Sobald sich am heutigen Eintrag etwas ändert (Uhrzeit, erledigt, stört-Personen, Eintrag)
+    - trigger: state
+      entity_id: sensor.heidi_heutiger_plan
   conditions:
     - condition: state
       entity_id: input_boolean.heidi_automatik
