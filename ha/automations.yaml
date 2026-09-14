@@ -249,7 +249,8 @@
         seg: "{{ state_attr('vacuum.heidi', 'current_segment') or '' }}"
         p: "{{ ('select.heidi_room_' ~ seg ~ '_') if seg else '' }}"
         # Während eines Laufs sind die Raum-Selects teils "unavailable" → Werte aus den Kartendaten des Roboters
-        rm: "{{ (state_attr('camera.heidi_map', 'rooms') or {}).get(seg | string, {}) if seg else {} }}"
+        # Schlüssel der Kartendaten sind Zahlen (1..7), nicht Text
+        rm: "{% set rooms = state_attr('camera.heidi_map', 'rooms') or {} %}{{ (rooms.get(seg | int) or rooms.get(seg | string) or {}) if seg else {} }}"
         sel: "{{ {'cleaning_mode': states(p ~ 'cleaning_mode'), 'suction_level': states(p ~ 'suction_level'), 'mop_pad_humidity': states(p ~ 'mop_pad_humidity'), 'cleaning_route': states(p ~ 'cleaning_route'), 'cleaning_times': states(p ~ 'cleaning_times'), 'floor_material': states(p ~ 'floor_material')} if p else {} }}"
         mode: "{{ sel.cleaning_mode if sel.cleaning_mode is defined and sel.cleaning_mode not in ['unavailable', 'unknown'] else {0: 'sweeping', 1: 'mopping', 2: 'sweeping_and_mopping', 3: 'mopping_after_sweeping'}.get(rm.cleaning_mode, '') }}"
         suction: "{{ sel.suction_level if sel.suction_level is defined and sel.suction_level not in ['unavailable', 'unknown'] else {0: 'quiet', 1: 'standard', 2: 'strong', 3: 'turbo'}.get(rm.suction_level, '') }}"
