@@ -76,9 +76,9 @@
       state: docked
     - condition: template
       value_template: "{{ states('sensor.heidi_battery_level') | int(0) >= states('input_number.heidi_min_akku') | int(30) }}"
-    - condition: state
-      entity_id: sensor.heidi_error
-      state: no_error
+    # Nur echte Fehler blockieren – Hinweise wie "clean_mop_pad" (Mopps reinigen) nicht
+    - condition: template
+      value_template: "{{ not state_attr('vacuum.heidi', 'has_error') }}"
   variables:
     slot: "{{ states('sensor.heidi_heutiger_plan') }}"
     name: "{{ state_attr('sensor.heidi_heutiger_plan', 'name') }}"
@@ -131,27 +131,29 @@
       entity_id: vacuum.heidi
       to: docked
       for: { minutes: 1 }
-  conditions:
-    - condition: state
-      entity_id: input_boolean.heidi_auto_lauf
-      state: "on"
   actions:
-    - if:
-        - condition: state
-          entity_id: sensor.heidi_task_status
-          state: completed
-        - condition: state
-          entity_id: input_boolean.heidi_auto_teil
-          state: "off"
+    # a) Automatik-Lauf: heute als erledigt buchen
+    - if: "{{ is_state('input_boolean.heidi_auto_lauf', 'on') }}"
       then:
-        - action: input_datetime.set_datetime
-          target: { entity_id: input_datetime.heidi_letzte_auto_reinigung }
-          data: { date: "{{ now().date() }}" }
-    - action: input_boolean.turn_off
-      target: { entity_id: [input_boolean.heidi_auto_lauf, input_boolean.heidi_auto_teil] }
-    # Roboter-Raumwerte wieder so, wie sie vor dem Planer-Lauf waren (Sicherung aus heidi_reinigung)
-    - action: script.heidi_raumwerte_wiederherstellen
-      continue_on_error: true
+        - if:
+            - condition: state
+              entity_id: sensor.heidi_task_status
+              state: completed
+            - condition: state
+              entity_id: input_boolean.heidi_auto_teil
+              state: "off"
+          then:
+            - action: input_datetime.set_datetime
+              target: { entity_id: input_datetime.heidi_letzte_auto_reinigung }
+              data: { date: "{{ now().date() }}" }
+        - action: input_boolean.turn_off
+          target: { entity_id: [input_boolean.heidi_auto_lauf, input_boolean.heidi_auto_teil] }
+    # b) Roboter-Raumwerte wieder so, wie sie vor dem Lauf waren (Sicherung aus heidi_reinigung) –
+    #    auch bei Handstart über ▶ im Planer, deshalb unabhängig vom Automatik-Lauf
+    - if: "{{ states('input_text.heidi_raum_snapshot') not in ['', 'unknown', 'unavailable'] }}"
+      then:
+        - action: script.heidi_raumwerte_wiederherstellen
+          continue_on_error: true
 
 - id: heidi_heimkehr
   alias: "Heidi: Heimkehr während Reinigung"

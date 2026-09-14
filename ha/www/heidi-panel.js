@@ -3,7 +3,7 @@
  * Robotereinstellungen, Einstellungs-Panel, Prognose) als HTML/CSS/JS.
  * Alle Daten kommen live aus Home Assistant (hass.states), alle Aktionen laufen über hass.callService.
  */
-const HP_VERSION = "1.5.0";
+const HP_VERSION = "1.5.1";
 
 const E = {
   vac: "vacuum.heidi",
@@ -41,6 +41,8 @@ const APP_SCENES = [
   { id: 34, name: "Wischen nach dem Saugen", sub: "Ganze Wohnung · nur Wischen", icon: "mdi:water" },
 ];
 const DAYS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
+// Hinweise/Fehler des Roboters (sensor.heidi_error) – Hinweise sind keine echten Fehler (vacuum has_error = false)
+const ERR_DE = { clean_mop_pad: "Mopps reinigen", dust_bag_full: "Staubbeutel voll", clean_water_tank_empty: "Frischwasser leer", dirty_water_tank_full: "Abwasser voll", dust_box_missing: "Staubbox fehlt", mop_pad_stop_rotate: "Mopp blockiert", wheels_stuck: "Rad blockiert", brush_stuck: "Bürste blockiert", low_battery: "Akku leer", station_disconnected: "Station getrennt", detergent_empty: "Reinigungsmittel leer", water_tank_missing: "Wassertank fehlt", clean_water_tank_missing: "Frischwassertank fehlt", dirty_water_tank_missing: "Abwassertank fehlt" };
 // Raum-Einstellungen sind am Roboter aktiv (switch.heidi_customized_cleaning): alle Werte gelten je Raum.
 // "Saugen, dann Wischen" und Route "Schnell" gibt es nur global und sind deshalb nicht mehr wählbar.
 const OPT = {
@@ -475,7 +477,7 @@ class HeidiPanel extends HTMLElement {
         ${sub ? `<div class="sub">${ic("mdi:subdirectory-arrow-right")}${esc(sub)}</div>` : ""}
         <div class="chips">${persons}
           ${room !== "–" && vac === "cleaning" && !phaseOk ? `<span class="chip on">${ic("mdi:floor-plan")}${esc(room)}</span>` : ""}
-          ${err !== "no_error" && err !== "unavailable" ? `<span class="chip bad">${ic("mdi:alert")}${esc(err.replace(/_/g, " "))}</span>` : ""}
+          ${err !== "no_error" && err !== "unavailable" ? `<span class="chip ${this.attr(E.vac, "has_error") ? "bad" : "warn"}" data-more="sensor.heidi_error">${ic(this.attr(E.vac, "has_error") ? "mdi:alert" : "mdi:information-outline")}${esc(ERR_DE[err] || err.replace(/_/g, " "))}</span>` : ""}
           <span class="chip" title="Nicht stören">${ic("mdi:sleep")}${esc(dnd)}</span>
         </div>
       </div>

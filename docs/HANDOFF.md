@@ -77,6 +77,24 @@ Uhr (10:15). Einrichten im Ordner `heidi/tests`: `npm i` und dann `npx playwrigh
 ---
 
 ## 2. Wichtige Erkenntnisse / behobene Fehler
+- **`initial:` bei Helfern ist eine Falle**: HA erzwingt den Startwert bei *jedem* Neustart und
+  verwirft die gespeicherten Werte (input_boolean/select/text/datetime/number). Am 14.09. um 09:00
+  hat ein Neustart alle Planer-Einstellungen zurückgesetzt (Uhrzeiten, „heute erledigt“ …). Seitdem
+  hat das Paket **keine `initial:`-Werte mehr**; HA stellt den letzten Zustand wieder her. Werte von
+  vor dem Neustart wurden aus der Historie zurückgeholt (`history/period` – Achtung: ohne
+  `end_time` liefert die API nur 24 h ab Start).
+  Startwerte für eine **Neueinrichtung** (dann einmal von Hand setzen): automatik/dark_mode/
+  planer_bereich/nina_zaehlt/prog_* an; plan1+2 aktiv+schnell an; Kartendarstellung Dreame-App,
+  Raumnamen Deutsch, bei Heimkehr „Zur Station“; Plan 1 „Tägliches Saugen“ Saugen/Turbo/Mittel/
+  Standard/1 Tage 0110111 09:30 Räume 7,6,5,4,3,2,1 stört nicole; Plan 2 „Saugen + Wischen“
+  Saugen + Wischen/Turbo/Mittel/Standard/1 Tage 1001000 09:30 (Herbert: 07:00) alle Räume stört
+  nicole; Plan 3 „Küche nach dem Kochen“ Räume 6,4 Wdh 2 19:30 manuell; Plan 4 „Bad & WC
+  gründlich“ Räume 1,3 Viel/Intensiv/3 10:30 manuell; Leise-Profil Leise/1, Schnell-Profil
+  Standard/1; Arbeitszeit 08:00–17:00, Rückkehr 17:00, Schnell-Minuten 90, Mindest-Akku 30,
+  Prognose Intervall 15 / Auflösung 30 / Wochen 8 / Halbwert 21 / Mindesttage 14.
+- **Roboter-Hinweise sind keine Fehler**: `sensor.heidi_error` = `clean_mop_pad` („Mopps
+  reinigen“) hat den Planer blockiert (Bedingung `no_error`). Jetzt zählt nur
+  `state_attr('vacuum.heidi','has_error')`; die Karte zeigt Hinweise gelb (ERR_DE), Fehler rot.
 - **Heatmap: Montag komplett „voll"** – Ursache war das Auffüllen von Lücken aus wenigen Messungen
   (Extrapolation). Fix: nur begrenzte kurze Lücken interpolieren, `None` = unbekannt.
 - Ringzahlen waren hinter `::after` versteckt → `z-index: 1` auf `.ring .num` / `.mini span`.
@@ -138,8 +156,8 @@ Uhr (10:15). Einrichten im Ordner `heidi/tests`: `npm i` und dann `npx playwrigh
     `segment_available_fn`, kein `cleaning_route_v2`).
   - „Saugen, dann Wischen“ (`mopping_after_sweeping`) und Route „Schnell“ (`quick`) gibt es nur
     global → im Planer entfernen. App-Szene 34 („Wischen nach dem Saugen“) läuft weiter.
-- Umsetzung (v1.5.0, **im Repo, noch NICHT auf dem Pi** – wartet auf Herberts Freigabe nach dem
-  Live-Mockup `heidi/mockups/heidi-live.html`, gebaut mit `node heidi/mockups/build-live.js`):
+- Umsetzung (v1.5.1, **seit 14.09. 09:00 auf dem Pi**; Live-Mockup `heidi/mockups/heidi-live.html`,
+  gebaut mit `node heidi/mockups/build-live.js`, war die Freigabegrundlage):
   - Karte: Streifen im Kopf **nur während einer Reinigung**: „Jetzt: <Raum>“ + Symbole mit
     kurzem Wert (Modus, Saugstufe, Wasser, Route, Wdh) des Raums aus `current_segment`, rechts
     „danach Küche → Wohnz.“; Tippen → Untermenü. (Herbert wollte keine Zusammenfassung
@@ -156,8 +174,12 @@ Uhr (10:15). Einrichten im Ordner `heidi/tests`: `npm i` und dann `npx playwrigh
     stellt den Snapshot wieder her (aufgerufen von `heidi_lauf_abgeschlossen`).
   - Kurzform Raumwerte: `1:B/T/V/-/2;6:B/L/M/-/1` = Raum:Modus/Saug/Wasser/Route/Wdh
     (S Saugen, B beides, W nur Wischen · L S K T · W M V · S I T · 1–3 · „-“ = nicht gesetzt).
-  - Deploy-Plan: `deploy.ps1`, `check_config`, **HA-Neustart** (neue Helfer), Strg+F5; danach
-    Plan 2 einmal von Hand starten und prüfen, dass Snapshot gefüllt und nach Andocken geleert wird.
+  - `heidi_lauf_abgeschlossen` stellt die Raumwerte **unabhängig vom Automatik-Lauf** wieder her
+    (auch nach Handstart über ▶), sobald Heidi 1 min angedockt ist und die Sicherung nicht leer ist.
+  - Testlauf 14.09. 09:07: `script.heidi_reinigung` mit Raum 3 (WC), Saugen/Standard/1× →
+    Sicherung `1:S/T/-/-/2;2:S/T/-/-/1;…` gefüllt, WC auf standard gesetzt, Start ok.
+  - Verwaiste `input_select.heidi_planN_ho_route/sp_route` per `config/entity_registry/remove`
+    (ha-ws.js) entfernt.
 
 ## 4. Offene Punkte (Stand 14.09.2026, Claude-Code-Sitzung)
 Erledigt:
