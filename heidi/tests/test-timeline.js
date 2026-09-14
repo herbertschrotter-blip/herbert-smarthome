@@ -16,6 +16,8 @@ const { chromium } = require('playwright'); const fs = require('fs');
     const now = Date.now(), m = (min) => new Date(now - min * 60000).toISOString();
     states['sensor.heidi_phase'] = { entity_id: 'sensor.heidi_phase', state: 'Wischt Küche', last_changed: m(3), attributes: {} };
     states['vacuum.heidi'].state = 'cleaning';
+    // Während eines Laufs ist das App-Protokoll "unavailable" – die Karte muss den letzten Stand behalten
+    window._histBackup = states['sensor.heidi_cleaning_history'];
     window._api = [];
     // Historie: Phase + Roboterzustand. Vorheriger Lauf endete vor 60 min (Rückkehr → docked), danach
     // Absaugen/Trocknen in der Station (zählt nicht), neuer Start vor 41 min. Türschwellen-Flackern
@@ -49,6 +51,9 @@ const { chromium } = require('playwright'); const fs = require('fs');
   console.log('Zeitleiste:'); tl.forEach(x => console.log('  ' + x));
   const api = await p.evaluate(() => window._api); console.log('API-Aufrufe:', api);
   console.log(tl.length === 7 && /Wäscht Mopps vor dem Start\s*5 min/.test(tl[0]) && /läuft/.test(tl[6]) ? 'ok' : 'FEHLER Zeitleiste');
+  // Protokoll-Sensor wird "unavailable" (wie im echten Lauf) → Protokoll bleibt mit Einträgen sichtbar
+  const keep = await p.evaluate(() => { const el = document.querySelector('heidi-panel'); const s = { ...el._hass.states }; s['sensor.heidi_cleaning_history'] = { ...s['sensor.heidi_cleaning_history'], state: 'unavailable', attributes: {}, last_updated: 'u' }; el.hass = { ...el._hass, states: s }; const sr = el.shadowRoot; return { details: !!sr.querySelector('[data-key=protokoll]'), rows: sr.querySelectorAll('.hrow[data-tl]:not([data-tl=cur])').length }; });
+  console.log('Protokoll bei unavailable:', JSON.stringify(keep), keep.details && keep.rows > 0 ? 'ok' : 'FEHLER Protokoll weg');
   // Protokoll-Eintrag aufklappen → zweiter API-Aufruf mit Zeitfenster des Laufs
   await p.evaluate(() => { const sr = document.querySelector('heidi-panel').shadowRoot; sr.querySelector('.hrow[data-tl]:not([data-tl=cur])').click(); });
   await p.waitForTimeout(300);

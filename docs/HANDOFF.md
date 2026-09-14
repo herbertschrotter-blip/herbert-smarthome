@@ -95,6 +95,13 @@ Uhr (10:15). Einrichten im Ordner `heidi/tests`: `npm i` und dann `npx playwrigh
   gründlich“ Räume 1,3 Viel/Intensiv/3 10:30 manuell; Leise-Profil Leise/1, Schnell-Profil
   Standard/1; Arbeitszeit 08:00–17:00, Rückkehr 17:00, Schnell-Minuten 90, Mindest-Akku 30,
   Prognose Intervall 15 / Auflösung 30 / Wochen 8 / Halbwert 21 / Mindesttage 14.
+- **`sensor.heidi_cleaning_history` ist während eines Laufs „unavailable“** → Protokoll und
+  „Letzter Lauf“ verschwanden. Karte (v1.5.5) merkt sich den letzten gültigen Stand
+  (`_histAttrs()`/`_histCache`) und zeigt das Protokoll während des Laufs weiter.
+- **Hinweg durch fremde Räume**: Beim Anfahren des ersten Raums meldete die Phase „Saugt Büro“,
+  „Saugt Flur“ … Jetzt „Fährt durch <Raum>“, wenn `current_segment` nicht in `active_segments`
+  liegt (Paket + Kopf-Streifen). Bei „ganze Karte“-Starts ist `active_segments` leer → keine
+  Unterscheidung möglich.
 - **Roboter-Hinweise sind keine Fehler**: `sensor.heidi_error` = `clean_mop_pad` („Mopps
   reinigen“) hat den Planer blockiert (Bedingung `no_error`). Jetzt zählt nur
   `state_attr('vacuum.heidi','has_error')`; die Karte zeigt Hinweise gelb (ERR_DE), Fehler rot.

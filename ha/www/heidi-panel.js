@@ -3,7 +3,7 @@
  * Robotereinstellungen, Einstellungs-Panel, Prognose) als HTML/CSS/JS.
  * Alle Daten kommen live aus Home Assistant (hass.states), alle Aktionen laufen über hass.callService.
  */
-const HP_VERSION = "1.5.4";
+const HP_VERSION = "1.5.5";
 
 const E = {
   vac: "vacuum.heidi",
@@ -501,8 +501,10 @@ class HeidiPanel extends HTMLElement {
     const v = room ? this._roomVals(seg) : null; if (!v) return "";
     const active = this.attr(E.vac, "active_segments") || [];
     const order = (this.attr(E.vac, "cleaning_sequence") || []).filter((id) => active.includes(id));
-    const idx = order.indexOf(seg), rest = idx >= 0 ? order.slice(idx + 1) : [];
+    const idx = order.indexOf(seg), rest = idx >= 0 ? order.slice(idx + 1) : order;
     const restTxt = rest.map((id) => ROOMS.find((r) => r.id === id)?.short).filter(Boolean).join(" → ");
+    // Raum gehört nicht zum Auftrag → Heidi fährt nur durch (Hinweg): keine Werte anzeigen
+    if (active.length && !active.includes(seg)) return `<div class="strip" data-act="rooms" title="Räume einstellen"><div class="lab">${ic(room.icon)} Fährt durch ${esc(room.short)} <span class="r">${restTxt ? "zu " + esc(restTxt) : ""} ${ic("mdi:chevron-right")}</span></div></div>`;
     const chip = (icon, txt, cls = "k") => `<span class="chip ${cls}" title="${esc(txt)}">${icon}${esc(txt)}</span>`;
     const modeIc = v.modus === "Saugen" ? ic("mdi:broom") : v.modus === "Nur Wischen" ? ic("mdi:water") : ic("mdi:broom") + ic("mdi:water");
     const fanIc = ic({ Leise: "mdi:fan-speed-1", Standard: "mdi:fan-speed-2", Stark: "mdi:fan-speed-3", Turbo: "mdi:fan" }[v.saug] || "mdi:fan");
@@ -587,9 +589,10 @@ class HeidiPanel extends HTMLElement {
 
   _stats() {
     const m = this.num("sensor.heidi_total_cleaning_time", 0);
-    const last = this.st("sensor.heidi_cleaning_history"), d = new Date(last);
+    const lastAttr = Object.values(this._histAttrs()).filter((v) => v && typeof v === "object" && v.timestamp).sort((x, y) => y.timestamp - x.timestamp)[0];
+    const last = lastAttr ? new Date(lastAttr.timestamp * 1000).toISOString() : this.st("sensor.heidi_cleaning_history"), d = new Date(last);
     const lastTxt = isNaN(d) ? "–" : d.toDateString() === new Date().toDateString() ? d.toLocaleTimeString("de-AT", { hour: "2-digit", minute: "2-digit" }) : d.toLocaleDateString("de-AT", { day: "2-digit", month: "2-digit" });
-    const ha = this._hass.states["sensor.heidi_cleaning_history"]?.attributes || {};
+    const ha = this._histAttrs();
     const lastRun = Object.values(ha).filter((v) => v && typeof v === "object" && v.timestamp).sort((x, y) => y.timestamp - x.timestamp)[0];
     const num = (v) => String(v ?? "").replace(/[^0-9]/g, "") || "0";
     const area = lastRun ? num(lastRun.cleaned_area) : this.st("sensor.heidi_cleaned_area"), dur = lastRun ? num(lastRun.cleaning_time) : this.st("sensor.heidi_cleaning_time");
@@ -601,10 +604,18 @@ class HeidiPanel extends HTMLElement {
       </div>${this._history()}${this._robot()}</div>`;
   }
 
+  // Protokoll-Attribute; während eines Laufs ist der Sensor "unavailable" → letzten Stand behalten
+  _histAttrs() {
+    const live = this._hass.states["sensor.heidi_cleaning_history"];
+    const ok = live && !["unknown", "unavailable"].includes(live.state) && Object.values(live.attributes || {}).some((v) => v && typeof v === "object" && v.timestamp);
+    if (ok) this._histCache = live.attributes;
+    return ok ? live.attributes : (this._histCache || {});
+  }
+
   _history() {
-    const a = this._hass.states["sensor.heidi_cleaning_history"]?.attributes || {};
+    const a = this._histAttrs();
     const rows = Object.entries(a).filter(([k, v]) => v && typeof v === "object" && v.timestamp).sort((x, y) => y[1].timestamp - x[1].timestamp).slice(0, 30);
-    if (!rows.length) return "";
+    if (!rows.length && !VAC_RUN.includes(this.st(E.vac))) return "";
     const fmt = (ts) => { const d = new Date(ts * 1000); return d.toLocaleDateString("de-AT", { weekday: "short", day: "2-digit", month: "2-digit" }) + " " + d.toLocaleTimeString("de-AT", { hour: "2-digit", minute: "2-digit" }); };
     const now = Math.floor(Date.now() / 1000);
     const li = rows.map(([, v], i) => {
