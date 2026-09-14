@@ -1,0 +1,6 @@
+{
+  "name": "heidi-tests",
+  "private": true,
+  "scripts": { "test": "node test-real.js && node test-editor.js && node test-zones.js" },
+  "devDependencies": { "playwright": "^1.50.0" }
+}

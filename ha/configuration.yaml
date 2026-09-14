@@ -1,0 +1,35 @@
+
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Pakete: je Thema eine Datei unter /config/packages/ (z. B. heidi.yaml)
+homeassistant:
+  packages: !include_dir_named packages
+  allowlist_external_dirs:
+    - /config/www
+    - /config/prognose
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+# Dashboards im YAML-Modus (Dateien unter /config/dashboards/)
+lovelace:
+  mode: storage
+  dashboards:
+    heidi-yaml:
+      mode: yaml
+      title: Heidi
+      icon: mdi:robot-vacuum
+      show_in_sidebar: true
+      filename: dashboards/heidi.yaml
+
+# Helfer (Schalter) für Heidi
+input_boolean:
+  stuehle_am_boden:
+    name: Stühle am Boden
+    icon: mdi:chair-rolling

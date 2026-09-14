@@ -1,0 +1,8 @@
+title: Heidi
+views:
+  - title: Heidi
+    path: heidi
+    icon: mdi:robot-vacuum
+    type: panel
+    cards:
+      - type: custom:heidi-panel
