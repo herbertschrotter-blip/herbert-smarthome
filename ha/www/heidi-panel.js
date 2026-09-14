@@ -3,7 +3,7 @@
  * Robotereinstellungen, Einstellungs-Panel, Prognose) als HTML/CSS/JS.
  * Alle Daten kommen live aus Home Assistant (hass.states), alle Aktionen laufen über hass.callService.
  */
-const HP_VERSION = "1.6.0";
+const HP_VERSION = "1.6.1";
 
 const E = {
   vac: "vacuum.heidi",
@@ -862,8 +862,8 @@ class HeidiPanel extends HTMLElement {
         <div class="rc ${mopOnly ? "" : "dim"}"><span>Route</span>${seg(id, "route", OPT.route, v.route, dis || !mopOnly)}</div>
         <div class="rc"><span>Wdh.</span>${seg(id, "wdh", OPT.wdh, v.wdh, dis)}</div>`}</div>`;
     };
-    const ids = plan ? ROOMS.filter((x) => e.raeume.has(x.id)) : ROOMS.slice();
-    const rows = ids.sort((a, b) => a.id - b.id).map((rm) => {
+    const ids = plan ? this._seqRooms().filter((x) => e.raeume.has(x.id)) : this._seqRooms();
+    const rows = ids.map((rm) => {
       if (plan) { const own = !!e.raum[rm.id]; return block(rm.id, rm.short, rm.icon, own ? e.raum[rm.id] : std(), own, true); }
       const v = this._roomVals(rm.id); return block(rm.id, rm.short, rm.icon, v || { modus: "–", saug: "–", wasser: null, route: null, wdh: "–" }, true, !!v);
     }).join("");
@@ -910,12 +910,14 @@ class HeidiPanel extends HTMLElement {
     if (tage.every((v, i) => v === (i < 5))) return "Mo–Fr"; if (tage.every((v, i) => v === (i >= 5))) return "Sa + So";
     return DAYS.filter((d, i) => tage[i]).join(n > 3 ? " " : " + "); // viele Tage: kompakt ohne Pluszeichen
   }
-  _roomLabel(set) { if (set.size === 7) return "Alle"; if (!set.size) return "keine Räume"; return ROOMS.filter((r) => set.has(r.id)).map((r) => r.short).join(", "); }
+  _roomLabel(set) { if (set.size === 7) return "Alle"; if (!set.size) return "keine Räume"; return this._seqRooms().filter((r) => set.has(r.id)).map((r) => r.short).join(", "); }
+  // Räume in der Reihenfolge, in der der Roboter sie abfährt (cleaning_sequence der Karte)
+  _seqRooms() { const seq = this.attr(E.vac, "cleaning_sequence") || []; return ROOMS.slice().sort((a, b) => { const ia = seq.indexOf(a.id), ib = seq.indexOf(b.id); return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib); }); }
 
   _editorHtml(n) {
     const e = this._ed || (this._ed = this._planRead(n));
     const seg = (key, opts, cls = "") => `<div class="seg ${cls}">${opts.map((o) => `<button data-ed="set" data-key="${key}" data-val="${esc(o)}" class="${e[key] === o ? "on" : ""}">${esc(o)}</button>`).join("")}</div>`;
-    const rooms = ROOMS.map((r) => `<button class="chip ${e.raeume.has(r.id) ? "on" : ""}" data-ed="room" data-val="${r.id}" title="${e.raum[r.id] ? "eigene Werte" : ""}">${ic(r.icon)}${r.short}${e.raum[r.id] ? '<i class="dotm"></i>' : ""}</button>`).join("");
+    const rooms = this._seqRooms().map((r) => `<button class="chip ${e.raeume.has(r.id) ? "on" : ""}" data-ed="room" data-val="${r.id}" title="${e.raum[r.id] ? "eigene Werte" : ""}">${ic(r.icon)}${r.short}${e.raum[r.id] ? '<i class="dotm"></i>' : ""}</button>`).join("");
     const ownCount = Object.keys(e.raum).filter((id) => e.raeume.has(parseInt(id))).length;
     const days = DAYS.map((d, i) => `<button class="chip ${e.tage[i] ? "on" : ""}" data-ed="day" data-val="${i}">${d}</button>`).join("");
     const presets = [["Mo–Fr", "1111100"], ["Wochenende", "0000011"], ["Täglich", "1111111"], ["Nur manuell (Szene)", "0000000"]].map(([t, m]) => `<button class="chip" data-ed="preset" data-val="${m}">${t}</button>`).join("");
@@ -930,7 +932,7 @@ class HeidiPanel extends HTMLElement {
       <h2>Eintrag ${n}&nbsp;<span style="font-weight:400;color:var(--muted)">bearbeiten</span><button class="iconbtn" data-act="close" aria-label="Schließen" style="margin-left:auto">${ic("mdi:close")}</button></h2>
       <div class="sec"><div class="lab">Name <span class="r" style="color:${e.aktiv ? "var(--accent)" : "var(--muted)"}">${e.aktiv ? "Aktiv" : "Inaktiv"} <span class="sw ${e.aktiv ? "on" : ""}" data-ed="bool" data-key="aktiv" role="switch" aria-checked="${e.aktiv}" tabindex="0"></span></span></div>
         <input type="text" data-ed="name" maxlength="40" value="${esc(e.name)}"></div>
-      <div class="sec"><div class="lab">Räume <span class="r">${esc(this._roomLabel(e.raeume))}${ownCount ? ` · ${ownCount} mit eigenen Werten` : ""}</span></div><div class="rooms">${rooms}</div></div>
+      <div class="sec"><div class="lab">Räume <span class="r">${esc(this._roomLabel(e.raeume))}${ownCount ? ` · ${ownCount} mit eigenen Werten` : ""}</span></div><div class="rooms">${rooms}</div><div class="hint">Reihenfolge wie der Roboter fährt (in der Dreame-App änderbar)</div></div>
       <div class="sec"><div class="lab">Standard für alle gewählten Räume</div>${seg("modus", OPT.modus)}</div>
       <div class="two">
         <div class="sec"><div class="lab">Saugstufe</div>${seg("saug", OPT.saug)}</div>

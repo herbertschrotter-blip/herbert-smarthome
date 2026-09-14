@@ -163,12 +163,19 @@ def lernwerte(rows):
     raeume = {}   # seg -> {flaechen:[...], belag}
     vor, zw = [], []
     selfclean = 25
+    now = datetime.now()
     for idx, run in enumerate(runs):
-        for s in room_segments(run):
+        segs = room_segments(run)
+        # Unvollständige Raumabschnitte liefern keine Raumfläche: der erste, wenn das Protokoll erst
+        # mitten im Lauf begann (Fläche > 0 in der ersten Zeile), und der letzte, wenn der Lauf noch läuft.
+        began_late = run[0]["area_f"] > 0
+        ongoing = run[-1].get("vac") in RUN and (now - run[-1]["t"]).total_seconds() < 300
+        for i, s in enumerate(segs):
             a = acc.setdefault(s["key"], {"min": 0.0, "area": 0.0, "drop": 0.0, "runs": set()})
             a["min"] += s["min"]; a["area"] += s["area"]; a["drop"] += s["drop"]; a["runs"].add(idx)
             rm = raeume.setdefault(s["seg"], {"flaechen": [], "belag": ""})
-            if s["area"] > 0:
+            partial = (i == 0 and began_late) or (i == len(segs) - 1 and ongoing)
+            if s["area"] > 0 and not partial:
                 rm["flaechen"].append(s["area"] / s["times"])
             if s["belag"]:
                 rm["belag"] = s["belag"]
