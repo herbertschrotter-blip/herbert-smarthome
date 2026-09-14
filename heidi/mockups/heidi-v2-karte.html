@@ -1852,11 +1852,21 @@ const MODES = [
   { key:'wand', name:'Wände', hint:'Linien ziehen → vacuum_set_restricted_zone { walls } (virtuelle Wände)', mode: { name:'Virtuelle Wände', icon:'mdi:wall', selection_type:'MANUAL_PATH', max_selections:10, coordinates_rounding:true, coordinates_to_meters_divider:1000, run_immediately:false, service_call_schema:{ service:'dreame_vacuum.vacuum_set_restricted_zone', service_data:{ entity_id:'[[entity_id]]', walls:'[[selection]]' } } } },
 ];
 let cardB = null;
+// Heidis Kartenknöpfe am unteren Rand des Kartenbilds verankern (nicht der Kartenzeile darunter)
+function placeOnMap() {
+  const img = cardB?.shadowRoot?.querySelector('img'), wrap = document.querySelector('.mapwrap'), bar = document.querySelector('.onmap');
+  if (!img || !wrap || !bar) return;
+  if (!img.complete || !img.getBoundingClientRect().height) { setTimeout(placeOnMap, 150); return; }
+  const w = wrap.getBoundingClientRect(), i = img.getBoundingClientRect();
+  bar.style.bottom = Math.max(10, Math.round(w.bottom - i.bottom) + 10) + 'px';
+}
+window.addEventListener('resize', placeOnMap);
 function setMode(key) {
   const m = MODES.find((x) => x.key === key) || MODES[0];
   const slot = document.getElementById('slotB'); slot.innerHTML = '';
   cardB = make({ ...base, title:'', tiles:[], icons:[], map_modes:[m.mode] }); slot.appendChild(cardB);
   document.querySelectorAll('#modes button').forEach((b) => b.classList.toggle('on', b.dataset.key === key));
+  placeOnMap();
   if (key !== 'goto') document.getElementById('gotoBtn').classList.remove('on');
   const below = document.getElementById('below');
   below.innerHTML = key === 'raeume' ? `<div class="rooms" id="rooms">${[...ROOMS].sort((a,b) => b[0]-a[0]).map(([id,t]) => `<button data-id="${id}">${t.replace('zimmer','z.')}</button>`).join('')}</div>` : `<div class="modehint" id="modehint">${m.hint}</div>`;
