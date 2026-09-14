@@ -1,0 +1,14 @@
+# Niemals ins Repo: Zugangsdaten, Datenbanken, private Protokolle
+secrets.yaml
+.storage/
+*.db
+*.db-*
+*.log
+presence_log.csv
+config.json
+# Lokales
+node_modules/
+*.png
+!heidi/mockups/*.png
+.env
+heidi/tests/real_states.json
