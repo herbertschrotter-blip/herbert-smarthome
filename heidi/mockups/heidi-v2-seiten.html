@@ -161,7 +161,12 @@
   .map .nomop { fill: rgba(90,169,255,.25); stroke: var(--blue); stroke-width: 1.2; stroke-dasharray: 4 3; }
   .map .bot { fill: var(--accent); stroke: #fff; stroke-width: 1.5; }
   .map .dock { fill: var(--muted-2); }
-  .map .mtools { position: absolute; right: 10px; bottom: 10px; display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+  .map .mtools { position: absolute; left: 10px; bottom: 10px; display: flex; gap: 6px; }
+  .map .mtools .btn.sm { background: rgba(20,28,44,.72); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+  .map .mtools .btn.sm.on { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+  .mapmodes { display: flex; gap: 8px; align-items: center; margin-top: 10px; } .mapmodes .seg2 { flex: 1 1 auto; } .mapmodes .seg2 button { flex: 1; }
+  .maps { display: inline-flex; gap: 2px; background: rgba(120,120,128,.22); border-radius: 8px; padding: 2px; } .maps button { border: 0; background: transparent; color: var(--muted); padding: 3px 8px; border-radius: 6px; font: inherit; font-size: 11px; font-weight: 500; cursor: pointer; } .maps button.on { color: var(--text); background: var(--glass-3); }
+  .tabs { display: flex; gap: 2px; background: rgba(120,120,128,.22); border-radius: 10px; padding: 2px; margin-bottom: 10px; } .tabs button { flex: 1; border: 0; background: transparent; color: var(--text); padding: 8px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; } .tabs button.on { background: var(--glass-3); font-weight: 600; }
   .rooms { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 10px; }
   @container (max-width: 640px) { .rooms { grid-template-columns: repeat(4, 1fr); } }
   .rooms button { border: 1px solid var(--line-soft); background: var(--glass-2); border-radius: 12px; padding: 9px 4px 7px; display: grid; justify-items: center; gap: 4px; font-size: 11px; cursor: pointer; position: relative; }
@@ -239,7 +244,7 @@
   .hint { font-size: 12px; color: var(--muted); }
   .toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); background: rgba(20,24,34,.92); color: #fff; padding: 10px 16px; border-radius: 14px; font-size: 13px; z-index: 70; box-shadow: 0 10px 30px rgba(0,0,0,.4); opacity: 0; pointer-events: none; transition: opacity .2s; max-width: 90%; text-align: center; }
   .toast.show { opacity: 1; }
-  .fade { animation: fade .18s ease; } @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .fade { animation: fade .18s ease; } @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 </style>
 </head>
 <body>
@@ -302,7 +307,7 @@ const S = {
     { n: 4, name: 'Bad & WC gründlich', aktiv: false, raeume: [1, 3], modus: 'Nur Wischen', saug: 'Standard', wasser: 'Viel', route: 'Intensiv', wdh: '3', tage: [0, 0, 0, 0, 0, 0, 0], zeit: '10:30', personen: [], ho: 'Warten', hoSaug: 'Leise', hoWdh: '1', schnell: false, spSaug: 'Standard', spWdh: '1', raum: {} },
   ],
   robotRooms: { 1: ['Saugen + Wischen', 'Turbo', 'Viel', null, '2'], 2: ['Saugen', 'Leise', null, null, '1'], 3: ['Nur Wischen', 'Standard', 'Mittel', 'Intensiv', '1'], 4: ['Saugen + Wischen', 'Turbo', 'Mittel', null, '1'], 5: ['Saugen', 'Standard', null, null, '1'], 6: ['Saugen + Wischen', 'Turbo', 'Viel', null, '1'], 7: ['Saugen + Wischen', 'Turbo', 'Mittel', null, '1'] },
-  selRooms: new Set(), zones: [[-4200, -4775, -1150, -2075]], noMops: [[-1550, -188, -643, 937]], chairs: true, kind: 'Dreame-App', rotation: '0', raumnamen: 'Deutsch',
+  mapMode: 'raeume', goto: false, mapSel: 1, selRooms: new Set(), zones: [[-4200, -4775, -1150, -2075]], noMops: [[-1550, -188, -643, 937]], chairs: true, kind: 'Dreame-App', rotation: '0', raumnamen: 'Deutsch',
   planerBereich: true, prognoseAktiv: true, ninaZaehlt: false, abweichung: false, prog: { herbert: true, nicole: true, nina: true },
   az: ['08:00', '17:00'], rueckkehr: '17:00', schnellMin: 90, minAkku: 30, heimkehr: 'Zur Station', prognose: { intervall: 15, aufloesung: 30, wochen: 8, halbwert: 21, mindesttage: 14 },
   tlOpen: new Set(), overlay: null, draft: null,
@@ -381,7 +386,7 @@ function pageStart() {
       <div class="card"><h2>Verschleiß <span class="r">Reset durch Antippen</span></h2><div class="cons">
         ${[['Hauptbürste', 71], ['Seitenbürste', 44], ['Filter', 18], ['Sensoren', 92], ['Räder', 8]].map(([n, p]) => `<button data-confirm="${n}: Zähler zurücksetzen?"><div class="mini" style="--p:${p};--v:${p <= 10 ? 'var(--bad)' : p <= 25 ? 'var(--warn)' : 'var(--accent)'}"><span>${p}</span></div><div class="l">${n}</div></button>`).join('')}</div></div>
       <div class="nav">
-        <button class="navtile" data-nav="reinigen"><div class="ic c-teal">${I.broom}</div><div class="t">Reinigen ${I.chev}</div><div class="s">Karte, Räume wählen, Sperrzonen, App-Szenen</div></button>
+        <button class="navtile" data-nav="reinigen"><div class="ic c-teal">${I.broom}</div><div class="t">Reinigen ${I.chev}</div><div class="s">Karte: Räume, Zone, Punkt · Hinfahren · Sperrzonen · App-Szenen</div></button>
         <button class="navtile" data-nav="planer"><div class="ic c-blue">${I.cal}</div><div class="t">Planer ${I.chev}</div><div class="s">4 Einträge · heute: Tägliches Saugen 09:30 · ≈ ${fmtMin(estimate(S.plans[0]).total)} ✓</div></button>
         <button class="navtile" data-nav="protokoll"><div class="ic c-purple">${I.list}</div><div class="t">Protokoll ${I.chev}</div><div class="s">Letzter Lauf gestern 09:31 · 84 m² · 96 min</div></button>
         ${pg}
@@ -400,16 +405,22 @@ function mapSvg(sel, cur, showZones) {
 }
 
 function pageReinigen() {
-  const st = STATES[S.vac], sel = S.selRooms;
+  const st = STATES[S.vac], sel = S.selRooms, mode = S.goto ? 'goto' : S.mapMode;
   const chips = ROOMS.map((r) => `<button class="${sel.has(r.id) ? 'sel' : ''}" data-room="${r.id}">${I[r.icon]}${r.short}</button>`).join('');
+  const HINT = { zone: 'Rechteck auf der Karte aufziehen (bis zu 5), dann ▶ → dreame_vacuum.vacuum_clean_zone', punkt: 'Punkt auf der Karte antippen, dann ▶ → dreame_vacuum.vacuum_clean_spot', goto: 'Punkt auf der Karte antippen → dreame_vacuum.vacuum_goto (Heidi fährt hin und wartet)' };
+  const below = mode === 'raeume'
+    ? `<div class="rooms">${chips}</div>${sel.size ? `<div class="runbar fade"><button class="btn primary" data-confirm="Jetzt reinigen: ${esc(ROOMS.filter((r) => sel.has(r.id)).map((r) => r.short).join(', '))}?" data-then="cleanrooms">${I.play}${sel.size} ${sel.size === 1 ? 'Raum' : 'Räume'} reinigen</button><button class="btn" data-act="clearrooms">${I.close}</button></div>` : `<div class="hint" style="margin-top:8px">Räume in der Karte oder über die Chips antippen, dann „reinigen“.</div>`}`
+    : `<div class="hint" style="margin-top:8px">${HINT[mode]}</div>`;
+  const maps = `<span class="maps"><button class="${S.mapSel === 1 ? 'on' : ''}" data-map="1">Erdgeschoss</button><button class="${S.mapSel === 2 ? 'on' : ''}" data-map="2">Obergeschoss</button></span>`;
   return navbar('Reinigen') + `<div class="grid"><div class="col">
-    <div class="card"><h2>Karte <span class="r">${esc(S.kind)} · ${st.phase}</span></h2>
-      <div class="map">${mapSvg(sel, st.cur, true)}<div class="mtools"><button class="btn sm" data-open="zones">${I.ban}Sperrzonen · 2</button><button class="btn sm ${S.chairs ? 'primary' : ''}" data-sw="chairs">${I.chair}Stühle am Boden${S.chairs ? ' · gesperrt' : ''}</button></div></div>
-      <div class="rooms">${chips}</div>
-      ${sel.size ? `<div class="runbar fade"><button class="btn primary" data-confirm="Jetzt reinigen: ${esc(ROOMS.filter((r) => sel.has(r.id)).map((r) => r.short).join(', '))}?" data-then="cleanrooms">${I.play}${sel.size} ${sel.size === 1 ? 'Raum' : 'Räume'} reinigen</button><button class="btn" data-act="clearrooms">${I.close}</button></div>` : `<div class="hint" style="margin-top:8px">Räume antippen (Karte oder Chips), dann „reinigen“. Einstellungen je Raum unter „Räume“.</div>`}
+    <div class="card"><h2>Karte ${maps}</h2>
+      <div class="map">${mapSvg(sel, st.cur, true)}<div class="mtools"><button class="btn sm ${S.goto ? 'on' : ''}" data-act="goto">${I.locate}Hinfahren</button><button class="btn sm" data-open="zones">${I.ban}Sperrzonen</button></div></div>
+      <div class="mapmodes"><div class="seg2"><button data-mapmode="raeume" class="${mode === 'raeume' ? 'on' : ''}">Räume</button><button data-mapmode="zone" class="${mode === 'zone' ? 'on' : ''}">Zone</button><button data-mapmode="punkt" class="${mode === 'punkt' ? 'on' : ''}">Punkt</button></div><button class="btn primary sm" data-confirm="Ganze Wohnung reinigen?" data-then="all">${I.play}Alles</button></div>
+      ${below}
     </div></div><div class="col">
     <div class="card"><h2>Dreame-App-Szenen</h2><div class="plan">
       ${[['Eingang reinigen', 'Flur · Saugen + Wischen · 2×', 'foot'], ['Bad Saugen/Wischen', 'Bad · 1×', 'shower'], ['Wischen nach dem Saugen', 'Ganze Wohnung · nur Wischen', 'water']].map(([n, s, ic]) => `<div class="pr"><div class="ic blue">${I[ic]}</div><div><div class="n">${n}</div><div class="s">${s}</div></div><span class="tag">App</span><div class="acts"><button class="ib go" data-confirm="„${n}“ starten?">${I.play}</button></div></div>`).join('')}</div></div>
+    <div class="card"><h2>Sperrzone Esstisch</h2><div class="crow"><div class="ic ${S.chairs ? 'on' : ''}">${I.chair}</div><div><div class="t">Stühle am Boden</div><div class="s">Setzt eine Sperrzone um den Esstisch (Automation heidi_sperrzone_esstisch)</div></div>${sw('chairs', S.chairs)}</div></div>
     <div class="card"><h2>Räume (Roboter-Werte)</h2><div class="hint">Modus, Saugstufe, Wasser, Route und Wiederholungen je Raum, wie in der Dreame-App. Änderungen gelten sofort.</div><div style="margin-top:10px"><button class="btn" data-open="rooms-robot">${I.grid}Räume einstellen …</button></div></div>
     </div></div>`;
 }
@@ -561,8 +572,9 @@ function estHtml(o) {
   return dlg('Dauer & Akku', esc(p.name), `${sum}<div class="sec"><div class="lab">Ablauf in Roboter-Reihenfolge</div><div style="display:grid;gap:4px">${rows}</div></div><div class="sec"><div class="lab">Akku über den Lauf</div><div class="chips" style="margin:0 0 6px"><span class="chip on">${esc(p.modus)} · ${esc(p.saug)}</span><button class="chip ${o.cmp ? 'acc' : ''}" data-act="est-cmp">Vergleich mit ${cmpSaug}</button><span class="hint">gestrichelt = geschätzt</span></div><svg viewBox="0 0 ${Wd} ${Ht}" style="width:100%;height:auto;display:block">${grid}${ret}${poly}${xt.join('')}</svg></div>`, `<button class="btn primary" data-act="${close}">${o.back === 'editor' ? 'Zurück zum Eintrag' : 'Fertig'}</button>`, close);
 }
 function zonesHtml(o) {
-  const body = `<div class="seg2" style="margin-bottom:8px"><button data-act="ztype" data-val="zones" class="${o.type === 'zones' ? 'on' : ''}">Sperrzonen (${S.zones.length})</button><button data-act="ztype" data-val="no_mops" class="${o.type === 'no_mops' ? 'on' : ''}">Wisch-Sperrzonen (${S.noMops.length})</button></div>
-    <div class="map" style="cursor:crosshair" data-zdraw>${mapSvg(new Set(), null, true)}</div><div class="hint" style="margin-top:8px">Rechteck aufziehen = neue Zone · antippen = auswählen · Speichern ersetzt alle Zonen dieses Typs.</div>
+  const T = { zones: ['Sperrzonen', S.zones.length, 'vacuum_set_restricted_zone { zones }'], no_mops: ['Wisch-Sperrzonen', S.noMops.length, 'vacuum_set_restricted_zone { no_mops }'], walls: ['Virtuelle Wände', 0, 'vacuum_set_restricted_zone { walls } – Linien statt Rechtecke'] };
+  const body = `<div class="tabs">${Object.entries(T).map(([k, [t, n]]) => `<button data-act="ztype" data-val="${k}" class="${o.type === k ? 'on' : ''}">${t}${n ? ` (${n})` : ''}</button>`).join('')}</div>
+    <div class="map" style="cursor:crosshair" data-zdraw>${mapSvg(new Set(), null, true)}</div><div class="hint" style="margin-top:8px">${o.type === 'walls' ? 'Linie ziehen = neue Wand' : 'Rechteck aufziehen = neue Zone'} · antippen = auswählen · Speichern ersetzt alle Einträge dieses Typs → ${T[o.type][2]}. Bestehende Einträge lädt Heidi aus camera.heidi_map (Overlay), neue zeichnet die Karte.</div>
     <div class="chips" style="margin-top:8px"><button class="btn sm danger" data-toast="Ausgewählte Zone gelöscht (Mockup)">Ausgewählte löschen</button><button class="btn sm danger" data-confirm="Wirklich alle Zonen dieses Typs löschen?">Alle löschen</button></div>`;
   return dlg('Sperrzonen bearbeiten', '', body, `<button class="btn" data-act="close">Abbrechen</button><button class="btn primary" data-act="zsave">Speichern</button>`, 'close', true);
 }
@@ -635,9 +647,12 @@ $('#page').addEventListener('click', async (e) => {
   }
   if (d.room && !d.rv && !d.seg) { const id = +d.room; S.selRooms.has(id) ? S.selRooms.delete(id) : S.selRooms.add(id); render(); return; }
   if (d.act === 'clearrooms') { S.selRooms = new Set(); render(); return; }
+  if (d.mapmode) { S.mapMode = d.mapmode; S.goto = false; render(); return; }
+  if (d.act === 'goto') { S.goto = !S.goto; render(); return; }
+  if (d.map) { S.mapSel = +d.map; toast('select.heidi_selected_map → Karte ' + d.map); render(); return; }
   if (d.run) { const p = S.plans.find((x) => x.n === +d.run); if (!p.aktiv) { toast('Eintrag ist inaktiv'); return; } confirmDlg(`„${p.name}“ jetzt starten?`, '', () => { S.vac = 'cleaning'; STATES.cleaning.big = p.name; toast('Gestartet: ' + p.name); render(); }); return; }
   if (d.tl !== undefined) { const i = +d.tl; S.tlOpen.has(i) ? S.tlOpen.delete(i) : S.tlOpen.add(i); render(); return; }
-  if (d.confirm) { confirmDlg(d.confirm, '', () => { if (d.then === 'cleanrooms') { S.vac = 'cleaning'; STATES.cleaning.big = 'Reinigt Räume'; S.selRooms = new Set(); toast('Gestartet (vacuum_clean_segment)'); render(); } else toast('Ausgelöst'); }); return; }
+  if (d.confirm) { confirmDlg(d.confirm, '', () => { if (d.then === 'cleanrooms') { S.vac = 'cleaning'; STATES.cleaning.big = 'Reinigt Räume'; S.selRooms = new Set(); toast('Gestartet (vacuum_clean_segment)'); render(); } else if (d.then === 'all') { S.vac = 'cleaning'; STATES.cleaning.big = 'Reinigt'; toast('Gestartet (vacuum.start)'); render(); } else toast('Ausgelöst'); }); return; }
   if (d.act === 'confirm-ok') { const then = S.overlay.then; S.overlay = null; renderOverlay(); then && then(); return; }
   if (d.act === 'close') { S.overlay = null; S.draft = null; renderOverlay(); return; }
   if (d.act === 'rooms-back' || d.act === 'est-back') { S.overlay = { kind: 'editor' }; renderOverlay(); return; }

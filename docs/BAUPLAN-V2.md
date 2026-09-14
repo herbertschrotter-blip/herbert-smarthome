@@ -295,7 +295,7 @@ heidi/card/
 | Seite | Inhalt |
 |---|---|
 | `start` | `heidi-hero` (mit Streifen, Knöpfen), `heidi-automatik` (Einzeiler + Schalter), `heidi-station`, `heidi-consumables`, `heidi-nav-tiles` (Reinigen, Planer, Protokoll, Prognose, Einstellungen; Prognose-Kachel mit den drei Tageswerten, nur bei aktiv) |
-| `reinigen` | `heidi-map-card` (Karte, Raum-Chips, Sperrzonen, Stühle), App-Szenen, Knopf „Räume (Roboter-Werte)“ |
+| `reinigen` | `heidi-map-card` (Kartenwahl in der Kopfzeile, Karte mit Knöpfen „Hinfahren“ und „Sperrzonen“ unten links, Segment Räume / Zone / Punkt mit „Alles“, Raum-Chips im Modus Räume), App-Szenen, Schalter „Stühle am Boden“ als Zeile, Knopf „Räume (Roboter-Werte)“. Referenz: `heidi/mockups/heidi-v2-karte.html` (echte Xiaomi-Karte im Glas-Design) und Seite Reinigen in `heidi-v2-seiten.html` |
 | `planer` | `heidi-planer` (Liste, Dauer-Kurzzeile), Automatik-Regeln, Editor/Räume/Dauer-Dialoge |
 | `protokoll` | `heidi-history` (Letzter Lauf, Protokoll, Zeitleiste), Lernwerte-Tabelle |
 | `prognose` | `heidi-prognose-view` |
@@ -312,7 +312,7 @@ trägt eines zwei unabhängige Zustände, werden es zwei.
 | `heidi-nav-tiles` | prognoseView | `heidi-navigate {page}` | Klick löst `location-changed` mit `/heidi-v2/<page>` aus (E2E `nav.js`) |
 | `heidi-hero` | robotView, api | `heidi-open-overlay {rooms}` | Kopf-Tabelle aus 0.1; Streifen-Fälle |
 | `heidi-dialog` | title, variant | `heidi-close`, `heidi-confirm` | Escape; Sheet < 600 px Container |
-| `heidi-map-card` | hass, api, kind, dark | `heidi-open-overlay {zones}` | Element über 20 Ticks identisch; `vacuum_clean_segment` nach Bestätigung |
+| `heidi-map-card` | hass, mapView, api, kind, dark | `heidi-open-overlay {zones}` | Element über 20 Ticks identisch; `vacuum_clean_segment` nach Bestätigung; Moduswechsel gibt der Karte genau einen `map_modes`-Eintrag |
 | `heidi-planer` | plans[], today, lern, restMin, api | `{editor n}`, `{estimate n}` | 4 Zeilen, heutiger markiert, ▶ verweigert bei inaktiv |
 | `heidi-planer-editor` | api, n, draft | `heidi-close` | 16 Calls; Draft überlebt hass-Update; Teilfehler sichtbar; Hinweis „außerhalb geändert“ |
 | `heidi-clock-picker` | value | `change` | 10 → Minuten → 15 → OK = „10:15“ |
@@ -529,11 +529,11 @@ Nach jedem Build v2 neben v1 ansehen; Unterschiede → Abschnitt 10/10a.
 
 **4.3 `heidi-map-card` (Seite Reinigen)**
 - Voraussetzung: 4.2, 2.4
-- Ziel: Kartenslot mit Modul-Cache, Raum-Chips, Leiste „N Räume reinigen“ mit Bestätigung, Zonen-Knopf mit Zähler, Stühle-Knopf, App-Szenen, Knopf „Räume (Roboter-Werte)“.
-- Nicht ändern: die drei Kartenkonfigurationen.
-- Akzeptanz: Karten-Element über 20 Ticks identisch und 0 Neuerzeugungen; Raumauswahl → `vacuum_clean_segment` mit richtigen `segments`; App-Szene → `heidi_app_szene` nach Bestätigung.
+- Ziel: Kartenslot mit Modul-Cache. Kopfzeile mit Kartenwahl (nur wenn `select.heidi_selected_map` existiert; schreibt `select_option`). Auf der Karte unten links zwei Knöpfe: „Hinfahren“ (schaltet die Karte in den Modus `vacuum_goto`) und „Sperrzonen“ (öffnet Dialog). Darunter Segment Räume / Zone / Punkt und Knopf „Alles“ (`vacuum.start` nach Bestätigung); das Segment gibt der eingebetteten Karte genau **einen** `map_modes`-Eintrag (`vacuum_clean_segment` mit `predefined_selections` inkl. `outline` je Raum, `vacuum_clean_zone`, `vacuum_clean_point`), sodass die Karte kein eigenes Modus-Menü zeigt. Im Modus Räume: Raum-Chips (Reihenfolge 7..1) und Leiste „N Räume reinigen“ mit Bestätigung; in den anderen Modi eine Hinweiszeile. Raum-Marker und Umrisse werden aus `camera.heidi_map` (Attribut `rooms`, Koordinaten) berechnet, nicht von Hand gesetzt. Glas-Optik über die CSS-Variablen aus `heidi/mockups/heidi-v2-karte.html` (Abschnitt „Was hier gesetzt ist“), `tiles: []`, `icons: []`, kein Titel. Sperrzonen-Dialog (`heidi-zones-editor`, 4.12) mit drei Reitern Sperrzonen / Wisch-Sperrzonen / Virtuelle Wände: bestehende Einträge aus `camera.heidi_map` als Heidi-Overlay (verschieben, löschen), neue über die Karte im Modus `MANUAL_RECTANGLE` bzw. `MANUAL_PATH` (Großschreibung, siehe Abschnitt 10). Schalter „Stühle am Boden“ als Zeile in einer eigenen Kachel, nicht auf der Karte. App-Szenen und Knopf „Räume (Roboter-Werte)“ wie bisher.
+- Nicht ändern: Dreame-App- und Nur-Bild-Konfiguration; Dienste und Payloads (Abschnitt 4); die Zeile der Karte mit Wiederholungen und ▶ bleibt (sie führt Zeichnungen aus und lässt sich per YAML nicht abschalten).
+- Akzeptanz: Karten-Element über 20 Ticks identisch und 0 Neuerzeugungen; Raumauswahl per Chip oder per Tipp in die Raumfläche → `vacuum_clean_segment` mit richtigen `segments`; Segmentwechsel setzt genau einen Modus; „Hinfahren“ setzt `vacuum_goto`; Kartenwahl fehlt ohne `select.heidi_selected_map`; App-Szene → `heidi_app_szene` nach Bestätigung; Umrisse stimmen mit `rooms` aus der Fixture überein.
 - Tests: `npm test`
-- Dateien: `src/components/heidi-map-card.ts`, `tests/e2e/map.js`
+- Dateien: `src/components/heidi-map-card.ts`, `src/ha/selectors.ts` (`readMap` mit Räumen/Umrissen), `tests/e2e/map.js`
 
 **4.4 `heidi-planer` (Seite Planer)**
 - Voraussetzung: 4.0, 2.2
@@ -601,9 +601,9 @@ Nach jedem Build v2 neben v1 ansehen; Unterschiede → Abschnitt 10/10a.
 
 **4.12 `heidi-zones-editor`**
 - Voraussetzung: 4.3, 2.4
-- Ziel: Zeichnen, Auswählen, Löschen, Speichern über `setZones` mit Teilfehler-Meldung.
+- Ziel: Dialog mit drei Reitern (Sperrzonen, Wisch-Sperrzonen, Virtuelle Wände). Bestehende Einträge aus `camera.heidi_map` (`no_go_areas`, `no_mopping_areas`, `virtual_walls`) als Overlay über dem Kartenbild wie in v1: auswählen, verschieben, löschen. Neue Einträge über die eingebettete Karte im Modus `MANUAL_RECTANGLE` (Zonen) bzw. `MANUAL_PATH` (Wände) oder über v1s Aufziehen auf dem Bild (eine der beiden Arten wird beim Bau gewählt und in Abschnitt 10 begründet). Speichern über `setZones` mit allen drei Listen und Teilfehler-Meldung; Hinweis, dass Speichern alle Einträge eines Typs ersetzt.
 - Nicht ändern: `calibration.ts`.
-- Akzeptanz: `zones.js` (Geste aus 0.1) → gleiche mm-Koordinaten wie v1; Hinweis ohne Kalibrierung.
+- Akzeptanz: `zones.js` (Geste aus 0.1) → gleiche mm-Koordinaten wie v1; Hinweis ohne Kalibrierung; Reiter Wände sendet `walls`.
 - Tests: `npm test`
 - Dateien: `src/components/heidi-zones-editor.ts`, `tests/e2e/zones.js`
 
@@ -701,7 +701,10 @@ Format: `- [Datum] [Aufgabe] Art (Widerspruch | Messung | Befund | Wunsch) · Sc
 
 Für 2.0 müssen `Blocker` und `Functional` = 0 sein. `Cosmetic` und `Post-2.0` dürfen offen bleiben.
 
-- (leer)
+- [2026-09-14] [4.3] Befund · Functional (v1): In der Xiaomi-Konfiguration von v1 (`_mountMap`, Modi „Sperrzonen setzen“ und „Wisch-Sperrzonen setzen“) steht `selection_type: manual_rectangle` in Kleinschreibung. Die Karte erwartet `MANUAL_RECTANGLE` (wie ihre eingebauten Vorlagen) und blendet sonst „+“ und Zeichenwerkzeuge aus. In v2 richtig schreiben; v1 bleibt unverändert (Regel 3). Entscheidung Herbert: zur Kenntnis genommen (Chat 14.09.).
+- [2026-09-14] [4.3] Befund · Cosmetic: Das Kartenbild der Integration enthält englische Raumnamen, Heidi zeigt deutsche Marker. In den Optionen der Dreame-Integration Raumnamen im Bild ausblenden (Herbert, beim Umschalten).
+- [2026-09-14] [4.3] Wunsch · Post-2.0: Pixelgenaue Raumauswahl wie in der App über `camera.heidi_map_data` (Valetudo-Format, Segment-Masken) in einer eigenen Kartenansicht; die Xiaomi-Karte kann nur Polygone (`outline`) und trifft an Raumrändern ungenau.
+- [2026-09-14] [4.3] Wunsch · Post-2.0: Kartenwahl für mehrere Etagen (`switch.heidi_multi_floor_map`, `select.heidi_selected_map`, `camera.heidi_map_1..3`), sobald eine zweite Karte existiert; Reihenfolge der Räume per Ziehen (`vacuum_set_cleaning_sequence`).
 
 Wünsche `Post-2.0`: lokale Font-Dateien (Sora/IBM Plex).
 
@@ -713,6 +716,7 @@ ist eine Abweichung ein Fehler.
 | id | bereich | v1 | v2 | grund | spec_test | Status |
 |---|---|---|---|---|---|---|
 | PD-000 | Navigation | eine Seite, Tabs Übersicht/Prognose, Einstellungen als Seitenleiste | Startseite + fünf Unteransichten (HA `subview`), Einstellungen als Seite | Herberts Wunsch; Layout, keine Fachlogik; Seitenschnitt laut Mockup 3.4 | `nav.js` | freigegeben (Herbert, 2026-09-14) |
+| PD-004 | Karte | Karte + Raum-Chips + Knöpfe „Sperrzonen“/„Stühle am Boden“ auf der Karte | Segment Räume/Zone/Punkt + „Alles“, Knöpfe „Hinfahren“/„Sperrzonen“ unten links auf der Karte, Räume auch per Tipp in die Fläche wählbar, Stühle-Schalter als Zeile | Herberts Wunsch (Chat 14.09.); Bedienung, keine Fachlogik; dieselben Dienste | `map.js` | freigegeben (Herbert, 2026-09-14) |
 | PD-001 | Editor | Live-Daten eingefroren bei offenem Editor | Kopf/Streifen aktualisieren sich, Draft bleibt | Folge des Render-Modells, nicht gewollt | `live-update.js` | freigegeben (Herbert, 2026-09-14) |
 | PD-002 | Speichern | Fehler beim Speichern → Toast, Editor schließt | Teilfehler benannt, Editor bleibt offen | Regel 20 | `api.test.ts` Fehlerinjektion | freigegeben (Herbert, 2026-09-14) |
 | PD-003 | Bestätigungen | `window.confirm` | `heidi-dialog confirm` | Regel 13 | `dialog.js` | freigegeben (Herbert, 2026-09-14) |
