@@ -72,7 +72,7 @@ Kurz-Start in Claude Code:
 ### Tests
 `heidi/tests/test-real.js`, `test-editor.js`, `test-zones.js` (Playwright headless, mit
 `real_states.json` als HA-Zustand). Editor-Test prüft u. a. die erzeugten Service-Calls und die
-Uhr (10:15). `npm i playwright` im Ordner `heidi/tests`.
+Uhr (10:15). Einrichten im Ordner `heidi/tests`: `npm i` und dann `npx playwright install chromium`.
 
 ---
 
@@ -84,6 +84,15 @@ Uhr (10:15). `npm i playwright` im Ordner `heidi/tests`.
 - Kopfzeile „Eintrag 2bearbeiten" → `&nbsp;` einfügen.
 - Prognose blieb grau, bis genügend Tage protokolliert waren (Mindesttage-Slider beachten).
 - WLAN-Anwesenheit wird alle *Intervall* Minuten (Standard 15) per Automation protokolliert.
+- **Umlaute in Entitäts-IDs**: HA macht aus dem Namen „Heidi Nicht stören“ die ID
+  `binary_sensor.heidi_nicht_storen` (ö → o, *nicht* oe). `unique_id` hat darauf keinen Einfluss.
+  Der Planer prüfte `heidi_nicht_stoeren` → Bedingung auf fehlende Entität ist immer falsch →
+  Planer hat nie ausgelöst, während der Status-Sensor „startet“ anzeigte. Bei neuen Template-
+  Entitäten mit Umlaut im Namen die echte ID immer per API nachschauen (gleiches gilt für
+  Automations-IDs: `automation.heidi_heimkehr_wahrend_reinigung`, `..._stuhle_am_boden`).
+- Der HA-Fehlerlog ist per REST (`error_log`) nicht mehr erreichbar (404) und
+  `home-assistant.log` liegt nicht auf der Samba-Freigabe → Fehler über die HA-Oberfläche
+  (Einstellungen → System → Protokolle) ansehen.
 
 ## 3. Werkzeug-Eigenheiten (Desktop / PC)
 - `H:\` ist ein Netzlaufwerk: `device_commit_files` scheitert dort („fetch or write failed").
@@ -95,16 +104,30 @@ Uhr (10:15). `npm i playwright` im Ordner `heidi/tests`.
 - GitHub: fine-grained Token nur für ausgewählte Repos kann keine Repos erstellen;
   `push_files` braucht einen bestehenden Branch (leeres Repo zuerst mit einer Datei füllen).
 - Token (HA, GitHub) niemals im Chat, in Dateien oder Commits.
+- `tools/ha-ws.js` (Node 24, eingebautes WebSocket): für Dinge, die die REST-API nicht kann
+  (Personen, Entitäts-Register). JSON-Argumente über **Git Bash** übergeben – in PowerShell
+  werden die Anführungszeichen zerlegt. Beispiel: `node tools/ha-ws.js person/list`.
+- Nach YAML-Änderungen an Automationen/Templates reicht `services/automation/reload` bzw.
+  `services/template/reload` – kein voller Neustart nötig (neue Helfer brauchen ihn aber).
 
-## 4. Offene Punkte
-- [ ] HA neu starten + Strg+F5, damit v1.3.1 und die v2-Helfer aktiv sind; im Planer-Editor
-      ▶ (Sofortstart) und **Speichern** real testen.
-- [ ] Große Dateien ins Repo übernehmen (siehe README „Erstes Setup"): `ha/www/heidi-panel.js`,
-      `ha/packages/heidi.yaml`, `ha/automations.yaml`, `ha/scripts.yaml`,
-      `ha/prognose/presence.py`, `ha/themes/heidi.yaml`, `heidi/mockups/*`.
-- [ ] `device_tracker.s23_ultra_von_herbert_2` zur Person `person.herbert_schrotter` hinzufügen
-      (HA-Oberfläche).
-- [ ] Zeitpläne in der Dreame-App deaktivieren (IDs 3–6), damit nur der HA-Planer fährt.
+## 4. Offene Punkte (Stand 14.09.2026, Claude-Code-Sitzung)
+Erledigt:
+- [x] HA neu gestartet (14.09. 06:33), v1.3.1 + v2-Helfer aktiv, Repo = `H:\`.
+- [x] Große Dateien sind im Repo.
+- [x] `device_tracker.s23_ultra_von_herbert_2` zu `person.herbert_schrotter` hinzugefügt
+      (per `tools/ha-ws.js person/update`; jetzt GPS + WLAN).
+- [x] Zeitpläne in der Dreame-App (IDs 3–6) sind alle deaktiviert.
+- [x] **Planer-Bug behoben**: Bedingung auf nicht existierende Entität
+      `binary_sensor.heidi_nicht_stoeren` → Planer lief nie (siehe Abschnitt 2).
+- [x] Playwright-Tests laufen (nach `npx playwright install chromium`).
+
+Offen:
+- [x] Roboter-„Nicht stören“ von 20:00–08:00 auf 20:00–07:00 gesetzt (`time.heidi_dnd_end`),
+      damit Plan 2 (Mo/Do, 07:00) pünktlich starten kann.
+- [ ] Im Planer-Editor ▶ (Sofortstart) und **Speichern** real im Browser testen (Tests sind grün,
+      Live-Klick fehlt noch).
+- [ ] Alte Personen `person.nicole` / `person.nina` (unavailable, ohne Tracker) in der
+      HA-Oberfläche löschen – nur `_2`-Personen werden benutzt.
 - [ ] Aufräumen: `H:\www\_deploy_yamls.txt.old`, `H:\www\heidi-panel-v1.1.0.bak.b64` löschen;
       optional altes Storage-Dashboard und nicht mehr benötigte HACS-Karten entfernen.
 - [ ] Optional: Remote Control in Claude Code einrichten, damit vom Handy aus über diesen PC

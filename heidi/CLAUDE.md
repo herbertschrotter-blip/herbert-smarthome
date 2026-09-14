@@ -15,6 +15,9 @@
   immer ALLE Zonen des Typs), `vacuum_start_shortcut` (App-Szenen: 32 Eingang, 33 Bad,
   34 Wischen nach Saugen), `vacuum_rename_segment`.
 - Reinigungsprotokoll der App: Attribute von `sensor.heidi_cleaning_history`.
+- Eigene Template-Sensoren (Paket): `binary_sensor.heidi_arbeitszeit`, `binary_sensor.heidi_nicht_storen`
+  (Achtung: ö→o in der ID; spiegelt `time.heidi_dnd_start/_end` des Roboters, aktuell 20:00–08:00),
+  `sensor.heidi_heutiger_plan`, `sensor.heidi_automatik_status`.
 - Weitere Sensoren: heidi_status, heidi_battery_level, heidi_error, heidi_task_status,
   heidi_main_brush_left/side_brush_left/filter_left/sensor_dirty_left/wheel_dirty_left,
   heidi_dust_bag_status, heidi_clean/dirty_water_tank_status, heidi_low_water_warning.

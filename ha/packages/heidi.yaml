@@ -262,6 +262,7 @@ template:
           {{ now().weekday() < 5
              and t >= states('input_datetime.heidi_arbeitszeit_start')
              and t < states('input_datetime.heidi_arbeitszeit_ende') }}
+      # Achtung: Entitäts-ID wird von HA als binary_sensor.heidi_nicht_storen erzeugt (ö -> o)
       - name: Heidi Nicht stören
         unique_id: heidi_nicht_stoeren
         icon: mdi:sleep
@@ -312,7 +313,7 @@ template:
           {% elif slot == '0' %}Heute kein geplanter Eintrag
           {% elif erledigt %}„{{ name }}“ heute erledigt
           {% elif is_state('input_boolean.heidi_auto_lauf','on') %}„{{ name }}“ läuft
-          {% elif is_state('binary_sensor.heidi_nicht_stoeren','on') %}Nicht-stören-Zeit – wartet
+          {% elif is_state('binary_sensor.heidi_nicht_storen','on') %}Nicht-stören-Zeit – wartet
           {% elif now_t < zeit %}Wartet auf „{{ name }}“ um {{ zeit }}
           {% elif states('sensor.heidi_battery_level') | int(0) < states('input_number.heidi_min_akku') | int(30) %}Akku zu niedrig – wartet
           {% elif not blockiert %}„{{ name }}“ startet

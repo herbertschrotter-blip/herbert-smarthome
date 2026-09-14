@@ -63,7 +63,7 @@
       entity_id: input_boolean.heidi_auto_lauf
       state: "off"
     - condition: state
-      entity_id: binary_sensor.heidi_nicht_stoeren
+      entity_id: binary_sensor.heidi_nicht_storen  # HA macht aus "stören" -> "storen" (nicht "stoeren")
       state: "off"
     - condition: template
       value_template: "{{ states('sensor.heidi_heutiger_plan') not in ['0','unknown','unavailable'] }}"

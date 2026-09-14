@@ -22,7 +22,10 @@ Cowork-Sitzungen (was gebaut wurde, warum, bekannte Stolpersteine, offene Punkte
 ## Repo-Aufbau
 - `ha/` – Spiegel der relevanten HA-Dateien (Quelle der Wahrheit; `H:\` ist das Ziel).
 - `heidi/` – Saugroboter Heidi: eigene `CLAUDE.md` mit Details, Tests, Mockups.
-- `tools/ha.ps1` (API), `tools/deploy.ps1` (Kopieren nach H:\ + Kartenversion hochzählen).
+- `tools/ha.ps1` (API), `tools/deploy.ps1` (Kopieren nach H:\ + Kartenversion hochzählen),
+  `tools/ha-ws.js` (WebSocket-API für Personen/Entitäts-Register; JSON-Argumente über Git Bash).
+- Entitäts-IDs mit Umlaut im Namen: HA macht ö→o, ü→u (`heidi_nicht_storen`, nicht `_stoeren`).
+  Vor dem Referenzieren die echte ID per `ha.ps1 get states/<id>` prüfen.
 - `docs/HANDOFF.md` – Übergabe aus dem Cowork-Chat, offene Punkte als Checkliste pflegen.
 
 ## Personen / Anwesenheit
