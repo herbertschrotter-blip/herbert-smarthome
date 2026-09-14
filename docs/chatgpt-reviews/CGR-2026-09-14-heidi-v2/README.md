@@ -4,7 +4,7 @@
 `heidi-panel.js`) und `docs/BAUPLAN-V2.md` (Neubau der Oberfläche auf dem bestehenden Backend).
 **Zeitraum:** 2026-09-14
 **Branch:** `claude/heidi-panel-architecture-review-rd951p`
-**Status:** Runde 2 offen
+**Status:** Runde 2 abgeschlossen, Runde 3 (Detailprüfung) vorbereitet, optional
 
 ---
 
@@ -24,6 +24,16 @@
 
 ### Runde 2 — Prüfung des überarbeiteten Bauplans
 - **Artefakte:** [r2/](./r2/)
-- **Fokus:** Aufgabenkartei, Abhängigkeiten, Vektor-Werkzeug, Spec-Grenzfälle, Fehlerstrategie,
-  Messanordnung, Round-Trip, Freigabekriterien, Umfang.
+- **Fokus:** ChatGPT antwortete auf Claudes Runde-1-Analyse (nicht auf den Runde-2-Prompt):
+  Gating, v1-Fehler, Bauplan-Umfang, sieben Ergänzungen; dazu Herberts Wunsch nach Seitenstruktur.
+- **Kernergebnis:** Memoisierte Selektoren ab Tag 1 (beide Reviewer, Herbert bestätigt);
+  Register „Paritätsabweichungen“; Vektoren `.v1.json`/`.spec.json`; sechs Felder je Aufgabe;
+  `src/ha/contract.ts` mit Generatoren; Diagnose-Selektor; Befundklassen; Teilfehler bei
+  `savePlan`; `PlanDraft` als Snapshot. Seitenstruktur über HA-Unteransichten mit Mockup vorab
+  (PD-000). Bauplan komplett neu geschrieben (41 Aufgaben).
+
+### Runde 3 — Detailprüfung des fertigen Bauplans (optional)
+- **Artefakte:** [r3/](./r3/)
+- **Fokus:** Seitenstruktur-Mechanik, Aufgabenkarten, Voraussetzungen, Vektor-Werkzeug,
+  Spec-Grenzfälle, Messanordnung, Round-Trip, Freigabekriterien, Umfang.
 - **Kernergebnis:** (offen)

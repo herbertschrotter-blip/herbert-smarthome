@@ -12,4 +12,4 @@ je Runde `r<N>/` mit `01-claude-prompt.md`, `02-chatgpt-response.md`, `03-claude
 
 | Serie | Thema | Status | Kernergebnis |
 |---|---|---|---|
-| [CGR-2026-09-14-heidi-v2](./CGR-2026-09-14-heidi-v2/README.md) | Architektur-Review und Bauplan v2 | Runde 2 offen | R1: Neubau freigegeben, Bauplan überarbeitet (Vertrag, Vektoren v1/spec, Gating nach Messung, Parallelbetriebsregeln) |
+| [CGR-2026-09-14-heidi-v2](./CGR-2026-09-14-heidi-v2/README.md) | Architektur-Review und Bauplan v2 | Runde 2 abgeschlossen, Runde 3 optional | R1: Neubau freigegeben, Bauplan überarbeitet (Vertrag, Vektoren v1/spec, Gating nach Messung, Parallelbetriebsregeln) |
