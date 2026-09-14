@@ -158,11 +158,14 @@ Plugin-System. `hass` kommt als Property herein, Lit rendert, fertig.
 
 ### Update-Gating ohne Handliste
 
-Die Signaturliste wird durch eine deklarierte Menge ersetzt, die aus den Selektoren stammt:
-jeder Selektor nennt die IDs, die er liest (z. B. `planEntityIds(n)`), die Shell vereinigt sie
-und vergleicht in `shouldUpdate` nur diese Zustände (`state` + `last_updated`). Dann kann keine
-Entität mehr „vergessen“ werden, und ein Test kann prüfen, dass jede in `real_states.json`
-gelesene ID auch in der Menge steht.
+Ursprünglicher Vorschlag: Signaturliste durch eine aus den Selektoren deklarierte ID-Menge
+ersetzen und in `shouldUpdate` nur diese Zustände vergleichen. **Entscheidung nach ChatGPT-Review
+Runde 1 (Herbert):** kein globales `shouldUpdate` ab Tag 1. Lit-Reaktivität zuerst, `hass` und
+Views nach unten reichen, in Phase 4 messen (Bauplan-Aufgabe 4.12) und nur dort gezielt gaten,
+wo es messbar nötig ist (Karten-Element-Cache, Zeitleiste). Selektoren führen ihre `entityIds`
+weiterhin, aber für Dokumentation und Tests: ein Test prüft, dass jede gelesene ID in der Menge
+steht, so kann keine Entität mehr „vergessen“ werden. Claudes Einwand (neue View-Referenzen bei
+jedem `hass`-Update lassen alle Kinder rendern) ist als Messfrage in 4.12 festgehalten.
 
 ### Overlays als ein Zustand
 
@@ -276,15 +279,20 @@ Prop-Drilling durch eine fremde Welt; im HA-Umfeld unüblich. Nein.
 
 **Custom Card in der YAML-`panel`-View behalten.**
 
-- Du hast heute schon volle Breite, Sidebar-Eintrag, keine Bearbeitungs-Leiste.
+- Der entscheidende Grund (nach ChatGPT-Review Runde 1 geschärft): **Heidi braucht nichts, was
+  `panel_custom` rechtfertigt.** Die `panel`-View liefert volle Breite, Sidebar-Eintrag und keine
+  Bearbeitungs-Leiste, und hält Heidi in der normalen Dashboard-Infrastruktur mit der kleinsten
+  Integrationsfläche.
 - `panel_custom` bringt `narrow`, `route` und eine eigene URL; dafür Registrierung in
-  `configuration.yaml` (Neustart bei jeder Änderung), und ein Panel lässt sich **nicht** in ein
-  anderes Dashboard einbetten.
-- Entscheidend für die Zukunft: Ein `heidi-hero` als Lit-Element kann später als
-  `custom:heidi-hero-card` im allgemeinen Dashboard stehen (gleiche Datei, zweites
-  `customElements.define`). Mit `panel_custom` gibt es diesen Weg nicht.
-- Unter-Ansichten (Prognose-Tab) bleiben wie heute internes Routing; wenn du irgendwann echte
-  URLs willst (`/heidi/planer`), ist `panel_custom` der Weg – aber das ist kein aktuelles Bedürfnis.
+  `configuration.yaml` (Neustart bei jeder Änderung) und ein Panel lässt sich nicht in ein
+  anderes Dashboard einbetten. Keiner dieser Vorteile wird gebraucht.
+- Einbettbarkeit von Teilen ins spätere allgemeine Dashboard ist **kein** Hauptargument mehr:
+  interne Lit-Elemente einer Vollbild-Karte sind nicht automatisch gute Lovelace-Karten.
+  Wiederverwendung ist deshalb auch kein Designziel für v2.
+- Unter-Ansichten (Prognose-Tab) bleiben internes Routing; wenn du irgendwann echte URLs willst
+  (`/heidi/planer`), ist `panel_custom` der Weg – aber das ist kein aktuelles Bedürfnis.
+- Unabhängig von der Wahl: Safe Areas (Notch, Home-Indikator) in der Companion-App gehören in
+  die Abnahme.
 
 ---
 
