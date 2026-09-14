@@ -3,6 +3,9 @@
 Antworte auf Deutsch. Herbert ist Home-Assistant-Einsteiger: Schritte kurz, konkret, keine
 Fachbegriffe ohne Erklärung. Große Umbauten zuerst als Mockup zeigen, dann umsetzen.
 
+**Beim Start zuerst `docs/HANDOFF.md` lesen** – dort steht der Stand aus den bisherigen
+Cowork-Sitzungen (was gebaut wurde, warum, bekannte Stolpersteine, offene Punkte).
+
 ## Umgebung
 - Home Assistant OS 2026.7 auf Raspberry Pi 5, `http://192.168.170.60:8123` (feste IP, FRITZ!Box).
 - Der HA-Config-Ordner (`/config` auf dem Pi) ist auf diesem PC als Laufwerk **`H:\`** eingebunden
@@ -20,6 +23,7 @@ Fachbegriffe ohne Erklärung. Große Umbauten zuerst als Mockup zeigen, dann ums
 - `ha/` – Spiegel der relevanten HA-Dateien (Quelle der Wahrheit; `H:\` ist das Ziel).
 - `heidi/` – Saugroboter Heidi: eigene `CLAUDE.md` mit Details, Tests, Mockups.
 - `tools/ha.ps1` (API), `tools/deploy.ps1` (Kopieren nach H:\ + Kartenversion hochzählen).
+- `docs/HANDOFF.md` – Übergabe aus dem Cowork-Chat, offene Punkte als Checkliste pflegen.
 
 ## Personen / Anwesenheit
 `person.herbert_schrotter` (Companion-App GPS + WLAN), `person.nicole_2`, `person.nina_2`
