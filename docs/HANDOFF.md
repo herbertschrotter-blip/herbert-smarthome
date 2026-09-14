@@ -241,8 +241,14 @@ Offen:
       damit Plan 2 (Mo/Do, 07:00) pünktlich starten kann.
 - [ ] Im Planer-Editor ▶ (Sofortstart) und **Speichern** real im Browser testen (Tests sind grün,
       Live-Klick fehlt noch).
-- [ ] Alte Personen `person.nicole` / `person.nina` (unavailable, ohne Tracker) in der
-      HA-Oberfläche löschen – nur `_2`-Personen werden benutzt.
+- [x] Aufgeräumt (14.09., per `ha-ws.js config/entity_registry/remove`): 18 v1-Planer-Helfer
+      (`input_select.heidi_planN_tage/_raeume`, `input_boolean.heidi_planN_nur_abwesend/_homeoffice`,
+      `heidi_homeoffice_modus`, `binary_sensor.heidi_homeoffice`), Integrationsreste
+      (`button.heidi_start_mapping`, `camera.heidi_map_data`, `camera.heidi_wifi_map_1`) und die
+      alten Personen-Entitäten `person.nicole`/`person.nina` (waren nur noch Register-Einträge,
+      `person/delete` kannte sie nicht).
+- [ ] HACS-Karten Mushroom, card-mod, expander-card, stack-in-card in HACS deinstallieren
+      (nichts verweist mehr darauf; HACS räumt Ressource + `www/community`-Ordner mit weg).
 - [ ] Aufräumen: `H:\www\_deploy_yamls.txt.old`, `H:\www\heidi-panel-v1.1.0.bak.b64` löschen;
       optional altes Storage-Dashboard und nicht mehr benötigte HACS-Karten entfernen.
 - [ ] Optional: Remote Control in Claude Code einrichten, damit vom Handy aus über diesen PC
