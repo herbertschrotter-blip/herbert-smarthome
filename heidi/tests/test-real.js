@@ -1,6 +1,6 @@
 const { chromium } = require('playwright'); const fs = require('fs');
 (async () => {
-  const b = await chromium.launch();
+  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' }).catch(() => chromium.launch());
   const p = await b.newPage({ viewport: { width: 1200, height: 1400 } });
   const errs = []; p.on('pageerror', e => errs.push(e.message)); p.on('console', m => { if (m.type() === 'error') errs.push('console: ' + m.text()); });
   const js = fs.readFileSync('../../ha/www/heidi-panel.js', 'utf8'); const states = JSON.parse(fs.readFileSync('real_states.json', 'utf8'));

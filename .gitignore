@@ -11,4 +11,3 @@ node_modules/
 *.png
 !heidi/mockups/*.png
 .env
-heidi/tests/real_states.json

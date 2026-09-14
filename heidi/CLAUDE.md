@@ -27,8 +27,7 @@
   (Schlüssel `type: module`) hochzählen – deploy.ps1 macht das automatisch. Dann HA-Neustart.
 - Testen ohne HA: `cd heidi/tests && node test-real.js` (Playwright + Chromium, Screenshot
   `panel_real.png`), `node test-editor.js` (Planer-Editor), `node test-zones.js`
-  (Sperrzonen-Editor). `real_states.json` = Abzug echter HA-States (erzeugen mit
-  `.\tools\dump-states.ps1`, liegt nicht im Repo).
+  (Sperrzonen-Editor). `real_states.json` = Abzug echter HA-States.
 - Optik: Glas-Kacheln (halbtransparent + Blur), Fonts Sora + IBM Plex Sans (Google Fonts,
   Fallback Roboto), Akzent #2fd1b6. Referenz-Mockups unter `heidi/mockups/`.
 - Bereiche: Kopf (Akku-Ring, Status, Personen-Chips, Stühle-Toggle, DND), Karte + Raum-Chips

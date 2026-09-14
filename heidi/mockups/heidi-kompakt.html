@@ -1,0 +1,270 @@
+<title>Heidi Kompakt</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#0c1219;--solid:#141c25;--card:rgba(255,255,255,.045);--card2:rgba(255,255,255,.05);--line:rgba(255,255,255,.09);--ink:#e8edf2;--muted:#94a4b4;
+  --glow1:rgba(47,209,182,.16);--glow2:rgba(90,169,255,.12);
+  --acc:#2fd1b6;--acc-ink:#0f151c;--good:#43d17a;--warn:#f2b544;--bad:#ff6b6b;--blue:#5aa9ff;
+  --shadow:0 10px 30px rgba(0,0,0,.35);
+}
+:root[data-theme="light"]{
+  --bg:#e9eef3;--solid:#ffffff;--card:rgba(255,255,255,.55);--card2:rgba(255,255,255,.6);--line:rgba(20,40,60,.10);--ink:#16202a;--muted:#5f7080;
+  --acc:#0fa892;--acc-ink:#ffffff;--shadow:0 8px 24px rgba(20,40,60,.10);--glow1:rgba(15,168,146,.18);--glow2:rgba(90,169,255,.18);
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#e9eef3;--solid:#ffffff;--card:rgba(255,255,255,.55);--card2:rgba(255,255,255,.6);--line:rgba(20,40,60,.10);--ink:#16202a;--muted:#5f7080;
+    --acc:#0fa892;--acc-ink:#ffffff;--shadow:0 8px 24px rgba(20,40,60,.10);--glow1:rgba(15,168,146,.18);--glow2:rgba(90,169,255,.18);
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(900px 500px at 8% -10%,var(--glow1),transparent 60%),radial-gradient(800px 500px at 100% 30%,var(--glow2),transparent 60%),radial-gradient(700px 400px at 40% 110%,var(--glow1),transparent 60%),var(--bg);background-attachment:fixed;min-height:100vh;color:var(--ink);font:14px/1.4 "IBM Plex Sans",system-ui,sans-serif;padding:20px 16px 40px;font-variant-numeric:tabular-nums}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:14px}
+h1,h2,.num{font-family:"Sora","IBM Plex Sans",system-ui,sans-serif}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.top h1{margin:0;font-size:22px;display:flex;align-items:center;gap:10px}
+.logo{width:34px;height:34px;border-radius:50%;background:var(--acc);display:grid;place-items:center;color:var(--acc-ink)}
+.tabs{margin-left:auto;display:flex;background:var(--card);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:999px;padding:3px}
+.tabs button{border:0;background:transparent;color:var(--muted);padding:6px 14px;border-radius:999px;font:inherit;font-weight:500;cursor:pointer}
+.tabs button.on{background:var(--card2);color:var(--ink)}
+.gear{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);display:grid;place-items:center;cursor:pointer}
+.grid{display:grid;grid-template-columns:1.15fr .85fr;gap:14px}
+.col{display:grid;gap:14px;align-content:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+.card h2{margin:0 0 12px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:8px}
+.card h2 .r{margin-left:auto;text-transform:none;letter-spacing:0;font:500 12px "IBM Plex Sans",sans-serif;color:var(--muted)}
+svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+/* hero */
+.hero{display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center}
+.ring{width:96px;height:96px;border-radius:50%;background:conic-gradient(var(--acc) 0 100%,var(--line) 0);display:grid;place-items:center;position:relative}
+.ring::after{content:"";position:absolute;inset:8px;border-radius:50%;background:var(--solid)}
+.ring .num{position:relative;font-size:22px;font-weight:700}
+.ring .num small{font-size:11px;color:var(--muted);font-weight:500;display:block;text-align:center}
+.status{display:grid;gap:6px}
+.status .big{font-family:"Sora",sans-serif;font-size:22px;font-weight:600;display:flex;align-items:center;gap:10px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--good);box-shadow:0 0 0 4px color-mix(in srgb,var(--good) 25%,transparent)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:var(--card2);border:1px solid var(--line);font-size:12px;font-weight:500}
+.chip.on{border-color:color-mix(in srgb,var(--acc) 50%,var(--line));color:var(--acc)}
+.chip.off{color:var(--muted)}
+.ctl{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.ctl button{border:1px solid var(--line);background:var(--card2);color:var(--ink);border-radius:12px;padding:10px 6px 8px;display:grid;justify-items:center;gap:4px;font:500 11px "IBM Plex Sans",sans-serif;cursor:pointer}
+.ctl button.primary{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+.ctl button:hover{filter:brightness(1.08)}
+/* map */
+.map{position:relative;border-radius:12px;overflow:hidden;background:var(--card2);aspect-ratio:16/9;max-width:100%}
+.map svg{width:100%;height:100%;display:block}
+.map .tools{position:absolute;right:10px;bottom:10px;display:flex;gap:6px}
+.tb{border:1px solid var(--line);background:var(--solid);color:var(--ink);border-radius:10px;padding:7px 10px;display:inline-flex;align-items:center;gap:6px;font:500 12px "IBM Plex Sans",sans-serif;cursor:pointer;box-shadow:var(--shadow)}
+.rooms{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:10px}
+.rooms button{border:1px solid var(--line);background:var(--card2);color:var(--ink);border-radius:10px;padding:8px 4px 6px;display:grid;justify-items:center;gap:3px;font:500 11px "IBM Plex Sans",sans-serif;cursor:pointer}
+.rooms button.sel{border-color:var(--acc);color:var(--acc)}
+/* consumables */
+.cons{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.cons .c{display:grid;justify-items:center;gap:4px}
+.mini{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;position:relative;background:conic-gradient(var(--v,var(--acc)) calc(var(--p)*1%),var(--line) 0)}
+.mini::after{content:"";position:absolute;inset:5px;border-radius:50%;background:var(--solid)}
+.mini span{position:relative;font:600 12px "Sora",sans-serif}
+.cons .l{font-size:11px;color:var(--muted)}
+/* planer */
+.plan{display:grid;gap:6px}
+.pr{display:grid;grid-template-columns:34px 1fr auto auto auto;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;background:var(--card2);border:1px solid var(--line)}
+.pr.today{border-color:color-mix(in srgb,var(--acc) 55%,var(--line))}
+.pr .ic{width:34px;height:34px;border-radius:9px;background:var(--card2);display:grid;place-items:center;color:var(--acc)}
+.pr .n{font-weight:600}
+.pr .s{font-size:11px;color:var(--muted)}
+.tag{font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--muted)}
+.tag.acc{color:var(--acc);border-color:color-mix(in srgb,var(--acc) 50%,var(--line))}
+.ib{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);display:grid;place-items:center;cursor:pointer}
+.ib.go{color:var(--acc)}
+.sw{width:38px;height:22px;border-radius:999px;background:var(--line);position:relative;cursor:pointer;flex:none}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .15s}
+.sw.on{background:var(--acc)}.sw.on::after{left:19px}
+/* kv tiles */
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tile{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:10px;display:grid;gap:2px}
+.tile .k{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.tile .num{font-size:18px;font-weight:600}
+.tile .num small{font-size:11px;color:var(--muted);font-weight:500;margin-left:3px}
+.bar{height:5px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:4px}
+.bar i{display:block;height:100%;background:var(--v,var(--acc))}
+.auto{display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px}
+.auto .t{font-weight:600}.auto .s{font-size:12px;color:var(--muted)}
+.prog{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+details{border-top:1px solid var(--line);padding-top:8px;margin-top:4px}
+summary{cursor:pointer;color:var(--muted);font-size:12px;font-weight:500;list-style:none;display:flex;align-items:center;gap:6px}
+summary::-webkit-details-marker{display:none}
+.rob{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.rob .tile .num{font-size:14px}
+@media (max-width:900px){.grid{grid-template-columns:1fr}.rooms{grid-template-columns:repeat(4,1fr)}}
+@media (max-width:520px){.hero{grid-template-columns:auto 1fr}.ctl{grid-column:1/-1}.cons{grid-template-columns:repeat(3,1fr)}.rob{grid-template-columns:repeat(2,1fr)}}
+@media (prefers-reduced-motion:reduce){.sw::after{transition:none}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="robot" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/><path d="M12 4v3M4 12h3"/></symbol>
+  <symbol id="play" viewBox="0 0 24 24"><path d="M7 5l12 7-12 7z"/></symbol>
+  <symbol id="pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol>
+  <symbol id="home" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20h4"/></symbol>
+  <symbol id="gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+  <symbol id="map" viewBox="0 0 24 24"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14"/></symbol>
+  <symbol id="ban" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M5.5 5.5l13 13"/></symbol>
+  <symbol id="drag" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" stroke-dasharray="3 3"/></symbol>
+  <symbol id="cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+  <symbol id="pen" viewBox="0 0 24 24"><path d="M4 20l4-1L19 8l-3-3L5 16zM14 7l3 3"/></symbol>
+  <symbol id="bolt" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></symbol>
+  <symbol id="drop" viewBox="0 0 24 24"><path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/></symbol>
+  <symbol id="bag" viewBox="0 0 24 24"><path d="M6 8h12l-1 12H7zM9 8V6a3 3 0 0 1 6 0v2"/></symbol>
+  <symbol id="chart" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></symbol>
+  <symbol id="clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+  <symbol id="sofa" viewBox="0 0 24 24"><path d="M4 11V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3M3 13a2 2 0 0 1 4 0v2h10v-2a2 2 0 0 1 4 0v5H3z"/></symbol>
+  <symbol id="chef" viewBox="0 0 24 24"><path d="M7 20h10v-6a5 5 0 1 0-3-9 4 4 0 0 0-4 0 5 5 0 1 0-3 9z"/></symbol>
+  <symbol id="desk" viewBox="0 0 24 24"><path d="M3 9h18M5 9v11M19 9v11M9 9v6h6V9"/></symbol>
+  <symbol id="foot" viewBox="0 0 24 24"><ellipse cx="9" cy="8" rx="3" ry="5"/><ellipse cx="15" cy="15" rx="3" ry="5"/></symbol>
+  <symbol id="wc" viewBox="0 0 24 24"><path d="M6 3h8v9H6zM4 12h16a6 6 0 0 1-6 6h-4a6 6 0 0 1-6-6zM9 18v3M15 18v3"/></symbol>
+  <symbol id="bed" viewBox="0 0 24 24"><path d="M3 18v-7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v7M3 15h18M6 9V6h5v3M13 9V6h5v3"/></symbol>
+  <symbol id="shower" viewBox="0 0 24 24"><path d="M5 20V9a4 4 0 0 1 8 0M9 13h8M11 16v1M14 16v1M17 16v1"/></symbol>
+  <symbol id="chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+</svg>
+
+<div class="wrap">
+  <div class="top">
+    <h1><span class="logo"><svg class="i"><use href="#robot"/></svg></span>Heidi</h1>
+    <div class="tabs"><button class="on">Übersicht</button><button>Prognose</button></div>
+    <button class="gear" aria-label="Einstellungen"><svg class="i"><use href="#gear"/></svg></button>
+  </div>
+
+  <div class="grid">
+    <div class="col">
+      <!-- Status -->
+      <div class="card">
+        <div class="hero">
+          <div class="ring"><div class="num">100<small>Akku</small></div></div>
+          <div class="status">
+            <div class="big"><span class="dot"></span>Angedockt</div>
+            <div class="chips">
+              <span class="chip on"><svg class="i" style="width:14px;height:14px"><use href="#user"/></svg>Herbert</span>
+              <span class="chip on"><svg class="i" style="width:14px;height:14px"><use href="#user"/></svg>Nicole</span>
+              <span class="chip off"><svg class="i" style="width:14px;height:14px"><use href="#user"/></svg>Nina</span>
+              <span class="chip"><svg class="i" style="width:14px;height:14px"><use href="#clock"/></svg>Nicht stören 22–07</span>
+            </div>
+          </div>
+          <div class="ctl">
+            <button class="primary"><svg class="i"><use href="#play"/></svg>Start</button>
+            <button><svg class="i"><use href="#pause"/></svg>Pause</button>
+            <button><svg class="i"><use href="#home"/></svg>Station</button>
+            <button><svg class="i"><use href="#bell"/></svg>Orten</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Karte -->
+      <div class="card">
+        <h2><svg class="i"><use href="#map"/></svg>Karte <span class="r">1 Sperrzone</span></h2>
+        <div class="map">
+          <svg viewBox="0 0 640 360" aria-label="Wohnungskarte">
+            <g fill="var(--card2)" stroke="var(--line)" stroke-width="2">
+              <rect x="40" y="40" width="250" height="150" rx="6"/><rect x="290" y="40" width="150" height="150" rx="6"/>
+              <rect x="440" y="40" width="160" height="110" rx="6"/><rect x="40" y="190" width="120" height="130" rx="6"/>
+              <rect x="160" y="190" width="70" height="60" rx="6"/><rect x="230" y="190" width="210" height="130" rx="6"/>
+              <rect x="440" y="150" width="160" height="170" rx="6"/>
+            </g>
+            <g fill="var(--muted)" font-family="IBM Plex Sans,sans-serif" font-size="14" text-anchor="middle">
+              <text x="165" y="120">Wohnzimmer</text><text x="365" y="120">Küche</text><text x="520" y="100">Büro</text>
+              <text x="100" y="260">Flur</text><text x="195" y="225">WC</text><text x="335" y="260">Schlafzimmer</text><text x="520" y="240">Bad</text>
+            </g>
+            <rect x="120" y="70" width="90" height="70" rx="4" fill="rgba(255,107,107,.18)" stroke="var(--bad)" stroke-width="2" stroke-dasharray="6 4"/>
+            <circle cx="585" cy="300" r="9" fill="var(--acc)"/><circle cx="585" cy="300" r="4" fill="var(--card)"/>
+          </svg>
+          <div class="tools">
+            <button class="tb"><svg class="i"><use href="#drag"/></svg>Zone</button>
+            <button class="tb"><svg class="i"><use href="#ban"/></svg>Sperrzonen</button>
+          </div>
+        </div>
+        <div class="rooms">
+          <button class="sel"><svg class="i"><use href="#sofa"/></svg>Wohnz.</button>
+          <button class="sel"><svg class="i"><use href="#chef"/></svg>Küche</button>
+          <button><svg class="i"><use href="#desk"/></svg>Büro</button>
+          <button><svg class="i"><use href="#foot"/></svg>Flur</button>
+          <button><svg class="i"><use href="#wc"/></svg>WC</button>
+          <button><svg class="i"><use href="#bed"/></svg>Schlafz.</button>
+          <button><svg class="i"><use href="#shower"/></svg>Bad</button>
+        </div>
+      </div>
+
+      <!-- Verbrauch -->
+      <div class="card">
+        <h2><svg class="i"><use href="#bolt"/></svg>Verschleiß</h2>
+        <div class="cons">
+          <div class="c"><div class="mini" style="--p:82"><span>82</span></div><div class="l">Hauptbürste</div></div>
+          <div class="c"><div class="mini" style="--p:64"><span>64</span></div><div class="l">Seitenbürste</div></div>
+          <div class="c"><div class="mini" style="--p:71"><span>71</span></div><div class="l">Filter</div></div>
+          <div class="c"><div class="mini" style="--p:90"><span>90</span></div><div class="l">Mopp</div></div>
+          <div class="c"><div class="mini" style="--p:38;--v:var(--warn)"><span>38</span></div><div class="l">Sensoren</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <!-- Automatik -->
+      <div class="card">
+        <div class="auto">
+          <div><div class="t">Automatik</div><div class="s">Heute 09:30 · Tägliches Saugen · wartet auf Abwesenheit</div></div>
+          <div class="sw on" role="switch" aria-checked="true"></div>
+        </div>
+      </div>
+
+      <!-- Planer -->
+      <div class="card">
+        <h2><svg class="i"><use href="#cal"/></svg>Planer</h2>
+        <div class="plan">
+          <div class="pr today"><div class="ic"><svg class="i"><use href="#bolt"/></svg></div><div><div class="n">Tägliches Saugen</div><div class="s">Alle Räume · Standard · 1×</div></div><span class="tag acc">Täglich 09:30</span><button class="ib go"><svg class="i"><use href="#play"/></svg></button><button class="ib"><svg class="i"><use href="#pen"/></svg></button></div>
+          <div class="pr"><div class="ic"><svg class="i"><use href="#drop"/></svg></div><div><div class="n">Saugen + Wischen</div><div class="s">Alle Räume · Standard · 1×</div></div><span class="tag">Mo + Do 10:00</span><button class="ib go"><svg class="i"><use href="#play"/></svg></button><button class="ib"><svg class="i"><use href="#pen"/></svg></button></div>
+          <div class="pr"><div class="ic"><svg class="i"><use href="#chef"/></svg></div><div><div class="n">Küche nach dem Kochen</div><div class="s">Küche + Flur · Stark · 2×</div></div><span class="tag">Manuell</span><button class="ib go"><svg class="i"><use href="#play"/></svg></button><button class="ib"><svg class="i"><use href="#pen"/></svg></button></div>
+          <div class="pr"><div class="ic"><svg class="i"><use href="#shower"/></svg></div><div><div class="n">Bad &amp; WC gründlich</div><div class="s">Bad + WC · Turbo · 2×</div></div><span class="tag">Sa 11:00</span><button class="ib go"><svg class="i"><use href="#play"/></svg></button><button class="ib"><svg class="i"><use href="#pen"/></svg></button></div>
+        </div>
+      </div>
+
+      <!-- Prognose -->
+      <div class="card">
+        <h2><svg class="i"><use href="#chart"/></svg>Prognose <span class="r">12 Tage gelernt</span></h2>
+        <div class="prog">
+          <div class="tile"><div class="k">Frei</div><div class="num">09–16<small>Uhr</small></div></div>
+          <div class="tile"><div class="k">Rückkehr</div><div class="num">16:30<small>Nicole</small></div></div>
+          <div class="tile"><div class="k">Sicher</div><div class="num">62<small>%</small></div><div class="bar"><i style="width:62%"></i></div></div>
+        </div>
+      </div>
+
+      <!-- Station -->
+      <div class="card">
+        <h2><svg class="i"><use href="#home"/></svg>Station</h2>
+        <div class="tiles">
+          <div class="tile"><div class="k"><svg class="i" style="width:14px;height:14px"><use href="#drop"/></svg>Frischwasser</div><div class="num">OK</div><div class="bar"><i style="width:80%"></i></div></div>
+          <div class="tile"><div class="k"><svg class="i" style="width:14px;height:14px"><use href="#drop"/></svg>Abwasser</div><div class="num">Leer</div><div class="bar"><i style="width:10%"></i></div></div>
+          <div class="tile"><div class="k"><svg class="i" style="width:14px;height:14px"><use href="#bag"/></svg>Staubbeutel</div><div class="num">26<small>Tage</small></div><div class="bar"><i style="width:45%;--v:var(--warn)"></i></div></div>
+        </div>
+      </div>
+
+      <!-- Statistik + Roboter -->
+      <div class="card">
+        <h2><svg class="i"><use href="#chart"/></svg>Heute <span class="r">Gesamt 1 240 m² · 31 Läufe</span></h2>
+        <div class="tiles">
+          <div class="tile"><div class="k">Fläche</div><div class="num">42<small>m²</small></div></div>
+          <div class="tile"><div class="k">Dauer</div><div class="num">38<small>min</small></div></div>
+          <div class="tile"><div class="k">Letzter Lauf</div><div class="num">08:12</div></div>
+        </div>
+        <details>
+          <summary><svg class="i" style="width:14px;height:14px"><use href="#chev"/></svg>Roboter</summary>
+          <div class="rob">
+            <div class="tile"><div class="k">Modell</div><div class="num">X60 Ultra</div></div>
+            <div class="tile"><div class="k">Firmware</div><div class="num">4.3.9</div></div>
+            <div class="tile"><div class="k">WLAN</div><div class="num">−58 dBm</div></div>
+            <div class="tile"><div class="k">Kindersicherung</div><div class="num">Aus</div></div>
+          </div>
+        </details>
+      </div>
+    </div>
+  </div>
+</div>

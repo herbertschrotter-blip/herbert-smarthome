@@ -1,0 +1,225 @@
+- id: heidi_sperrzone_esstisch
+  alias: "Heidi: Sperrzone Esstisch (Stühle am Boden)"
+  description: >-
+    Setzt eine Sperrzone um den Esstisch, solange der Schalter "Stühle am Boden" an ist.
+    Koordinaten = erkannter Esstisch (x -3600..-1750, y -4175..-2675) + 600 mm Rand.
+    Achtung: Der Dienst ersetzt immer ALLE Sperrzonen – weitere Zonen hier mit eintragen.
+  mode: single
+  triggers:
+    - trigger: state
+      entity_id: input_boolean.stuehle_am_boden
+      to: "on"
+      id: stuehle_unten
+    - trigger: state
+      entity_id: input_boolean.stuehle_am_boden
+      to: "off"
+      id: stuehle_oben
+  actions:
+    - choose:
+        - conditions:
+            - condition: trigger
+              id: stuehle_unten
+          sequence:
+            - action: dreame_vacuum.vacuum_set_restricted_zone
+              target:
+                entity_id: vacuum.heidi
+              data:
+                zones:
+                  - [-4200, -4775, -1150, -2075]
+        - conditions:
+            - condition: trigger
+              id: stuehle_oben
+          sequence:
+            - action: dreame_vacuum.vacuum_set_restricted_zone
+              target:
+                entity_id: vacuum.heidi
+              data:
+                zones: []
+
+# ═══════════════════════ Planer ═══════════════════════
+- id: heidi_planer
+  alias: "Heidi: Planer"
+  description: >-
+    Prüft alle 10 Minuten und bei jeder Anwesenheitsänderung, ob der heutige Planer-Eintrag
+    starten soll. Blockiert wird nur durch die im Eintrag gewählten Personen ("stört").
+    Homeoffice (Arbeitszeit + störende Person zu Hause): je nach Eintrag warten oder leise starten.
+    Schnellprogramm, wenn die erwartete Rückkehr bald ist.
+  mode: single
+  triggers:
+    - trigger: time_pattern
+      minutes: "/10"
+    - trigger: state
+      entity_id: [person.herbert_schrotter, person.nicole_2, person.nina_2]
+      to: ["home", "not_home"]
+      for: { minutes: 2 }
+    - trigger: state
+      entity_id: input_boolean.heidi_automatik
+      to: "on"
+  conditions:
+    - condition: state
+      entity_id: input_boolean.heidi_automatik
+      state: "on"
+    - condition: state
+      entity_id: input_boolean.heidi_auto_lauf
+      state: "off"
+    - condition: state
+      entity_id: binary_sensor.heidi_nicht_stoeren
+      state: "off"
+    - condition: template
+      value_template: "{{ states('sensor.heidi_heutiger_plan') not in ['0','unknown','unavailable'] }}"
+    - condition: template
+      value_template: "{{ not state_attr('sensor.heidi_heutiger_plan', 'erledigt') }}"
+    - condition: template
+      value_template: "{{ now().strftime('%H:%M') >= state_attr('sensor.heidi_heutiger_plan', 'zeit') }}"
+    - condition: state
+      entity_id: vacuum.heidi
+      state: docked
+    - condition: template
+      value_template: "{{ states('sensor.heidi_battery_level') | int(0) >= states('input_number.heidi_min_akku') | int(30) }}"
+    - condition: state
+      entity_id: sensor.heidi_error
+      state: no_error
+  variables:
+    slot: "{{ states('sensor.heidi_heutiger_plan') }}"
+    name: "{{ state_attr('sensor.heidi_heutiger_plan', 'name') }}"
+    stoerer: "{{ state_attr('sensor.heidi_heutiger_plan', 'stoerer') or [] }}"
+    blockiert: "{{ stoerer | length > 0 }}"
+    ho: "{{ blockiert and is_state('binary_sensor.heidi_arbeitszeit', 'on') }}"
+    ho_leise: "{{ ho and is_state('input_select.heidi_plan' ~ slot ~ '_homeoffice', 'Leise starten') }}"
+    schnell_erlaubt: "{{ is_state('input_boolean.heidi_plan' ~ slot ~ '_schnell', 'on') }}"
+    use_prog: >-
+      {{ is_state('input_boolean.heidi_prognose_aktiv','on') and is_state('input_boolean.heidi_abweichung_heute','off')
+         and (state_attr('sensor.heidi_prognose','tage') | int(0)) >= (states('input_number.heidi_prognose_mindesttage') | int(14)) and (state_attr('sensor.heidi_prognose','rueckkehr_min') | int(0)) > 0 }}
+    rest_min: >-
+      {% if use_prog %}{{ state_attr('sensor.heidi_prognose','rueckkehr_min') | int(0) }}
+      {% else %}{% set rk = states('input_datetime.heidi_rueckkehr') %}{{ (rk[:2] | int) * 60 + (rk[3:5] | int) - now().hour * 60 - now().minute }}{% endif %}
+    schnell: "{{ schnell_erlaubt and (rest_min | int) < (states('input_number.heidi_schnell_minuten') | int(90)) and not blockiert }}"
+  actions:
+    - choose:
+        # Keine störende Person zu Hause → normal (ggf. Schnellprogramm)
+        - conditions: "{{ not blockiert }}"
+          sequence:
+            - action: input_boolean.turn_off
+              target: { entity_id: input_boolean.heidi_auto_teil }
+            - action: input_boolean.turn_on
+              target: { entity_id: input_boolean.heidi_auto_lauf }
+            - action: input_text.set_value
+              target: { entity_id: input_text.heidi_auto_letzter_plan }
+              data: { value: "{{ name }}{{ ' (schnell)' if schnell else '' }}" }
+            - action: script.heidi_plan_starten
+              data: { plan: "{{ slot }}", variante: "{{ 'schnell' if schnell else 'normal' }}" }
+        # Homeoffice und Eintrag sagt "Leise starten" → leises Profil, gilt danach als erledigt
+        - conditions: "{{ ho_leise }}"
+          sequence:
+            - action: input_boolean.turn_off
+              target: { entity_id: input_boolean.heidi_auto_teil }
+            - action: input_boolean.turn_on
+              target: { entity_id: input_boolean.heidi_auto_lauf }
+            - action: input_text.set_value
+              target: { entity_id: input_text.heidi_auto_letzter_plan }
+              data: { value: "{{ name }} (leise, Homeoffice)" }
+            - action: script.heidi_plan_starten
+              data: { plan: "{{ slot }}", variante: leise }
+      # sonst: störende Person zu Hause → warten (nächste Prüfung in 10 min / bei Abwesenheit)
+
+- id: heidi_lauf_abgeschlossen
+  alias: "Heidi: Automatik-Lauf abgeschlossen"
+  description: Setzt "heute erledigt", wenn ein vom Planer gestarteter Lauf vollständig beendet wurde.
+  mode: single
+  triggers:
+    - trigger: state
+      entity_id: vacuum.heidi
+      to: docked
+      for: { minutes: 1 }
+  conditions:
+    - condition: state
+      entity_id: input_boolean.heidi_auto_lauf
+      state: "on"
+  actions:
+    - if:
+        - condition: state
+          entity_id: sensor.heidi_task_status
+          state: completed
+        - condition: state
+          entity_id: input_boolean.heidi_auto_teil
+          state: "off"
+      then:
+        - action: input_datetime.set_datetime
+          target: { entity_id: input_datetime.heidi_letzte_auto_reinigung }
+          data: { date: "{{ now().date() }}" }
+    - action: input_boolean.turn_off
+      target: { entity_id: [input_boolean.heidi_auto_lauf, input_boolean.heidi_auto_teil] }
+
+- id: heidi_heimkehr
+  alias: "Heidi: Heimkehr während Reinigung"
+  description: Reagiert nur, wenn die heimkehrende Person im laufenden Eintrag als "stört" gewählt ist.
+  mode: single
+  triggers:
+    - trigger: state
+      entity_id: [person.herbert_schrotter, person.nicole_2, person.nina_2]
+      to: home
+  conditions:
+    - condition: state
+      entity_id: input_boolean.heidi_auto_lauf
+      state: "on"
+    - condition: state
+      entity_id: vacuum.heidi
+      state: cleaning
+    - condition: template
+      value_template: >-
+        {% set key = {'person.herbert_schrotter':'herbert','person.nicole_2':'nicole','person.nina_2':'nina'}[trigger.entity_id] %}
+        {% set slot = states('sensor.heidi_heutiger_plan') %}
+        {{ slot != '0' and key in (states('input_text.heidi_plan' ~ slot ~ '_personen').split(',') | map('trim') | list) }}
+  actions:
+    - choose:
+        - conditions: "{{ is_state('input_select.heidi_bei_heimkehr', 'Zur Station') }}"
+          sequence:
+            - action: vacuum.return_to_base
+              target: { entity_id: vacuum.heidi }
+        - conditions: "{{ is_state('input_select.heidi_bei_heimkehr', 'Pausieren') }}"
+          sequence:
+            - action: vacuum.pause
+              target: { entity_id: vacuum.heidi }
+
+# ═══════════════════════ Dashboard & Prognose ═══════════════════════
+- id: heidi_dark_mode
+  alias: "Heidi: Dark Mode umschalten"
+  mode: single
+  triggers:
+    - trigger: state
+      entity_id: input_boolean.heidi_dark_mode
+    - trigger: homeassistant
+      event: start
+  actions:
+    - action: script.heidi_theme_anwenden
+
+- id: heidi_prognose_protokoll
+  alias: "Heidi: Prognose – Anwesenheit protokollieren"
+  mode: single
+  triggers:
+    - trigger: time_pattern
+      minutes: "/5"
+  conditions:
+    - condition: state
+      entity_id: input_boolean.heidi_prognose_aktiv
+      state: "on"
+    # Intervall aus den Dashboard-Einstellungen (5–60 min, Teiler von 60)
+    - condition: template
+      value_template: "{{ now().minute % (states('input_number.heidi_prognose_intervall') | int(15)) == 0 }}"
+  actions:
+    - action: shell_command.heidi_prognose_log
+
+- id: heidi_prognose_config
+  alias: "Heidi: Prognose – Einstellungen übernehmen"
+  mode: queued
+  triggers:
+    - trigger: state
+      entity_id: [input_boolean.heidi_prog_herbert, input_boolean.heidi_prog_nicole, input_boolean.heidi_prog_nina,
+                  input_number.heidi_prognose_wochen, input_number.heidi_prognose_halbwert, input_number.heidi_prognose_aufloesung]
+      for: { seconds: 2 }
+    - trigger: homeassistant
+      event: start
+  actions:
+    - action: shell_command.heidi_prognose_config
+    - action: homeassistant.update_entity
+      target: { entity_id: sensor.heidi_prognose }

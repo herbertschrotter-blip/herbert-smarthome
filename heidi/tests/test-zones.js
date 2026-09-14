@@ -1,6 +1,6 @@
 const { chromium } = require('playwright'); const fs = require('fs');
 (async () => {
-  const b = await chromium.launch();
+  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' }).catch(() => chromium.launch());
   const p = await b.newPage({ viewport: { width: 1200, height: 1000 } });
   const errs = []; p.on('pageerror', e => errs.push(e.message)); p.on('console', m => { if (m.type() === 'error') errs.push('console: ' + m.text()); else if (m.text().startsWith('svc')) errs.push(m.text()); });
   const js = fs.readFileSync('../../ha/www/heidi-panel.js', 'utf8'); const states = JSON.parse(fs.readFileSync('real_states.json', 'utf8'));
@@ -14,6 +14,7 @@ const { chromium } = require('playwright'); const fs = require('fs');
   await p.waitForTimeout(300);
   await p.evaluate(() => document.querySelector('heidi-panel').shadowRoot.querySelector('[data-act="zones"]').click());
   await p.waitForTimeout(500);
+  // Rechteck zeichnen: Pixel im svg
   const box = await p.evaluate(() => { const r = document.querySelector('heidi-panel').shadowRoot.querySelector('#zsvg').getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; });
   await p.mouse.move(box.x + box.w * 0.62, box.y + box.h * 0.35); await p.mouse.down(); await p.mouse.move(box.x + box.w * 0.72, box.y + box.h * 0.5, { steps: 5 }); await p.mouse.up();
   await p.waitForTimeout(200);

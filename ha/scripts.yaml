@@ -1,0 +1,159 @@
+# ═══════════════════════════════════════════════════════════════════════
+#  Heidi – Skripte (v2 – Planer-Editor)
+# ═══════════════════════════════════════════════════════════════════════
+
+heidi_reinigung:
+  alias: "Heidi: Reinigung starten"
+  icon: mdi:robot-vacuum
+  description: >-
+    Startet eine Raumreinigung mit Programm. Setzt pro Raum Modus/Saugstufe/Wassermenge/Route/
+    Wiederholungen (Heidi läuft im "angepassten" Raummodus) und ruft dann die Raumreinigung auf.
+  mode: single
+  fields:
+    raeume:
+      name: Räume (IDs mit Komma)
+      description: 1 Bad, 2 Schlafzimmer, 3 WC, 4 Flur, 5 Büro, 6 Küche, 7 Wohnzimmer
+      default: "7,6,5,4,3,2,1"
+      selector:
+        text:
+    modus:
+      name: Modus
+      default: Saugen
+      selector:
+        select:
+          options: [Saugen, Saugen + Wischen, "Saugen, dann Wischen", Nur Wischen]
+    saugstufe:
+      name: Saugstufe
+      default: Turbo
+      selector:
+        select:
+          options: [Leise, Standard, Stark, Turbo]
+    wasser:
+      name: Wassermenge
+      default: Mittel
+      selector:
+        select:
+          options: [Wenig, Mittel, Viel]
+    route:
+      name: Route
+      default: Standard
+      selector:
+        select:
+          options: [Schnell, Standard, Intensiv, Tief]
+    wiederholungen:
+      name: Wiederholungen
+      default: "1"
+      selector:
+        select:
+          options: ["1", "2", "3"]
+  variables:
+    ids: "{{ (raeume | default('7,6,5,4,3,2,1') | string).split(',') | map('trim') | reject('eq', '') | map('int') | list }}"
+    m: "{{ modus | default('Saugen') }}"
+    cm: "{{ {'Saugen':'sweeping','Saugen + Wischen':'sweeping_and_mopping','Saugen, dann Wischen':'sweeping_and_mopping','Nur Wischen':'mopping'}.get(m, 'sweeping') }}"
+    cm_global: "{{ 'mopping_after_sweeping' if m == 'Saugen, dann Wischen' else cm }}"
+    sl: "{{ {'Leise':'quiet','Standard':'standard','Stark':'strong','Turbo':'turbo'}.get(saugstufe | default('Turbo'), 'turbo') }}"
+    sl_num: "{{ {'quiet':0,'standard':1,'strong':2,'turbo':3}[sl] }}"
+    hum: "{{ {'Wenig':'slightly_dry','Mittel':'moist','Viel':'wet'}.get(wasser | default('Mittel'), 'moist') }}"
+    rt: "{{ {'Schnell':'quick','Standard':'standard','Intensiv':'intensive','Tief':'deep'}.get(route | default('Standard'), 'standard') }}"
+    rt_room: "{{ 'standard' if rt == 'quick' else rt }}"
+    times: "{{ wiederholungen | default('1') | int(1) }}"
+  sequence:
+    - condition: template
+      value_template: "{{ ids | length > 0 }}"
+    # Globale Einstellungen (falls die Entität gerade verfügbar ist)
+    - action: select.select_option
+      continue_on_error: true
+      target: { entity_id: select.heidi_cleaning_mode }
+      data: { option: "{{ cm_global }}" }
+    - action: select.select_option
+      continue_on_error: true
+      target: { entity_id: select.heidi_cleaning_route }
+      data: { option: "{{ rt }}" }
+    - repeat:
+        for_each: "{{ ids }}"
+        sequence:
+          - action: select.select_option
+            continue_on_error: true
+            target: { entity_id: "select.heidi_room_{{ repeat.item }}_cleaning_mode" }
+            data: { option: "{{ cm }}" }
+          - action: select.select_option
+            continue_on_error: true
+            target: { entity_id: "select.heidi_room_{{ repeat.item }}_suction_level" }
+            data: { option: "{{ sl }}" }
+          - action: select.select_option
+            continue_on_error: true
+            target: { entity_id: "select.heidi_room_{{ repeat.item }}_cleaning_times" }
+            data: { option: "{{ times }}x" }
+          - if: "{{ cm != 'sweeping' }}"
+            then:
+              - action: select.select_option
+                continue_on_error: true
+                target: { entity_id: "select.heidi_room_{{ repeat.item }}_mop_pad_humidity" }
+                data: { option: "{{ hum }}" }
+              - action: select.select_option
+                continue_on_error: true
+                target: { entity_id: "select.heidi_room_{{ repeat.item }}_cleaning_route" }
+                data: { option: "{{ rt_room }}" }
+    - delay: { seconds: 3 }
+    - action: dreame_vacuum.vacuum_clean_segment
+      target:
+        entity_id: vacuum.heidi
+      data:
+        segments: "{{ ids }}"
+        repeats: "{{ times }}"
+        suction_level: "{{ sl_num }}"
+
+heidi_plan_starten:
+  alias: "Heidi: Planer-Eintrag starten"
+  icon: mdi:calendar-check
+  description: Startet einen Planer-Eintrag (1–4) – normal, als Schnellprogramm oder leise (Homeoffice-Profil).
+  mode: single
+  fields:
+    plan:
+      name: Eintrag
+      default: 1
+      selector:
+        number: { min: 1, max: 4 }
+    variante:
+      name: Variante
+      default: normal
+      selector:
+        select:
+          options: [normal, schnell, leise]
+  variables:
+    p: "input_select.heidi_plan{{ plan }}_"
+    v: "{{ variante | default('normal') }}"
+  sequence:
+    - action: script.heidi_reinigung
+      data:
+        raeume: "{{ states('input_text.heidi_plan' ~ plan ~ '_raeume') }}"
+        modus: "{{ 'Saugen' if v in ['schnell', 'leise'] else states(p ~ 'modus') }}"
+        saugstufe: "{{ states(p ~ 'sp_saug') if v == 'schnell' else states(p ~ 'ho_saug') if v == 'leise' else states(p ~ 'saugstufe') }}"
+        wasser: "{{ states(p ~ 'wasser') }}"
+        route: "{{ states(p ~ 'sp_route') if v == 'schnell' else states(p ~ 'ho_route') if v == 'leise' else states(p ~ 'route') }}"
+        wiederholungen: "{{ states(p ~ 'sp_wdh') if v == 'schnell' else states(p ~ 'ho_wdh') if v == 'leise' else states(p ~ 'wiederholungen') }}"
+
+heidi_app_szene:
+  alias: "Heidi: App-Verknüpfung starten"
+  icon: mdi:link-variant
+  fields:
+    shortcut_id:
+      name: Verknüpfung (ID aus der Dreame-App)
+      default: 32
+      selector:
+        number: { min: 1, max: 999 }
+  sequence:
+    - action: dreame_vacuum.vacuum_start_shortcut
+      target:
+        entity_id: vacuum.heidi
+      data:
+        shortcut_id: "{{ shortcut_id }}"
+
+heidi_theme_anwenden:
+  alias: "Heidi: Theme anwenden"
+  icon: mdi:palette
+  sequence:
+    - action: frontend.set_theme
+      data:
+        name: "{{ 'heidi_dark' if is_state('input_boolean.heidi_dark_mode', 'on') else 'heidi_light' }}"
+        mode: "{{ 'dark' if is_state('input_boolean.heidi_dark_mode', 'on') else 'light' }}"

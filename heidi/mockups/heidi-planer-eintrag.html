@@ -1,0 +1,182 @@
+<title>Heidi Planer-Eintrag</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#0c1219;--solid:#141c25;--card:rgba(255,255,255,.045);--card2:rgba(255,255,255,.06);--card3:rgba(255,255,255,.1);--line:rgba(255,255,255,.09);--ink:#e8edf2;--muted:#94a4b4;
+  --glow1:rgba(47,209,182,.16);--glow2:rgba(90,169,255,.12);--acc:#2fd1b6;--acc-ink:#0f151c;--warn:#f2b544;--bad:#ff6b6b;--blue:#5aa9ff;--shadow:0 20px 50px rgba(0,0,0,.5);
+}
+:root[data-theme="light"]{--bg:#e9eef3;--solid:#fff;--card:rgba(255,255,255,.55);--card2:rgba(255,255,255,.7);--card3:rgba(20,40,60,.08);--line:rgba(20,40,60,.10);--ink:#16202a;--muted:#5f7080;--acc:#0fa892;--acc-ink:#fff;--glow1:rgba(15,168,146,.18);--glow2:rgba(90,169,255,.18);--shadow:0 20px 50px rgba(20,40,60,.18)}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--bg:#e9eef3;--solid:#fff;--card:rgba(255,255,255,.55);--card2:rgba(255,255,255,.7);--card3:rgba(20,40,60,.08);--line:rgba(20,40,60,.10);--ink:#16202a;--muted:#5f7080;--acc:#0fa892;--acc-ink:#fff;--glow1:rgba(15,168,146,.18);--glow2:rgba(90,169,255,.18);--shadow:0 20px 50px rgba(20,40,60,.18)}}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(900px 500px at 8% -10%,var(--glow1),transparent 60%),radial-gradient(800px 500px at 100% 30%,var(--glow2),transparent 60%),var(--bg);color:var(--ink);font:14px/1.4 "IBM Plex Sans",system-ui,sans-serif;padding:24px 16px 48px;font-variant-numeric:tabular-nums}
+h1,h2,h3,.num{font-family:"Sora","IBM Plex Sans",sans-serif}
+.wrap{max-width:640px;margin:0 auto;display:grid;gap:14px}
+.intro{color:var(--muted);font-size:13px;text-align:center}
+.box{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.06);display:grid;gap:16px}
+.box h2{margin:0;font-size:18px;font-weight:600;display:flex;align-items:center;gap:10px}
+.box h2 .x{margin-left:auto;width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--card2);color:var(--ink);display:grid;place-items:center;cursor:pointer}
+.sec{display:grid;gap:8px}
+.lab{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:8px}
+.lab .r{margin-left:auto;text-transform:none;letter-spacing:0;font-weight:500;font-size:12px}
+input[type=text]{width:100%;background:var(--solid);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;font-size:15px}
+svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--card2);color:var(--muted);border-radius:999px;padding:7px 12px;font:500 13px "IBM Plex Sans",sans-serif;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .12s}
+.chip.on{color:var(--acc);border-color:color-mix(in srgb,var(--acc) 55%,var(--line));background:color-mix(in srgb,var(--acc) 12%,transparent)}
+.chip.on.p{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 55%,var(--line));background:color-mix(in srgb,var(--warn) 12%,transparent)}
+.rooms{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+@media (max-width:520px){.rooms{grid-template-columns:repeat(4,1fr)}}
+.rooms .chip{border-radius:12px;padding:9px 4px 7px;display:grid;justify-items:center;gap:4px;font-size:11px}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.days .chip{justify-content:center;border-radius:12px;padding:9px 0}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;background:var(--card3);padding:4px;border-radius:12px}
+.seg button{border:0;border-radius:9px;padding:9px 6px;background:transparent;color:var(--muted);font:500 13px "IBM Plex Sans",sans-serif;cursor:pointer}
+.seg button.on{background:var(--solid);color:var(--ink);box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:520px){.two{grid-template-columns:1fr}}
+/* rows */
+.row{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;background:var(--card2);border:1px solid var(--line)}
+.row .ic{width:34px;height:34px;border-radius:9px;background:var(--card3);display:grid;place-items:center;color:var(--muted)}
+.row.on .ic{color:var(--acc);background:color-mix(in srgb,var(--acc) 15%,transparent)}
+.row .t{font-weight:600}.row .s{font-size:12px;color:var(--muted)}
+.sw{width:38px;height:22px;border-radius:999px;background:var(--card3);position:relative;cursor:pointer;flex:none}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .15s}
+.row.on .sw,.sw.on{background:var(--acc)}.row.on .sw::after,.sw.on::after{left:19px}
+.sub{grid-column:2/4;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.sub .chip{padding:5px 10px;font-size:12px}
+.help{font-size:12px;color:var(--muted);line-height:1.45}
+.mini{width:100%;display:grid;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px}
+.mlab{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.mrow{display:grid;grid-template-columns:110px 1fr;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.seg.s{padding:3px}.seg.s button{padding:6px 4px;font-size:12px}
+/* clock */
+.timebtn{display:inline-flex;align-items:center;gap:10px;background:var(--solid);border:1px solid var(--line);border-radius:10px;padding:8px 14px;cursor:pointer;font:600 22px "Sora",sans-serif}
+.timebtn small{font:500 12px "IBM Plex Sans",sans-serif;color:var(--muted)}
+.clock{display:none;justify-items:center;gap:10px;background:var(--solid);border:1px solid var(--line);border-radius:16px;padding:14px}
+.clock.open{display:grid}
+.clock .hd{display:flex;gap:6px;align-items:baseline;font:600 34px "Sora",sans-serif}
+.clock .hd span{cursor:pointer;padding:2px 8px;border-radius:8px;color:var(--muted)}
+.clock .hd span.on{color:var(--ink);background:var(--card3)}
+.dial{position:relative;width:240px;height:240px;border-radius:50%;background:var(--card3);touch-action:none;user-select:none}
+.dial .n{position:absolute;width:32px;height:32px;margin:-16px;border-radius:50%;display:grid;place-items:center;font:500 13px "IBM Plex Sans",sans-serif;cursor:pointer}
+.dial .n.sel{background:var(--acc);color:var(--acc-ink);font-weight:600}
+.dial .hand{position:absolute;left:50%;top:50%;width:2px;height:88px;background:var(--acc);transform-origin:top center;margin-left:-1px;transform:rotate(180deg)}
+.dial .hub{position:absolute;left:50%;top:50%;width:8px;height:8px;margin:-4px;border-radius:50%;background:var(--acc)}
+.clock .foot{display:flex;gap:8px;justify-content:flex-end;width:100%}
+.btn{border:1px solid var(--line);background:var(--card2);color:var(--ink);border-radius:10px;padding:10px 16px;font:500 13px "IBM Plex Sans",sans-serif;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.btn.primary{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+.btn.ghost{background:transparent}
+.foot{display:flex;gap:8px;justify-content:flex-end;padding-top:4px;border-top:1px solid var(--line)}
+.foot .del{margin-right:auto;color:var(--bad)}
+[hidden]{display:none!important}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="sofa" viewBox="0 0 24 24"><path d="M4 11V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3M3 13a2 2 0 0 1 4 0v2h10v-2a2 2 0 0 1 4 0v5H3z"/></symbol>
+  <symbol id="chef" viewBox="0 0 24 24"><path d="M7 20h10v-6a5 5 0 1 0-3-9 4 4 0 0 0-4 0 5 5 0 1 0-3 9z"/></symbol>
+  <symbol id="desk" viewBox="0 0 24 24"><path d="M3 9h18M5 9v11M19 9v11M9 9v6h6V9"/></symbol>
+  <symbol id="foot" viewBox="0 0 24 24"><ellipse cx="9" cy="8" rx="3" ry="5"/><ellipse cx="15" cy="15" rx="3" ry="5"/></symbol>
+  <symbol id="wc" viewBox="0 0 24 24"><path d="M6 3h8v9H6zM4 12h16a6 6 0 0 1-6 6h-4a6 6 0 0 1-6-6zM9 18v3M15 18v3"/></symbol>
+  <symbol id="bed" viewBox="0 0 24 24"><path d="M3 18v-7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v7M3 15h18M6 9V6h5v3M13 9V6h5v3"/></symbol>
+  <symbol id="shower" viewBox="0 0 24 24"><path d="M5 20V9a4 4 0 0 1 8 0M9 13h8M11 16v1M14 16v1M17 16v1"/></symbol>
+  <symbol id="user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+  <symbol id="case" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 12h18"/></symbol>
+  <symbol id="bolt" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></symbol>
+  <symbol id="power" viewBox="0 0 24 24"><path d="M12 3v9M6 7a8 8 0 1 0 12 0"/></symbol>
+  <symbol id="clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></symbol>
+  <symbol id="play" viewBox="0 0 24 24"><path d="M7 5l12 7-12 7z"/></symbol>
+</svg>
+
+<div class="wrap">
+  <div class="intro">Mockup · Planer-Eintrag bearbeiten (Glas-Optik, alles klickbar)</div>
+  <div class="box" id="box">
+    <h2>Eintrag 2 <span style="font-weight:400;color:var(--muted)">bearbeiten</span><button class="x" aria-label="Schließen"><svg class="i"><use href="#x"/></svg></button></h2>
+
+    <div class="sec"><div class="lab">Name <span class="r" id="aktivlab" style="display:flex;align-items:center;gap:8px;color:var(--acc)">Aktiv <span class="sw on" id="aktiv"></span></span></div><input type="text" id="name" value="Saugen + Wischen"></div>
+
+    <div class="sec"><div class="lab">Räume <span class="r" id="roomsum">Alle</span></div>
+      <div class="rooms" id="rooms">
+        <button class="chip on" data-r="7"><svg class="i"><use href="#sofa"/></svg>Wohnz.</button>
+        <button class="chip on" data-r="6"><svg class="i"><use href="#chef"/></svg>Küche</button>
+        <button class="chip on" data-r="5"><svg class="i"><use href="#desk"/></svg>Büro</button>
+        <button class="chip on" data-r="4"><svg class="i"><use href="#foot"/></svg>Flur</button>
+        <button class="chip on" data-r="3"><svg class="i"><use href="#wc"/></svg>WC</button>
+        <button class="chip on" data-r="2"><svg class="i"><use href="#bed"/></svg>Schlafz.</button>
+        <button class="chip on" data-r="1"><svg class="i"><use href="#shower"/></svg>Bad</button>
+      </div></div>
+
+    <div class="sec"><div class="lab">Modus</div>
+      <div class="seg" id="modus"><button>Saugen</button><button class="on">Saugen + Wischen</button><button>Saugen, dann Wischen</button><button>Nur Wischen</button></div></div>
+
+    <div class="two">
+      <div class="sec"><div class="lab">Saugstufe</div><div class="seg"><button>Leise</button><button>Standard</button><button>Stark</button><button class="on">Turbo</button></div></div>
+      <div class="sec" id="wasser"><div class="lab">Wassermenge</div><div class="seg"><button>Wenig</button><button class="on">Mittel</button><button>Viel</button></div></div>
+    </div>
+    <div class="two">
+      <div class="sec"><div class="lab">Route</div><div class="seg"><button>Schnell</button><button class="on">Standard</button><button>Intensiv</button><button>Tief</button></div></div>
+      <div class="sec"><div class="lab">Wiederholungen</div><div class="seg"><button class="on">1×</button><button>2×</button><button>3×</button></div></div>
+    </div>
+
+    <div class="sec"><div class="lab">Ausführung <span class="r" id="daysum">Mo + Do</span></div>
+      <div class="days" id="days">
+        <button class="chip on">Mo</button><button class="chip">Di</button><button class="chip">Mi</button><button class="chip on">Do</button><button class="chip">Fr</button><button class="chip">Sa</button><button class="chip">So</button>
+      </div>
+      <div class="chips"><button class="chip" data-preset="1,1,1,1,1,0,0">Mo–Fr</button><button class="chip" data-preset="0,0,0,0,0,1,1">Wochenende</button><button class="chip" data-preset="1,1,1,1,1,1,1">Täglich</button><button class="chip" data-preset="0,0,0,0,0,0,0">Nur manuell (Szene)</button></div>
+    </div>
+
+    <div class="sec" id="timesec"><div class="lab">Uhrzeit</div>
+      <div><button class="timebtn" id="timebtn"><svg class="i"><use href="#clock"/></svg><span id="tval">09:30</span><small>antippen zum Ändern</small></button></div>
+      <div class="clock" id="clock">
+        <div class="hd"><span id="hh" class="on">09</span>:<span id="mm">30</span></div>
+        <div class="dial" id="dial"><div class="hand" id="hand"></div><div class="hub"></div></div>
+        <div class="foot"><button class="btn ghost" id="tcancel">Abbrechen</button><button class="btn primary" id="tok">OK</button></div>
+      </div>
+    </div>
+
+    <div class="sec"><div class="lab">Bedingungen</div>
+      <div class="row on" id="r1"><div class="ic"><svg class="i"><use href="#user"/></svg></div><div><div class="t">Nicht fahren, wenn zu Hause ist:</div><div class="s">Wartet, bis die gewählten Personen weg sind – heute wird nachgeholt</div></div><div class="sw"></div>
+        <div class="sub"><button class="chip">Herbert</button><button class="chip on p">Nicole</button><button class="chip">Nina</button></div></div>
+      <div class="row on" id="r2"><div class="ic"><svg class="i"><use href="#case"/></svg></div><div><div class="t">Bei Homeoffice</div><div class="s">Mo–Fr 08–17 Uhr ist eine der Personen oben zu Hause</div></div><span></span>
+        <div class="sub" style="display:grid;gap:8px">
+          <div class="seg" id="homode"><button class="on">Warten, bis die Person weg ist</button><button>Leise starten</button></div>
+          <div class="mini" id="hoset" hidden><div class="mlab">Leise starten mit</div><div class="mrow"><span>Saugstufe</span><div class="seg s"><button class="on">Leise</button><button>Standard</button><button>Stark</button></div></div><div class="mrow"><span>Route</span><div class="seg s"><button class="on">Schnell</button><button>Standard</button><button>Intensiv</button></div></div><div class="mrow"><span>Wiederholungen</span><div class="seg s"><button class="on">1×</button><button>2×</button></div></div></div>
+        </div></div>
+      <div class="row on" id="r3"><div class="ic"><svg class="i"><use href="#bolt"/></svg></div><div><div class="t">Schnellprogramm bei wenig Zeit</div><div class="s">Wenn weniger als 90 min bis zur erwarteten Rückkehr bleiben</div></div><div class="sw"></div>
+        <div class="sub"><div class="mini"><div class="mlab">Schnellprogramm läuft mit</div><div class="mrow"><span>Saugstufe</span><div class="seg s"><button>Leise</button><button class="on">Standard</button><button>Stark</button></div></div><div class="mrow"><span>Route</span><div class="seg s"><button class="on">Schnell</button><button>Standard</button><button>Intensiv</button></div></div><div class="mrow"><span>Wiederholungen</span><div class="seg s"><button class="on">1×</button><button>2×</button></div></div><div class="help">Immer nur Saugen, gewählte Räume · gilt danach als erledigt</div></div></div></div>
+    </div>
+
+    <div class="foot"><button class="btn ghost del"><svg class="i"><use href="#trash"/></svg>Zurücksetzen</button><button class="btn ghost"><svg class="i"><use href="#play"/></svg>Jetzt starten</button><button class="btn">Abbrechen</button><button class="btn primary">Speichern</button></div>
+  </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+// segmented
+$$('.seg').forEach(g=>g.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;g.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));if(g.id==='modus'){$('#wasser').style.opacity=b.textContent==='Saugen'?.35:1;}}));
+// rooms
+const roomNames={7:'Wohnzimmer',6:'Küche',5:'Büro',4:'Flur',3:'WC',2:'Schlafzimmer',1:'Bad'};
+function roomSum(){const on=$$('#rooms .chip.on');$('#roomsum').textContent=on.length===7?'Alle':on.length===0?'keine':on.map(b=>roomNames[b.dataset.r]).join(', ');}
+$('#rooms').addEventListener('click',e=>{const b=e.target.closest('.chip');if(!b)return;b.classList.toggle('on');roomSum();});
+// days
+const dn=['Mo','Di','Mi','Do','Fr','Sa','So'];
+function daySum(){const on=$$('#days .chip').map(b=>b.classList.contains('on'));const n=on.filter(Boolean).length;let t=n===7?'Täglich':n===0?'Nur manuell':on.every((v,i)=>v===(i<5))?'Mo–Fr':on.every((v,i)=>v===(i>=5))?'Sa + So':dn.filter((d,i)=>on[i]).join(' + ');$('#daysum').textContent=t;$('#timesec').hidden=n===0;}
+$('#days').addEventListener('click',e=>{const b=e.target.closest('.chip');if(!b)return;b.classList.toggle('on');daySum();});
+$$('[data-preset]').forEach(p=>p.addEventListener('click',()=>{const v=p.dataset.preset.split(',');$$('#days .chip').forEach((b,i)=>b.classList.toggle('on',v[i]==='1'));daySum();}));
+// clock
+let H=9,M=30,mode='h';
+const dial=$('#dial');
+function drawDial(){dial.querySelectorAll('.n').forEach(n=>n.remove());const R=100,cx=120,cy=120;const items=mode==='h'?[...Array(24).keys()]:[...Array(12).keys()].map(i=>i*5);items.forEach((v,i)=>{const outer=mode==='h'?v<12:true;const r=mode==='h'?(v<12?R:R-36):R;const ang=((mode==='h'?v%12:i)/12)*2*Math.PI-Math.PI/2;const d=document.createElement('div');d.className='n'+((mode==='h'?v===H:v===M)?' sel':'');d.style.left=(cx+r*Math.cos(ang))+'px';d.style.top=(cy+r*Math.sin(ang))+'px';d.textContent=String(v).padStart(2,'0');d.dataset.v=v;dial.appendChild(d);});const sel=mode==='h'?H:M/5;const ang=(sel%12)/12*360;const r=mode==='h'&&H>=12?R-36:R;$('#hand').style.height=r+'px';$('#hand').style.transform=`rotate(${ang+180}deg)`;$('#hh').textContent=String(H).padStart(2,'0');$('#mm').textContent=String(M).padStart(2,'0');$('#hh').classList.toggle('on',mode==='h');$('#mm').classList.toggle('on',mode==='m');}
+dial.addEventListener('click',e=>{const n=e.target.closest('.n');if(!n)return;const v=+n.dataset.v;if(mode==='h'){H=v;mode='m';}else{M=v;}drawDial();});
+$('#hh').onclick=()=>{mode='h';drawDial()};$('#mm').onclick=()=>{mode='m';drawDial()};
+$('#timebtn').onclick=()=>{mode='h';drawDial();$('#clock').classList.add('open');};
+$('#tcancel').onclick=()=>$('#clock').classList.remove('open');
+$('#tok').onclick=()=>{$('#tval').textContent=`${String(H).padStart(2,'0')}:${String(M).padStart(2,'0')}`;$('#clock').classList.remove('open');};
+// rows
+$$('.row').forEach(r=>{r.querySelector('.sw').addEventListener('click',()=>r.classList.toggle('on'));r.querySelectorAll('.sub .chip').forEach(c=>c.addEventListener('click',()=>{c.classList.toggle('on');c.classList.toggle('p',c.classList.contains('on'));}));});
+$('#homode').addEventListener('click',()=>{const leise=$('#homode button:nth-child(2)').classList.contains('on');$('#hoset').hidden=!leise;});
+$('#aktiv').addEventListener('click',()=>{const sw=$('#aktiv');sw.classList.toggle('on');const on=sw.classList.contains('on');$('#aktivlab').firstChild.textContent=on?'Aktiv ':'Inaktiv ';$('#aktivlab').style.color=on?'var(--acc)':'var(--muted)';$('#box').style.opacity=on?1:.75;});
+roomSum();daySum();
+</script>

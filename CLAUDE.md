@@ -15,14 +15,11 @@ Fachbegriffe ohne Erklärung. Große Umbauten zuerst als Mockup zeigen, dann ums
   (`.\tools\ha.ps1 post config/core/check_config`), dann HA neu starten
   (`.\tools\ha.ps1 post services/homeassistant/restart`). Dashboard danach mit Strg+F5 laden.
 - Nie ins Repo: `H:\.storage\`, `secrets.yaml`, Datenbanken, `prognose/presence_log.csv`.
-- Falls `ha/www/heidi-panel.js`, `ha/packages/heidi.yaml`, `ha/automations.yaml`, `ha/scripts.yaml`
-  oder `ha/prognose/presence.py` im Repo fehlen: von `H:\` übernehmen (siehe README) und committen.
 
 ## Repo-Aufbau
 - `ha/` – Spiegel der relevanten HA-Dateien (Quelle der Wahrheit; `H:\` ist das Ziel).
 - `heidi/` – Saugroboter Heidi: eigene `CLAUDE.md` mit Details, Tests, Mockups.
-- `tools/ha.ps1` (API), `tools/deploy.ps1` (Kopieren nach H:\ + Kartenversion hochzählen),
-  `tools/dump-states.ps1` (Testdaten aus HA ziehen).
+- `tools/ha.ps1` (API), `tools/deploy.ps1` (Kopieren nach H:\ + Kartenversion hochzählen).
 
 ## Personen / Anwesenheit
 `person.herbert_schrotter` (Companion-App GPS + WLAN), `person.nicole_2`, `person.nina_2`
