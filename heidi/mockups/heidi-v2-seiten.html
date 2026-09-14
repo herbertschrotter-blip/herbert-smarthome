@@ -101,6 +101,11 @@
   .btn svg { width: 18px; height: 18px; }
   .strip { margin-top: 14px; padding: 10px 12px; border-radius: 16px; background: var(--glass-2); border: 1px solid var(--line-soft); cursor: pointer; }
   .strip .lab { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; }
+  .strip .lab svg { width: 16px; height: 16px; flex: none; }
+  .livemap { margin-top: 12px; cursor: pointer; }
+  .livemap .map { border-radius: var(--r-s); } .livemap .map > svg { height: 200px; width: 100%; }
+  .livemap .cap { margin-top: 6px; font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; } .livemap .cap b { color: var(--text); }
+  .livemap .cap svg { width: 14px; height: 14px; }
   .strip .lab .r { margin-left: auto; color: var(--muted); font-weight: 500; }
   .strip .chips { margin-top: 8px; }
 
@@ -368,7 +373,8 @@ function pageStart() {
   const ctl = S.vac === 'cleaning' ? B('pause', 'Pause', 1, 'Pause') + B('stop', 'Stopp', 0, 'Heidi stoppt') + B('home', 'Station', 0, 'Heidi fährt zur Station')
     : S.vac === 'paused' ? B('play', 'Weiter', 1, 'Weiter') + B('stop', 'Stopp', 0, 'Heidi stoppt') + B('home', 'Station', 0, 'Heidi fährt zur Station')
     : B('play', 'Start', 1, 'Heidi startet') + B('home', 'Station', 0, 'Heidi fährt zur Station') + B('locate', 'Orten', 0, 'Heidi meldet sich');
-  const strip = st.cur ? `<div class="strip" data-open="rooms-robot"><div class="lab">${I.chef} Jetzt: Küche <span class="r">danach Wohnz. → Büro ›</span></div><div class="chips">${chip('broom', 'Saugen + Wischen', 'k')}${chip('fan', 'Turbo', 'k')}${chip('water', 'Mittel', 'k')}${chip('repeat', '1×', 'k')}</div></div>` : '';
+  const strip = st.cur ? `<div class="strip" data-open="rooms-robot"><div class="lab">${I.chef} Jetzt: Küche <span class="r">danach Wohnz. → Büro ›</span></div><div class="chips">${chip('broom', 'Saugen + Wischen', 'k')}${chip('fan', 'Turbo', 'k')}${chip('water', 'Mittel', 'k')}${chip('repeat', '1×', 'k')}</div></div>
+    <div class="livemap" data-nav="reinigen" title="Zur Karte"><div class="map">${mapSvg(new Set([7, 5]), st.cur, false)}</div><div class="cap">${I.map}<b>Live-Karte</b> · Küche · 34 m² · noch Wohnz., Büro · antippen für Karte</div></div>` : '';
   const pg = S.prognoseAktiv ? `<button class="navtile" data-nav="prognose"><div class="ic c-orange">${I.chart}</div><div class="t">Prognose ${I.chev}</div><div class="prog"><div>Frei<b>9–16½</b></div><div>Rückkehr<b>16:40</b></div><div>Sicher<b>78 %</b></div></div></button>` : '';
   return `
     <div class="head"><div><h1>Heidi</h1><div class="sub">${st.head}</div></div><button class="iconbtn" data-nav="einstellungen" aria-label="Einstellungen">${I.gear}</button></div>
