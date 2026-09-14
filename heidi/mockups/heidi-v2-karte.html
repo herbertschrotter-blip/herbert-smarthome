@@ -1855,8 +1855,9 @@ let cardB = null;
 // Heidis Kartenknöpfe am unteren Rand des Kartenbilds verankern (nicht der Kartenzeile darunter)
 function placeOnMap() {
   const img = cardB?.shadowRoot?.querySelector('img'), wrap = document.querySelector('.mapwrap'), bar = document.querySelector('.onmap');
-  if (!img || !wrap || !bar) return;
-  if (!img.complete || !img.getBoundingClientRect().height) { setTimeout(placeOnMap, 150); return; }
+  if (!wrap || !bar) return;
+  if (!img || !img.getBoundingClientRect().height) { if ((placeOnMap.n = (placeOnMap.n || 0) + 1) < 40) setTimeout(placeOnMap, 150); return; }
+  placeOnMap.n = 0;
   const w = wrap.getBoundingClientRect(), i = img.getBoundingClientRect();
   bar.style.bottom = Math.max(10, Math.round(w.bottom - i.bottom) + 10) + 'px';
 }
