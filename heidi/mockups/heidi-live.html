@@ -54,6 +54,7 @@ const E = {
   rotation: "select.heidi_map_rotation",
   jemand: "binary_sensor.heidi_jemand_zu_hause",
   phase: "sensor.heidi_phase", // feiner Arbeitsschritt (Template-Sensor im Paket), Verlauf = Zeitleiste im Protokoll
+  lern: "sensor.heidi_lernwerte", // Lernwerte aus dem Laufprotokoll (Minuten/m², Akku %/min, Ladekurve, Raumflächen)
 };
 const PHASE_IDLE = ["Schläft", "Lädt", "Angedockt", "Bereit", "unknown", "unavailable", ""];
 const VAC_RUN = ["cleaning", "paused", "returning"]; // Roboter unterwegs = Lauf aktiv (vacuum.heidi)
@@ -203,6 +204,20 @@ ha-icon { --mdc-icon-size: 18px; }
 .ed .rooms .chip { position: relative; } .dotm { position: absolute; top: 5px; right: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
 .ed .btnrow { display: flex; gap: 8px; flex-wrap: wrap; } .ed .btnrow .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 14px; font-size: 13px; }
 .hint { font-size: 12px; color: var(--muted); }
+/* Dauer & Akku */
+.estline { margin-top: 4px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); border-radius: 999px; padding: 3px 9px; font-size: 11px; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.estline ha-icon { --mdc-icon-size: 13px; }
+.estline.acc { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); } .estline.warn { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 45%, var(--line)); } .estline.bad { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 45%, var(--line)); }
+.esum { display: grid; gap: 4px; padding: 10px 12px; border-radius: 12px; font-size: 13px; border: 1px solid var(--line); background: var(--surface-2); }
+.esum.ok { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); } .esum.bad { border-color: color-mix(in srgb, var(--bad) 45%, var(--line)); }
+.elist { display: grid; gap: 4px; }
+.er { display: grid; grid-template-columns: 26px 1fr auto 48px; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 10px; background: var(--surface-2); font-size: 12px; }
+.er .ei { color: var(--accent); } .er .ei ha-icon { --mdc-icon-size: 18px; } .er.laden .ei { color: var(--warn); } .er.wasch .ei, .er.heim .ei { color: var(--blue); }
+.er .et { display: grid; } .er .et small { color: var(--muted); font-size: 11px; } .er .em { color: var(--text); font-variant-numeric: tabular-nums; } .er .eb { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; } .er .eb.bad { color: var(--bad); }
+.er.laden, .er.wasch, .er.heim { color: var(--muted); }
+.estsvg { width: 100%; height: auto; margin-top: 6px; display: block; }
+.lern { display: grid; gap: 4px; margin-top: 8px; } .lr { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 8px; font-size: 12px; padding: 5px 8px; border-radius: 8px; background: var(--surface-2); color: var(--muted); } .lr span:first-child { color: var(--text); font-weight: 500; }
+@media (max-width: 520px) { .lr { grid-template-columns: 1fr 1fr; } }
 .rooms { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 10px; }
 @media (max-width: 900px) { .rooms { grid-template-columns: repeat(4, 1fr); } }
 .rooms .btn { padding: 8px 4px 6px; border-radius: 10px; }
@@ -389,6 +404,7 @@ class HeidiPanel extends HTMLElement {
     this._tl = {};            // Zeitleisten-Cache je Lauf (Schlüssel = Zeitstempel bzw. "cur")
     this._tlOpen = new Set(); // aufgeklappte Protokoll-Einträge
     this._rooms = null;       // Untermenü Räume: { mode: "robot"|"plan", back: "editor"|null }
+    this._est = null;         // Untermenü Dauer & Akku: { n, variante, sel: Set("Modus/Saugstufe"), back }
     this._view = "main";
     this._sig = "";
     this._mapEls = {};
@@ -437,7 +453,7 @@ class HeidiPanel extends HTMLElement {
       ["modus", "saugstufe", "wasser", "route", "wiederholungen", "homeoffice", "ho_saug", "ho_wdh", "sp_saug", "sp_wdh"].forEach((k) => ids.push(`input_select.heidi_plan${n}_${k}`));
     }
     for (let r = 1; r <= 7; r++) RV_KEYS.forEach((k) => ids.push(`select.heidi_room_${r}_${RV_ENT[k]}`));
-    ids.push("switch.heidi_customized_cleaning", "input_boolean.heidi_auto_lauf", "input_text.heidi_raum_snapshot");
+    ids.push("switch.heidi_customized_cleaning", "input_boolean.heidi_auto_lauf", "input_text.heidi_raum_snapshot", E.lern);
     const s = this._hass.states;
     return ids.map((i) => { const x = s[i]; return x ? x.state + "|" + (x.last_updated || "") : "?"; }).join(";") + "|" + this._view + "|" + this._panel;
   }
@@ -584,7 +600,7 @@ class HeidiPanel extends HTMLElement {
       const p = this._planRead(n), manual = !p.tage.some(Boolean), today = String(heute) === String(n);
       return `<div class="pr ${today ? "today" : ""} ${p.aktiv ? "" : "off"}">
         <div class="ic">${ic(icons[n - 1])}</div>
-        <div><div class="n">${esc(p.name)}</div><div class="s">${esc(this._roomLabel(p.raeume))} · ${esc(p.modus)} · ${esc(p.wdh)}×${Object.keys(p.raum).length ? " · Räume einzeln" : ""}${p.personen.size ? " · wartet auf " + [...p.personen].map((x) => x[0].toUpperCase() + x.slice(1)).join(", ") : ""}</div></div>
+        <div><div class="n">${esc(p.name)}</div><div class="s">${esc(this._roomLabel(p.raeume))} · ${esc(p.modus)} · ${esc(p.wdh)}×${Object.keys(p.raum).length ? " · Räume einzeln" : ""}${p.personen.size ? " · wartet auf " + [...p.personen].map((x) => x[0].toUpperCase() + x.slice(1)).join(", ") : ""}</div>${this._estLine(n)}</div>
         <span class="tag ${today ? "acc" : ""}">${manual ? "Manuell" : esc(this._dayLabel(p.tage) + " " + p.zeit)}</span>
         <button class="ib go" title="Jetzt starten" data-run="${n}">${ic("mdi:play")}</button><button class="ib" title="Bearbeiten" data-edit="${n}">${ic("mdi:pencil")}</button></div>`;
     }).join("");
@@ -804,6 +820,7 @@ class HeidiPanel extends HTMLElement {
   // ───────── Overlays: Einstellungen & Planer-Editor ─────────
   _renderOverlay() {
     const o = this.$("#overlay");
+    if (this._est) { o.innerHTML = this._estHtml(); return; }
     if (this._rooms) { o.innerHTML = this._roomsHtml(); return; }
     if (this._editing) { o.innerHTML = this._editorHtml(this._editing); return; }
     if (this._zones) { o.innerHTML = this._zonesHtml(); this._zonesBind(); return; }
@@ -948,7 +965,7 @@ class HeidiPanel extends HTMLElement {
         <div class="sec" style="opacity:${e.modus === "Nur Wischen" ? "1" : ".4"}"><div class="lab">Route <span class="r">nur bei „Nur Wischen“</span></div>${seg("route", OPT.route)}</div>
         <div class="sec"><div class="lab">Wiederholungen</div>${seg("wdh", OPT.wdh)}</div>
       </div>
-      <div class="btnrow"><button class="btn" data-act="rooms-plan">${ic("mdi:floor-plan")}Räume einzeln …${ownCount ? ` (${ownCount})` : ""}</button><button class="btn" data-act="rooms-robot">${ic("mdi:robot-vacuum")}Roboter-Werte</button></div>
+      <div class="btnrow"><button class="btn" data-act="rooms-plan">${ic("mdi:floor-plan")}Räume einzeln …${ownCount ? ` (${ownCount})` : ""}</button><button class="btn" data-act="rooms-robot">${ic("mdi:robot-vacuum")}Roboter-Werte</button>${this._lern() ? `<button class="btn" data-act="est" data-plan="${n}">${ic("mdi:timer-outline")}Dauer &amp; Akku</button>` : ""}</div>
       <div class="sec"><div class="lab">Ausführung <span class="r">${esc(this._dayLabel(e.tage))}</span></div><div class="days">${days}</div><div class="chips">${presets}</div></div>
       <div class="sec" ${manual ? "hidden" : ""}><div class="lab">Uhrzeit</div>
         <div><button class="timebtn" data-ed="clock">${ic("mdi:clock-outline")}<span>${esc(e.zeit)}</span><small>antippen zum Ändern</small></button></div>
@@ -1007,7 +1024,97 @@ class HeidiPanel extends HTMLElement {
     this._editing = null; this._ed = null; this._sig = ""; this.hass = this._hass;
   }
 
-  _closeOverlays() { this._editing = null; this._ed = null; this._panel = false; this._zones = null; this._rooms = null; this._sig = ""; this._render(); }
+  _closeOverlays() { this._editing = null; this._ed = null; this._panel = false; this._zones = null; this._rooms = null; this._est = null; this._sig = ""; this._render(); }
+
+  // ───────── Dauer & Akku (v1.6): Schätzung aus Lernwerten ─────────
+  _lern() { const s = this._hass.states[E.lern]; return s && !["unknown", "unavailable"].includes(s.state) && s.attributes?.raten ? s.attributes : null; }
+  _planVals(n) { return this._editing === n && this._ed ? this._ed : this._planRead(n); }
+  _rate(lern, modus, saug) {
+    const r = lern.raten?.[modus + "/" + saug];
+    if (r && r.laeufe > 0) return { ...r, gelernt: true };
+    // Ersatz: gelernte Werte desselben Modus (andere Saugstufe) × Faktor, sonst Erfahrungswerte
+    const F = { Leise: 0.8, Standard: 1, Stark: 1.25, Turbo: 1.6 };
+    const base = Object.entries(lern.raten || {}).filter(([k, v]) => k.startsWith(modus + "/") && v.laeufe > 0).map(([k, v]) => ({ ...v, f: F[k.split("/")[1]] || 1 }))[0];
+    const b = base || { min_pro_m2: modus === "Saugen" ? 0.9 : 1.6, pct_pro_min: modus === "Saugen" ? 0.3 : 0.42, f: 1 };
+    return { min_pro_m2: b.min_pro_m2, pct_pro_min: b.pct_pro_min * (F[saug] || 1) / b.f, gelernt: false };
+  }
+  _chargeMin(from, to, L) { let m = 0; if (from < 80) m += (Math.min(to, 80) - from) / L.schnell_pct_min; if (to > 80) m += (to - Math.max(from, 80)) / L.langsam_pct_min; return Math.max(0, m); }
+  _restMin() { // Minuten bis zur erwarteten Rückkehr – wie in der Automatik
+    const a = this._hass.states[E.prognose]?.attributes || {};
+    const useProg = this.on(E.prognoseAktiv) && !this.on("input_boolean.heidi_abweichung_heute") && (parseInt(a.tage) || 0) >= this.num("input_number.heidi_prognose_mindesttage", 14) && (parseInt(a.rueckkehr_min) || 0) > 0;
+    if (useProg) return { min: parseInt(a.rueckkehr_min), quelle: "Prognose" };
+    const rk = (this.st("input_datetime.heidi_rueckkehr") || "17:00:00").slice(0, 5), now = new Date();
+    return { min: parseInt(rk.slice(0, 2)) * 60 + parseInt(rk.slice(3, 5)) - now.getHours() * 60 - now.getMinutes(), quelle: "übliche Rückkehr " + rk };
+  }
+  // Simuliert einen Eintrag Raum für Raum: Dauer, Akku, Mopp-Wäschen, Ladestopps. uniform = feste Einstellung für alle Räume (Diagramm)
+  _estimate(p, variante = "normal", uniform = null, batt0 = null) {
+    const lern = this._lern(); if (!lern) return null;
+    batt0 = batt0 ?? this.num("sensor.heidi_battery_level", 100);
+    const seq = this.attr(E.vac, "cleaning_sequence") || [], ids = [...p.raeume];
+    const order = seq.filter((i) => ids.includes(i)).concat(ids.filter((i) => !seq.includes(i)));
+    const std = variante === "schnell" ? { modus: "Saugen", saug: p.spSaug, wdh: p.spWdh } : variante === "leise" ? { modus: "Saugen", saug: p.hoSaug, wdh: p.hoWdh } : { modus: p.modus, saug: p.saug, wdh: p.wdh };
+    const L = lern.laden || { schnell_pct_min: 1.1, langsam_pct_min: 0.5, rueckkehr_pct: 15, weiter_pct: 80 };
+    const W = lern.waesche || { vor_start_min: 4, zwischen_min: 5, nach_m2: this.num("number.heidi_self_clean_area", 25) };
+    const setting = (id) => uniform ? { ...std, ...uniform } : variante === "normal" ? { ...std, ...(p.raum[id] || {}) } : std;
+    const steps = []; let t = 0, batt = batt0, since = 0, charges = 0, unlearned = 0, used = 0;
+    const wet = order.some((id) => setting(id).modus !== "Saugen");
+    if (wet) { steps.push({ typ: "wasch", text: "Wäscht Mopps vor dem Start", min: W.vor_start_min, batt }); t += W.vor_start_min; }
+    for (const id of order) {
+      const s = setting(id), rate = this._rate(lern, s.modus, s.saug), room = ROOMS.find((r) => r.id === id);
+      const area = lern.raeume?.[id]?.flaeche || 8, min = area * rate.min_pro_m2 * (parseInt(s.wdh) || 1), drain = min * rate.pct_pro_min;
+      if (!rate.gelernt) unlearned++;
+      if (batt - drain < L.rueckkehr_pct) { const cmin = this._chargeMin(batt, L.weiter_pct, L) + 4; steps.push({ typ: "laden", text: `Lädt ${Math.round(batt)} % → ${L.weiter_pct} %`, min: cmin, batt: L.weiter_pct }); t += cmin; batt = L.weiter_pct; charges++; }
+      batt -= drain; t += min; since += area; used += drain;
+      steps.push({ typ: "raum", id, text: room?.short || id, sub: `${s.modus} · ${s.saug} · ${s.wdh}×${s.modus !== "Saugen" && s.wasser ? " · " + s.wasser : ""}`, min, batt, area, gelernt: rate.gelernt });
+      if (s.modus !== "Saugen" && since >= W.nach_m2) { steps.push({ typ: "wasch", text: "Wäscht Mopps zwischendurch", min: W.zwischen_min, batt }); t += W.zwischen_min; since = 0; }
+    }
+    steps.push({ typ: "heim", text: "Fährt zur Station", min: 3, batt }); t += 3;
+    return { steps, total: t, batt0, battEnd: batt, charges, unlearned, used, order };
+  }
+  _fmtMin(m) { m = Math.round(m); return m < 60 ? `${m} min` : `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, "0")} min`; }
+  // Kurzzeile beim Planer-Eintrag
+  _estLine(n) {
+    const p = this._planVals(n), e = this._estimate(p); if (!e) return "";
+    const rest = this._restMin(), fits = e.total <= rest.min, cls = fits ? (e.charges ? "warn" : "acc") : "bad";
+    return `<button class="estline ${cls}" data-act="est" data-plan="${n}" title="Dauer & Akku">${ic("mdi:timer-outline")}ca. ${this._fmtMin(e.total)} · ${ic("mdi:battery-60")}${Math.round(e.used)} %${e.charges ? ` · ${ic("mdi:power-plug")}Nachladen` : ""}${e.unlearned ? " · geschätzt" : ""}</button>`;
+  }
+  _estHtml() {
+    const st = this._est, n = st.n, p = this._planVals(n), lern = this._lern();
+    const close = st.back === "editor" ? "est-back" : "close";
+    const head = `<h2>Dauer &amp; Akku&nbsp;<span style="font-weight:400;color:var(--muted)">${esc(p.name || "Eintrag " + n)}</span><button class="iconbtn" data-act="${close}" aria-label="Schließen" style="margin-left:auto">${ic("mdi:close")}</button></h2>`;
+    if (!lern) return `<div class="scrim" data-act="${close}"></div><div class="modal"><div class="box ed" role="dialog" style="width:min(640px,100%)">${head}<div class="hint">Noch keine Lernwerte – das Laufprotokoll sammelt sie ab dem ersten Lauf.</div></div></div>`;
+    const e = this._estimate(p, st.variante), rest = this._restMin(), now = new Date(), endAt = new Date(now.getTime() + e.total * 60000);
+    const tm = (d) => d.toLocaleTimeString("de-AT", { hour: "2-digit", minute: "2-digit" });
+    const fits = e.total <= rest.min;
+    const segV = `<div class="seg"><button data-act="est-var" data-val="normal" class="${st.variante === "normal" ? "on" : ""}">Volles Programm</button><button data-act="est-var" data-val="schnell" class="${st.variante === "schnell" ? "on" : ""}">Schnellprogramm</button></div>`;
+    const icon = { wasch: "mdi:washing-machine", laden: "mdi:power-plug", heim: "mdi:home-import-outline" };
+    const rows = e.steps.map((s) => s.typ === "raum"
+      ? `<div class="er"><span class="ei">${ic(ROOMS.find((r) => r.id === s.id)?.icon || "mdi:floor-plan")}</span><span class="et"><b>${esc(s.text)}</b><small>${esc(s.sub)} · ${Math.round(s.area)} m²${s.gelernt ? "" : " · geschätzt"}</small></span><span class="em">${this._fmtMin(s.min)}</span><span class="eb ${s.batt < 20 ? "bad" : ""}">${Math.round(s.batt)} %</span></div>`
+      : `<div class="er ${s.typ}"><span class="ei">${ic(icon[s.typ])}</span><span class="et">${esc(s.text)}</span><span class="em">${this._fmtMin(s.min)}</span><span class="eb">${Math.round(s.batt)} %</span></div>`).join("");
+    const sum = `<div class="esum ${fits ? "ok" : "bad"}"><div><b>${this._fmtMin(e.total)}</b> gesamt · fertig um ${tm(endAt)} bei Start jetzt</div><div>${rest.min > 0 ? `Rückkehr in ${this._fmtMin(rest.min)} (${esc(rest.quelle)}) → ${fits ? "reicht" : "reicht nicht"}` : "Rückkehrzeit vorbei"}${e.charges ? ` · ${e.charges}× Nachladen` : ""} · Verbrauch ${Math.round(e.used)} % · Akku ${Math.round(e.batt0)} % → ${Math.round(e.battEnd)} %</div></div>`;
+    // Diagramm: Akku über die Zeit je gewählter Einstellung
+    const keys = Object.keys(lern.raten || {}); OPT.modus.forEach((m) => OPT.saug.forEach((s) => { if (!keys.includes(m + "/" + s)) keys.push(m + "/" + s); }));
+    const own = p.modus + "/" + p.saug; if (!st.sel.size) { st.sel.add(own); }
+    const chips = keys.map((k) => { const [m, s] = k.split("/"), r = lern.raten?.[k]; return `<button class="chip ${st.sel.has(k) ? "on" : ""}" data-act="est-sel" data-val="${esc(k)}" title="${r ? r.laeufe + " Läufe" : "geschätzt"}">${esc(m)} · ${esc(s)}${r ? "" : " *"}</button>`; }).join("");
+    const lines = [...st.sel].map((k) => { const [modus, saug] = k.split("/"); return { k, e: this._estimate(p, st.variante, { modus, saug }), own: k === own, gelernt: !!lern.raten?.[k] }; });
+    const maxT = Math.max(60, rest.min > 0 ? rest.min * 1.1 : 0, ...lines.map((l) => l.e.total)) ;
+    const Wd = 600, Ht = 200, px = 44, py = 14, X = (m) => px + (m / maxT) * (Wd - px - 10), Y = (b) => py + (1 - b / 100) * (Ht - py - 26);
+    const colors = ["var(--accent)", "var(--blue)", "var(--warn)", "#c77dff", "#ff8fa3", "#8bd17c"];
+    const poly = lines.map((l, i) => { let pts = [[0, l.e.batt0]], t = 0; l.e.steps.forEach((s) => { t += s.min; pts.push([t, s.batt]); }); return `<polyline points="${pts.map(([m, b]) => `${X(m).toFixed(1)},${Y(b).toFixed(1)}`).join(" ")}" fill="none" stroke="${colors[i % colors.length]}" stroke-width="${l.own ? 3 : 1.8}" ${l.gelernt ? "" : 'stroke-dasharray="5 4"'} stroke-linejoin="round"/><text x="${X(t).toFixed(1)}" y="${(Y(l.e.battEnd) - 6).toFixed(1)}" fill="${colors[i % colors.length]}" font-size="10" text-anchor="end">${tm(new Date(now.getTime() + t * 60000))}</text>`; }).join("");
+    const grid = [0, 25, 50, 75, 100].map((b) => `<line x1="${px}" x2="${Wd - 10}" y1="${Y(b)}" y2="${Y(b)}" stroke="var(--line)"/><text x="${px - 6}" y="${Y(b) + 3}" fill="var(--muted)" font-size="10" text-anchor="end">${b}%</text>`).join("");
+    const xt = []; for (let m = 0; m <= maxT; m += maxT > 240 ? 60 : 30) xt.push(`<text x="${X(m)}" y="${Ht - 6}" fill="var(--muted)" font-size="10" text-anchor="middle">${m >= 60 ? (m / 60).toFixed(m % 60 ? 1 : 0) + " h" : m + " min"}</text>`);
+    const ret = rest.min > 0 && rest.min <= maxT ? `<line x1="${X(rest.min)}" x2="${X(rest.min)}" y1="${py}" y2="${Ht - 22}" stroke="var(--bad)" stroke-dasharray="3 3"/><text x="${X(rest.min) + 4}" y="${py + 10}" fill="var(--bad)" font-size="10">Rückkehr</text>` : "";
+    const L = lern.laden || {}; const rl = L.rueckkehr_pct ? `<line x1="${px}" x2="${Wd - 10}" y1="${Y(L.rueckkehr_pct)}" y2="${Y(L.rueckkehr_pct)}" stroke="var(--warn)" stroke-dasharray="2 4"/>` : "";
+    const svg = `<svg viewBox="0 0 ${Wd} ${Ht}" class="estsvg">${grid}${rl}${ret}${poly}${xt.join("")}</svg>`;
+    const lt = keys.filter((k) => lern.raten?.[k]).map((k) => { const r = lern.raten[k]; return `<div class="lr"><span>${esc(k.replace("/", " · "))}</span><span>${r.min_pro_m2.toFixed(2)} min/m²</span><span>${r.pct_pro_min.toFixed(2)} %/min</span><span>${r.laeufe} ${r.laeufe === 1 ? "Lauf" : "Läufe"}</span></div>`; }).join("");
+    const lade = lern.laden ? `<div class="lr"><span>Laden</span><span>${lern.laden.schnell_pct_min} %/min bis 80 %</span><span>${lern.laden.langsam_pct_min} %/min darüber</span><span>Rückkehr ${lern.laden.rueckkehr_pct} % · weiter ab ${lern.laden.weiter_pct} %</span></div>` : "";
+    return `<div class="scrim" data-act="${close}"></div><div class="modal"><div class="box ed" role="dialog" style="width:min(680px,100%)">${head}
+      ${segV}${sum}
+      <div class="sec"><div class="lab">Ablauf in Roboter-Reihenfolge</div><div class="elist">${rows}</div></div>
+      <div class="sec"><div class="lab">Akku über den Lauf <span class="r">* = noch nicht gelernt, gestrichelt</span></div><div class="chips">${chips}</div>${svg}</div>
+      <details data-key="lern" ${this._open.has("lern") ? "open" : ""}><summary>${ic("mdi:chevron-down", 'class="chev"')}Lernwerte (${keys.filter((k) => lern.raten?.[k]).length} Einstellungen · ${lern.laeufe_gesamt ?? "?"} Läufe)</summary><div class="lern">${lt}${lade}</div></details>
+      <div class="foot"><button class="btn primary" data-act="${close}">${st.back === "editor" ? "Zurück zum Eintrag" : "Fertig"}</button></div></div></div>`;
+  }
 
   // ───────── Sperrzonen-Editor ─────────
   _rectsFromAttr(a) {
@@ -1098,6 +1205,10 @@ class HeidiPanel extends HTMLElement {
     if (t.dataset.act === "rooms-robot") { this._rooms = { mode: "robot", n: this._editing, back: "editor" }; this._renderOverlay(); return; }
     if (t.dataset.act === "rooms-mode") { this._rooms.mode = t.dataset.val; this._renderOverlay(); return; }
     if (t.dataset.act === "rooms-back") { this._rooms = null; this._renderOverlay(); return; }
+    if (t.dataset.act === "est") { const n = parseInt(t.dataset.plan); this._est = { n, variante: "normal", sel: new Set(), back: this._editing === n ? "editor" : null }; this._renderOverlay(); return; }
+    if (t.dataset.act === "est-var") { this._est.variante = t.dataset.val; this._renderOverlay(); return; }
+    if (t.dataset.act === "est-sel") { const k = t.dataset.val; this._est.sel.has(k) ? this._est.sel.delete(k) : this._est.sel.add(k); this._renderOverlay(); return; }
+    if (t.dataset.act === "est-back") { this._est = null; this._renderOverlay(); return; }
     if (t.tagName === "SUMMARY") { const d = t.parentElement; const key = d.dataset.key; setTimeout(() => { if (key) { d.open ? this._open.add(key) : this._open.delete(key); } }, 0); return; }
     if (t.dataset.ed) { if (t.dataset.ed !== "name") this._edClick(t); return; }
     const confirmText = t.dataset.confirm; if (confirmText && !window.confirm(confirmText)) return;
@@ -1164,6 +1275,15 @@ function reset() {
     delete states["input_select.heidi_plan" + n + "_ho_route"]; delete states["input_select.heidi_plan" + n + "_sp_route"];
   }
   upd("input_text.heidi_raum_snapshot", "");
+  // Lernwerte (Beispiel, angelehnt an den Lauf vom 14.09.: Saugen+Wischen Standard ≈ 0,4 %/min)
+  upd("sensor.heidi_lernwerte", "6", {
+    laeufe_gesamt: 6,
+    raten: { "Saugen/Standard": { min_pro_m2: 0.9, pct_pro_min: 0.3, laeufe: 3 }, "Saugen/Turbo": { min_pro_m2: 0.95, pct_pro_min: 0.55, laeufe: 2 }, "Saugen + Wischen/Standard": { min_pro_m2: 1.6, pct_pro_min: 0.42, laeufe: 1 } },
+    raeume: { 1: { flaeche: 6, belag: "Fliesen" }, 2: { flaeche: 16, belag: "Holz" }, 3: { flaeche: 3, belag: "Fliesen" }, 4: { flaeche: 14, belag: "Holz" }, 5: { flaeche: 12, belag: "Holz" }, 6: { flaeche: 12, belag: "Fliesen" }, 7: { flaeche: 30, belag: "Holz" } },
+    laden: { schnell_pct_min: 1.1, langsam_pct_min: 0.5, rueckkehr_pct: 15, weiter_pct: 80 },
+    waesche: { vor_start_min: 4, zwischen_min: 5, nach_m2: 25 },
+  });
+  upd("sensor.heidi_battery_level", "62");
   upd("input_boolean.heidi_auto_lauf", "off");
   upd("input_text.heidi_auto_letzter_plan", "Saugen + Wischen");
   upd("vacuum.heidi", "docked", { cleaning_sequence: [1, 6, 7, 2, 4, 3, 5], active_segments: null, status: "Sleeping" });

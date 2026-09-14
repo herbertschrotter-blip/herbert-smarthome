@@ -33,6 +33,15 @@ function reset() {
     delete states["input_select.heidi_plan" + n + "_ho_route"]; delete states["input_select.heidi_plan" + n + "_sp_route"];
   }
   upd("input_text.heidi_raum_snapshot", "");
+  // Lernwerte (Beispiel, angelehnt an den Lauf vom 14.09.: Saugen+Wischen Standard ≈ 0,4 %/min)
+  upd("sensor.heidi_lernwerte", "6", {
+    laeufe_gesamt: 6,
+    raten: { "Saugen/Standard": { min_pro_m2: 0.9, pct_pro_min: 0.3, laeufe: 3 }, "Saugen/Turbo": { min_pro_m2: 0.95, pct_pro_min: 0.55, laeufe: 2 }, "Saugen + Wischen/Standard": { min_pro_m2: 1.6, pct_pro_min: 0.42, laeufe: 1 } },
+    raeume: { 1: { flaeche: 6, belag: "Fliesen" }, 2: { flaeche: 16, belag: "Holz" }, 3: { flaeche: 3, belag: "Fliesen" }, 4: { flaeche: 14, belag: "Holz" }, 5: { flaeche: 12, belag: "Holz" }, 6: { flaeche: 12, belag: "Fliesen" }, 7: { flaeche: 30, belag: "Holz" } },
+    laden: { schnell_pct_min: 1.1, langsam_pct_min: 0.5, rueckkehr_pct: 15, weiter_pct: 80 },
+    waesche: { vor_start_min: 4, zwischen_min: 5, nach_m2: 25 },
+  });
+  upd("sensor.heidi_battery_level", "62");
   upd("input_boolean.heidi_auto_lauf", "off");
   upd("input_text.heidi_auto_letzter_plan", "Saugen + Wischen");
   upd("vacuum.heidi", "docked", { cleaning_sequence: [1, 6, 7, 2, 4, 3, 5], active_segments: null, status: "Sleeping" });
