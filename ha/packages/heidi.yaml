@@ -75,7 +75,7 @@ input_select:
   # Planer-Einträge: Programm
   heidi_plan1_modus:
     name: Plan 1 Modus
-    options: &modus [Saugen, Saugen + Wischen, "Saugen, dann Wischen", Nur Wischen]
+    options: &modus [Saugen, Saugen + Wischen, Nur Wischen]  # "Saugen, dann Wischen" nur global – bei Raum-Einstellungen nicht verfügbar
     initial: Saugen
   heidi_plan1_saugstufe:
     name: Plan 1 Saugstufe
@@ -87,7 +87,7 @@ input_select:
     initial: Mittel
   heidi_plan1_route:
     name: Plan 1 Route
-    options: &route [Schnell, Standard, Intensiv, Tief]
+    options: &route [Standard, Intensiv, Tief]  # wirkt nur bei "Nur Wischen"; "Schnell" nur global
     initial: Standard
   heidi_plan1_wiederholungen:
     name: Plan 1 Wiederholungen
@@ -99,11 +99,9 @@ input_select:
     options: &ho [Warten, Leise starten]
     initial: Warten
   heidi_plan1_ho_saug: { name: Plan 1 Leise-Saugstufe, options: &saug3 [Leise, Standard, Stark], initial: Leise }
-  heidi_plan1_ho_route: { name: Plan 1 Leise-Route, options: &route3 [Schnell, Standard, Intensiv], initial: Schnell }
   heidi_plan1_ho_wdh: { name: Plan 1 Leise-Wiederholungen, options: &wdh2 ["1", "2"], initial: "1" }
   # Planer-Einträge: Profil "Schnellprogramm"
   heidi_plan1_sp_saug: { name: Plan 1 Schnell-Saugstufe, options: *saug3, initial: Standard }
-  heidi_plan1_sp_route: { name: Plan 1 Schnell-Route, options: *route3, initial: Schnell }
   heidi_plan1_sp_wdh: { name: Plan 1 Schnell-Wiederholungen, options: *wdh2, initial: "1" }
 
   heidi_plan2_modus: { name: Plan 2 Modus, options: *modus, initial: Saugen + Wischen }
@@ -113,10 +111,8 @@ input_select:
   heidi_plan2_wiederholungen: { name: Plan 2 Wiederholungen, options: *wdh, initial: "1" }
   heidi_plan2_homeoffice: { name: Plan 2 bei Homeoffice, options: *ho, initial: Warten }
   heidi_plan2_ho_saug: { name: Plan 2 Leise-Saugstufe, options: *saug3, initial: Leise }
-  heidi_plan2_ho_route: { name: Plan 2 Leise-Route, options: *route3, initial: Schnell }
   heidi_plan2_ho_wdh: { name: Plan 2 Leise-Wiederholungen, options: *wdh2, initial: "1" }
   heidi_plan2_sp_saug: { name: Plan 2 Schnell-Saugstufe, options: *saug3, initial: Standard }
-  heidi_plan2_sp_route: { name: Plan 2 Schnell-Route, options: *route3, initial: Schnell }
   heidi_plan2_sp_wdh: { name: Plan 2 Schnell-Wiederholungen, options: *wdh2, initial: "1" }
 
   heidi_plan3_modus: { name: Plan 3 Modus, options: *modus, initial: Saugen + Wischen }
@@ -126,10 +122,8 @@ input_select:
   heidi_plan3_wiederholungen: { name: Plan 3 Wiederholungen, options: *wdh, initial: "2" }
   heidi_plan3_homeoffice: { name: Plan 3 bei Homeoffice, options: *ho, initial: Warten }
   heidi_plan3_ho_saug: { name: Plan 3 Leise-Saugstufe, options: *saug3, initial: Leise }
-  heidi_plan3_ho_route: { name: Plan 3 Leise-Route, options: *route3, initial: Schnell }
   heidi_plan3_ho_wdh: { name: Plan 3 Leise-Wiederholungen, options: *wdh2, initial: "1" }
   heidi_plan3_sp_saug: { name: Plan 3 Schnell-Saugstufe, options: *saug3, initial: Standard }
-  heidi_plan3_sp_route: { name: Plan 3 Schnell-Route, options: *route3, initial: Schnell }
   heidi_plan3_sp_wdh: { name: Plan 3 Schnell-Wiederholungen, options: *wdh2, initial: "1" }
 
   heidi_plan4_modus: { name: Plan 4 Modus, options: *modus, initial: Saugen + Wischen }
@@ -139,10 +133,8 @@ input_select:
   heidi_plan4_wiederholungen: { name: Plan 4 Wiederholungen, options: *wdh, initial: "3" }
   heidi_plan4_homeoffice: { name: Plan 4 bei Homeoffice, options: *ho, initial: Warten }
   heidi_plan4_ho_saug: { name: Plan 4 Leise-Saugstufe, options: *saug3, initial: Leise }
-  heidi_plan4_ho_route: { name: Plan 4 Leise-Route, options: *route3, initial: Schnell }
   heidi_plan4_ho_wdh: { name: Plan 4 Leise-Wiederholungen, options: *wdh2, initial: "1" }
   heidi_plan4_sp_saug: { name: Plan 4 Schnell-Saugstufe, options: *saug3, initial: Standard }
-  heidi_plan4_sp_route: { name: Plan 4 Schnell-Route, options: *route3, initial: Schnell }
   heidi_plan4_sp_wdh: { name: Plan 4 Schnell-Wiederholungen, options: *wdh2, initial: "1" }
 
 # ── Texte, Zeiten, Zahlen ───────────────────────────────────────────────
@@ -167,6 +159,15 @@ input_text:
   heidi_plan3_personen: { name: Plan 3 stört, initial: "", max: 40 }
   heidi_plan4_personen: { name: Plan 4 stört, initial: "", max: 40 }
   heidi_auto_letzter_plan: { name: Heidi zuletzt gestarteter Plan, max: 60 }
+  # Einzelwerte je Raum (leer = Standard des Eintrags): "1:B/T/V/-/2;2:S/L/-/-/1"
+  #   Raum-ID : Modus(S Saugen, B Saugen+Wischen, W Nur Wischen) / Saugstufe(L,S,K Stark,T Turbo) /
+  #   Wasser(W,M,V) / Route(S,I,T Tief) / Wiederholungen(1-3); "-" = nicht gesetzt
+  heidi_plan1_raumwerte: { name: Plan 1 Raumwerte, initial: "", max: 255 }
+  heidi_plan2_raumwerte: { name: Plan 2 Raumwerte, initial: "", max: 255 }
+  heidi_plan3_raumwerte: { name: Plan 3 Raumwerte, initial: "", max: 255 }
+  heidi_plan4_raumwerte: { name: Plan 4 Raumwerte, initial: "", max: 255 }
+  # Sicherung der Roboter-Raumwerte vor einem Planer-Lauf (gleiches Format); leer = nichts gesichert
+  heidi_raum_snapshot: { name: Heidi Raumwerte-Sicherung, initial: "", max: 255 }
 
 input_datetime:
   heidi_arbeitszeit_start: { name: Heidi Arbeitszeit Beginn, has_date: false, has_time: true, initial: "08:00:00" }

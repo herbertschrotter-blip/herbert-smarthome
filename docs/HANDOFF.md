@@ -138,9 +138,24 @@ Uhr (10:15). Einrichten im Ordner `heidi/tests`: `npm i` und dann `npx playwrigh
     `segment_available_fn`, kein `cleaning_route_v2`).
   - „Saugen, dann Wischen“ (`mopping_after_sweeping`) und Route „Schnell“ (`quick`) gibt es nur
     global → im Planer entfernen. App-Szene 34 („Wischen nach dem Saugen“) läuft weiter.
-- Umsetzung geplant nach Mockup `heidi/mockups/heidi-einstellungen.html`: Einstellungs-Streifen
-  im Kopf, Raum-Tabelle im Bereich „Roboter“, Planer-Editor ohne die zwei Optionen; Schnell-/
-  Leise-Profil nur noch Saugstufe + Wdh (+ Modus nur Saugen).
+- Umsetzung (v1.5.0, **im Repo, noch NICHT auf dem Pi** – wartet auf Herberts Freigabe nach dem
+  Live-Mockup `heidi/mockups/heidi-live.html`, gebaut mit `node heidi/mockups/build-live.js`):
+  - Karte: Streifen „Fährt mit“ im Kopf (Raumwerte zusammengefasst, Quelle Eintrag/Roboter,
+    Reihenfolge; Tippen → Untermenü). Untermenü „Räume“ (`_roomsHtml`/`_rvClick`) mit Modus
+    **Roboter** (schreibt sofort `select.heidi_room_N_*`, Zeile „Alle Räume“) und **Eintrag N**
+    (Einzelwerte je Raum im Editor-Objekt `_ed.raum`, gespeichert als
+    `input_text.heidi_planN_raumwerte`). Editor: Modus 3 Optionen, Route nur bei „Nur Wischen“,
+    Knöpfe „Räume einzeln …“ / „Roboter-Werte“, Punkt am Raum-Chip bei Einzelwerten; Schnell-/
+    Leise-Profil nur Saugstufe + Wdh. Bereich „Roboter“: Knopf „Räume …“.
+  - Paket: `input_text.heidi_planN_raumwerte` (255), `input_text.heidi_raum_snapshot`;
+    `*_ho_route`/`*_sp_route` entfernt; Optionen bereinigt.
+  - Skripte v3: `heidi_reinigung` sichert Roboter-Raumwerte (Snapshot, nur wenn leer), setzt je
+    Raum Modus → 2 s → Saugstufe/Wdh/Wasser/Route, startet; `heidi_raumwerte_wiederherstellen`
+    stellt den Snapshot wieder her (aufgerufen von `heidi_lauf_abgeschlossen`).
+  - Kurzform Raumwerte: `1:B/T/V/-/2;6:B/L/M/-/1` = Raum:Modus/Saug/Wasser/Route/Wdh
+    (S Saugen, B beides, W nur Wischen · L S K T · W M V · S I T · 1–3 · „-“ = nicht gesetzt).
+  - Deploy-Plan: `deploy.ps1`, `check_config`, **HA-Neustart** (neue Helfer), Strg+F5; danach
+    Plan 2 einmal von Hand starten und prüfen, dass Snapshot gefüllt und nach Andocken geleert wird.
 
 ## 4. Offene Punkte (Stand 14.09.2026, Claude-Code-Sitzung)
 Erledigt:

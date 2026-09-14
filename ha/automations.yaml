@@ -149,6 +149,9 @@
           data: { date: "{{ now().date() }}" }
     - action: input_boolean.turn_off
       target: { entity_id: [input_boolean.heidi_auto_lauf, input_boolean.heidi_auto_teil] }
+    # Roboter-Raumwerte wieder so, wie sie vor dem Planer-Lauf waren (Sicherung aus heidi_reinigung)
+    - action: script.heidi_raumwerte_wiederherstellen
+      continue_on_error: true
 
 - id: heidi_heimkehr
   alias: "Heidi: Heimkehr während Reinigung"

@@ -1,13 +1,19 @@
 # ═══════════════════════════════════════════════════════════════════════
-#  Heidi – Skripte (v2 – Planer-Editor)
+#  Heidi – Skripte (v3 – Raumwerte je Eintrag, Roboter-Werte werden gesichert/wiederhergestellt)
+#  Voraussetzung: Raum-Einstellungen am Roboter an (switch.heidi_customized_cleaning) – dann
+#  gelten die select.heidi_room_N_* je Raum, die globalen Selects sind nicht verfügbar.
+#  Raumwerte-Kurzform: "1:B/T/V/-/2;2:S/L/-/-/1"  = Raum : Modus/Saugstufe/Wasser/Route/Wdh
+#    Modus S Saugen, B Saugen+Wischen, W Nur Wischen · Saugstufe L S K(Stark) T(Turbo)
+#    Wasser W M V · Route S I T(Tief) · "-" = nicht gesetzt
 # ═══════════════════════════════════════════════════════════════════════
 
 heidi_reinigung:
   alias: "Heidi: Reinigung starten"
   icon: mdi:robot-vacuum
   description: >-
-    Startet eine Raumreinigung mit Programm. Setzt pro Raum Modus/Saugstufe/Wassermenge/Route/
-    Wiederholungen (Heidi läuft im "angepassten" Raummodus) und ruft dann die Raumreinigung auf.
+    Startet eine Raumreinigung. Sichert zuerst die Raumwerte des Roboters (input_text.heidi_raum_snapshot,
+    nur wenn leer), setzt dann je Raum Modus/Saugstufe/Wasser/Route/Wiederholungen (Standardwerte,
+    überschrieben durch "raumwerte") und ruft die Raumreinigung auf. Wiederherstellen: heidi_raumwerte_wiederherstellen.
   mode: single
   fields:
     raeume:
@@ -17,11 +23,11 @@ heidi_reinigung:
       selector:
         text:
     modus:
-      name: Modus
+      name: Modus (Standard für alle Räume)
       default: Saugen
       selector:
         select:
-          options: [Saugen, Saugen + Wischen, "Saugen, dann Wischen", Nur Wischen]
+          options: [Saugen, Saugen + Wischen, Nur Wischen]
     saugstufe:
       name: Saugstufe
       default: Turbo
@@ -29,72 +35,124 @@ heidi_reinigung:
         select:
           options: [Leise, Standard, Stark, Turbo]
     wasser:
-      name: Wassermenge
+      name: Wassermenge (nur beim Wischen)
       default: Mittel
       selector:
         select:
           options: [Wenig, Mittel, Viel]
     route:
-      name: Route
+      name: Route (nur bei "Nur Wischen")
       default: Standard
       selector:
         select:
-          options: [Schnell, Standard, Intensiv, Tief]
+          options: [Standard, Intensiv, Tief]
     wiederholungen:
       name: Wiederholungen
       default: "1"
       selector:
         select:
           options: ["1", "2", "3"]
+    raumwerte:
+      name: Einzelwerte je Raum (Kurzform, optional)
+      description: 'z. B. "1:B/T/V/-/2;2:S/L/-/-/1" – überschreibt die Standardwerte für diese Räume'
+      default: ""
+      selector:
+        text:
   variables:
     ids: "{{ (raeume | default('7,6,5,4,3,2,1') | string).split(',') | map('trim') | reject('eq', '') | map('int') | list }}"
-    m: "{{ modus | default('Saugen') }}"
-    cm: "{{ {'Saugen':'sweeping','Saugen + Wischen':'sweeping_and_mopping','Saugen, dann Wischen':'sweeping_and_mopping','Nur Wischen':'mopping'}.get(m, 'sweeping') }}"
-    cm_global: "{{ 'mopping_after_sweeping' if m == 'Saugen, dann Wischen' else cm }}"
-    sl: "{{ {'Leise':'quiet','Standard':'standard','Stark':'strong','Turbo':'turbo'}.get(saugstufe | default('Turbo'), 'turbo') }}"
-    sl_num: "{{ {'quiet':0,'standard':1,'strong':2,'turbo':3}[sl] }}"
-    hum: "{{ {'Wenig':'slightly_dry','Mittel':'moist','Viel':'wet'}.get(wasser | default('Mittel'), 'moist') }}"
-    rt: "{{ {'Schnell':'quick','Standard':'standard','Intensiv':'intensive','Tief':'deep'}.get(route | default('Standard'), 'standard') }}"
-    rt_room: "{{ 'standard' if rt == 'quick' else rt }}"
-    times: "{{ wiederholungen | default('1') | int(1) }}"
+    # Standardwerte als Kurzcodes
+    d_m: "{{ {'Saugen':'S','Saugen + Wischen':'B','Nur Wischen':'W'}.get(modus | default('Saugen'), 'S') }}"
+    d_s: "{{ {'Leise':'L','Standard':'S','Stark':'K','Turbo':'T'}.get(saugstufe | default('Turbo'), 'T') }}"
+    d_w: "{{ {'Wenig':'W','Mittel':'M','Viel':'V'}.get(wasser | default('Mittel'), 'M') }}"
+    d_r: "{{ {'Standard':'S','Intensiv':'I','Tief':'T'}.get(route | default('Standard'), 'S') }}"
+    d_n: "{{ wiederholungen | default('1') | string }}"
+    # Einzelwerte: Liste [[id, [m,s,w,r,n]], …]
+    ov: >-
+      {% set ns = namespace(l=[]) %}
+      {% for p in (raumwerte | default('') | string).split(';') if ':' in p %}
+        {% set id = p.split(':')[0] | int(0) %}{% set f = p.split(':')[1].split('/') %}
+        {% if id > 0 and f | length >= 5 %}{% set ns.l = ns.l + [[id, f]] %}{% endif %}
+      {% endfor %}
+      {{ ns.l }}
+    # Aufgelöste Werte je Raum: [[id, m, s, w, r, n], …]  ("-" in Einzelwerten = Standard)
+    plan: >-
+      {% set ns = namespace(l=[]) %}
+      {% for id in ids %}
+        {% set o = ov | selectattr(0, 'eq', id) | map(attribute=1) | first | default(none) %}
+        {% set m = o[0] if o and o[0] != '-' else d_m %}
+        {% set s = o[1] if o and o[1] != '-' else d_s %}
+        {% set w = o[2] if o and o[2] != '-' else d_w %}
+        {% set r = o[3] if o and o[3] != '-' else d_r %}
+        {% set n = o[4] if o and o[4] in ['1','2','3'] else d_n %}
+        {% set ns.l = ns.l + [[id, m, s, w, r, n]] %}
+      {% endfor %}
+      {{ ns.l }}
+    MODE: { S: sweeping, B: sweeping_and_mopping, W: mopping }
+    SUCT: { L: quiet, S: standard, K: strong, T: turbo }
+    WATER: { W: slightly_dry, M: moist, V: wet }
+    ROUTE: { S: standard, I: intensive, T: deep }
+    # Saugstufe für den Startbefehl (Zahl): höchste der gewählten Räume
+    sl_num: "{{ plan | map(attribute=2) | map('replace','L','0') | map('replace','S','1') | map('replace','K','2') | map('replace','T','3') | map('int') | max }}"
+    times: "{{ plan | map(attribute=5) | map('int') | max }}"
   sequence:
     - condition: template
       value_template: "{{ ids | length > 0 }}"
-    # Globale Einstellungen (falls die Entität gerade verfügbar ist)
-    - action: select.select_option
-      continue_on_error: true
-      target: { entity_id: select.heidi_cleaning_mode }
-      data: { option: "{{ cm_global }}" }
-    - action: select.select_option
-      continue_on_error: true
-      target: { entity_id: select.heidi_cleaning_route }
-      data: { option: "{{ rt }}" }
+    # 1) Roboter-Raumwerte sichern (nur wenn noch keine Sicherung vorliegt)
+    - if: "{{ states('input_text.heidi_raum_snapshot') in ['', 'unknown', 'unavailable'] }}"
+      then:
+        - action: input_text.set_value
+          target: { entity_id: input_text.heidi_raum_snapshot }
+          data:
+            value: >-
+              {% set M = {'sweeping':'S','sweeping_and_mopping':'B','mopping':'W'} %}
+              {% set S = {'quiet':'L','standard':'S','strong':'K','turbo':'T'} %}
+              {% set W = {'slightly_dry':'W','moist':'M','wet':'V'} %}
+              {% set R = {'standard':'S','intensive':'I','deep':'T'} %}
+              {% set ns = namespace(p=[]) %}
+              {% for i in range(1, 8) %}
+                {% set m = states('select.heidi_room_' ~ i ~ '_cleaning_mode') %}
+                {% if m in M %}
+                  {% set ns.p = ns.p + [i ~ ':' ~ M[m] ~ '/' ~ S.get(states('select.heidi_room_' ~ i ~ '_suction_level'), 'T') ~ '/'
+                     ~ W.get(states('select.heidi_room_' ~ i ~ '_mop_pad_humidity'), '-') ~ '/' ~ R.get(states('select.heidi_room_' ~ i ~ '_cleaning_route'), '-') ~ '/'
+                     ~ (states('select.heidi_room_' ~ i ~ '_cleaning_times') | replace('x', '') | default('1', true))] %}
+                {% endif %}
+              {% endfor %}
+              {{ ns.p | join(';') }}
+    # 2) Modus je Raum (davon hängt ab, ob Wasser/Route verfügbar werden)
     - repeat:
-        for_each: "{{ ids }}"
+        for_each: "{{ plan }}"
         sequence:
           - action: select.select_option
             continue_on_error: true
-            target: { entity_id: "select.heidi_room_{{ repeat.item }}_cleaning_mode" }
-            data: { option: "{{ cm }}" }
+            target: { entity_id: "select.heidi_room_{{ repeat.item[0] }}_cleaning_mode" }
+            data: { option: "{{ MODE[repeat.item[1]] }}" }
+    - delay: { seconds: 2 }
+    # 3) Übrige Werte je Raum
+    - repeat:
+        for_each: "{{ plan }}"
+        sequence:
           - action: select.select_option
             continue_on_error: true
-            target: { entity_id: "select.heidi_room_{{ repeat.item }}_suction_level" }
-            data: { option: "{{ sl }}" }
+            target: { entity_id: "select.heidi_room_{{ repeat.item[0] }}_suction_level" }
+            data: { option: "{{ SUCT[repeat.item[2]] }}" }
           - action: select.select_option
             continue_on_error: true
-            target: { entity_id: "select.heidi_room_{{ repeat.item }}_cleaning_times" }
-            data: { option: "{{ times }}x" }
-          - if: "{{ cm != 'sweeping' }}"
+            target: { entity_id: "select.heidi_room_{{ repeat.item[0] }}_cleaning_times" }
+            data: { option: "{{ repeat.item[5] }}x" }
+          - if: "{{ repeat.item[1] != 'S' }}"
             then:
               - action: select.select_option
                 continue_on_error: true
-                target: { entity_id: "select.heidi_room_{{ repeat.item }}_mop_pad_humidity" }
-                data: { option: "{{ hum }}" }
+                target: { entity_id: "select.heidi_room_{{ repeat.item[0] }}_mop_pad_humidity" }
+                data: { option: "{{ WATER[repeat.item[3]] }}" }
+          - if: "{{ repeat.item[1] == 'W' }}"
+            then:
               - action: select.select_option
                 continue_on_error: true
-                target: { entity_id: "select.heidi_room_{{ repeat.item }}_cleaning_route" }
-                data: { option: "{{ rt_room }}" }
-    - delay: { seconds: 3 }
+                target: { entity_id: "select.heidi_room_{{ repeat.item[0] }}_cleaning_route" }
+                data: { option: "{{ ROUTE[repeat.item[4]] }}" }
+    - delay: { seconds: 2 }
+    # 4) Raumreinigung starten (Raumwerte gelten; Saugstufe/Wdh zusätzlich mitgeben)
     - action: dreame_vacuum.vacuum_clean_segment
       target:
         entity_id: vacuum.heidi
@@ -103,10 +161,66 @@ heidi_reinigung:
         repeats: "{{ times }}"
         suction_level: "{{ sl_num }}"
 
+heidi_raumwerte_wiederherstellen:
+  alias: "Heidi: Roboter-Raumwerte wiederherstellen"
+  icon: mdi:backup-restore
+  description: Stellt die vor dem Planer-Lauf gesicherten Raumwerte (input_text.heidi_raum_snapshot) wieder her und leert die Sicherung.
+  mode: single
+  variables:
+    snap: "{{ states('input_text.heidi_raum_snapshot') }}"
+    rows: >-
+      {% set ns = namespace(l=[]) %}
+      {% for p in (snap | string).split(';') if ':' in p %}
+        {% set id = p.split(':')[0] | int(0) %}{% set f = p.split(':')[1].split('/') %}
+        {% if id > 0 and f | length >= 5 %}{% set ns.l = ns.l + [[id, f[0], f[1], f[2], f[3], f[4]]] %}{% endif %}
+      {% endfor %}
+      {{ ns.l }}
+    MODE: { S: sweeping, B: sweeping_and_mopping, W: mopping }
+    SUCT: { L: quiet, S: standard, K: strong, T: turbo }
+    WATER: { W: slightly_dry, M: moist, V: wet }
+    ROUTE: { S: standard, I: intensive, T: deep }
+  sequence:
+    - condition: template
+      value_template: "{{ rows | length > 0 }}"
+    - repeat:
+        for_each: "{{ rows }}"
+        sequence:
+          - action: select.select_option
+            continue_on_error: true
+            target: { entity_id: "select.heidi_room_{{ repeat.item[0] }}_cleaning_mode" }
+            data: { option: "{{ MODE.get(repeat.item[1], 'sweeping') }}" }
+    - delay: { seconds: 2 }
+    - repeat:
+        for_each: "{{ rows }}"
+        sequence:
+          - action: select.select_option
+            continue_on_error: true
+            target: { entity_id: "select.heidi_room_{{ repeat.item[0] }}_suction_level" }
+            data: { option: "{{ SUCT.get(repeat.item[2], 'turbo') }}" }
+          - action: select.select_option
+            continue_on_error: true
+            target: { entity_id: "select.heidi_room_{{ repeat.item[0] }}_cleaning_times" }
+            data: { option: "{{ repeat.item[5] if repeat.item[5] in ['1','2','3'] else '1' }}x" }
+          - if: "{{ repeat.item[3] in WATER }}"
+            then:
+              - action: select.select_option
+                continue_on_error: true
+                target: { entity_id: "select.heidi_room_{{ repeat.item[0] }}_mop_pad_humidity" }
+                data: { option: "{{ WATER[repeat.item[3]] }}" }
+          - if: "{{ repeat.item[4] in ROUTE }}"
+            then:
+              - action: select.select_option
+                continue_on_error: true
+                target: { entity_id: "select.heidi_room_{{ repeat.item[0] }}_cleaning_route" }
+                data: { option: "{{ ROUTE[repeat.item[4]] }}" }
+    - action: input_text.set_value
+      target: { entity_id: input_text.heidi_raum_snapshot }
+      data: { value: "" }
+
 heidi_plan_starten:
   alias: "Heidi: Planer-Eintrag starten"
   icon: mdi:calendar-check
-  description: Startet einen Planer-Eintrag (1–4) – normal, als Schnellprogramm oder leise (Homeoffice-Profil).
+  description: Startet einen Planer-Eintrag (1–4) – normal (mit Einzelwerten je Raum), als Schnellprogramm oder leise (Homeoffice-Profil, beide nur Saugen).
   mode: single
   fields:
     plan:
@@ -130,8 +244,9 @@ heidi_plan_starten:
         modus: "{{ 'Saugen' if v in ['schnell', 'leise'] else states(p ~ 'modus') }}"
         saugstufe: "{{ states(p ~ 'sp_saug') if v == 'schnell' else states(p ~ 'ho_saug') if v == 'leise' else states(p ~ 'saugstufe') }}"
         wasser: "{{ states(p ~ 'wasser') }}"
-        route: "{{ states(p ~ 'sp_route') if v == 'schnell' else states(p ~ 'ho_route') if v == 'leise' else states(p ~ 'route') }}"
+        route: "{{ states(p ~ 'route') }}"
         wiederholungen: "{{ states(p ~ 'sp_wdh') if v == 'schnell' else states(p ~ 'ho_wdh') if v == 'leise' else states(p ~ 'wiederholungen') }}"
+        raumwerte: "{{ '' if v in ['schnell', 'leise'] else states('input_text.heidi_plan' ~ plan ~ '_raumwerte') }}"
 
 heidi_app_szene:
   alias: "Heidi: App-Verknüpfung starten"

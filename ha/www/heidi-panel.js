@@ -3,7 +3,7 @@
  * Robotereinstellungen, Einstellungs-Panel, Prognose) als HTML/CSS/JS.
  * Alle Daten kommen live aus Home Assistant (hass.states), alle Aktionen laufen über hass.callService.
  */
-const HP_VERSION = "1.4.2";
+const HP_VERSION = "1.5.0";
 
 const E = {
   vac: "vacuum.heidi",
@@ -41,17 +41,48 @@ const APP_SCENES = [
   { id: 34, name: "Wischen nach dem Saugen", sub: "Ganze Wohnung · nur Wischen", icon: "mdi:water" },
 ];
 const DAYS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
+// Raum-Einstellungen sind am Roboter aktiv (switch.heidi_customized_cleaning): alle Werte gelten je Raum.
+// "Saugen, dann Wischen" und Route "Schnell" gibt es nur global und sind deshalb nicht mehr wählbar.
 const OPT = {
-  modus: ["Saugen", "Saugen + Wischen", "Saugen, dann Wischen", "Nur Wischen"],
+  modus: ["Saugen", "Saugen + Wischen", "Nur Wischen"],
   saug: ["Leise", "Standard", "Stark", "Turbo"],
   wasser: ["Wenig", "Mittel", "Viel"],
-  route: ["Schnell", "Standard", "Intensiv", "Tief"],
+  route: ["Standard", "Intensiv", "Tief"], // nur bei "Nur Wischen"
   wdh: ["1", "2", "3"],
   ho: ["Warten", "Leise starten"],
   saug3: ["Leise", "Standard", "Stark"],
-  route3: ["Schnell", "Standard", "Intensiv"],
   wdh2: ["1", "2"],
 };
+// Raumwerte: Kurzcodes (input_text.heidi_planN_raumwerte, Snapshot, Skript) ↔ deutsche Bezeichnung ↔ HA-Option
+const RV = {
+  modus: { S: "Saugen", B: "Saugen + Wischen", W: "Nur Wischen" },
+  saug: { L: "Leise", S: "Standard", K: "Stark", T: "Turbo" },
+  wasser: { W: "Wenig", M: "Mittel", V: "Viel" },
+  route: { S: "Standard", I: "Intensiv", T: "Tief" },
+};
+const RV_HA = {
+  modus: { sweeping: "Saugen", sweeping_and_mopping: "Saugen + Wischen", mopping: "Nur Wischen" },
+  saug: { quiet: "Leise", standard: "Standard", strong: "Stark", turbo: "Turbo" },
+  wasser: { slightly_dry: "Wenig", moist: "Mittel", wet: "Viel" },
+  route: { standard: "Standard", intensive: "Intensiv", deep: "Tief" },
+};
+const RV_ENT = { modus: "cleaning_mode", saug: "suction_level", wasser: "mop_pad_humidity", route: "cleaning_route", wdh: "cleaning_times" };
+const RV_KEYS = ["modus", "saug", "wasser", "route", "wdh"];
+const inv = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [v, k]));
+// "1:B/T/V/-/2;2:S/L/-/-/1"  →  { 1: {modus:"Saugen + Wischen", saug:"Turbo", wasser:"Viel", route:null, wdh:"2"}, … }
+const parseRaum = (s) => {
+  const out = {};
+  String(s || "").split(";").forEach((p) => {
+    const [id, rest] = p.split(":"); if (!id || !rest) return; const f = rest.split("/");
+    const n = parseInt(id); if (!(n >= 1 && n <= 7)) return;
+    out[n] = { modus: RV.modus[f[0]] || "Saugen", saug: RV.saug[f[1]] || "Standard", wasser: RV.wasser[f[2]] || null, route: RV.route[f[3]] || null, wdh: /^[123]$/.test(f[4]) ? f[4] : "1" };
+  });
+  return out;
+};
+const encodeRaum = (o) => Object.keys(o).map((n) => parseInt(n)).sort((a, b) => a - b).map((n) => {
+  const v = o[n], c = (k) => inv(RV[k])[v[k]] || "-";
+  return `${n}:${c("modus")}/${c("saug")}/${v.modus === "Saugen" ? "-" : c("wasser")}/${v.modus === "Nur Wischen" ? c("route") : "-"}/${v.wdh || "1"}`;
+}).join(";");
 
 const CSS = `
 :host { display: block; }
@@ -121,6 +152,25 @@ ha-icon { --mdc-icon-size: 18px; }
 .tb { border: 1px solid var(--line); background: var(--solid); color: var(--text); border-radius: 10px; padding: 7px 10px; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; box-shadow: var(--shadow); }
 .tb ha-icon { --mdc-icon-size: 16px; }
 .tb.warn { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 55%, var(--line)); }
+/* Einstellungs-Streifen im Kopf */
+.strip { display: grid; gap: 6px; padding-top: 10px; margin-top: 12px; border-top: 1px solid var(--line); cursor: pointer; }
+.strip .lab { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; display: flex; gap: 8px; align-items: center; }
+.strip .lab .r { margin-left: auto; text-transform: none; letter-spacing: 0; font-weight: 500; color: var(--accent); display: flex; align-items: center; gap: 2px; }
+.strip .lab .r ha-icon { --mdc-icon-size: 16px; }
+.chip.k { color: var(--text); } .chip.k b { color: var(--muted); font-weight: 500; }
+/* Untermenü Räume */
+.rlist { display: grid; gap: 8px; }
+.rr { display: grid; gap: 4px; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line); }
+.rr.std .rc { opacity: .45; }
+.rr .rn { display: flex; align-items: center; gap: 8px; font-weight: 600; margin-bottom: 2px; } .rr .rn ha-icon { --mdc-icon-size: 18px; color: var(--muted); }
+.rr .rn .chip { margin-left: auto; cursor: pointer; padding: 4px 10px; font-size: 11px; }
+.rr .rc { display: grid; grid-template-columns: 72px 1fr; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+.rr .rc.dim { opacity: .35; }
+.seg.dis button { pointer-events: none; }
+.rr.all { background: color-mix(in srgb, var(--accent) 8%, var(--surface-2)); border-color: color-mix(in srgb, var(--accent) 35%, var(--line)); }
+.ed .rooms .chip { position: relative; } .dotm { position: absolute; top: 5px; right: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+.ed .btnrow { display: flex; gap: 8px; flex-wrap: wrap; } .ed .btnrow .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 14px; font-size: 13px; }
+.hint { font-size: 12px; color: var(--muted); }
 .rooms { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 10px; }
 @media (max-width: 900px) { .rooms { grid-template-columns: repeat(4, 1fr); } }
 .rooms .btn { padding: 8px 4px 6px; border-radius: 10px; }
@@ -305,6 +355,7 @@ class HeidiPanel extends HTMLElement {
     this._open = new Set(["verbrauch"]);
     this._tl = {};            // Zeitleisten-Cache je Lauf (Schlüssel = Zeitstempel bzw. "cur")
     this._tlOpen = new Set(); // aufgeklappte Protokoll-Einträge
+    this._rooms = null;       // Untermenü Räume: { mode: "robot"|"plan", back: "editor"|null }
     this._view = "main";
     this._sig = "";
     this._mapEls = {};
@@ -318,6 +369,7 @@ class HeidiPanel extends HTMLElement {
     if (!this._built) { this._build(); this._built = true; }
     const sig = this._signature();
     if (sig !== this._sig && !this._editing && !this._zones) { this._sig = sig; this._render(); }
+    else if (this._editing && this._rooms?.mode === "robot" && sig !== this._sig) { this._sig = sig; this._renderOverlay(); }
     else if (this._editing) { /* Editor offen: nur Kopf still lassen */ }
   }
 
@@ -347,10 +399,12 @@ class HeidiPanel extends HTMLElement {
     E.persons.forEach((p) => ids.push(p.id));
     for (let n = 1; n <= 4; n++) {
       ["aktiv", "schnell"].forEach((k) => ids.push(`input_boolean.heidi_plan${n}_${k}`));
-      ["name", "raeume", "tage", "personen"].forEach((k) => ids.push(`input_text.heidi_plan${n}_${k}`));
+      ["name", "raeume", "tage", "personen", "raumwerte"].forEach((k) => ids.push(`input_text.heidi_plan${n}_${k}`));
       ids.push(`input_datetime.heidi_plan${n}_zeit`);
-      ["modus", "saugstufe", "wasser", "route", "wiederholungen", "homeoffice", "ho_saug", "ho_route", "ho_wdh", "sp_saug", "sp_route", "sp_wdh"].forEach((k) => ids.push(`input_select.heidi_plan${n}_${k}`));
+      ["modus", "saugstufe", "wasser", "route", "wiederholungen", "homeoffice", "ho_saug", "ho_wdh", "sp_saug", "sp_wdh"].forEach((k) => ids.push(`input_select.heidi_plan${n}_${k}`));
     }
+    for (let r = 1; r <= 7; r++) RV_KEYS.forEach((k) => ids.push(`select.heidi_room_${r}_${RV_ENT[k]}`));
+    ids.push("switch.heidi_customized_cleaning", "input_boolean.heidi_auto_lauf", "input_text.heidi_raum_snapshot");
     const s = this._hass.states;
     return ids.map((i) => { const x = s[i]; return x ? x.state + "|" + (x.last_updated || "") : "?"; }).join(";") + "|" + this._view + "|" + this._panel;
   }
@@ -424,7 +478,31 @@ class HeidiPanel extends HTMLElement {
           <span class="chip" title="Nicht stören">${ic("mdi:sleep")}${esc(dnd)}</span>
         </div>
       </div>
-      <div class="ctl">${ctl}</div></div></div>`;
+      <div class="ctl">${ctl}</div></div>${this._strip()}</div>`;
+  }
+
+  // Werte eines Raums vom Roboter (deutsch); null, wenn Raum-Einstellungen nicht verfügbar sind
+  _roomVals(id) {
+    const g = (k) => { const v = this.st(`select.heidi_room_${id}_${RV_ENT[k]}`); return ["unknown", "unavailable"].includes(v) ? null : v; };
+    const m = g("modus"); if (m === null) return null;
+    return { modus: RV_HA.modus[m] || m, saug: RV_HA.saug[g("saug")] || "–", wasser: g("wasser") ? RV_HA.wasser[g("wasser")] || g("wasser") : null, route: g("route") ? RV_HA.route[g("route")] || g("route") : null, wdh: (g("wdh") || "1x").replace("x", "") };
+  }
+
+  // Streifen "Fährt mit": Zusammenfassung der Raumwerte (laufender Auftrag: nur die aktiven Räume)
+  _strip() {
+    const vac = this.st(E.vac), running = ["cleaning", "paused", "returning"].includes(vac);
+    const segs = running ? (this.attr(E.vac, "active_segments") || []) : [];
+    const ids = segs.length ? segs : ROOMS.map((r) => r.id);
+    const vals = ids.map((id) => this._roomVals(id)).filter(Boolean);
+    if (!vals.length) return `<div class="strip" data-act="rooms"><div class="lab">Fährt mit <span class="r">Raum-Einstellungen am Roboter aus ${ic("mdi:chevron-right")}</span></div></div>`;
+    const auto = this.on("input_boolean.heidi_auto_lauf") ? this.st("input_text.heidi_auto_letzter_plan") : "";
+    const src = running && auto && !["unknown", "unavailable", ""].includes(auto) ? `Eintrag „${auto}“` : running ? "Roboter-Werte" : "Roboter-Werte · zum Ändern tippen";
+    const uni = (k) => { const s = new Set(vals.map((x) => x[k] ?? "–")); return s.size === 1 ? [...s][0] : null; };
+    const chip = (lab, k, fmt = (x) => x) => { const u = uni(k); return `<span class="chip k"><b>${lab}</b> ${u !== null ? esc(fmt(u)) : "je Raum"}</span>`; };
+    const seq = (this.attr(E.vac, "cleaning_sequence") || []).filter((id) => ids.includes(id)).map((id) => ROOMS.find((r) => r.id === id)?.short).filter(Boolean).join(" → ");
+    const wet = vals.some((x) => x.modus !== "Saugen");
+    return `<div class="strip" data-act="rooms" title="Räume einstellen"><div class="lab">Fährt mit <span class="r">${esc(src)} ${ic("mdi:chevron-right")}</span></div>
+      <div class="chips">${chip("Modus", "modus")}${chip("Saugstufe", "saug")}${wet ? chip("Wasser", "wasser", (x) => x ?? "–") : ""}${chip("Wdh.", "wdh", (x) => x + "×")}${seq ? `<span class="chip k"><b>Reihenfolge</b> ${esc(seq)}</span>` : ""}</div></div>`;
   }
 
   _mapCard() {
@@ -468,7 +546,7 @@ class HeidiPanel extends HTMLElement {
       const p = this._planRead(n), manual = !p.tage.some(Boolean), today = String(heute) === String(n);
       return `<div class="pr ${today ? "today" : ""} ${p.aktiv ? "" : "off"}">
         <div class="ic">${ic(icons[n - 1])}</div>
-        <div><div class="n">${esc(p.name)}</div><div class="s">${esc(this._roomLabel(p.raeume))} · ${esc(p.modus)} · ${esc(p.wdh)}×${p.personen.size ? " · wartet auf " + [...p.personen].map((x) => x[0].toUpperCase() + x.slice(1)).join(", ") : ""}</div></div>
+        <div><div class="n">${esc(p.name)}</div><div class="s">${esc(this._roomLabel(p.raeume))} · ${esc(p.modus)} · ${esc(p.wdh)}×${Object.keys(p.raum).length ? " · Räume einzeln" : ""}${p.personen.size ? " · wartet auf " + [...p.personen].map((x) => x[0].toUpperCase() + x.slice(1)).join(", ") : ""}</div></div>
         <span class="tag ${today ? "acc" : ""}">${manual ? "Manuell" : esc(this._dayLabel(p.tage) + " " + p.zeit)}</span>
         <button class="ib go" title="Jetzt starten" data-run="${n}">${ic("mdi:play")}</button><button class="ib" title="Bearbeiten" data-edit="${n}">${ic("mdi:pencil")}</button></div>`;
     }).join("");
@@ -594,6 +672,7 @@ class HeidiPanel extends HTMLElement {
         ${sel("select.heidi_carpet_cleaning", "Teppich")}${sel("select.heidi_water_temperature", "Wassertemperatur")}${sel("select.heidi_drying_time", "Trocknung")}${sel("select.heidi_auto_empty_mode", "Absaugen")}${sel("select.heidi_self_clean_frequency", "Mopp-Wäsche")}
         ${num("number.heidi_self_clean_area", "Mopp-Wäsche nach", " m²")}${sel("select.heidi_cleangenius", "CleanGenius")}${num("number.heidi_volume", "Lautstärke", " %")}
         <div class="row"><div>Nicht stören</div><div style="display:flex;gap:6px"><input type="time" data-time="time.heidi_dnd_start" value="${esc((this.st("time.heidi_dnd_start") || "").slice(0, 5))}"><input type="time" data-time="time.heidi_dnd_end" value="${esc((this.st("time.heidi_dnd_end") || "").slice(0, 5))}"></div></div>
+        <div class="row"><div>Raum-Einstellungen<div class="sub">Modus, Saugstufe, Wasser, Route, Wiederholungen je Raum</div></div><button class="btn" data-act="rooms" style="display:inline-flex;align-items:center;gap:6px;padding:8px 12px;font-size:12px">${ic("mdi:floor-plan")}Räume …</button></div>
       </div></details>`;
   }
 
@@ -670,6 +749,7 @@ class HeidiPanel extends HTMLElement {
   // ───────── Overlays: Einstellungen & Planer-Editor ─────────
   _renderOverlay() {
     const o = this.$("#overlay");
+    if (this._rooms) { o.innerHTML = this._roomsHtml(); return; }
     if (this._editing) { o.innerHTML = this._editorHtml(this._editing); return; }
     if (this._zones) { o.innerHTML = this._zonesHtml(); this._zonesBind(); return; }
     if (this._panel) { o.innerHTML = this._panelHtml(); return; }
@@ -714,10 +794,68 @@ class HeidiPanel extends HTMLElement {
       modus: st("modus"), saug: st("saugstufe"), wasser: st("wasser"), route: st("route"), wdh: st("wiederholungen"),
       tage: [...mask].map((c) => c === "1"), zeit: (this.st(`input_datetime.heidi_plan${n}_zeit`) || "09:30").slice(0, 5),
       personen: new Set(tx("personen").split(",").map((x) => x.trim()).filter(Boolean)),
-      ho: st("homeoffice"), hoSaug: st("ho_saug"), hoRoute: st("ho_route"), hoWdh: st("ho_wdh"),
-      schnell: this.on(`input_boolean.heidi_plan${n}_schnell`), spSaug: st("sp_saug"), spRoute: st("sp_route"), spWdh: st("sp_wdh"),
+      ho: st("homeoffice"), hoSaug: st("ho_saug"), hoWdh: st("ho_wdh"),
+      schnell: this.on(`input_boolean.heidi_plan${n}_schnell`), spSaug: st("sp_saug"), spWdh: st("sp_wdh"),
+      raum: parseRaum(tx("raumwerte")), // Einzelwerte je Raum (leer = Standard des Eintrags)
       clock: null,
     };
+  }
+
+  // ───────── Untermenü Räume (v1.5) ─────────
+  _roomsHtml() {
+    const r = this._rooms, plan = r.mode === "plan", e = plan ? this._ed : null;
+    const seg = (id, k, opts, cur, dis) => `<div class="seg s ${dis ? "dis" : ""}">${opts.map((o) => `<button data-rv="${k}" data-room="${id}" data-val="${esc(o)}" class="${String(cur) === o ? "on" : ""}">${esc(o)}${k === "wdh" ? "×" : ""}</button>`).join("")}</div>`;
+    const std = () => ({ modus: e.modus, saug: e.saug, wasser: e.wasser, route: e.route, wdh: e.wdh });
+    const block = (id, name, icon, v, own, avail, cls = "") => {
+      const wet = v.modus !== "Saugen", mopOnly = v.modus === "Nur Wischen", dis = plan && !own;
+      return `<div class="rr ${dis ? "std" : ""} ${cls}"><div class="rn">${ic(icon)}${esc(name)}${plan && id !== "all" ? `<button class="chip ${own ? "on" : ""}" data-rv="own" data-room="${id}">${own ? "eigene Werte" : "Standard des Eintrags"}</button>` : ""}</div>
+        ${!avail ? `<div class="hint">Raum-Einstellungen nicht verfügbar</div>` : `<div class="rc"><span>Modus</span>${seg(id, "modus", OPT.modus, v.modus, dis)}</div>
+        <div class="rc"><span>Saugstufe</span>${seg(id, "saug", OPT.saug, v.saug, dis)}</div>
+        <div class="rc ${wet ? "" : "dim"}"><span>Wasser</span>${seg(id, "wasser", OPT.wasser, v.wasser, dis || !wet)}</div>
+        <div class="rc ${mopOnly ? "" : "dim"}"><span>Route</span>${seg(id, "route", OPT.route, v.route, dis || !mopOnly)}</div>
+        <div class="rc"><span>Wdh.</span>${seg(id, "wdh", OPT.wdh, v.wdh, dis)}</div>`}</div>`;
+    };
+    const ids = plan ? ROOMS.filter((x) => e.raeume.has(x.id)) : ROOMS.slice();
+    const rows = ids.sort((a, b) => a.id - b.id).map((rm) => {
+      if (plan) { const own = !!e.raum[rm.id]; return block(rm.id, rm.short, rm.icon, own ? e.raum[rm.id] : std(), own, true); }
+      const v = this._roomVals(rm.id); return block(rm.id, rm.short, rm.icon, v || { modus: "–", saug: "–", wasser: null, route: null, wdh: "–" }, true, !!v);
+    }).join("");
+    // Zeile "Alle Räume": zeigt gemeinsame Werte, Klick setzt alle
+    let all = "";
+    if (!plan) {
+      const vs = ROOMS.map((x) => this._roomVals(x.id)).filter(Boolean);
+      const uni = (k) => { const s = new Set(vs.map((x) => x[k] ?? "–")); return s.size === 1 ? [...s][0] : "–"; };
+      if (vs.length) all = block("all", "Alle Räume", "mdi:select-all", { modus: uni("modus"), saug: uni("saug"), wasser: uni("wasser"), route: uni("route"), wdh: uni("wdh") }, true, true, "all");
+    }
+    const n = r.n || this._editing;
+    const modeSeg = r.back === "editor" ? `<div class="seg" style="margin-bottom:4px"><button data-act="rooms-mode" data-val="robot" class="${plan ? "" : "on"}">Roboter-Werte</button><button data-act="rooms-mode" data-val="plan" class="${plan ? "on" : ""}">Nur Eintrag ${n}</button></div>` : "";
+    const hint = plan ? `Räume mit „eigene Werte“ überschreiben beim Start von Eintrag ${n} den Standard des Eintrags (${esc(e.modus)} · ${esc(e.saug)} · ${esc(e.wdh)}×). Gespeichert wird mit „Speichern“ im Eintrag.`
+      : `Das sind die Raum-Einstellungen des Roboters – dieselben wie in der Dreame-App. Änderungen gelten sofort. Ein Planer-Eintrag setzt beim Start seine eigenen Werte und stellt diese hier danach wieder her.`;
+    const foot = plan ? `<button class="btn" data-rv="own" data-room="none">Alle auf Standard</button><button class="btn primary" data-act="rooms-back">Zurück zum Eintrag</button>`
+      : `<button class="btn primary" data-act="${r.back === "editor" ? "rooms-back" : "close"}">${r.back === "editor" ? "Zurück zum Eintrag" : "Fertig"}</button>`;
+    return `<div class="scrim" data-act="${r.back === "editor" ? "rooms-back" : "close"}"></div><div class="modal"><div class="box ed" role="dialog" style="width:min(600px,100%)">
+      <h2>Räume&nbsp;<span style="font-weight:400;color:var(--muted)">${plan ? `Eintrag ${n}` : "Roboter"}</span><button class="iconbtn" data-act="${r.back === "editor" ? "rooms-back" : "close"}" aria-label="Schließen" style="margin-left:auto">${ic("mdi:close")}</button></h2>
+      ${modeSeg}<div class="hint">${hint}<br>Wasser nur beim Wischen · Route nur bei „Nur Wischen“.</div>
+      <div class="rlist">${all}${rows}</div>
+      <div class="foot">${foot}</div></div></div>`;
+  }
+
+  async _rvClick(t) {
+    const r = this._rooms; if (!r) return; const k = t.dataset.rv, id = t.dataset.room, v = t.dataset.val;
+    if (r.mode === "plan") {
+      const e = this._ed; if (!e) return;
+      const std = () => ({ modus: e.modus, saug: e.saug, wasser: e.wasser, route: e.route, wdh: e.wdh });
+      if (k === "own") { if (id === "none") e.raum = {}; else { const i = parseInt(id); if (e.raum[i]) delete e.raum[i]; else e.raum[i] = std(); } }
+      else { const i = parseInt(id); if (!e.raum[i]) e.raum[i] = std(); e.raum[i][k] = v; }
+      this._renderOverlay(); return;
+    }
+    // Roboter: sofort setzen (Modus zuerst – davon hängt ab, ob Wasser/Route verfügbar sind)
+    const ids = id === "all" ? ROOMS.map((x) => x.id) : [parseInt(id)];
+    const opt = k === "wdh" ? v + "x" : (inv(RV_HA[k])[v] || v);
+    try {
+      await Promise.all(ids.map((i) => this.call("select", "select_option", { entity_id: `select.heidi_room_${i}_${RV_ENT[k]}`, option: opt })));
+      this.toast(id === "all" ? "Alle Räume gesetzt" : "Gesetzt");
+    } catch (err) { this.toast("Nicht möglich: " + (err?.message || err)); }
   }
   _dayLabel(tage) {
     const n = tage.filter(Boolean).length;
@@ -730,14 +868,14 @@ class HeidiPanel extends HTMLElement {
   _editorHtml(n) {
     const e = this._ed || (this._ed = this._planRead(n));
     const seg = (key, opts, cls = "") => `<div class="seg ${cls}">${opts.map((o) => `<button data-ed="set" data-key="${key}" data-val="${esc(o)}" class="${e[key] === o ? "on" : ""}">${esc(o)}</button>`).join("")}</div>`;
-    const rooms = ROOMS.map((r) => `<button class="chip ${e.raeume.has(r.id) ? "on" : ""}" data-ed="room" data-val="${r.id}">${ic(r.icon)}${r.short}</button>`).join("");
+    const rooms = ROOMS.map((r) => `<button class="chip ${e.raeume.has(r.id) ? "on" : ""}" data-ed="room" data-val="${r.id}" title="${e.raum[r.id] ? "eigene Werte" : ""}">${ic(r.icon)}${r.short}${e.raum[r.id] ? '<i class="dotm"></i>' : ""}</button>`).join("");
+    const ownCount = Object.keys(e.raum).filter((id) => e.raeume.has(parseInt(id))).length;
     const days = DAYS.map((d, i) => `<button class="chip ${e.tage[i] ? "on" : ""}" data-ed="day" data-val="${i}">${d}</button>`).join("");
     const presets = [["Mo–Fr", "1111100"], ["Wochenende", "0000011"], ["Täglich", "1111111"], ["Nur manuell (Szene)", "0000000"]].map(([t, m]) => `<button class="chip" data-ed="preset" data-val="${m}">${t}</button>`).join("");
     const persons = E.persons.map((p) => { const k = p.name.toLowerCase(); return `<button class="chip ${e.personen.has(k) ? "warn" : ""}" data-ed="person" data-val="${k}">${ic("mdi:account")}${p.name}</button>`; }).join("");
     const manual = !e.tage.some(Boolean);
     const mini = (title, pre, help) => `<div class="mini"><div class="mlab">${title}</div>
       <div class="mrow"><span>Saugstufe</span>${seg(pre + "Saug", OPT.saug3, "s")}</div>
-      <div class="mrow"><span>Route</span>${seg(pre + "Route", OPT.route3, "s")}</div>
       <div class="mrow"><span>Wiederholungen</span>${seg(pre + "Wdh", OPT.wdh2, "s")}</div>${help ? `<div class="hint" style="margin:0">${help}</div>` : ""}</div>`;
     const schnellMin = this.num("input_number.heidi_schnell_minuten", 90);
     const az = `${(this.st("input_datetime.heidi_arbeitszeit_start") || "08:00").slice(0, 5)}–${(this.st("input_datetime.heidi_arbeitszeit_ende") || "17:00").slice(0, 5)}`;
@@ -745,16 +883,17 @@ class HeidiPanel extends HTMLElement {
       <h2>Eintrag ${n}&nbsp;<span style="font-weight:400;color:var(--muted)">bearbeiten</span><button class="iconbtn" data-act="close" aria-label="Schließen" style="margin-left:auto">${ic("mdi:close")}</button></h2>
       <div class="sec"><div class="lab">Name <span class="r" style="color:${e.aktiv ? "var(--accent)" : "var(--muted)"}">${e.aktiv ? "Aktiv" : "Inaktiv"} <span class="sw ${e.aktiv ? "on" : ""}" data-ed="bool" data-key="aktiv" role="switch" aria-checked="${e.aktiv}" tabindex="0"></span></span></div>
         <input type="text" data-ed="name" maxlength="40" value="${esc(e.name)}"></div>
-      <div class="sec"><div class="lab">Räume <span class="r">${esc(this._roomLabel(e.raeume))}</span></div><div class="rooms">${rooms}</div></div>
-      <div class="sec"><div class="lab">Modus</div>${seg("modus", OPT.modus)}</div>
+      <div class="sec"><div class="lab">Räume <span class="r">${esc(this._roomLabel(e.raeume))}${ownCount ? ` · ${ownCount} mit eigenen Werten` : ""}</span></div><div class="rooms">${rooms}</div></div>
+      <div class="sec"><div class="lab">Standard für alle gewählten Räume</div>${seg("modus", OPT.modus)}</div>
       <div class="two">
         <div class="sec"><div class="lab">Saugstufe</div>${seg("saug", OPT.saug)}</div>
         <div class="sec" style="opacity:${e.modus === "Saugen" ? ".4" : "1"}"><div class="lab">Wassermenge</div>${seg("wasser", OPT.wasser)}</div>
       </div>
       <div class="two">
-        <div class="sec"><div class="lab">Route</div>${seg("route", OPT.route)}</div>
+        <div class="sec" style="opacity:${e.modus === "Nur Wischen" ? "1" : ".4"}"><div class="lab">Route <span class="r">nur bei „Nur Wischen“</span></div>${seg("route", OPT.route)}</div>
         <div class="sec"><div class="lab">Wiederholungen</div>${seg("wdh", OPT.wdh)}</div>
       </div>
+      <div class="btnrow"><button class="btn" data-act="rooms-plan">${ic("mdi:floor-plan")}Räume einzeln …${ownCount ? ` (${ownCount})` : ""}</button><button class="btn" data-act="rooms-robot">${ic("mdi:robot-vacuum")}Roboter-Werte</button></div>
       <div class="sec"><div class="lab">Ausführung <span class="r">${esc(this._dayLabel(e.tage))}</span></div><div class="days">${days}</div><div class="chips">${presets}</div></div>
       <div class="sec" ${manual ? "hidden" : ""}><div class="lab">Uhrzeit</div>
         <div><button class="timebtn" data-ed="clock">${ic("mdi:clock-outline")}<span>${esc(e.zeit)}</span><small>antippen zum Ändern</small></button></div>
@@ -803,16 +942,17 @@ class HeidiPanel extends HTMLElement {
     const txt = (k, v) => c.push(this.call("input_text", "set_value", { entity_id: `input_text.heidi_plan${n}_${k}`, value: v }));
     const bool = (k, v) => c.push(this.call("input_boolean", v ? "turn_on" : "turn_off", { entity_id: `input_boolean.heidi_plan${n}_${k}` }));
     txt("name", e.name); txt("raeume", ROOMS.filter((r) => e.raeume.has(r.id)).map((r) => r.id).join(",")); txt("tage", e.tage.map((b) => (b ? "1" : "0")).join("")); txt("personen", [...e.personen].join(","));
+    const raum = {}; Object.keys(e.raum).forEach((id) => { if (e.raeume.has(parseInt(id))) raum[id] = e.raum[id]; }); txt("raumwerte", encodeRaum(raum));
     sel("modus", e.modus); sel("saugstufe", e.saug); sel("wasser", e.wasser); sel("route", e.route); sel("wiederholungen", e.wdh);
-    sel("homeoffice", e.ho); sel("ho_saug", e.hoSaug); sel("ho_route", e.hoRoute); sel("ho_wdh", e.hoWdh);
-    sel("sp_saug", e.spSaug); sel("sp_route", e.spRoute); sel("sp_wdh", e.spWdh);
+    sel("homeoffice", e.ho); sel("ho_saug", e.hoSaug); sel("ho_wdh", e.hoWdh);
+    sel("sp_saug", e.spSaug); sel("sp_wdh", e.spWdh);
     bool("aktiv", e.aktiv); bool("schnell", e.schnell);
     c.push(this.call("input_datetime", "set_datetime", { entity_id: `input_datetime.heidi_plan${n}_zeit`, time: e.zeit + ":00" }));
     try { await Promise.all(c); this.toast("Eintrag gespeichert"); } catch (err) { this.toast("Fehler beim Speichern: " + err.message); }
     this._editing = null; this._ed = null; this._sig = ""; this.hass = this._hass;
   }
 
-  _closeOverlays() { this._editing = null; this._ed = null; this._panel = false; this._zones = null; this._sig = ""; this._render(); }
+  _closeOverlays() { this._editing = null; this._ed = null; this._panel = false; this._zones = null; this._rooms = null; this._sig = ""; this._render(); }
 
   // ───────── Sperrzonen-Editor ─────────
   _rectsFromAttr(a) {
@@ -894,9 +1034,15 @@ class HeidiPanel extends HTMLElement {
 
   // ───────── Events ─────────
   async _onClick(e) {
-    const t = e.target.closest("[data-act],[data-view],[data-toggle],[data-more],[data-svc],[data-reset],[data-press],[data-run],[data-app],[data-edit],[data-option],[data-shell],[data-fieldtoggle],[data-ztype],[data-zact],[data-room],[data-ed],[data-tl],summary");
+    const t = e.target.closest("[data-rv],[data-act],[data-view],[data-toggle],[data-more],[data-svc],[data-reset],[data-press],[data-run],[data-app],[data-edit],[data-option],[data-shell],[data-fieldtoggle],[data-ztype],[data-zact],[data-room],[data-ed],[data-tl],summary");
     if (!t) return;
     if (t.dataset.tl) { const k = t.dataset.tl; if (k === "cur") return; if (this._tlOpen.has(k)) this._tlOpen.delete(k); else { this._tlOpen.add(k); this._loadTimeline(k, parseInt(t.dataset.start), parseInt(t.dataset.end)); } this._sig = ""; this._render(); return; }
+    if (t.dataset.rv) { this._rvClick(t); return; }
+    if (t.dataset.act === "rooms") { this._rooms = { mode: "robot", back: null }; this._renderOverlay(); return; }
+    if (t.dataset.act === "rooms-plan") { this._rooms = { mode: "plan", n: this._editing, back: "editor" }; this._renderOverlay(); return; }
+    if (t.dataset.act === "rooms-robot") { this._rooms = { mode: "robot", n: this._editing, back: "editor" }; this._renderOverlay(); return; }
+    if (t.dataset.act === "rooms-mode") { this._rooms.mode = t.dataset.val; this._renderOverlay(); return; }
+    if (t.dataset.act === "rooms-back") { this._rooms = null; this._renderOverlay(); return; }
     if (t.tagName === "SUMMARY") { const d = t.parentElement; const key = d.dataset.key; setTimeout(() => { if (key) { d.open ? this._open.add(key) : this._open.delete(key); } }, 0); return; }
     if (t.dataset.ed) { if (t.dataset.ed !== "name") this._edClick(t); return; }
     const confirmText = t.dataset.confirm; if (confirmText && !window.confirm(confirmText)) return;
