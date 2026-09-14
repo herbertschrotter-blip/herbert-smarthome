@@ -258,3 +258,4 @@ Offen:
 - Cowork-Projektdoku (claude.ai, Projekt „Mein SmartHome"): `claude/heidi-setup.md`.
 - Architektur-Review der Karte (Zielarchitektur, Refactoring-Plan, Teststrategie): `docs/ARCHITEKTUR-REVIEW.md`.
 - Bauplan für den Neubau der Karte (v2, Phasen, Statusliste, Entitäts-Vertrag): `docs/BAUPLAN-V2.md`.
+- ChatGPT-Review-Archiv (Zweitmeinung zu Review + Bauplan): `docs/chatgpt-reviews/INDEX.md`.
