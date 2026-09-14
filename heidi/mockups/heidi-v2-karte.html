@@ -23,7 +23,12 @@
   .rooms { display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-top:10px; } @container (max-width:640px){ .rooms{ grid-template-columns:repeat(4,1fr);} }
   .rooms button { border:1px solid var(--line-soft); background:var(--glass-2); color:var(--text); border-radius:12px; padding:9px 4px 7px; font:inherit; font-size:11px; cursor:pointer; }
   .rooms button.sel { border-color:var(--accent); color:var(--accent); background:color-mix(in srgb,var(--accent) 14%,transparent); }
-  .tools { display:flex; gap:6px; justify-content:flex-end; margin-top:8px; }
+  .tools { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:10px 0 0; }
+  .seg2 { display:inline-flex; background:rgba(120,120,128,.22); border-radius:10px; padding:2px; gap:2px; flex-wrap:wrap; }
+  .seg2 button { border:0; background:transparent; color:var(--text); padding:6px 10px; border-radius:8px; font:inherit; font-size:13px; font-weight:500; cursor:pointer; white-space:nowrap; }
+  .seg2 button.on { background:var(--glass-3); font-weight:600; box-shadow:0 1px 4px rgba(0,0,0,.25); }
+  .maps { display:flex; gap:6px; align-items:center; margin-top:10px; font-size:12px; color:var(--muted); } .maps .chip { display:inline-flex; align-items:center; gap:6px; padding:5px 10px; border-radius:999px; background:var(--glass-2); border:1px solid var(--line-soft); font-size:12px; color:var(--muted); cursor:pointer; } .maps .chip.on { color:var(--text); background:var(--glass-3); border-color:var(--accent); }
+  .modehint { font-size:12px; color:var(--muted); margin-top:8px; min-height:1.4em; }
   .tb { border:1px solid var(--line); background:rgba(20,28,44,.7); color:var(--text); border-radius:12px; padding:8px 12px; font:inherit; font-size:13px; font-weight:600; backdrop-filter:blur(12px); cursor:pointer; }
   .tb.primary { background:var(--accent); color:var(--accent-ink); border-color:transparent; }
   .note { font-size:12px; color:var(--muted); margin-top:10px; line-height:1.45; }
@@ -67,9 +72,11 @@
     <div class="card"><h2>A · Standard <span class="r">wie in einem normalen HA-Dashboard</span></h2><div class="std" id="slotA"></div>
       <div class="note">Weißer Kartenrahmen, blaue Akzentfarbe, Kachelzeile und Knopfleiste der Karte selbst.</div></div>
     <div class="card"><h2>Karte <span class="r">Xiaomi-Karte · Angedockt</span></h2>
-      <div class="mapwrap glass" id="slotB"></div><div class="tools"><button class="tb">⃠ Sperrzonen · 2</button><button class="tb primary">Stühle am Boden · gesperrt</button></div>
+      <div class="maps"><span>Karte:</span><span class="chip on" data-map="1">Erdgeschoss</span><span class="chip" data-map="2">Obergeschoss</span><span class="chip" data-map="3">Keller</span><span style="margin-left:auto">select.heidi_selected_map</span></div>
+      <div class="mapwrap glass" id="slotB"></div>
+      <div class="tools"><div class="seg2" id="modes"></div><button class="tb primary" id="allBtn">▶ Alles reinigen</button></div><div class="modehint" id="modehint"></div>
       <div class="rooms" id="rooms"></div>
-      <div class="note">Dieselbe Karte: Hintergrund transparent, Radius 16 px, Akzent Heidi-Türkis, Raumbeschriftungen in Heidi-Schrift, <code>tiles: []</code>, <code>icons: []</code>, nur der Modus „Räume“, kein Titel. Die Zeile mit „×1“ und dem Startknopf gehört zur Karte (Wiederholungen + Auswahl ausführen); die großen Kreise sind Platzhalter für Icons, die es nur in HA gibt. Sperrzonen-, Stühle-Knopf und Raum-Chips sind Heidis eigene Bedienelemente.</div></div>
+      <div class="note">Dieselbe Karte: Hintergrund transparent, Radius 16 px, Akzent Heidi-Türkis, Raumbeschriftungen in Heidi-Schrift, <code>tiles: []</code>, <code>icons: []</code>, kein Titel. Der Modus-Umschalter oben ist Heidis eigener; er gibt der Karte jeweils genau einen Modus (die Karte hat dann kein eigenes Menü). Die Zeile mit „×1“ und dem Startknopf gehört zur Karte (Wiederholungen + Auswahl ausführen); die großen Kreise sind Platzhalter für Icons, die es nur in HA gibt. Kartenwahl-Chips und Raum-Chips sind Heidis Elemente.</div></div>
   </div>
   <div class="card" style="margin-top:16px"><h2>Was hier gesetzt ist</h2><pre class="note" style="white-space:pre-wrap;margin:0" id="cssShown"></pre></div>
 </div>
@@ -1803,8 +1810,28 @@ function make(cfg) {
 }
 const base = { type:'custom:xiaomi-vacuum-map-card', entity:'vacuum.heidi', vacuum_platform:'Tasshack/dreame-vacuum', language:'de', map_source:{ image: IMG }, calibration_source:{ calibration_points: CAL }, map_locked:true, two_finger_pan:true, map_modes: modes };
 document.getElementById('slotA').appendChild(make({ ...base, title:'Heidi' }));
-const cardB = make({ ...base, title:'', tiles:[], icons:[], map_modes:[modes[0]] });
-document.getElementById('slotB').appendChild(cardB);
+const MODES = [
+  { key:'raeume', name:'Räume', hint:'Räume antippen, dann ▶ in der Karte oder Heidis Raum-Chips → dreame_vacuum.vacuum_clean_segment', mode: modes[0] },
+  { key:'zone', name:'Zone', hint:'Rechteck aufziehen (bis zu 5) → dreame_vacuum.vacuum_clean_zone', mode: { template:'vacuum_clean_zone', name:'Zone', icon:'mdi:select-drag', max_selections:5 } },
+  { key:'punkt', name:'Punkt', hint:'Punkt setzen → dreame_vacuum.vacuum_clean_spot (Fleck reinigen)', mode: { template:'vacuum_clean_point', name:'Punkt', icon:'mdi:map-marker-radius' } },
+  { key:'goto', name:'Hinfahren', hint:'Punkt setzen → dreame_vacuum.vacuum_goto', mode: { template:'vacuum_goto', name:'Hinfahren', icon:'mdi:map-marker' } },
+  { key:'sperr', name:'Sperrzonen', hint:'Rechtecke aufziehen → vacuum_set_restricted_zone { zones } · ersetzt ALLE Sperrzonen; bestehende zeigt nur das Kartenbild', mode: { name:'Sperrzonen', icon:'mdi:cancel', selection_type:'manual_rectangle', max_selections:10, coordinates_rounding:true, run_immediately:false, service_call_schema:{ service:'dreame_vacuum.vacuum_set_restricted_zone', service_data:{ entity_id:'[[entity_id]]', zones:'[[selection]]' } } } },
+  { key:'wisch', name:'Wisch-Sperr', hint:'Rechtecke aufziehen → vacuum_set_restricted_zone { no_mops }', mode: { name:'Wisch-Sperrzonen', icon:'mdi:water-off', selection_type:'manual_rectangle', max_selections:10, coordinates_rounding:true, run_immediately:false, service_call_schema:{ service:'dreame_vacuum.vacuum_set_restricted_zone', service_data:{ entity_id:'[[entity_id]]', no_mops:'[[selection]]' } } } },
+  { key:'wand', name:'Wände', hint:'Linien ziehen → vacuum_set_restricted_zone { walls } (virtuelle Wände)', mode: { name:'Virtuelle Wände', icon:'mdi:wall', selection_type:'manual_path', max_selections:10, coordinates_rounding:true, run_immediately:false, service_call_schema:{ service:'dreame_vacuum.vacuum_set_restricted_zone', service_data:{ entity_id:'[[entity_id]]', walls:'[[selection]]' } } } },
+];
+let cardB = null;
+function setMode(key) {
+  const m = MODES.find((x) => x.key === key) || MODES[0];
+  const slot = document.getElementById('slotB'); slot.innerHTML = '';
+  cardB = make({ ...base, title:'', tiles:[], icons:[], map_modes:[m.mode] }); slot.appendChild(cardB);
+  document.querySelectorAll('#modes button').forEach((b) => b.classList.toggle('on', b.dataset.key === key));
+  document.getElementById('modehint').textContent = m.hint;
+}
+document.getElementById('modes').innerHTML = MODES.map((m) => `<button data-key="${m.key}">${m.name}</button>`).join('');
+document.getElementById('modes').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) setMode(b.dataset.key); });
+document.getElementById('allBtn').addEventListener('click', () => { hass.callService('vacuum', 'start', { entity_id: 'vacuum.heidi' }); document.getElementById('modehint').textContent = 'vacuum.start → ganze Karte (Heidis eigener Knopf, nicht die Karte)'; });
+document.querySelector('.maps').addEventListener('click', (e) => { const c = e.target.closest('[data-map]'); if (!c) return; document.querySelectorAll('.maps .chip').forEach((x) => x.classList.toggle('on', x === c)); document.getElementById('modehint').textContent = 'select.heidi_selected_map → „' + c.textContent + '“ · die Karte folgt camera.heidi_map (Demo zeigt dasselbe Bild)'; });
+setMode('raeume');
 // Raum-Chips von Heidi spiegeln die Auswahl in der Karte (Demo: nur optisch)
 const rooms = document.getElementById('rooms');
 rooms.innerHTML = ROOMS.map(([id,t]) => `<button data-id="${id}">${t.replace('zimmer','z.')}</button>`).join('');
