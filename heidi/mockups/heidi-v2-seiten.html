@@ -103,7 +103,8 @@
   .strip .lab { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; }
   .strip .lab svg { width: 16px; height: 16px; flex: none; }
   .livemap { margin-top: 12px; cursor: pointer; }
-  .livemap .map { border-radius: var(--r-s); } .livemap .map > svg { height: 200px; width: 100%; }
+  .livemap .map { border-radius: var(--r-s); } .livemap .map > svg { height: 360px; width: 100%; }
+  @container (max-width: 520px) { .livemap .map > svg { height: 240px; } }
   .livemap .cap { margin-top: 6px; font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; } .livemap .cap b { color: var(--text); }
   .livemap .cap svg { width: 14px; height: 14px; }
   .strip .lab .r { margin-left: auto; color: var(--muted); font-weight: 500; }
@@ -132,7 +133,7 @@
   .tiles.three { grid-template-columns: repeat(3, 1fr); }
   @container (max-width: 520px) { .tiles { grid-template-columns: repeat(2, 1fr); } .tiles.three { grid-template-columns: repeat(3, 1fr); } }
   .tile { background: var(--glass-2); border: 1px solid var(--line-soft); border-radius: var(--r-s); padding: 12px; min-height: 70px; }
-  .tile .k { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  .tile .k { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; } .tile .k svg { width: 14px; height: 14px; flex: none; }
   .tile .v { font-size: 20px; font-weight: 700; margin-top: 6px; }
   .tile .v small { font-size: 12px; color: var(--muted); font-weight: 500; margin-left: 3px; }
   .tile.warn { border-color: color-mix(in srgb, var(--warn) 45%, transparent); } .tile.warn .v { color: var(--warn); }
@@ -384,10 +385,6 @@ function pageStart() {
         <div class="chips">${chip('user', 'Herbert', 'on')}${chip('user', 'Nicole')}<span class="chip" style="opacity:.6">${I.user}Nina</span>${chip('info', 'Mopps reinigen', 'warn')}${chip('moon', '20:00–07:00')}</div></div></div>
         <div class="ctl">${ctl}</div>${strip}</div>
       <div class="card"><div class="crow" style="background:transparent;border:0;padding:0"><div class="ic on">${I.auto}</div><div><div class="t">Automatik</div><div class="s">${S.automatik ? st.auto : 'Aus'}</div></div>${sw('automatik', S.automatik)}</div></div>
-      <div class="card"><h2>Station <span class="r">letzte Wäsche heute 08:52</span></h2><div class="tiles">
-        <div class="tile"><div class="k">${I.tray}Beutel</div><div class="v">OK</div></div><div class="tile warn"><div class="k">${I.water}Frischwasser</div><div class="v">Leer</div></div>
-        <div class="tile"><div class="k">${I.water}Abwasser</div><div class="v">OK</div></div><div class="tile"><div class="k">${I.wash}Mittel</div><div class="v">OK</div></div></div>
-        <div class="ctl" style="grid-template-columns:repeat(4,1fr)"><button class="btn" data-toast="Absaugen gestartet">Absaugen</button><button class="btn" data-toast="Mopp-Wäsche gestartet">Mopp</button><button class="btn" data-toast="Trocknen gestartet">Trocknen</button><button class="btn" data-confirm="Reinigung der Station starten?">Station</button></div></div>
     </div><div class="col">
       <div class="card"><h2>Verschleiß <span class="r">Reset durch Antippen</span></h2><div class="cons">
         ${[['Hauptbürste', 71], ['Seitenbürste', 44], ['Filter', 18], ['Sensoren', 92], ['Räder', 8]].map(([n, p]) => `<button data-confirm="${n}: Zähler zurücksetzen?"><div class="mini" style="--p:${p};--v:${p <= 10 ? 'var(--bad)' : p <= 25 ? 'var(--warn)' : 'var(--accent)'}"><span>${p}</span></div><div class="l">${n}</div></button>`).join('')}</div></div>
@@ -398,7 +395,12 @@ function pageStart() {
         ${pg}
         <button class="navtile" data-open="rooms-robot"><div class="ic c-gray">${I.grid}</div><div class="t">Räume ${I.chev}</div><div class="s">Roboter-Werte je Raum: Modus, Saugstufe, Wasser</div></button>
         <button class="navtile" data-nav="einstellungen"><div class="ic c-gray">${I.gear}</div><div class="t">Einstellungen ${I.chev}</div><div class="s">Karte, Roboter, Prognose, Diagnose · v2.0.0-alpha</div></button>
-      </div></div></div>`;
+      </div>
+      <div class="card"><h2>Station <span class="r">letzte Wäsche heute 08:52</span></h2><div class="tiles">
+        <div class="tile"><div class="k">${I.tray}Beutel</div><div class="v">OK</div></div><div class="tile warn"><div class="k">${I.water}Frischwasser</div><div class="v">Leer</div></div>
+        <div class="tile"><div class="k">${I.water}Abwasser</div><div class="v">OK</div></div><div class="tile"><div class="k">${I.wash}Mittel</div><div class="v">OK</div></div></div>
+        <div class="ctl" style="grid-template-columns:repeat(4,1fr)"><button class="btn" data-toast="Absaugen gestartet">Absaugen</button><button class="btn" data-toast="Mopp-Wäsche gestartet">Mopp</button><button class="btn" data-toast="Trocknen gestartet">Trocknen</button><button class="btn" data-confirm="Reinigung der Station starten?">Station</button></div></div>
+      </div></div>`;
 }
 
 function navbar(title, right = '') { return `<div class="navbar"><button class="back" data-nav="start">${I.back}Heidi</button><h1>${title}</h1><div class="r">${right}</div></div>`; }
