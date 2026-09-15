@@ -24,7 +24,8 @@ Cowork-Sitzungen (was gebaut wurde, warum, bekannte Stolpersteine, offene Punkte
 
 ## Repo-Aufbau
 - `ha/` – Spiegel der relevanten HA-Dateien (Quelle der Wahrheit; `H:\` ist das Ziel).
-- `heidi/` – Saugroboter Heidi (v1-Karte, Backend, v1-Tests, v1-Mockups): eigene `CLAUDE.md`.
+- `heidi/` – Saugroboter Heidi: Backend-Doku, v1-Tests, v1-Mockups, `archiv/` mit der abgeschalteten v1-Karte
+  (heidi-panel.js, Dashboard heidi.yaml; seit 15.09.2026 nur Referenz): eigene `CLAUDE.md`.
 - `dreame_x60/` – Projekt **dreame_x60**: Neubau der Heidi-Karte (v2) mit `card/`, `tests/`, `mockups/`. Bauplan
   `docs/dreame_x60/BAUPLAN.md` (Statusliste = Wahrheit), Begründungen `docs/dreame_x60/ARCHITEKTUR-REVIEW.md`.
   Arbeit nur auf Branch `dreame_x60`; `main` bleibt das, was auf `H:` läuft.
@@ -41,5 +42,5 @@ Personen werden in der HA-Oberfläche verwaltet.
 
 ## HACS
 Installiert: dreame-vacuum (Tasshack, 2.0.0b25, Beta nötig), dreame-vacuum-map-card,
-xiaomi-vacuum-map-card. Nicht mehr benötigt (können weg): Mushroom, card-mod, expander-card,
-stack-in-card.
+xiaomi-vacuum-map-card. Nicht mehr benötigt seit v1 aus ist (in HACS deinstallieren, Herbert):
+Mushroom, card-mod, expander-card, stack-in-card.

@@ -1,5 +1,5 @@
 // Entitäts-Vertrag (Bauplan Abschnitt 4, eingefroren). Einzige Stelle, die Entitäts-IDs kennt oder bildet (Regel 1).
-// Werte 1:1 aus v1 (ha/www/heidi-panel.js: E, RV, RV_HA, RV_ENT, OPT, Personen) und ha/packages/heidi.yaml.
+// Werte 1:1 aus v1 (heidi/archiv/heidi-panel.js: E, RV, RV_HA, RV_ENT, OPT, Personen) und ha/packages/heidi.yaml.
 // Anzeige-Dinge (Kurznamen, Icons, Reihenfolge der Chips) gehören nach config.ts, nicht hierher.
 // Roboter-IDs sind nicht fest verdrahtet (PD-012, Herbert 15.09.): Domäne + Merkmal stehen hier, der Gerätename kommt
 // aus der Erkennung in device.ts. Paket-Helfer (heidi.yaml) behalten ihr festes Präfix.

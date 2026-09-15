@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const CARD = path.resolve(HERE, '..');
-const V1 = path.resolve(CARD, '..', '..', 'ha', 'www', 'heidi-panel.js');
+const V1 = path.resolve(CARD, '..', '..', 'heidi', 'archiv', 'heidi-panel.js'); // v1 seit 15.09.2026 abgeschaltet, Referenz im Archiv
 const FIXTURES = path.resolve(CARD, 'tests', 'fixtures');
 const INPUTS = path.resolve(HERE, 'v1-inputs');
 

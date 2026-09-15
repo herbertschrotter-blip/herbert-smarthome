@@ -71,8 +71,8 @@ Claude Code im Web bereitet diese Aufgaben vor, führt sie aber nicht aus.
 | 6.1 | E2E Round-Trip v2 → v1 und `availability.js` | offen |
 | 6.2 | Paritäts-Checkliste (Abschnitt 9) vollständig | offen |
 | 6.3 | **[PC]** Geräte-Sichtung (Companion hoch/quer, Tablet mit Sidebar, Kiosk, Desktop) | offen |
-| 6.4 | **[PC]** Sieben Tage Parallelbetrieb ohne freigabeblockierenden Befund | offen |
-| 6.5 | **[PC]** Umschalten, v1 archivieren, Doku auf v2 | offen |
+| 6.4 | **[PC]** Sieben Tage Parallelbetrieb ohne freigabeblockierenden Befund | entfällt (Herbert, 15.09.: v1 vorzeitig abgeschaltet, kein Parallelbetrieb) |
+| 6.5 | **[PC]** Umschalten, v1 archivieren, Doku auf v2 | v1 abgeschaltet und archiviert (15.09., vorgezogen); Rest (Dashboard-Pfad `/heidi/…`, Doku) offen |
 
 Status-Werte: `offen`, `in Arbeit (Datum)`, `fertig (Commit)`, `blockiert (Abschnitt 10)`.
 
@@ -119,10 +119,10 @@ freigegeben).
     Attribute, `camera.heidi_map` nur auf die genutzten Attribute). Unveränderte Sicht = gleiche
     Referenz = Lit-Kind bleibt ruhig. `memo-selector.ts` bleibt unter 100 Zeilen, sonst stoppen.
     Kein Store, kein Abhängigkeitsgraph, keine Observables.
-11. **Parallelbetrieb:** Während der Abnahme wird der Planer-Editor nur in v2 benutzt; v1 dient
-    zum Lesen. Derselbe Plan wird nie gleichzeitig in v1 und v2 bearbeitet (16 Helfer, keine
-    Transaktion). Jedes Bundle registriert nur seinen Elementnamen und trägt sich nur einmal in
-    `window.customCards` ein. Versionen v1/v2 getrennt.
+11. **Parallelbetrieb (aufgehoben 15.09.):** v1 ist auf Herberts Wunsch vorzeitig abgeschaltet
+    (Dashboard, Ressource, Datei vom Pi entfernt; Referenz `heidi/archiv/`). Bis 4.4/4.5 gibt es keinen
+    Planer-Editor in der Oberfläche; Einträge laufen weiter über die Automation. Das Bundle registriert
+    nur seinen Elementnamen und trägt sich nur einmal in `window.customCards` ein.
 12. **HA-interne Frontend-Bausteine:** Abhängigkeit begrenzt auf die heute nötigen
     Schnittstellen `ha-icon`, `loadCardHelpers().createCardElement`, Event `hass-more-info`,
     HA-Navigation per `navigate`-Event (`location-changed`). Keine Stabilitätsgarantie, deshalb
@@ -694,13 +694,10 @@ Nach jedem Build v2 neben v1 ansehen; Unterschiede → Abschnitt 10/10a.
 - Akzeptanz: Befunde in Abschnitt 10 klassifiziert; keine offenen `Blocker`/`Functional`.
 - Tests: manuell.
 
-**6.4 [PC] Sieben Tage Parallelbetrieb**
-- Voraussetzung: 6.3
-- Ziel: v2 als Hauptdashboard, v1 nur lesen (Regel 11).
-- Akzeptanz: sieben Tage ohne offenen `Blocker`/`Functional`-Befund.
+**6.4 [PC] Sieben Tage Parallelbetrieb** – entfällt (v1 am 15.09. abgeschaltet, Herberts Entscheidung; die Abnahme 6.2/6.3 läuft direkt auf v2).
 
-**6.5 [PC] Umschalten**
-- Voraussetzung: 6.4, Abschnitt 11 erfüllt
+**6.5 [PC] Umschalten** – Teil „v1 archivieren“ am 15.09. erledigt (`heidi/archiv/`, Pi bereinigt, `deploy.ps1` nur v2, Dashboard „Heidi“ = v2).
+- Voraussetzung: 6.3, Abschnitt 11 erfüllt
 - Ziel: `ha/dashboards/heidi.yaml` bekommt die sechs Views von `dreame_x60.yaml` (Pfad `/heidi/...`, `back_path` anpassen); `dreame_x60.yaml` und Dashboard-Eintrag entfernen; `ha/www/heidi-panel.js` → `heidi-panel-v1.js` (Ressource entfernen); Build-Ziel wird `ha/www/heidi-panel.js`; `heidi/tests` → `heidi/tests-v1`; `HANDOFF.md`, `heidi/CLAUDE.md`, `CLAUDE.md` auf v2; Version `2.0.0`.
 - Akzeptanz: Abschnitt 11 vollständig.
 
@@ -785,6 +782,8 @@ Wünsche `Post-2.0`: lokale Font-Dateien (Sora/IBM Plex).
 - [2026-09-15] [4.3b] Messung · Info (dritter echter Lauf 11:50, Start über die Heidi-Karte, Tipp-Reihenfolge Küche → Wohnzimmer → Flur): **Reihenfolge wird eingehalten.** `startRooms` setzte `input_text.heidi_lauf_reihenfolge` = „6,7,4“, `active_segments` = 6,7,4; Phase 11:50 „Saugt Küche“, 11:53 „Saugt Wohnzimmer“ (in der Anzeigereihenfolge 7..1 wäre das Wohnzimmer zuerst gekommen). Auftrag-Kachel zeigte „Küche → Wohnz. → Flur · 1/3 · Nächster Raum Flur“. Das Roboter-Attribut `cleaning_sequence` (hier 1,6,7,2,4,3,5) blieb dabei unverändert – es ist die App-Standardreihenfolge, nicht die Auftragsreihenfolge. Um 12:03 „Fährt zur Station“ ohne den Flur, 12:04 `idle` bei Status „Returning“ (wie beim Abbruch 11:23), 12:05 docked/lädt; Herbert hat sie um 12:03 selbst zur Station geschickt (kein Überspringen). **Befund Reinigungspfad:** Während des Laufs enthielten weder das Kartenbild (`camera.heidi_map`) noch das Kartenpaket (`camera.heidi_map_data`, Entities nur robot_position/charger_location) den Reinigungspfad – auch nicht mit geöffneter Dreame-App (dreimal über eine Minute geprüft). Nach dem App-Lauf 09:58 hatte das Bild von 10:56 die Bahnen (Fixture `map.png`, Paket mit 4 `path`-Entities). Bei den beiden HA-Starts (11:23, 11:50) fehlte der Pfad von Anfang an. Nicht von der Karte verursacht (Bild 1:1 von der Integration; v1 und Dreame-App-Karte zeigen dasselbe Bild). Ursache offen: „tr“-Spur in den Kartenframes (`dreame/map.py` 4356) kommt nicht an oder wird verworfen; ohne Debug-Protokoll der Integration nicht entscheidbar. Nächster Schritt: beim nächsten App-Start prüfen, ob die Bahnen dann live erscheinen; wenn ja, GitHub-Issues der Integration (Tasshack/dreame-vacuum) durchsehen. Nach dem Andocken (12:05) war das Kartenpaket weiterhin ein Teilpaket (7*, 6*, 4*) – das vollständige Paket kommt erst mit dem nächsten vollständigen Kartenframe; der Raum-Speicher der Heidi-Karte deckt das ab.
 
 - [2026-09-15] [4.3c] Befund · Info (Herbert: „alle Gerätenamen im Dashboard sollen ausgelesen werden, die IDs haben ein Muster“ → vorgezogen, PD-012): `src/ha/device.ts` erkennt den Roboter (Konfiguration `robot:`, Entitäts-Register Plattform `dreame_vacuum`, sonst Zustände mit `segment_cleaning`/`cleaning_sequence`) und liefert Präfix + Anzeigename; `contract.ts` bildet die 49 Roboter-Merkmale und die Raum-Selects daraus (`ROBOT_FEATURES`, `robotEntity`, `robotIds`), Paket-IDs bleiben fest (`PACKAGE_PREFIX`). `memoizeSelector` nimmt ID-Listen und Vergleichstabellen als Funktionen (Gerätewechsel → neue Liste → Neuberechnung). Das Panel ruft `discoverDevice` in `willUpdate` vor jedem Render. Befund dabei: `friendly_name` von `vacuum.heidi` ist **„Heidi  Heidi“** (Gerätename + gleichnamige Entität, `has_entity_name`) → `cleanName` entfernt Wiederholungen; im echten HA kommt der Name aus dem Geräte-Register (`hass.devices`, vom Benutzer vergebener Name zuerst). Grenze: Automationen, Skripte und das Paket (`ha/`) verwenden die Roboter-IDs weiterhin wörtlich – bei einer ID-Umbenennung in HA müssten sie nachgezogen werden (eine Stelle je Datei, Abschnitt 4 des Bauplans und `docs/dreame_x60/ENTITAETEN.md` listen sie). Räume (`config.ts` ROOMS 7..1) und Optionen bleiben bis nach 6.5 fest (ClickUp „Post-2.0: So wenig wie möglich fest verdrahtet“). Tests: `device.test.ts` (Erkennung aus Zuständen/Register/Konfiguration, ohne Roboter, Umbenennung heidi→berta über alle Selektoren, Paket-IDs ohne Präfix), `device.js` (Kopf „Berta ist unterwegs“, Seitenleiste, Akku, Pause → `vacuum.berta`, `robot:` bei zwei Robotern, ohne Roboter ≥ 84 fehlend in der Diagnose). Alle Vektor-/Paritätstests unverändert grün (sie setzen das Gerät „heidi“).
+
+- [2026-09-15] [6.5] Befund · Info (Herberts Entscheidung: „schalte v1 ab, ich muss das nicht produktiv haben“): v1 vorzeitig abgeschaltet. Vom Pi entfernt: `www/heidi-panel.js`, die Sicherungen `heidi-panel-v1.1.0.bak`, `.bak.b64`, `heidi-panel-v1.2.1.bak`, `_deploy_yamls.txt.old`, `dashboards/heidi.yaml`, der Dashboard-Eintrag `heidi-yaml` in `configuration.yaml` (v2-Dashboard `dreame-x60` heißt jetzt „Heidi“, Symbol robot-vacuum) und die Lovelace-Ressource `/local/heidi-panel.js`. Im Repo: `ha/www/heidi-panel.js` und `ha/dashboards/heidi.yaml` → `heidi/archiv/` (Referenz für Vektoren und Nachschlagen, `v1-vectors.js` liest von dort); `deploy.ps1` kopiert nur noch v2. Bleibt auf dem Pi, weil v2 es nutzt: Paket, Automationen, Skripte, Prognose-Skripte, Theme, HACS-Karten dreame-vacuum-map-card und xiaomi-vacuum-map-card. Nur v1 brauchte: HACS Mushroom, card-mod, expander-card, stack-in-card → Herbert deinstalliert sie in HACS (HACS verwaltet Dateien und Ressourcen selbst). Regel 11 und 6.4 aufgehoben; Regel 2 (Parität) bleibt, Referenz ist das Archiv. Lücke bis 4.4/4.5: kein Planer-Editor in der Oberfläche.
 
 ## 10a. Paritätsabweichungen (Register)
 

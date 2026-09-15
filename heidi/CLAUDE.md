@@ -26,7 +26,11 @@
   heidi_main_brush_left/side_brush_left/filter_left/sensor_dirty_left/wheel_dirty_left,
   heidi_dust_bag_status, heidi_clean/dirty_water_tank_status, heidi_low_water_warning.
 
-## Eigene Karte `ha/www/heidi-panel.js` (custom:heidi-panel)
+## Eigene Karte v1 `heidi/archiv/heidi-panel.js` (custom:heidi-panel) – **abgeschaltet am 15.09.2026**
+
+v1 läuft nicht mehr in HA (Dashboard-Eintrag, Ressource und Datei auf dem Pi entfernt). Die Datei liegt im Archiv als
+Referenz für den Neubau v2 (`dreame_x60/`): Paritätsvektoren (`dreame_x60/card/tools/v1-vectors.js`) und Nachschlagen,
+was gebaut war. Nicht mehr deployen, nicht weiterentwickeln. Beschreibung unten = Stand v1.6.2.
 - Ein HTMLElement mit Shadow DOM, rendert alles aus `hass.states`, Aktionen über
   `hass.callService`. Kartenbild wird per `loadCardHelpers().createCardElement` eingebettet
   (Dreame-App / Xiaomi-Karte / Nur Bild – Auswahl in den Dashboard-Einstellungen).

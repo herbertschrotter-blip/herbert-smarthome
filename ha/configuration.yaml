@@ -21,17 +21,12 @@ scene: !include scenes.yaml
 lovelace:
   mode: storage
   dashboards:
-    heidi-yaml:
+    # Heidi-Karte v2 (Projekt dreame_x60, Bauplan docs/dreame_x60/BAUPLAN.md). v1 (heidi-yaml, heidi-panel.js) am 15.09.2026
+    # abgeschaltet – Referenz im Repo unter heidi/archiv/.
+    dreame-x60:
       mode: yaml
       title: Heidi
       icon: mdi:robot-vacuum
-      show_in_sidebar: true
-      filename: dashboards/heidi.yaml
-    # Neubau der Heidi-Karte (Projekt dreame_x60, Bauplan docs/dreame_x60/BAUPLAN.md); Parallelbetrieb zu heidi-yaml
-    dreame-x60:
-      mode: yaml
-      title: Heidi v2
-      icon: mdi:robot-vacuum-variant
       show_in_sidebar: true
       filename: dashboards/dreame_x60.yaml
 
