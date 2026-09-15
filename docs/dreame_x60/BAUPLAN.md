@@ -36,8 +36,8 @@ Claude Code im Web bereitet diese Aufgaben vor, führt sie aber nicht aus.
 | 0.4 | Backend: `rest_min`/`rest_quelle` als Attribute, Automation liest sie | fertig (44d5406; eingespielt, check_config valid, Attribute geprüft); Trace-Vergleich beim nächsten Automatik-Lauf offen |
 | 1.1 | Toolchain `dreame_x60/card/` | fertig (15.09.; build/check/lint grün) |
 | 1.2 | Leere Lit-Shell `dreame-x60-panel`, Build nach `ha/www/dreame_x60.js` | fertig (15.09.; render.js 27/27 grün) |
-| 1.3 | Dashboard `dreame_x60.yaml` mit sechs Views, `configuration.yaml`, `deploy.ps1` | offen |
-| 1.4 | **[PC]** Ressource anlegen, HA-Neustart, „Heidi v2“ sichtbar | offen |
+| 1.3 | Dashboard `dreame_x60.yaml` mit sechs Views, `configuration.yaml`, `deploy.ps1` | fertig (15.09.; YAML geprüft, check_config valid) |
+| 1.4 | **[PC]** Ressource anlegen, HA-Neustart, „Heidi v2“ sichtbar | fertig (15.09. 06:44: Ressource `/local/dreame_x60.js?v=2.0.0-alpha.1`, Dashboard `dreame-x60` in der Liste, Bundle wird ausgeliefert); Sichtprüfung im Browser durch Herbert offen |
 | 2.0 | `src/ha/contract.ts` + Vektor-Werkzeug `tools/v1-vectors.js` | offen |
 | 2.1 | `domain/raumwerte.ts` + Vektoren | offen |
 | 2.2 | `domain/estimate.ts` + Vektoren | offen |

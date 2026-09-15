@@ -1,0 +1,52 @@
+# dreame_x60 – Heidi-Karte v2 (Bauplan 1.3). Sechs Ansichten, jede zeigt dieselbe Karte mit einer anderen
+# Seite (page). start ist die normale Ansicht; die anderen sind Unteransichten mit Zurück-Pfeil nach start.
+# Die Karte navigiert selbst über das navigate-Ereignis von HA (URL /dreame-x60/<page>).
+title: Heidi v2
+views:
+  - title: Heidi
+    path: start
+    icon: mdi:robot-vacuum-variant
+    type: panel
+    cards:
+      - type: custom:dreame-x60-panel
+        page: start
+  - title: Karte
+    path: reinigen
+    subview: true
+    back_path: /dreame-x60/start
+    type: panel
+    cards:
+      - type: custom:dreame-x60-panel
+        page: reinigen
+  - title: Planer
+    path: planer
+    subview: true
+    back_path: /dreame-x60/start
+    type: panel
+    cards:
+      - type: custom:dreame-x60-panel
+        page: planer
+  - title: Verlauf
+    path: protokoll
+    subview: true
+    back_path: /dreame-x60/start
+    type: panel
+    cards:
+      - type: custom:dreame-x60-panel
+        page: protokoll
+  - title: Prognose
+    path: prognose
+    subview: true
+    back_path: /dreame-x60/start
+    type: panel
+    cards:
+      - type: custom:dreame-x60-panel
+        page: prognose
+  - title: Einstellungen
+    path: einstellungen
+    subview: true
+    back_path: /dreame-x60/start
+    type: panel
+    cards:
+      - type: custom:dreame-x60-panel
+        page: einstellungen

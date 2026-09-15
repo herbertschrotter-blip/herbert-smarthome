@@ -27,6 +27,13 @@ lovelace:
       icon: mdi:robot-vacuum
       show_in_sidebar: true
       filename: dashboards/heidi.yaml
+    # Neubau der Heidi-Karte (Projekt dreame_x60, Bauplan docs/dreame_x60/BAUPLAN.md); Parallelbetrieb zu heidi-yaml
+    dreame-x60:
+      mode: yaml
+      title: Heidi v2
+      icon: mdi:robot-vacuum-variant
+      show_in_sidebar: true
+      filename: dashboards/dreame_x60.yaml
 
 # Helfer (Schalter) für Heidi
 input_boolean:
