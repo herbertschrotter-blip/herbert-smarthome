@@ -78,7 +78,13 @@ const rect = (page, sel) => page.evaluate((s) => { const e = document.querySelec
   await open(page, { variant: 'confirm', text: 'Starten?' });
   const a = await rect(page, '.alert');
   H.check('390: Bestätigung unten (16 px Rand)', Math.abs(a.bottom - (a.innerH - 16)) < 2 && a.left === 16, a);
-  await H.screenshot(page, 'dialog-390.png');
+  // Screenshot über die Shell (dort erbt der Dialog die Farb-Tokens), nur der Viewport
+  await page.evaluate(() => { document.querySelectorAll('dx-dialog').forEach((d) => d.remove()); document.querySelector('dreame-x60-panel').openOverlay({ kind: 'confirm', text: '„Tägliches Saugen“ jetzt starten?', sub: 'Heidi fährt sofort los', onOk: () => {} }); });
+  await page.waitForTimeout(300);
+  await page.screenshot({ path: `${H.OUT}/dialog-390.png` });
+  await page.evaluate(() => { document.querySelector('dreame-x60-panel').openOverlay({ kind: 'editor', n: 2 }); });
+  await page.waitForTimeout(300);
+  await page.screenshot({ path: `${H.OUT}/dialog-390-sheet.png` });
   H.check('390: keine Fehler', errs.length === 0, errs);
   await page.close();
 }
