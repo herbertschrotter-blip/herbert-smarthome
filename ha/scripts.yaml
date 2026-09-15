@@ -97,6 +97,14 @@ heidi_reinigung:
   sequence:
     - condition: template
       value_template: "{{ ids | length > 0 }}"
+    # 0) Angepasste Reinigung sicherstellen (ein App-Start schaltet sie aus; ohne sie sind die Raum-Selects nicht verfügbar)
+    - if: "{{ is_state('switch.heidi_customized_cleaning', 'off') }}"
+      then:
+        - action: switch.turn_on
+          target: { entity_id: switch.heidi_customized_cleaning }
+        - wait_template: "{{ states('select.heidi_room_1_cleaning_mode') not in ['unavailable', 'unknown'] }}"
+          timeout: "00:00:15"
+          continue_on_timeout: true
     # 1) Roboter-Raumwerte sichern (nur wenn noch keine Sicherung vorliegt)
     - if: "{{ states('input_text.heidi_raum_snapshot') in ['', 'unknown', 'unavailable'] }}"
       then:

@@ -257,7 +257,7 @@ Uhr (10:15). Einrichten im Ordner `heidi/tests`: `npm i` und dann `npx playwrigh
   die Render-Ruhe. Version 2.0.0-alpha.7 eingespielt (mit Heidis Lauf 08:37 live geprüft).
 - **Wortwahl „Mopp“ (15.09., Herbert):** Backend-Phasentexte in `heidi.yaml` und die Bedingung in `automations.yaml` auf „Wäscht Mopp …“/„Trocknet Mopp“, `runlog.py` zählt beide Schreibweisen (alte Historie); v2-Texte „Mopp reinigen“, „Wäscht Mopp …“ (PD-008); v1 unverändert. Eingespielt ohne Neustart (template/automation reload).
 - **4.2 (15.09.):** `dx-dialog` (modal/sheet/confirm, Slots für Inhalt und Fuß, Zurück-Pfeil, Escape, Fokus + Tab-Falle, Sheet < 640 px Viewport); Shell nutzt ihn für Bestätigung und Platzhalter-Dialoge. Version 2.0.0-alpha.11 eingespielt.
-- **Backend 15.09. (Herbert):** „Angepasste Reinigung“ war aus (App-Start schaltet sie aus) → Raum-Werte in HA `unavailable`, Streifen/Werte leer. Herbert hat sie eingeschaltet; neue Automation `heidi_angepasste_reinigung_an` schaltet den Schalter nach dem Lauf (angedockt, 5 min aus) wieder ein. Eingespielt ohne Neustart.
+- **Backend 15.09. (Herbert):** „Angepasste Reinigung“ war aus (App-Start schaltet sie aus) → Raum-Werte in HA `unavailable`, Streifen/Werte leer. Herbert hat sie eingeschaltet; neue Automation `heidi_angepasste_reinigung_an` schaltet den Schalter nach dem Lauf (angedockt, 5 min aus) wieder ein; Skript `heidi_reinigung` schaltet ihn zusätzlich direkt vor dem Lauf ein (Schritt 0). Eingespielt ohne Neustart (automation/script reload).
 - **Nächstes:** 4.3 Karte (`dx-map-card` + `dx-quickstart`), dann 4.4 Planer. Offene Entscheidungen: Bauplan Abschnitt 10 und ClickUp.
 
 ## 4. Offene Punkte (Stand 14.09.2026, Claude-Code-Sitzung)
