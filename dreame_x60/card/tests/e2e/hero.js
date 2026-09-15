@@ -12,6 +12,7 @@ const { page, errs, states: docked } = await H.mount(b, { page: 'start', viewpor
 /** Zustände wie das v1-Werkzeug: Fixture + Overrides. */
 const statesFor = (v) => {
   const s = { ...docked };
+  delete s['camera.heidi_map']; // Parität: v1 kennt keinen Rückfall auf Kartendaten (PD-010 wird unten mit states-driving.json geprüft)
   for (const [id, o] of Object.entries(v.input.overrides ?? {})) {
     const cur = s[id] ?? { entity_id: id, state: 'unknown', attributes: {} };
     s[id] = { ...cur, state: o.state ?? cur.state, attributes: { ...cur.attributes, ...(o.attributes ?? {}) } };
@@ -91,11 +92,27 @@ const jetzt = v1.vektoren.find((v) => /Streifen · Jetzt/.test(v.name));
   H.checkEqual('Trocknen: „trocknet · lädt“', await page.evaluate(() => document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-hero').shadowRoot.querySelector('.station div:last-child').textContent.trim()), 'trocknet · lädt');
 }
 
+// ── Echter App-Lauf (states-driving.json, 15.09. 09:59, Küche+Flur, Saugen/Standard/1×): Modus-Select unavailable →
+//    Werte aus den Kartendaten (PD-010): drei Felder, Streifen, Auftrag ──
+{
+  await setStates(H.loadFixture('states-driving.json'));
+  const got = await readHero();
+  H.checkEqual('App-Lauf: Werte des aktuellen Raums aus den Kartendaten', got.params, ['Saugen', 'Standard', '–']);
+  H.checkEqual('App-Lauf: Streifen „Jetzt: Küche danach Flur“ mit Chips', norm(got.strip), 'Jetzt: Küche danach Flur SaugenStandard1×');
+  const a = await page.evaluate(() => {
+    const sr = document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-auftrag').shadowRoot;
+    const t = (sel) => { const e = sr.querySelector(sel); return e ? e.textContent.replace(/\s+/g, ' ').trim() : null; };
+    return [t('.route'), t('.meter .p'), t('.row.next .t'), t('.row.next .tag')];
+  });
+  H.checkEqual('App-Lauf: Auftrag Küche → Flur, 0 / 2, nächster Raum Flur (Saugen)', a, ['Küche → Flur', '0 / 2', 'Flur', 'Saugen']);
+}
+
 // ── Leerlauf: gemeinsame Werte („–“ bei unavailable), kein Streifen, kein Auftrag ──
 await setStates(docked);
 {
   const got = await readHero();
-  H.checkEqual('Leerlauf (Raum-Selects unavailable): drei Felder „–“', got.params, ['–', '–', '–']);
+  H.checkEqual('Leerlauf (Raum-Selects unavailable, Kartendaten vorhanden): gemeinsame Werte aller Räume', got.params, ['Saugen', 'Turbo', '–']);
+  { const ohne = { ...docked }; delete ohne['camera.heidi_map']; await setStates(ohne); H.checkEqual('Leerlauf ohne Selects und ohne Karte: drei Felder „–“', (await readHero()).params, ['–', '–', '–']); await setStates(docked); }
   H.check('Leerlauf: kein Streifen', got.strip === null, got.strip);
   H.check('Leerlauf: kein dx-auftrag', !(await page.evaluate(() => !!document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-auftrag'))));
   H.check('Leerlauf ohne Laden: kein Blitz am Akku', !(await page.evaluate(() => !!document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-hero').shadowRoot.querySelector('.batt .bolt'))));

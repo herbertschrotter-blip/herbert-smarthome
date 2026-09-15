@@ -21,6 +21,7 @@ const v1 = read<{ quelle: string; vektoren: V1Vector[] }>('status.v1.json');
 
 function statesFor(v: V1Vector): States {
   const s: States = { ...docked };
+  delete s['camera.heidi_map']; // Parität: v1 kennt keinen Rückfall auf Kartendaten (PD-010, eigener Test in selectors.test.ts/hero.js)
   for (const [id, o] of Object.entries(v.input.overrides ?? {})) {
     const cur = s[id] ?? { entity_id: id, state: 'unknown', attributes: {} };
     s[id] = { entity_id: id, state: o.state ?? cur.state, attributes: { ...cur.attributes, ...(o.attributes ?? {}) } };

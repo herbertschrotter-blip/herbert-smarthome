@@ -42,9 +42,13 @@ test('Roboter-Sicht aus der Fixture', () => {
 });
 
 test('Raumwerte: Fixture (unavailable) → null, gesetzte Werte → deutsch', () => {
-  assert.equal(readRoomValues(6)(docked), null);
+  // Selects unavailable, aber Kartendaten vorhanden → Werte aus der Karte (PD-010); ohne Karte → null
+  assert.deepEqual(readRoomValues(6)(docked), { modus: 'Saugen', saug: 'Turbo', wasser: 'Mittel', route: 'Standard', wdh: '1' });
   const all = readAllRoomValues(docked);
-  assert.equal(all.anyUnavailable, true);
+  assert.equal(all.anyUnavailable, false);
+  const ohneKarte = clone(docked); delete ohneKarte['camera.heidi_map'];
+  assert.equal(readRoomValues(6)(ohneKarte), null);
+  assert.equal(readAllRoomValues(ohneKarte).anyUnavailable, true);
   let s = withState(docked, 'select.heidi_room_6_cleaning_mode', 'sweeping_and_mopping');
   s = withState(s, 'select.heidi_room_6_suction_level', 'turbo'); s = withState(s, 'select.heidi_room_6_mop_pad_humidity', 'moist'); s = withState(s, 'select.heidi_room_6_cleaning_route', 'standard'); s = withState(s, 'select.heidi_room_6_cleaning_times', '2x');
   assert.deepEqual(readRoomValues(6)(s), { modus: 'Saugen + Wischen', saug: 'Turbo', wasser: 'Mittel', route: 'Standard', wdh: '2' });
@@ -122,4 +126,25 @@ test('Diagnose: Fixture ohne fehlende IDs; eine entfernte ID wird gemeldet', () 
   const d2 = readDiagnostics(s);
   assert.deepEqual(d2.missing, ['input_number.heidi_min_akku']);
   assert.ok(d2.groups[1]!.missing.includes('input_number.heidi_min_akku'), 'Paket-Gruppe');
+});
+
+test('Raumwerte im Lauf (PD-010): Modus-Select unavailable → Werte aus den Kartendaten; Kamera-Bild löst keinen Neuwert aus', () => {
+  resetAll(); const driving = JSON.parse(fs.readFileSync(path.join(FIX, 'states-driving.json'), 'utf8')) as States;
+  const all = readAllRoomValues(driving);
+  assert.equal(driving['select.heidi_room_6_cleaning_mode']?.state, 'unavailable', 'Fixture: Modus-Select im App-Lauf unavailable');
+  assert.deepEqual(all.rooms[6], { modus: 'Saugen', saug: 'Standard', wasser: 'Mittel', route: 'Standard', wdh: '1' }, 'Küche aus camera.heidi_map.rooms');
+  assert.deepEqual(all.vonKarte, [1, 2, 3, 4, 5, 6, 7], 'alle sieben aus der Karte');
+  assert.equal(all.anyUnavailable, false);
+  // Neues Kamerabild (state/last_updated/entity_picture ändern sich, rooms nicht) → gleiche Referenz
+  const cam = driving['camera.heidi_map']!;
+  const next: States = { ...driving, 'camera.heidi_map': { ...cam, state: '2026-09-15 10:05:00', last_updated: '2026-09-15T08:05:00+00:00', attributes: { ...cam.attributes, entity_picture: '/api/x?token=neu' } } };
+  assert.equal(readAllRoomValues(next), all, 'Kamerabild ohne rooms-Änderung → memoisiert');
+  // rooms geändert → neuer Wert
+  const rooms = { ...(cam.attributes.rooms as Record<string, Record<string, unknown>>) };
+  rooms['6'] = { ...rooms['6'], suction_level: 3 };
+  const changed: States = { ...driving, 'camera.heidi_map': { ...cam, attributes: { ...cam.attributes, rooms } } };
+  assert.equal(readAllRoomValues(changed).rooms[6]?.saug, 'Turbo');
+  // Ohne Karte und ohne Selects → null
+  const none: States = { ...driving }; delete none['camera.heidi_map'];
+  assert.equal(readAllRoomValues(none).rooms[6], null);
 });

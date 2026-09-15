@@ -36,6 +36,15 @@ for (const pg of PAGES) {
   H.check('im Lauf: keine Fehler', errs.length === 0, errs);
   await page.close();
 }
+// Dritte Fixture (mitten in der Fahrt, App-Start Küche+Flur, 15.09. 09:59): Auftrag-Kachel, Titel „unterwegs“
+{
+  for (const pg of PAGES) {
+    const { page, errs } = await H.mount(b, { page: pg, fixture: 'states-driving.json', viewport: { width: 1400, height: 1400 } });
+    H.check(`driving-Fixture ${pg}: keine Seiten-/Konsolenfehler`, errs.length === 0, errs);
+    if (pg === 'start') { H.checkEqual('driving-Fixture start: Fläche auftrag statt automatik', await slots(page), SLOTS_IDLE.map((s) => (s === 'automatik' ? 'auftrag' : s))); H.checkEqual('driving-Fixture: Titel „Heidi ist unterwegs“', await H.shadowText(page, '.topbar h1'), 'Heidi ist unterwegs'); }
+    await page.close();
+  }
+}
 // Zweite Fixture (im Lauf, 0.2): jede Seite ohne Konsolenfehler, Übersicht mit Auftrag-Kachel
 {
   for (const pg of PAGES) {

@@ -3,7 +3,7 @@
 // Nur contract.ts kennt IDs; hier werden sie nur benutzt. Sichten dürfen IDs für Bedienelemente mitführen.
 import { ENTITIES, PERSONS, PLAN_NUMBERS, ROOM_IDS, ROOM_SELECT_FIELDS, ROOM_VALUE_CODES, allContractIds, planEntity, roomEntity } from './contract';
 import type { PlanNumber, RoomId, PersonKey } from './contract';
-import { memoizeSelector, stateAndAttributes } from './memo-selector';
+import { memoizeSelector, sameValue, stateAndAttributes } from './memo-selector';
 import type { Selector } from './memo-selector';
 import type { HassEntity, States } from './types';
 import { heroModel } from '../domain/status';
@@ -139,10 +139,41 @@ export const readPlans: Selector<PlansView> = memoizeSelector([...PLAN_NUMBERS.f
 const { RV_HA, RV_ENT } = ROOM_VALUE_CODES;
 const roomIds = (id: RoomId): string[] => ROOM_SELECT_FIELDS.map((f) => roomEntity(id, f));
 
-/** Werte eines Raums vom Roboter (deutsch); null, wenn der Modus nicht verfügbar ist (wie v1 _roomVals). */
+/** Zahlencodes der Kartendaten (camera.heidi_map, Attribut rooms) → HA-Optionen der Selects (wie Automation heidi_laufprotokoll). */
+const MAP_CODES = {
+  modus: { 0: 'sweeping', 1: 'mopping', 2: 'sweeping_and_mopping', 3: 'mopping_after_sweeping' } as Record<number, string>,
+  saug: { 0: 'quiet', 1: 'standard', 2: 'strong', 3: 'turbo' } as Record<number, string>,
+  wasser: { 1: 'slightly_dry', 2: 'moist', 3: 'wet' } as Record<number, string>,
+  route: { 1: 'standard', 2: 'intensive', 3: 'deep' } as Record<number, string>,
+};
+/** Nur das Attribut `rooms` der Karte zählt (der Kamerazustand ändert sich mit jedem Bild). */
+const mapRoomsOnly = (a: HassEntity | undefined, b: HassEntity | undefined): boolean => sameValue(a?.attributes?.rooms, b?.attributes?.rooms);
+
+/**
+ * Rückfall (PD-010): Während eines Laufs sind Modus-Select und Schalter „angepasste Reinigung“ unavailable;
+ * die Kartendaten des Roboters führen dieselben Werte je Raum als Zahlencodes.
+ */
+function roomValuesFromMap(s: States, id: RoomId): RoomValues | null {
+  const rooms = attr<Record<string, Record<string, unknown>>>(s, E.map, 'rooms');
+  const r = rooms && typeof rooms === 'object' ? rooms[String(id)] : undefined;
+  if (!r || typeof r !== 'object') return null;
+  const code = (k: keyof typeof MAP_CODES, field: string): string | null => { const v = r[field]; return typeof v === 'number' ? (MAP_CODES[k][v] ?? null) : null; };
+  const m = code('modus', 'cleaning_mode'); if (m === null) return null;
+  const saugRaw = code('saug', 'suction_level'), wasserRaw = code('wasser', 'water_volume'), routeRaw = code('route', 'cleaning_route');
+  const times = r.cleaning_times;
+  return {
+    modus: ((RV_HA.modus as Record<string, string>)[m] ?? m) as RoomValues['modus'],
+    saug: ((saugRaw && (RV_HA.saug as Record<string, string>)[saugRaw]) || '–') as RoomValues['saug'],
+    wasser: wasserRaw ? (((RV_HA.wasser as Record<string, string>)[wasserRaw] ?? wasserRaw) as RoomValues['wasser']) : null,
+    route: routeRaw ? (((RV_HA.route as Record<string, string>)[routeRaw] ?? routeRaw) as RoomValues['route']) : null,
+    wdh: (typeof times === 'number' && times >= 1 && times <= 3 ? String(times) : '1') as RoomValues['wdh'],
+  };
+}
+
+/** Werte eines Raums vom Roboter (deutsch); zuerst die Selects (wie v1 _roomVals), sonst die Kartendaten (PD-010); null ohne beides. */
 export function roomValuesOf(s: States, id: RoomId): RoomValues | null {
   const g = (k: keyof typeof RV_ENT): string | null => { const v = st(s, roomEntity(id, RV_ENT[k])); return EMPTY.includes(v) ? null : v; };
-  const m = g('modus'); if (m === null) return null;
+  const m = g('modus'); if (m === null) return roomValuesFromMap(s, id);
   const saugRaw = g('saug'), wasserRaw = g('wasser'), routeRaw = g('route');
   return {
     modus: (RV_HA.modus as Record<string, string>)[m] as RoomValues['modus'] ?? (m as RoomValues['modus']),
@@ -152,14 +183,22 @@ export function roomValuesOf(s: States, id: RoomId): RoomValues | null {
     wdh: (g('wdh') ?? '1x').replace('x', '') as RoomValues['wdh'],
   };
 }
-const ROOM_SELECTORS = Object.fromEntries(ROOM_IDS.map((id) => [id, memoizeSelector(roomIds(id), (s) => roomValuesOf(s, id))])) as Record<RoomId, Selector<RoomValues | null>>;
+const ROOM_SELECTORS = Object.fromEntries(ROOM_IDS.map((id) => [id, memoizeSelector([...roomIds(id), E.map], (s) => roomValuesOf(s, id), { [E.map]: mapRoomsOnly })])) as Record<RoomId, Selector<RoomValues | null>>;
 export const readRoomValues = (id: RoomId): Selector<RoomValues | null> => ROOM_SELECTORS[id];
 
-export interface AllRoomValuesView { rooms: Record<RoomId, RoomValues | null>; customized: boolean; anyUnavailable: boolean }
-export const readAllRoomValues: Selector<AllRoomValuesView> = memoizeSelector([...ROOM_IDS.flatMap(roomIds), E.customizedCleaning], (s) => {
+export interface AllRoomValuesView {
+  rooms: Record<RoomId, RoomValues | null>;
+  customized: boolean;
+  /** Mindestens ein Raum ohne Werte (weder Selects noch Kartendaten) */
+  anyUnavailable: boolean;
+  /** Räume, deren Werte aus den Kartendaten kommen (Selects unavailable, PD-010) – dort ist Schreiben nicht möglich */
+  vonKarte: RoomId[];
+}
+export const readAllRoomValues: Selector<AllRoomValuesView> = memoizeSelector([...ROOM_IDS.flatMap(roomIds), E.customizedCleaning, E.map], (s) => {
   const rooms = Object.fromEntries(ROOM_IDS.map((id) => [id, ROOM_SELECTORS[id](s)])) as Record<RoomId, RoomValues | null>;
-  return { rooms, customized: on(s, E.customizedCleaning), anyUnavailable: ROOM_IDS.some((id) => rooms[id] === null) };
-});
+  const vonKarte = ROOM_IDS.filter((id) => rooms[id] !== null && EMPTY.includes(st(s, roomEntity(id, RV_ENT.modus))));
+  return { rooms, customized: on(s, E.customizedCleaning), anyUnavailable: ROOM_IDS.some((id) => rooms[id] === null), vonKarte };
+}, { [E.map]: mapRoomsOnly });
 
 // ───────── Lernwerte ─────────
 export const readLearn: Selector<Lernwerte | null> = memoizeSelector([E.lern], (s) => {

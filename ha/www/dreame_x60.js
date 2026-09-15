@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.11 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.12 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -1169,13 +1169,40 @@ var readPlans = memoizeSelector([...PLAN_NUMBERS.flatMap(planIds), E2.heutePlan,
 });
 var { RV_HA, RV_ENT } = ROOM_VALUE_CODES;
 var roomIds = (id) => ROOM_SELECT_FIELDS.map((f3) => roomEntity(id, f3));
+var MAP_CODES = {
+  modus: { 0: "sweeping", 1: "mopping", 2: "sweeping_and_mopping", 3: "mopping_after_sweeping" },
+  saug: { 0: "quiet", 1: "standard", 2: "strong", 3: "turbo" },
+  wasser: { 1: "slightly_dry", 2: "moist", 3: "wet" },
+  route: { 1: "standard", 2: "intensive", 3: "deep" }
+};
+var mapRoomsOnly = (a3, b3) => sameValue(a3?.attributes?.rooms, b3?.attributes?.rooms);
+function roomValuesFromMap(s4, id) {
+  const rooms = attr(s4, E2.map, "rooms");
+  const r4 = rooms && typeof rooms === "object" ? rooms[String(id)] : void 0;
+  if (!r4 || typeof r4 !== "object") return null;
+  const code = (k2, field) => {
+    const v2 = r4[field];
+    return typeof v2 === "number" ? MAP_CODES[k2][v2] ?? null : null;
+  };
+  const m2 = code("modus", "cleaning_mode");
+  if (m2 === null) return null;
+  const saugRaw = code("saug", "suction_level"), wasserRaw = code("wasser", "water_volume"), routeRaw = code("route", "cleaning_route");
+  const times = r4.cleaning_times;
+  return {
+    modus: RV_HA.modus[m2] ?? m2,
+    saug: saugRaw && RV_HA.saug[saugRaw] || "\u2013",
+    wasser: wasserRaw ? RV_HA.wasser[wasserRaw] ?? wasserRaw : null,
+    route: routeRaw ? RV_HA.route[routeRaw] ?? routeRaw : null,
+    wdh: typeof times === "number" && times >= 1 && times <= 3 ? String(times) : "1"
+  };
+}
 function roomValuesOf(s4, id) {
   const g2 = (k2) => {
     const v2 = st(s4, roomEntity(id, RV_ENT[k2]));
     return EMPTY2.includes(v2) ? null : v2;
   };
   const m2 = g2("modus");
-  if (m2 === null) return null;
+  if (m2 === null) return roomValuesFromMap(s4, id);
   const saugRaw = g2("saug"), wasserRaw = g2("wasser"), routeRaw = g2("route");
   return {
     modus: RV_HA.modus[m2] ?? m2,
@@ -1185,11 +1212,12 @@ function roomValuesOf(s4, id) {
     wdh: (g2("wdh") ?? "1x").replace("x", "")
   };
 }
-var ROOM_SELECTORS = Object.fromEntries(ROOM_IDS.map((id) => [id, memoizeSelector(roomIds(id), (s4) => roomValuesOf(s4, id))]));
-var readAllRoomValues = memoizeSelector([...ROOM_IDS.flatMap(roomIds), E2.customizedCleaning], (s4) => {
+var ROOM_SELECTORS = Object.fromEntries(ROOM_IDS.map((id) => [id, memoizeSelector([...roomIds(id), E2.map], (s4) => roomValuesOf(s4, id), { [E2.map]: mapRoomsOnly })]));
+var readAllRoomValues = memoizeSelector([...ROOM_IDS.flatMap(roomIds), E2.customizedCleaning, E2.map], (s4) => {
   const rooms = Object.fromEntries(ROOM_IDS.map((id) => [id, ROOM_SELECTORS[id](s4)]));
-  return { rooms, customized: on(s4, E2.customizedCleaning), anyUnavailable: ROOM_IDS.some((id) => rooms[id] === null) };
-});
+  const vonKarte = ROOM_IDS.filter((id) => rooms[id] !== null && EMPTY2.includes(st(s4, roomEntity(id, RV_ENT.modus))));
+  return { rooms, customized: on(s4, E2.customizedCleaning), anyUnavailable: ROOM_IDS.some((id) => rooms[id] === null), vonKarte };
+}, { [E2.map]: mapRoomsOnly });
 var readLearn = memoizeSelector([E2.lern], (s4) => {
   const e4 = ent(s4, E2.lern);
   return e4 && !EMPTY2.includes(e4.state) && e4.attributes?.raten ? e4.attributes : null;
@@ -1750,7 +1778,7 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.11";
+var VERSION = "2.0.0-alpha.12";
 
 // src/shared/robot-svg.ts
 var robotSvg = w`<svg viewBox="0 0 200 200" class="robotpic" aria-hidden="true">
