@@ -1,0 +1,195 @@
+{
+ "quelle": "ha/www/heidi-panel.js v1.6.2",
+ "erzeugt": "2026-09-15T05:13:46.956Z",
+ "vektoren": [
+  {
+   "name": "Plan 2 normal, Lernwerte der Fixture, Akku 100",
+   "input": {
+    "n": 2,
+    "variante": "normal",
+    "batt": 100
+   },
+   "output": {
+    "plan": {
+     "n": 2,
+     "name": "Saugen + Wischen",
+     "aktiv": true,
+     "raeume": [
+      7,
+      6,
+      5,
+      4,
+      3,
+      2,
+      1
+     ],
+     "modus": "Saugen + Wischen",
+     "saug": "Standard",
+     "wasser": "Mittel",
+     "route": "Standard",
+     "wdh": "1",
+     "tage": [
+      true,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false
+     ],
+     "zeit": "09:40",
+     "personen": [
+      "nicole"
+     ],
+     "ho": "Warten",
+     "hoSaug": "Leise",
+     "hoWdh": "1",
+     "schnell": true,
+     "spSaug": "Standard",
+     "spWdh": "1",
+     "raum": {
+      "1": {
+       "modus": "Saugen + Wischen",
+       "saug": "Standard",
+       "wasser": "Wenig",
+       "route": null,
+       "wdh": "1"
+      },
+      "2": {
+       "modus": "Saugen + Wischen",
+       "saug": "Standard",
+       "wasser": "Viel",
+       "route": null,
+       "wdh": "1"
+      },
+      "3": {
+       "modus": "Saugen + Wischen",
+       "saug": "Standard",
+       "wasser": "Mittel",
+       "route": null,
+       "wdh": "1"
+      }
+     },
+     "clock": null
+    },
+    "estimate": {
+     "steps": [
+      {
+       "typ": "wasch",
+       "text": "Wäscht Mopps vor dem Start",
+       "min": 0.6,
+       "batt": 100
+      },
+      {
+       "typ": "raum",
+       "id": 7,
+       "text": "Wohnz.",
+       "sub": "Saugen + Wischen · Standard · 1×",
+       "min": 12.312,
+       "batt": 90.002656,
+       "area": 8,
+       "gelernt": true
+      },
+      {
+       "typ": "raum",
+       "id": 6,
+       "text": "Küche",
+       "sub": "Saugen + Wischen · Standard · 1×",
+       "min": 12.312,
+       "batt": 80.005312,
+       "area": 8,
+       "gelernt": true
+      },
+      {
+       "typ": "raum",
+       "id": 5,
+       "text": "Büro",
+       "sub": "Saugen + Wischen · Standard · 1×",
+       "min": 12.312,
+       "batt": 70.007968,
+       "area": 8,
+       "gelernt": true
+      },
+      {
+       "typ": "raum",
+       "id": 4,
+       "text": "Flur",
+       "sub": "Saugen + Wischen · Standard · 1×",
+       "min": 6.156,
+       "batt": 65.009296,
+       "area": 4,
+       "gelernt": true
+      },
+      {
+       "typ": "wasch",
+       "text": "Wäscht Mopps zwischendurch",
+       "min": 3.5,
+       "batt": 65.009296
+      },
+      {
+       "typ": "raum",
+       "id": 3,
+       "text": "WC",
+       "sub": "Saugen + Wischen · Standard · 1× · Mittel",
+       "min": 12.312,
+       "batt": 55.01195200000001,
+       "area": 8,
+       "gelernt": true
+      },
+      {
+       "typ": "raum",
+       "id": 2,
+       "text": "Schlafz.",
+       "sub": "Saugen + Wischen · Standard · 1× · Viel",
+       "min": 16.929,
+       "batt": 41.26560400000001,
+       "area": 11,
+       "gelernt": true
+      },
+      {
+       "typ": "raum",
+       "id": 1,
+       "text": "Bad",
+       "sub": "Saugen + Wischen · Standard · 1× · Wenig",
+       "min": 16.929,
+       "batt": 27.519256000000013,
+       "area": 11,
+       "gelernt": true
+      },
+      {
+       "typ": "wasch",
+       "text": "Wäscht Mopps zwischendurch",
+       "min": 3.5,
+       "batt": 27.519256000000013
+      },
+      {
+       "typ": "heim",
+       "text": "Fährt zur Station",
+       "min": 3,
+       "batt": 27.519256000000013
+      }
+     ],
+     "total": 99.862,
+     "batt0": 100,
+     "battEnd": 27.519256000000013,
+     "charges": 0,
+     "unlearned": 0,
+     "used": 72.480744,
+     "order": [
+      7,
+      6,
+      5,
+      4,
+      3,
+      2,
+      1
+     ]
+    },
+    "restMin": {
+     "min": 587,
+     "quelle": "übliche Rückkehr 17:00"
+    }
+   }
+  }
+ ]
+}

@@ -1,0 +1,83 @@
+{
+ "quelle": "ha/www/heidi-panel.js v1.6.2",
+ "erzeugt": "2026-09-15T05:13:49.052Z",
+ "vektoren": [
+  {
+   "name": "angedockt (Fixture)",
+   "input": {
+    "overrides": {}
+   },
+   "output": {
+    "big": "Schläft",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "reinigt, Phase gesetzt",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "cleaning"
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "sensor.heidi_task_status": {
+      "state": "segment_cleaning"
+     }
+    }
+   },
+   "output": {
+    "big": "Reinigt",
+    "sub": "Wischt Küche",
+    "btns": [
+     "Pause",
+     "Stopp",
+     "Station"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  }
+ ]
+}

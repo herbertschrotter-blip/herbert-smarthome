@@ -1,0 +1,5 @@
+[
+  { "name": "zwei Räume mit Wasser und Route", "s": "1:B/T/V/-/2;6:W/L/M/I/1" },
+  { "name": "leer", "s": "" },
+  { "name": "Objekt kodieren", "obj": { "7": { "modus": "Saugen", "saug": "Turbo", "wasser": "Mittel", "route": "Tief", "wdh": "3" } } }
+]

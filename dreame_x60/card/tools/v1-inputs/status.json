@@ -1,0 +1,4 @@
+[
+  { "name": "angedockt (Fixture)", "overrides": {} },
+  { "name": "reinigt, Phase gesetzt", "overrides": { "vacuum.heidi": { "state": "cleaning" }, "sensor.heidi_phase": { "state": "Wischt Küche" }, "sensor.heidi_task_status": { "state": "segment_cleaning" } } }
+]

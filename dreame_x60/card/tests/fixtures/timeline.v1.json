@@ -1,0 +1,134 @@
+{
+ "quelle": "ha/www/heidi-panel.js v1.6.2",
+ "erzeugt": "2026-09-15T05:13:47.816Z",
+ "vektoren": [
+  {
+   "name": "laufender Auftrag wie test-timeline.js",
+   "input": {
+    "phaseNow": "Wischt Küche",
+    "phaseNowMin": 3,
+    "vacState": "cleaning",
+    "phase": [
+     [
+      90,
+      "Saugt Bad"
+     ],
+     [
+      62,
+      "Fährt zur Station"
+     ],
+     [
+      60,
+      "Saugt Staub ab"
+     ],
+     [
+      58,
+      "Trocknet Mopps"
+     ],
+     [
+      41,
+      "Wäscht Mopps vor dem Start"
+     ],
+     [
+      36,
+      "Saugt und wischt Wohnzimmer"
+     ],
+     [
+      30,
+      "Saugt und wischt Küche"
+     ],
+     [
+      29.66,
+      "Saugt und wischt Wohnzimmer"
+     ],
+     [
+      19,
+      "Fährt zum Mopp-Waschen"
+     ],
+     [
+      17,
+      "Wäscht Mopps zwischendurch"
+     ],
+     [
+      12,
+      "Saugt und wischt Wohnzimmer"
+     ],
+     [
+      3,
+      "Wischt Küche"
+     ]
+    ],
+    "vac": [
+     [
+      90,
+      "cleaning"
+     ],
+     [
+      62,
+      "returning"
+     ],
+     [
+      60,
+      "docked"
+     ],
+     [
+      41,
+      "cleaning"
+     ],
+     [
+      40.9,
+      "docked"
+     ],
+     [
+      40.8,
+      "idle"
+     ],
+     [
+      40.5,
+      "cleaning"
+     ]
+    ]
+   },
+   "output": {
+    "now": 1789449226958,
+    "rows": [
+     {
+      "t": 1789446766958,
+      "state": "Wäscht Mopps vor dem Start",
+      "dur": 5
+     },
+     {
+      "t": 1789447066958,
+      "state": "Saugt und wischt Wohnzimmer",
+      "dur": 17
+     },
+     {
+      "t": 1789448086958,
+      "state": "Fährt zum Mopp-Waschen",
+      "dur": 2
+     },
+     {
+      "t": 1789448206958,
+      "state": "Wäscht Mopps zwischendurch",
+      "dur": 5
+     },
+     {
+      "t": 1789448506958,
+      "state": "Saugt und wischt Wohnzimmer",
+      "dur": 9
+     },
+     {
+      "t": 1789449046958,
+      "state": "Wischt Küche",
+      "dur": 3.0007
+     }
+    ],
+    "end": null,
+    "error": null,
+    "api": [
+     "history/period/2026-09-14T21:13:47.000Z?filter_entity_id=sensor.heidi_phase,vacuum.heidi&end_time=2026-09-15T05%3A13%3A47.000Z&minimal_response&no_attributes"
+    ]
+   }
+  }
+ ]
+}

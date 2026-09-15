@@ -1,0 +1,58 @@
+{
+ "quelle": "ha/www/heidi-panel.js v1.6.2",
+ "erzeugt": "2026-09-15T05:13:46.550Z",
+ "vektoren": [
+  {
+   "name": "zwei Räume mit Wasser und Route",
+   "input": {
+    "s": "1:B/T/V/-/2;6:W/L/M/I/1"
+   },
+   "output": {
+    "parsed": {
+     "1": {
+      "modus": "Saugen + Wischen",
+      "saug": "Turbo",
+      "wasser": "Viel",
+      "route": null,
+      "wdh": "2"
+     },
+     "6": {
+      "modus": "Nur Wischen",
+      "saug": "Leise",
+      "wasser": "Mittel",
+      "route": "Intensiv",
+      "wdh": "1"
+     }
+    },
+    "encoded": "1:B/T/V/-/2;6:W/L/M/I/1"
+   }
+  },
+  {
+   "name": "leer",
+   "input": {
+    "s": ""
+   },
+   "output": {
+    "parsed": {},
+    "encoded": ""
+   }
+  },
+  {
+   "name": "Objekt kodieren",
+   "input": {
+    "obj": {
+     "7": {
+      "modus": "Saugen",
+      "saug": "Turbo",
+      "wasser": "Mittel",
+      "route": "Tief",
+      "wdh": "3"
+     }
+    }
+   },
+   "output": {
+    "encoded": "7:S/T/-/-/3"
+   }
+  }
+ ]
+}

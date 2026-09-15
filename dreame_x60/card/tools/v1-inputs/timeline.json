@@ -1,0 +1,5 @@
+[
+  { "name": "laufender Auftrag wie test-timeline.js", "phaseNow": "Wischt Küche", "phaseNowMin": 3, "vacState": "cleaning",
+    "phase": [[90, "Saugt Bad"], [62, "Fährt zur Station"], [60, "Saugt Staub ab"], [58, "Trocknet Mopps"], [41, "Wäscht Mopps vor dem Start"], [36, "Saugt und wischt Wohnzimmer"], [30, "Saugt und wischt Küche"], [29.66, "Saugt und wischt Wohnzimmer"], [19, "Fährt zum Mopp-Waschen"], [17, "Wäscht Mopps zwischendurch"], [12, "Saugt und wischt Wohnzimmer"], [3, "Wischt Küche"]],
+    "vac": [[90, "cleaning"], [62, "returning"], [60, "docked"], [41, "cleaning"], [40.9, "docked"], [40.8, "idle"], [40.5, "cleaning"]] }
+]

@@ -1,0 +1,5 @@
+[
+  { "name": "dayLabel Mo–Fr", "fn": "_dayLabel", "args": [[true, true, true, true, true, false, false]] },
+  { "name": "roomLabel zwei Räume", "fn": "_roomLabel", "args": [{ "__set": [7, 6] }] },
+  { "name": "fmtMin 96", "fn": "_fmtMin", "args": [96] }
+]
