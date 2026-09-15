@@ -12,6 +12,7 @@ export const ENTITIES = {
   // Roboter (Dreame-Integration)
   vac: 'vacuum.heidi',
   map: 'camera.heidi_map',
+  selectedMap: 'select.heidi_selected_map', // Kartenwahl (4.3), nur wenn verfügbar
   status: 'sensor.heidi_status',
   error: 'sensor.heidi_error',
   taskStatus: 'sensor.heidi_task_status',

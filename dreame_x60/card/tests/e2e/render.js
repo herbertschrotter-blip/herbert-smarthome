@@ -13,7 +13,8 @@ for (const pg of PAGES) {
   const data = await H.shadowText(page, '.page');
   H.check(`${pg}: Version in der Seitenleiste "dreame_x60 v${H.VERSION}"`, version === `dreame_x60 v${H.VERSION}`, version);
   H.check(`${pg}: Seite markiert`, await page.evaluate((p) => !!document.querySelector('dreame-x60-panel').shadowRoot.querySelector(`.page[data-page="${p}"]`), pg));
-  H.check(`${pg}: Zustandsdaten angebunden`, /\d+ Entitäten verbunden/.test(data || ''), data && data.slice(0, 120));
+  if (['start', 'reinigen'].includes(pg)) H.check(`${pg}: Karte (dx-map-card) vorhanden`, await page.evaluate(() => !!document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-map-card')));
+  else H.check(`${pg}: Zustandsdaten angebunden`, /\d+ Entitäten verbunden/.test(data || ''), data && data.slice(0, 120));
   H.check(`${pg}: Kopfzeile mit Titel`, !!(await H.shadowText(page, '.topbar h1')));
   H.check(`${pg}: keine Seiten-/Konsolenfehler`, errs.length === 0, errs);
   if (pg === 'start') {

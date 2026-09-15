@@ -258,7 +258,8 @@ Uhr (10:15). Einrichten im Ordner `heidi/tests`: `npm i` und dann `npx playwrigh
 - **Wortwahl „Mopp“ (15.09., Herbert):** Backend-Phasentexte in `heidi.yaml` und die Bedingung in `automations.yaml` auf „Wäscht Mopp …“/„Trocknet Mopp“, `runlog.py` zählt beide Schreibweisen (alte Historie); v2-Texte „Mopp reinigen“, „Wäscht Mopp …“ (PD-008); v1 unverändert. Eingespielt ohne Neustart (template/automation reload).
 - **4.2 (15.09.):** `dx-dialog` (modal/sheet/confirm, Slots für Inhalt und Fuß, Zurück-Pfeil, Escape, Fokus + Tab-Falle, Sheet < 640 px Viewport); Shell nutzt ihn für Bestätigung und Platzhalter-Dialoge. Version 2.0.0-alpha.11 eingespielt.
 - **Backend 15.09. (Herbert):** „Angepasste Reinigung“ war aus (App-Start schaltet sie aus) → Raum-Werte in HA `unavailable`, Streifen/Werte leer. Herbert hat sie eingeschaltet; neue Automation `heidi_angepasste_reinigung_an` schaltet den Schalter nach dem Lauf (angedockt, 5 min aus) wieder ein; Skript `heidi_reinigung` schaltet ihn zusätzlich direkt vor dem Lauf ein (Schritt 0). Eingespielt ohne Neustart (automation/script reload).
-- **Nächstes:** 4.3 Karte (`dx-map-card` + `dx-quickstart`), dann 4.4 Planer. Offene Entscheidungen: Bauplan Abschnitt 10 und ClickUp.
+- **4.3 (15.09.):** `dx-map-card` (`full` auf Reinigen: Kartenwahl, Xiaomi-Karte mit einem Modus je Element aus dem Modul-Cache, Hinfahren/Sperrzonen, Räume/Zone/Punkt, „Alles“, Raumkacheln; `compact` auf der Übersicht = Kamerabild mit Reitern und Bildunterschrift) und `dx-quickstart`; Seite Reinigen mit App-Szenen, „Stühle am Boden“, „Räume einstellen“. Karten-Konfigurationen in `src/ha/map-config.ts`, Umrisse aus `readMap().roomShapes`. Version 2.0.0-alpha.13. Sichtprüfung mit der echten Karte in HA offen.
+- **Nächstes:** 4.4 Planer (`dx-planer`), dann 4.5 Editor + Uhr. Offene Entscheidungen: Bauplan Abschnitt 10 und ClickUp.
 
 ## 4. Offene Punkte (Stand 14.09.2026, Claude-Code-Sitzung)
 Erledigt:

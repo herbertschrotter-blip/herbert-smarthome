@@ -348,12 +348,41 @@ export const readRobotSettings: Selector<RobotSettingsView> = memoizeSelector([E
 });
 
 // ───────── Karte (Attribute für dx-map-card / Sperrzonen) ─────────
-export interface MapView { entityPicture: string; calibrationPoints: unknown; noGoAreas: unknown; noMoppingAreas: unknown; virtualWalls: unknown; rooms: unknown; karte: string; chairs: boolean; roomOrder: typeof ROOMS }
-export const readMap: Selector<MapView> = memoizeSelector([E.map, E.karte, E.chairs], (s) => ({
-  entityPicture: String(attr(s, E.map, 'entity_picture') ?? ''), calibrationPoints: attr(s, E.map, 'calibration_points') ?? null,
-  noGoAreas: attr(s, E.map, 'no_go_areas') ?? null, noMoppingAreas: attr(s, E.map, 'no_mopping_areas') ?? null, virtualWalls: attr(s, E.map, 'virtual_walls') ?? null,
-  rooms: attr(s, E.map, 'rooms') ?? null, karte: st(s, E.karte), chairs: on(s, E.chairs), roomOrder: ROOMS,
-}), { [E.map]: stateAndAttributes(['entity_picture', 'calibration_points', 'no_go_areas', 'no_mopping_areas', 'virtual_walls', 'rooms']) });
+/** Raum mit Umriss aus den Kartendaten (Roboter-Koordinaten in mm) – für Marker und Umrisse der Xiaomi-Karte (4.3). */
+export interface RoomShape { id: RoomId; name: string; short: string; icon: string; x: number; y: number; outline: [number, number][] }
+export interface MapView {
+  entityPicture: string; calibrationPoints: unknown; noGoAreas: unknown; noMoppingAreas: unknown; virtualWalls: unknown; rooms: unknown;
+  karte: string; chairs: boolean; chairsId: string; roomOrder: typeof ROOMS;
+  /** Sichtbare Räume 1..7 mit Koordinaten aus `camera.heidi_map` (Reihenfolge wie `roomOrder`) */
+  roomShapes: RoomShape[];
+  /** Kartenwahl (`select.heidi_selected_map`), null wenn die Entität fehlt oder unavailable ist */
+  selectedMap: { id: string; value: string; options: string[] } | null;
+}
+const coord = (v: unknown): number | null => (typeof v === 'number' && isFinite(v) ? v : null);
+function roomShapes(s: States): RoomShape[] {
+  const rooms = attr<Record<string, Record<string, unknown>>>(s, E.map, 'rooms');
+  if (!rooms || typeof rooms !== 'object') return [];
+  const out: RoomShape[] = [];
+  for (const r of ROOMS) {
+    const m = rooms[String(r.id)];
+    if (!m || m.visibility === 'Hidden') continue;
+    const x0 = coord(m.x0), y0 = coord(m.y0), x1 = coord(m.x1), y1 = coord(m.y1);
+    if (x0 === null || y0 === null || x1 === null || y1 === null) continue;
+    const cx = coord(m.x) ?? (x0 + x1) / 2, cy = coord(m.y) ?? (y0 + y1) / 2;
+    out.push({ id: r.id, name: String(m.custom_name ?? m.name ?? r.name), short: r.short, icon: r.icon, x: cx, y: cy, outline: [[x0, y0], [x1, y0], [x1, y1], [x0, y1]] });
+  }
+  return out;
+}
+export const readMap: Selector<MapView> = memoizeSelector([E.map, E.karte, E.chairs, E.selectedMap], (s) => {
+  const sm = ent(s, E.selectedMap);
+  return {
+    entityPicture: String(attr(s, E.map, 'entity_picture') ?? ''), calibrationPoints: attr(s, E.map, 'calibration_points') ?? null,
+    noGoAreas: attr(s, E.map, 'no_go_areas') ?? null, noMoppingAreas: attr(s, E.map, 'no_mopping_areas') ?? null, virtualWalls: attr(s, E.map, 'virtual_walls') ?? null,
+    rooms: attr(s, E.map, 'rooms') ?? null, karte: st(s, E.karte), chairs: on(s, E.chairs), chairsId: E.chairs, roomOrder: ROOMS,
+    roomShapes: roomShapes(s),
+    selectedMap: sm && !EMPTY.includes(sm.state) ? { id: E.selectedMap, value: sm.state, options: opts(s, E.selectedMap) } : null,
+  };
+}, { [E.map]: stateAndAttributes(['entity_picture', 'calibration_points', 'no_go_areas', 'no_mopping_areas', 'virtual_walls', 'rooms']) });
 
 // ───────── Diagnose ─────────
 export interface DiagnosticsView { total: number; missing: string[]; unavailable: string[]; groups: { name: string; total: number; missing: string[]; unavailable: string[] }[] }

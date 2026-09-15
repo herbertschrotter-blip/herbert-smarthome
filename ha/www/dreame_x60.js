@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.12 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.13 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -557,6 +557,8 @@ var ENTITIES = {
   // Roboter (Dreame-Integration)
   vac: "vacuum.heidi",
   map: "camera.heidi_map",
+  selectedMap: "select.heidi_selected_map",
+  // Kartenwahl (4.3), nur wenn verfügbar
   status: "sensor.heidi_status",
   error: "sensor.heidi_error",
   taskStatus: "sensor.heidi_task_status",
@@ -986,6 +988,11 @@ var ERR_DE = {
   clean_water_tank_missing: "Frischwassertank fehlt",
   dirty_water_tank_missing: "Abwassertank fehlt"
 };
+var APP_SCENES = [
+  { id: 32, name: "Eingang reinigen", sub: "Flur \xB7 Saugen + Wischen \xB7 2\xD7", icon: "mdi:door-open" },
+  { id: 33, name: "Bad Saugen/Wischen", sub: "Bad \xB7 1\xD7", icon: "mdi:shower" },
+  { id: 34, name: "Wischen nach dem Saugen", sub: "Ganze Wohnung \xB7 nur Wischen", icon: "mdi:water" }
+];
 
 // src/domain/status.ts
 var TASK_DE = {
@@ -1040,6 +1047,13 @@ function heroModel(i5) {
 }
 
 // src/domain/labels.ts
+var LOCALE = "de-AT";
+function fmtDate(iso, now = /* @__PURE__ */ new Date()) {
+  const d3 = iso instanceof Date ? iso : new Date(iso);
+  if (isNaN(d3.getTime())) return "\u2013";
+  const same = d3.toDateString() === now.toDateString();
+  return (same ? "heute" : d3.toLocaleDateString(LOCALE, { day: "2-digit", month: "2-digit" })) + " " + d3.toLocaleTimeString(LOCALE, { hour: "2-digit", minute: "2-digit" });
+}
 function roomName(raw, deutsch) {
   if (!raw || ["unknown", "unavailable"].includes(raw)) return "\u2013";
   return deutsch ? ROOMS_DE[raw] ?? raw : raw;
@@ -1352,17 +1366,38 @@ var readRobotSettings = memoizeSelector([E2.carpetCleaning, E2.waterTemperature,
     dndEndId: E2.dndEnd
   };
 });
-var readMap = memoizeSelector([E2.map, E2.karte, E2.chairs], (s4) => ({
-  entityPicture: String(attr(s4, E2.map, "entity_picture") ?? ""),
-  calibrationPoints: attr(s4, E2.map, "calibration_points") ?? null,
-  noGoAreas: attr(s4, E2.map, "no_go_areas") ?? null,
-  noMoppingAreas: attr(s4, E2.map, "no_mopping_areas") ?? null,
-  virtualWalls: attr(s4, E2.map, "virtual_walls") ?? null,
-  rooms: attr(s4, E2.map, "rooms") ?? null,
-  karte: st(s4, E2.karte),
-  chairs: on(s4, E2.chairs),
-  roomOrder: ROOMS
-}), { [E2.map]: stateAndAttributes(["entity_picture", "calibration_points", "no_go_areas", "no_mopping_areas", "virtual_walls", "rooms"]) });
+var coord = (v2) => typeof v2 === "number" && isFinite(v2) ? v2 : null;
+function roomShapes(s4) {
+  const rooms = attr(s4, E2.map, "rooms");
+  if (!rooms || typeof rooms !== "object") return [];
+  const out = [];
+  for (const r4 of ROOMS) {
+    const m2 = rooms[String(r4.id)];
+    if (!m2 || m2.visibility === "Hidden") continue;
+    const x0 = coord(m2.x0), y0 = coord(m2.y0), x1 = coord(m2.x1), y1 = coord(m2.y1);
+    if (x0 === null || y0 === null || x1 === null || y1 === null) continue;
+    const cx = coord(m2.x) ?? (x0 + x1) / 2, cy = coord(m2.y) ?? (y0 + y1) / 2;
+    out.push({ id: r4.id, name: String(m2.custom_name ?? m2.name ?? r4.name), short: r4.short, icon: r4.icon, x: cx, y: cy, outline: [[x0, y0], [x1, y0], [x1, y1], [x0, y1]] });
+  }
+  return out;
+}
+var readMap = memoizeSelector([E2.map, E2.karte, E2.chairs, E2.selectedMap], (s4) => {
+  const sm = ent(s4, E2.selectedMap);
+  return {
+    entityPicture: String(attr(s4, E2.map, "entity_picture") ?? ""),
+    calibrationPoints: attr(s4, E2.map, "calibration_points") ?? null,
+    noGoAreas: attr(s4, E2.map, "no_go_areas") ?? null,
+    noMoppingAreas: attr(s4, E2.map, "no_mopping_areas") ?? null,
+    virtualWalls: attr(s4, E2.map, "virtual_walls") ?? null,
+    rooms: attr(s4, E2.map, "rooms") ?? null,
+    karte: st(s4, E2.karte),
+    chairs: on(s4, E2.chairs),
+    chairsId: E2.chairs,
+    roomOrder: ROOMS,
+    roomShapes: roomShapes(s4),
+    selectedMap: sm && !EMPTY2.includes(sm.state) ? { id: E2.selectedMap, value: sm.state, options: opts(s4, E2.selectedMap) } : null
+  };
+}, { [E2.map]: stateAndAttributes(["entity_picture", "calibration_points", "no_go_areas", "no_mopping_areas", "virtual_walls", "rooms"]) });
 var isRobotId = (id) => /^(vacuum|camera|switch|button|select\.heidi_(room_|carpet|water|drying|auto_empty|self_clean|cleangenius|map_rotation)|number|time)\./.test(id) || /^sensor\.heidi_(status|error|task_status|battery_level|current_room|cleaned_area|cleaning_time|cleaning_history|cleaning_count|total_|first_cleaning|main_brush|side_brush|filter_left|sensor_dirty|wheel_dirty|dust_bag|clean_water|dirty_water|detergent|low_water|auto_empty|self_wash)/.test(id);
 var readDiagnostics = memoizeSelector(allContractIds(), (s4) => {
   const ids = allContractIds();
@@ -1435,6 +1470,9 @@ var EVENTS = {
 };
 function emit(target, name, detail) {
   target.dispatchEvent(new CustomEvent(name, { detail, bubbles: true, composed: true }));
+}
+function askConfirm(target, text, onOk, opts2 = {}) {
+  emit(target, EVENTS.openOverlay, { kind: "confirm", text, onOk, ...opts2 });
 }
 function moreInfo(target, entityId) {
   emit(target, "hass-more-info", { entityId });
@@ -1778,7 +1816,7 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.12";
+var VERSION = "2.0.0-alpha.13";
 
 // src/shared/robot-svg.ts
 var robotSvg = w`<svg viewBox="0 0 200 200" class="robotpic" aria-hidden="true">
@@ -1986,6 +2024,23 @@ var controls = i`
   .row > div:first-child { flex: 1; min-width: 0; }
   .tag { font-size: 11px; font-weight: 600; letter-spacing: 0.04em; padding: 3px 8px; border-radius: 6px; background: var(--dx-surface-active); color: var(--dx-text-muted); white-space: nowrap; }
   .tag.acc { color: var(--dx-accent); background: var(--dx-accent-soft); }
+
+  /* Listenzeilen mit Symbol (Szenen, Planer), Schalter, kleine Symbolknöpfe */
+  .plan { display: grid; }
+  .pr { display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 12px; min-height: 60px; padding: 8px 0; border-top: 1px solid var(--dx-border); }
+  .pr:first-child { border-top: 0; }
+  .pr .ic { width: 36px; height: 36px; border-radius: var(--dx-radius-sm); background: var(--dx-surface-raised); display: inline-flex; align-items: center; justify-content: center; color: var(--dx-text-muted); border: 1px solid var(--dx-border); }
+  .pr .n { font-weight: 600; font-size: 14px; } .pr .s { font-size: 12px; color: var(--dx-text-muted); margin-top: 2px; }
+  .pr .acts { display: flex; gap: 6px; }
+  .crow { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; padding: 10px 12px; border-radius: var(--dx-radius-md); background: var(--dx-surface-raised); border: 1px solid var(--dx-border); }
+  .crow .ic { width: 38px; height: 38px; border-radius: var(--dx-radius-sm); background: var(--dx-surface-active); display: inline-flex; align-items: center; justify-content: center; color: var(--dx-text-muted); }
+  .crow .ic.on { color: var(--dx-positive); background: var(--dx-positive-soft); }
+  .crow .t { font-weight: 600; font-size: 14px; } .crow .s { font-size: 12px; color: var(--dx-text-muted); margin-top: 1px; }
+  .sw { width: 44px; height: 26px; border-radius: 999px; background: var(--dx-surface-active); border: 1px solid var(--dx-border-strong); position: relative; flex: none; transition: background var(--dx-dur), border-color var(--dx-dur); }
+  .sw::after { content: ''; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--dx-text-muted); transition: transform var(--dx-dur) var(--dx-ease), background var(--dx-dur); }
+  .sw.on { background: var(--dx-positive-soft); border-color: rgba(57, 217, 138, 0.5); } .sw.on::after { transform: translateX(18px); background: var(--dx-positive); }
+  .ib { width: 40px; height: 40px; border-radius: var(--dx-radius-sm); display: inline-flex; align-items: center; justify-content: center; color: var(--dx-text-muted); border: 1px solid var(--dx-border); background: var(--dx-surface-raised); }
+  .ib:hover { color: var(--dx-text); background: var(--dx-surface-active); } .ib.go { color: var(--dx-positive); }
 
   @media (hover: none) { .btn:hover, button.chip:hover, button.note:hover { background: var(--dx-surface-raised); } }
 `;
@@ -2294,6 +2349,351 @@ var DxDialog = class extends i4 {
 };
 if (!customElements.get(DIALOG_ELEMENT)) customElements.define(DIALOG_ELEMENT, DxDialog);
 
+// src/ha/map-config.ts
+var MAP_MODES = {
+  raeume: { label: "R\xE4ume", hint: "Auswahl per Kachel oder Tipp in die Raumfl\xE4che" },
+  zone: { label: "Zone", hint: "Rechteck auf der Karte aufziehen (bis zu 5), dann \u25B6 in der Karte" },
+  punkt: { label: "Punkt", hint: "Punkt auf der Karte antippen, dann \u25B6 in der Karte" },
+  goto: { label: "Hinfahren", hint: "Punkt auf der Karte antippen \u2192 Heidi f\xE4hrt hin und wartet" }
+};
+function modeEntry(mode, rooms) {
+  switch (mode) {
+    case "raeume":
+      return {
+        template: "vacuum_clean_segment",
+        name: "R\xE4ume",
+        icon: "mdi:floor-plan",
+        predefined_selections: rooms.map((r4) => ({ id: r4.id, outline: r4.outline, label: { text: r4.name, x: r4.x, y: r4.y, offset_y: 35 }, icon: { name: r4.icon, x: r4.x, y: r4.y } }))
+      };
+    case "zone":
+      return { template: "vacuum_clean_zone", name: "Zone", icon: "mdi:select-drag", max_selections: 5 };
+    case "punkt":
+      return { template: "vacuum_clean_point", name: "Punkt", icon: "mdi:map-marker-radius" };
+    case "goto":
+      return { template: "vacuum_goto", name: "Hinfahren", icon: "mdi:map-marker" };
+  }
+}
+var hasModes = (kind) => kind === "Xiaomi-Karte";
+function buildMapConfig(kind, dark, mode, rooms) {
+  if (kind === "Dreame-App") return { type: "custom:dreame-vacuum-map-card", entity: ENTITIES.vac, title: "Heidi", theme: dark ? "dark" : "light", language: "de", default_mode: "room" };
+  if (kind === "Xiaomi-Karte") {
+    return {
+      type: "custom:xiaomi-vacuum-map-card",
+      entity: ENTITIES.vac,
+      vacuum_platform: "Tasshack/dreame-vacuum",
+      language: "de",
+      map_source: { camera: ENTITIES.map },
+      calibration_source: { camera: true },
+      map_locked: true,
+      two_finger_pan: true,
+      title: "",
+      tiles: [],
+      icons: [],
+      map_modes: [modeEntry(mode, rooms)]
+    };
+  }
+  return pictureConfig();
+}
+function pictureConfig() {
+  return { type: "picture-entity", entity: ENTITIES.map, camera_image: ENTITIES.map, show_name: false, show_state: false };
+}
+
+// src/shared/caches.ts
+var mapElements = /* @__PURE__ */ new Map();
+
+// src/shared/rooms.ts
+function toggleRoom(sel, id) {
+  const next = new Set(sel);
+  if (next.has(id)) next.delete(id);
+  else next.add(id);
+  return next;
+}
+function toggleAll(sel, order) {
+  return sel.size === order.length ? /* @__PURE__ */ new Set() : new Set(order.map((r4) => r4.id));
+}
+function selectedRooms(sel, order) {
+  return order.filter((r4) => sel.has(r4.id));
+}
+function selectionLabel(sel, order) {
+  const n4 = sel.size;
+  if (n4 && n4 === order.length) return "Ganze Wohnung";
+  return `${n4} ${n4 === 1 ? "Raum" : "R\xE4ume"}`;
+}
+function confirmText(sel, order) {
+  return `Jetzt reinigen: ${selectedRooms(sel, order).map((r4) => r4.short).join(", ")}?`;
+}
+function segmentsOf(sel, order) {
+  return selectedRooms(sel, order).map((r4) => r4.id);
+}
+
+// src/components/dx-map-card.ts
+var MAP_ELEMENT = "dx-map-card";
+var DxMapCard = class extends i4 {
+  constructor() {
+    super();
+    this._pending = null;
+    this.variant = "full";
+    this.dark = true;
+    this._mode = "raeume";
+    this._sel = /* @__PURE__ */ new Set();
+    this._error = null;
+  }
+  static {
+    this.styles = [controls, i`
+    :host { display: flex; flex-direction: column; gap: var(--dx-space-3); min-width: 0; }
+    .tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--dx-border); overflow-x: auto; }
+    .tabs button { height: 40px; padding: 0 12px; color: var(--dx-text-muted); font-weight: 500; font-size: 13px; border-bottom: 2px solid transparent; margin-bottom: -1px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .tabs button.on { color: var(--dx-text); border-bottom-color: var(--dx-accent); }
+    .tabs button ha-icon { --mdc-icon-size: 16px; width: 16px; height: 16px; }
+    .seg2 { display: inline-flex; background: var(--dx-bg); border: 1px solid var(--dx-border); border-radius: var(--dx-radius-md); padding: 3px; gap: 2px; max-width: 100%; flex-wrap: wrap; }
+    .seg2 button { height: 34px; padding: 0 12px; border-radius: 7px; font-size: 13px; font-weight: 500; color: var(--dx-text-muted); white-space: nowrap; }
+    .seg2 button.on { background: var(--dx-surface-active); color: var(--dx-text); box-shadow: inset 0 0 0 1px rgba(88, 183, 246, 0.5); }
+    .hd .seg2 { margin-left: auto; }
+    .map { position: relative; background: var(--dx-bg); border: 1px solid var(--dx-border); border-radius: var(--dx-radius-md); overflow: hidden; flex: 1;
+      background-image: linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px); background-size: 24px 24px; }
+    .map.tap { cursor: pointer; }
+    .slot { min-height: 220px; display: block;
+      /* Heidi-Glas: die eingebettete Karte liest diese Variablen durch ihr Shadow DOM (dreame_x60/mockups/karte.html) */
+      --ha-card-background: transparent; --card-background-color: transparent; --ha-card-border-width: 0; --ha-card-border-radius: 0; --ha-card-box-shadow: none;
+      --primary-text-color: var(--dx-text); --secondary-text-color: var(--dx-text-muted); --primary-color: var(--dx-accent); --slider-color: var(--dx-accent);
+      --map-card-primary-color: var(--dx-accent); --map-card-primary-text-color: var(--dx-on-accent); --map-card-big-radius: 16px; --map-card-small-radius: 10px; --map-card-disabled-text-color: var(--dx-text-muted);
+      --map-card-room-label-color: var(--dx-text); --map-card-room-label-color-selected: var(--dx-on-accent); --map-card-room-label-font-size: 12px;
+      --map-card-room-icon-color: var(--dx-text); --map-card-room-icon-color-selected: var(--dx-on-accent);
+      --map-card-room-icon-background-color: rgba(12, 18, 30, 0.55); --map-card-room-icon-background-color-selected: var(--dx-accent); --map-card-room-icon-size: 18px; --map-card-room-icon-wrapper-size: 30px;
+      --map-card-room-outline-fill-color: transparent; --map-card-room-outline-fill-color-selected: color-mix(in srgb, var(--dx-accent) 35%, transparent); --map-card-room-outline-line-color: rgba(255, 255, 255, 0.28); --map-card-room-outline-line-color-selected: var(--dx-accent); --map-card-room-outline-line-width: 1;
+      --map-card-predefined-rectangle-fill-color: transparent; --map-card-predefined-rectangle-fill-color-selected: color-mix(in srgb, var(--dx-accent) 35%, transparent);
+      --map-card-predefined-rectangle-line-color: transparent; --map-card-predefined-rectangle-line-color-selected: var(--dx-accent);
+      --map-card-predefined-rectangle-label-color: var(--dx-text); --map-card-predefined-rectangle-label-color-selected: var(--dx-on-accent); --map-card-predefined-rectangle-label-font-size: 12px;
+      --map-card-predefined-rectangle-icon-color: var(--dx-text); --map-card-predefined-rectangle-icon-color-selected: var(--dx-on-accent);
+      --map-card-predefined-rectangle-icon-background-color: rgba(12, 18, 30, 0.55); --map-card-predefined-rectangle-icon-background-color-selected: var(--dx-accent); --map-card-predefined-rectangle-icon-size: 18px; --map-card-predefined-rectangle-icon-wrapper-size: 30px;
+      --map-card-manual-rectangle-fill-color: color-mix(in srgb, var(--dx-danger) 28%, transparent); --map-card-manual-rectangle-line-color: var(--dx-danger); --map-card-manual-rectangle-fill-color-selected: color-mix(in srgb, var(--dx-danger) 40%, transparent); --map-card-manual-rectangle-line-color-selected: var(--dx-danger);
+      --map-card-ripple-color: var(--dx-accent); --mdc-icon-size: 18px; }
+    .catch { position: absolute; inset: 0; }
+    .mtools { position: absolute; left: 10px; bottom: 10px; display: flex; gap: 6px; }
+    .mtools .btn { box-shadow: var(--dx-shadow-float); background: var(--dx-surface-raised); }
+    .mapcap { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--dx-text-muted); flex-wrap: wrap; }
+    .mapcap b { color: var(--dx-text); font-weight: 600; }
+    .mapcap .r { margin-left: auto; }
+    .mapmodes { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .mapmodes .hint { flex: 1; }
+    .rooms { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+    .rooms button { display: grid; justify-items: center; gap: 6px; padding: 12px 6px 10px; min-height: 72px; border-radius: var(--dx-radius-md); background: var(--dx-surface-raised); border: 1px solid var(--dx-border); font-size: 12px; font-weight: 500; color: var(--dx-text-muted); transition: background var(--dx-dur), border-color var(--dx-dur), color var(--dx-dur); }
+    .rooms button ha-icon { --mdc-icon-size: 20px; width: 20px; height: 20px; }
+    .rooms button:hover { background: var(--dx-surface-active); color: var(--dx-text); }
+    .rooms button.sel { border-color: var(--dx-accent); background: var(--dx-accent-soft); color: var(--dx-text); box-shadow: inset 0 0 0 1px rgba(88, 183, 246, 0.35); }
+    .rooms button.sel ha-icon { color: var(--dx-accent); }
+    .runbar { display: flex; gap: 8px; align-items: center; }
+    .runbar .btn.primary { flex: 1; }
+    .err { color: var(--dx-danger); font-size: 12px; }
+    @container content (max-width: 1099px) { .rooms { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  `];
+  }
+  static {
+    this.properties = {
+      hass: { attribute: false },
+      map: { attribute: false },
+      robot: { attribute: false },
+      history: { attribute: false },
+      api: { attribute: false },
+      variant: { type: String },
+      dark: { type: Boolean },
+      _mode: { state: true },
+      _sel: { state: true },
+      _error: { state: true }
+    };
+  }
+  get mode() {
+    return this._mode;
+  }
+  get selection() {
+    return this._sel;
+  }
+  /** Schlüssel des Modul-Caches: die Übersicht zeigt immer das Kamerabild, die Seite Reinigen je Darstellung und Modus. */
+  cacheKey() {
+    if (this.variant === "compact") return "compact";
+    const kind = this.map?.karte ?? "";
+    return hasModes(kind) ? `${kind}|${this._mode}` : `${kind}|${this.dark}`;
+  }
+  updated() {
+    void this.mountMap();
+  }
+  /** Karten-Element aus dem Cache in den Slot setzen (oder einmal erzeugen); `hass` bei jedem Tick durchreichen. */
+  async mountMap() {
+    const slot = this.renderRoot.querySelector(".slot");
+    if (!slot || !this.map) return;
+    const key = this.cacheKey();
+    let el = mapElements.get(key);
+    if (!el) {
+      if (this._pending === key) return;
+      this._pending = key;
+      try {
+        if (!window.loadCardHelpers) throw new Error("loadCardHelpers fehlt");
+        const helpers = await window.loadCardHelpers();
+        const cfg = this.variant === "compact" ? pictureConfig() : buildMapConfig(this.map.karte, this.dark, this._mode, this.map.roomShapes);
+        el = helpers.createCardElement(cfg);
+        mapElements.set(key, el);
+        this._error = null;
+      } catch (e4) {
+        this._error = `Karte konnte nicht geladen werden: ${String(e4?.message ?? e4)}`;
+        return;
+      } finally {
+        this._pending = null;
+      }
+      if (this.cacheKey() !== key) {
+        void this.mountMap();
+        return;
+      }
+    }
+    if (this.hass) el.hass = this.hass;
+    if (slot.firstChild !== el) slot.replaceChildren(el);
+  }
+  // ───────── Aktionen ─────────
+  setMode(mode) {
+    this._mode = mode;
+  }
+  openZones() {
+    emit(this, EVENTS.openOverlay, { kind: "zones", type: "zones" });
+  }
+  goReinigen() {
+    emit(this, EVENTS.navigate, { page: "reinigen" });
+  }
+  runRooms() {
+    const order = this.map?.roomOrder ?? [];
+    const segments = segmentsOf(this._sel, order);
+    if (!segments.length) return;
+    askConfirm(this, confirmText(this._sel, order), () => {
+      void this.api?.cleanSegments(segments).then(() => emit(this, EVENTS.toast, `Gestartet: ${selectionLabel(this._sel, order)}`), (e4) => emit(this, EVENTS.toast, `Start fehlgeschlagen: ${String(e4?.message ?? e4)}`));
+      this._sel = /* @__PURE__ */ new Set();
+    });
+  }
+  runAll() {
+    askConfirm(this, "Ganze Wohnung reinigen?", () => {
+      void this.api?.vacuum("start");
+      emit(this, EVENTS.toast, "Gestartet: ganze Wohnung");
+    });
+  }
+  // ───────── Rendern ─────────
+  /** Bildunterschrift (compact): im Lauf Raum, Fläche und Rest; sonst Station und letzter Lauf. */
+  caption() {
+    const r4 = this.robot;
+    if (r4 && (r4.vac === "cleaning" || r4.vac === "paused") && !r4.docked) {
+      const rest = runOrder(r4).rest.map((id) => roomById(id)?.short).filter(Boolean).join(", ");
+      return b2`<b>Live-Karte</b> · ${r4.room !== "\u2013" ? r4.room : "unterwegs"} · ${r4.cleanedArea} m²${rest ? b2` · noch ${rest}` : A}`;
+    }
+    const last = this.history?.entries[0];
+    return b2`<b>Karte</b> · Heidi in der Station${last ? b2` · letzter Lauf ${fmtDate(last.ts * 1e3)}` : A}`;
+  }
+  renderCompact() {
+    return b2`
+      <div class="tabs">
+        <button class="on"><ha-icon icon="mdi:map-outline"></ha-icon>Live-Karte</button>
+        <button data-nav="reinigen" @click=${this.goReinigen}><ha-icon icon="mdi:view-grid-outline"></ha-icon>Räume</button>
+        <button data-open="zones" @click=${this.openZones}><ha-icon icon="mdi:cancel"></ha-icon>Sperrzonen</button>
+        <button data-nav="protokoll" @click=${() => emit(this, EVENTS.navigate, { page: "protokoll" })}><ha-icon icon="mdi:history"></ha-icon>Reinigungsverlauf</button>
+      </div>
+      <div class="map tap" title="Zur Karte">
+        <div class="slot"></div>
+        <div class="catch" @click=${this.goReinigen}></div>
+        <div class="mtools"><button class="btn sm" @click=${this.goReinigen}><ha-icon icon="mdi:map-outline"></ha-icon>Karte öffnen</button></div>
+      </div>
+      ${this._error ? b2`<div class="err">${this._error}</div>` : A}
+      <div class="mapcap">${this.caption()}<span class="r">antippen für Räume, Zone, Punkt, Sperrzonen</span></div>`;
+  }
+  renderFull() {
+    const m2 = this.map;
+    const kind = m2?.karte ?? "";
+    const modes = hasModes(kind);
+    const order = m2?.roomOrder ?? [];
+    const sel = this._sel;
+    const sm = m2?.selectedMap ?? null;
+    return b2`
+      <div class="hd"><h2><ha-icon icon="mdi:map-outline"></ha-icon>Karte</h2>
+        ${sm ? b2`<span class="seg2 maps">${sm.options.map((o5) => b2`<button class=${o5 === sm.value ? "on" : ""} data-map=${o5} @click=${() => void this.api?.selectOption(sm.id, o5)}>${o5}</button>`)}</span>` : b2`<span class="r">${kind}</span>`}
+      </div>
+      <div class="map">
+        <div class="slot"></div>
+        ${modes ? b2`<div class="mtools">
+          <button class="btn sm ${this._mode === "goto" ? "on" : ""}" data-act="goto" @click=${() => this.setMode(this._mode === "goto" ? "raeume" : "goto")}><ha-icon icon="mdi:map-marker"></ha-icon>Hinfahren</button>
+          <button class="btn sm" data-open="zones" @click=${this.openZones}><ha-icon icon="mdi:cancel"></ha-icon>Sperrzonen</button>
+        </div>` : b2`<div class="mtools"><button class="btn sm" data-open="zones" @click=${this.openZones}><ha-icon icon="mdi:cancel"></ha-icon>Sperrzonen</button></div>`}
+      </div>
+      ${this._error ? b2`<div class="err">${this._error}</div>` : A}
+      <div class="mapmodes">
+        ${modes ? b2`<div class="seg2 modes">${["raeume", "zone", "punkt"].map((k2) => b2`<button data-mode=${k2} class=${this._mode === k2 ? "on" : ""} @click=${() => this.setMode(k2)}>${MAP_MODES[k2].label}</button>`)}</div>` : A}
+        <span class="hint">${modes ? MAP_MODES[this._mode].hint : "R\xE4ume antippen, dann \u201Ereinigen\u201C"}</span>
+        <button class="btn primary sm" data-act="all" @click=${this.runAll}><ha-icon icon="mdi:play"></ha-icon>Alles</button>
+      </div>
+      ${!modes || this._mode === "raeume" ? b2`
+        <div class="rooms">${order.map((r4) => b2`<button class=${sel.has(r4.id) ? "sel" : ""} data-room=${r4.id} @click=${() => {
+      this._sel = toggleRoom(sel, r4.id);
+    }}><ha-icon icon=${r4.icon}></ha-icon>${r4.short}</button>`)}</div>
+        ${sel.size ? b2`<div class="runbar"><button class="btn primary" data-act="run" @click=${this.runRooms}><ha-icon icon="mdi:play"></ha-icon>${selectionLabel(sel, order)} reinigen</button><button class="btn icon" aria-label="Auswahl aufheben" @click=${() => {
+      this._sel = /* @__PURE__ */ new Set();
+    }}><ha-icon icon="mdi:close"></ha-icon></button></div>` : A}
+      ` : A}`;
+  }
+  render() {
+    return this.variant === "compact" ? this.renderCompact() : this.renderFull();
+  }
+};
+if (!customElements.get(MAP_ELEMENT)) customElements.define(MAP_ELEMENT, DxMapCard);
+
+// src/components/dx-quickstart.ts
+var QUICKSTART_ELEMENT = "dx-quickstart";
+var DxQuickstart = class extends i4 {
+  static {
+    this.styles = [controls, i`
+    :host { display: flex; flex-direction: column; gap: var(--dx-space-3); min-width: 0; }
+    .qs { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 8px; }
+    .qs button { display: grid; justify-items: center; gap: 6px; padding: 12px 6px 10px; min-height: 72px; border-radius: var(--dx-radius-md); background: var(--dx-surface-raised); border: 1px solid var(--dx-border); font-size: 12px; font-weight: 500; color: var(--dx-text-muted); transition: background var(--dx-dur), border-color var(--dx-dur), color var(--dx-dur); }
+    .qs button ha-icon { --mdc-icon-size: 20px; width: 20px; height: 20px; }
+    .qs button:hover { background: var(--dx-surface-active); color: var(--dx-text); }
+    .qs button.sel { border-color: var(--dx-accent); background: var(--dx-accent-soft); color: var(--dx-text); box-shadow: inset 0 0 0 1px rgba(88, 183, 246, 0.35); }
+    .qs button.sel ha-icon { color: var(--dx-accent); }
+    .runbar { display: flex; gap: 8px; align-items: center; }
+    .runbar .btn.primary { flex: 1; }
+    @container content (max-width: 1099px) { .qs { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  `];
+  }
+  static {
+    this.properties = { roomOrder: { attribute: false }, api: { attribute: false }, _sel: { state: true } };
+  }
+  constructor() {
+    super();
+    this.roomOrder = [];
+    this._sel = /* @__PURE__ */ new Set();
+  }
+  get selection() {
+    return this._sel;
+  }
+  run() {
+    const segments = segmentsOf(this._sel, this.roomOrder);
+    if (!segments.length) return;
+    askConfirm(this, confirmText(this._sel, this.roomOrder), () => {
+      void this.api?.cleanSegments(segments).then(() => emit(this, EVENTS.toast, `Gestartet: ${selectionLabel(this._sel, this.roomOrder)}`), (e4) => emit(this, EVENTS.toast, `Start fehlgeschlagen: ${String(e4?.message ?? e4)}`));
+      this._sel = /* @__PURE__ */ new Set();
+    });
+  }
+  render() {
+    const sel = this._sel, order = this.roomOrder;
+    return b2`
+      <div class="hd"><h2><ha-icon icon="mdi:view-grid-outline"></ha-icon>Schnellstart – Räume auswählen</h2><span class="r">${sel.size ? `${sel.size} gew\xE4hlt` : "Mehrfachauswahl"}</span></div>
+      <div class="qs">
+        <button class=${sel.size && sel.size === order.length ? "sel" : ""} data-room="all" @click=${() => {
+      this._sel = toggleAll(sel, order);
+    }}><ha-icon icon="mdi:home-outline"></ha-icon>Alles</button>
+        ${order.map((r4) => b2`<button class=${sel.has(r4.id) ? "sel" : ""} data-room=${r4.id} @click=${() => {
+      this._sel = toggleRoom(sel, r4.id);
+    }}><ha-icon icon=${r4.icon}></ha-icon>${r4.short}</button>`)}
+      </div>
+      ${sel.size ? b2`<div class="runbar"><button class="btn primary" @click=${this.run}><ha-icon icon="mdi:play"></ha-icon>${selectionLabel(sel, order)} reinigen</button><button class="btn icon" aria-label="Auswahl aufheben" title="Auswahl aufheben" @click=${() => {
+      this._sel = /* @__PURE__ */ new Set();
+    }}><ha-icon icon="mdi:close"></ha-icon></button></div>` : b2`<div class="hint">Räume antippen, dann „reinigen“ – Heidi fährt mit den Roboter-Werten je Raum.</div>`}
+    `;
+  }
+};
+if (!customElements.get(QUICKSTART_ELEMENT)) customElements.define(QUICKSTART_ELEMENT, DxQuickstart);
+
 // src/dreame-x60-panel.ts
 var ELEMENT = "dreame-x60-panel";
 var TOAST_MS = 1900;
@@ -2320,7 +2720,7 @@ var DreameX60Panel = class extends i4 {
     this.addEventListener(EVENTS.navigate, (e4) => navigate(toPage(e4.detail?.page)));
   }
   static {
-    this.styles = [tokens, base, shell];
+    this.styles = [tokens, base, controls, shell];
   }
   static {
     this.properties = {
@@ -2404,7 +2804,7 @@ var DreameX60Panel = class extends i4 {
         <dx-nav .page=${page} .prognoseAktiv=${readPrognose(s4).aktiv} .version=${VERSION}></dx-nav>
         <main class="content page" data-page=${page}>
           ${this.renderTopbar(page, robot)}
-          ${page === "start" ? this.renderStart(s4, robot) : this.renderPage(page, s4)}
+          ${page === "start" ? this.renderStart(s4, robot) : page === "reinigen" ? this.renderReinigen(s4, robot) : this.renderPage(page, s4)}
         </main>
       </div></div>
       ${this.renderOverlay()}
@@ -2460,16 +2860,46 @@ var DreameX60Panel = class extends i4 {
         ${(lines[sl.slot] ?? []).map((l3) => b2`<div class="hint preview">${l3}</div>`)}
         <div class="hint">Platzhalter – entsteht in Aufgabe ${sl.task}.</div>
       </section>`;
-    const rest = START_SLOTS.filter((sl) => !["hero", "map", "automatik", "auftrag", "heute"].includes(sl.slot));
+    const rest = START_SLOTS.filter((sl) => !["hero", "map", "automatik", "auftrag", "heute", "quickstart"].includes(sl.slot));
+    const dark = readSettings(s4).dark;
     return b2`
       <div class="bento">
         <dx-hero class="b span3" data-slot="hero" .robot=${robot} .rooms=${rooms} .api=${this.api}></dx-hero>
-        ${box(startSlot("map"))}
+        <dx-map-card class="b span6" data-slot="map" variant="compact" .hass=${this.hass} .map=${map} .robot=${robot} .history=${hist} .api=${this.api} ?dark=${dark}></dx-map-card>
         <div class="span3 stack rightstack">
           ${(robot.vac === "cleaning" || robot.vac === "paused") && !robot.docked ? b2`<dx-auftrag class="b" data-slot="auftrag" .robot=${robot} .rooms=${rooms}></dx-auftrag>` : box(startSlot("automatik"))}
           ${box(startSlot("heute"))}
         </div>
-        ${rest.map(box)}
+        ${rest.map((sl) => sl.slot === "history" ? b2`<dx-quickstart class="b span7" data-slot="quickstart" .roomOrder=${map.roomOrder} .api=${this.api}></dx-quickstart>${box(sl)}` : box(sl))}
+      </div>`;
+  }
+  /** Seite Reinigen (4.3): Karte `full` links, rechts App-Szenen, Schalter „Stühle am Boden“ und Knopf „Räume (Roboter-Werte)“. */
+  renderReinigen(s4, robot) {
+    const map = readMap(s4);
+    const hist = readHistory(s4);
+    const dark = readSettings(s4).dark;
+    return b2`
+      <div class="bento">
+        <dx-map-card class="b span8" data-slot="map-full" variant="full" .hass=${this.hass} .map=${map} .robot=${robot} .history=${hist} .api=${this.api} ?dark=${dark}></dx-map-card>
+        <div class="span4 stack">
+          <section class="b" data-slot="scenes">
+            <div class="hd"><h2><ha-icon icon="mdi:flash-outline"></ha-icon>Dreame-App-Szenen</h2></div>
+            <div class="plan">${APP_SCENES.map((sc) => b2`<div class="pr"><div class="ic"><ha-icon icon=${sc.icon}></ha-icon></div><div><div class="n">${sc.name}</div><div class="s">${sc.sub}</div></div><span class="tag">App</span>
+              <div class="acts"><button class="ib go" data-scene=${sc.id} aria-label="Starten" title="Starten" @click=${() => askConfirm(this, `\u201E${sc.name}\u201C starten?`, () => {
+      void this.api.runScene(sc.id);
+      this.toast(`Gestartet: ${sc.name}`);
+    })}><ha-icon icon="mdi:play"></ha-icon></button></div></div>`)}</div>
+          </section>
+          <section class="b" data-slot="chairs">
+            <div class="crow"><div class="ic ${map.chairs ? "on" : ""}"><ha-icon icon="mdi:chair-rolling"></ha-icon></div><div><div class="t">Stühle am Boden</div><div class="s">Setzt eine Sperrzone um den Esstisch</div></div>
+              <button class="sw ${map.chairs ? "on" : ""}" role="switch" aria-checked=${map.chairs ? "true" : "false"} aria-label="Stühle am Boden" data-toggle="chairs" @click=${() => void this.api.toggle(map.chairsId)}></button></div>
+          </section>
+          <section class="b" data-slot="rooms">
+            <div class="hd"><h2><ha-icon icon="mdi:view-grid-outline"></ha-icon>Räume (Roboter-Werte)</h2></div>
+            <div class="hint">Modus, Saugstufe, Wasser, Route und Wiederholungen je Raum, wie in der Dreame-App. Änderungen gelten sofort.</div>
+            <button class="btn" data-open="rooms" style="align-self:flex-start" @click=${() => this.openOverlay({ kind: "rooms", mode: "robot" })}><ha-icon icon="mdi:view-grid-outline"></ha-icon>Räume einstellen …</button>
+          </section>
+        </div>
       </div>`;
   }
   /** Unterseiten: bis zur jeweiligen Karte in Phase 4 ein Platzhalter mit einer Vorschau der Sichten, damit die Verdrahtung sichtbar ist. */

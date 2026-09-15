@@ -42,7 +42,8 @@ export function loadFixture(name = 'states-docked.json') {
 const PAGE_HTML = `<!doctype html><html><head><meta charset="utf-8"><title>dx test</title></head><body style="margin:0;background:#06090c"><script>
   class HaIcon extends HTMLElement { connectedCallback(){ this.innerHTML='<span style="display:inline-block;width:1em;height:1em;border-radius:3px;background:currentColor;opacity:.6"></span>'; } }
   customElements.define('ha-icon', HaIcon);
-  window.loadCardHelpers = async () => ({ createCardElement: (cfg) => { const d=document.createElement('div'); d.className='map-stub'; d.style.cssText='height:300px;background:#1c2732;color:#9ab;display:grid;place-items:center'; d.textContent='[Karte: '+cfg.type+']'; return d; } });
+  window._cards = []; // jede erzeugte Karten-Konfiguration (4.3: Modi, Umrisse, Anzahl der Neuerzeugungen)
+  window.loadCardHelpers = async () => ({ createCardElement: (cfg) => { window._cards.push(cfg); const d=document.createElement('div'); d.className='map-stub'; d.cfg=cfg; d.style.cssText='height:300px;background:#1c2732;color:#9ab;display:grid;place-items:center'; d.textContent='[Karte: '+cfg.type+']'; return d; } });
 </script></body></html>`;
 
 /**

@@ -22,6 +22,11 @@ import './components/dx-nav';
 import './components/dx-hero';
 import './components/dx-auftrag';
 import './components/dx-dialog';
+import './components/dx-map-card';
+import './components/dx-quickstart';
+import { APP_SCENES } from './config';
+import { askConfirm } from './shared/overlay';
+import { controls } from './styles/controls';
 
 export const ELEMENT = 'dreame-x60-panel';
 export { PAGES };
@@ -33,7 +38,7 @@ const TOAST_MS = 1900;
 const GREETING = (h: number): string => (h < 11 ? 'Guten Morgen' : h < 18 ? 'Guten Tag' : 'Guten Abend');
 
 export class DreameX60Panel extends LitElement {
-  static override styles = [tokens, base, shell];
+  static override styles = [tokens, base, controls, shell];
 
   static override properties = {
     hass: { attribute: false },
@@ -133,7 +138,7 @@ export class DreameX60Panel extends LitElement {
         <dx-nav .page=${page} .prognoseAktiv=${readPrognose(s).aktiv} .version=${VERSION}></dx-nav>
         <main class="content page" data-page=${page}>
           ${this.renderTopbar(page, robot)}
-          ${page === 'start' ? this.renderStart(s, robot) : this.renderPage(page, s)}
+          ${page === 'start' ? this.renderStart(s, robot) : page === 'reinigen' ? this.renderReinigen(s, robot) : this.renderPage(page, s)}
         </main>
       </div></div>
       ${this.renderOverlay()}
@@ -188,16 +193,42 @@ export class DreameX60Panel extends LitElement {
         ${(lines[sl.slot] ?? []).map((l) => html`<div class="hint preview">${l}</div>`)}
         <div class="hint">Platzhalter – entsteht in Aufgabe ${sl.task}.</div>
       </section>`;
-    const rest = START_SLOTS.filter((sl) => !['hero', 'map', 'automatik', 'auftrag', 'heute'].includes(sl.slot));
+    const rest = START_SLOTS.filter((sl) => !['hero', 'map', 'automatik', 'auftrag', 'heute', 'quickstart'].includes(sl.slot));
+    const dark = readSettings(s).dark;
     return html`
       <div class="bento">
         <dx-hero class="b span3" data-slot="hero" .robot=${robot} .rooms=${rooms} .api=${this.api}></dx-hero>
-        ${box(startSlot('map'))}
+        <dx-map-card class="b span6" data-slot="map" variant="compact" .hass=${this.hass} .map=${map} .robot=${robot} .history=${hist} .api=${this.api} ?dark=${dark}></dx-map-card>
         <div class="span3 stack rightstack">
           ${(robot.vac === 'cleaning' || robot.vac === 'paused') && !robot.docked ? html`<dx-auftrag class="b" data-slot="auftrag" .robot=${robot} .rooms=${rooms}></dx-auftrag>` : box(startSlot('automatik'))}
           ${box(startSlot('heute'))}
         </div>
-        ${rest.map(box)}
+        ${rest.map((sl) => (sl.slot === 'history' ? html`<dx-quickstart class="b span7" data-slot="quickstart" .roomOrder=${map.roomOrder} .api=${this.api}></dx-quickstart>${box(sl)}` : box(sl)))}
+      </div>`;
+  }
+
+  /** Seite Reinigen (4.3): Karte `full` links, rechts App-Szenen, Schalter „Stühle am Boden“ und Knopf „Räume (Roboter-Werte)“. */
+  private renderReinigen(s: HomeAssistant['states'], robot: RobotView): TemplateResult {
+    const map = readMap(s); const hist = readHistory(s); const dark = readSettings(s).dark;
+    return html`
+      <div class="bento">
+        <dx-map-card class="b span8" data-slot="map-full" variant="full" .hass=${this.hass} .map=${map} .robot=${robot} .history=${hist} .api=${this.api} ?dark=${dark}></dx-map-card>
+        <div class="span4 stack">
+          <section class="b" data-slot="scenes">
+            <div class="hd"><h2><ha-icon icon="mdi:flash-outline"></ha-icon>Dreame-App-Szenen</h2></div>
+            <div class="plan">${APP_SCENES.map((sc) => html`<div class="pr"><div class="ic"><ha-icon icon=${sc.icon}></ha-icon></div><div><div class="n">${sc.name}</div><div class="s">${sc.sub}</div></div><span class="tag">App</span>
+              <div class="acts"><button class="ib go" data-scene=${sc.id} aria-label="Starten" title="Starten" @click=${() => askConfirm(this, `„${sc.name}“ starten?`, () => { void this.api.runScene(sc.id); this.toast(`Gestartet: ${sc.name}`); })}><ha-icon icon="mdi:play"></ha-icon></button></div></div>`)}</div>
+          </section>
+          <section class="b" data-slot="chairs">
+            <div class="crow"><div class="ic ${map.chairs ? 'on' : ''}"><ha-icon icon="mdi:chair-rolling"></ha-icon></div><div><div class="t">Stühle am Boden</div><div class="s">Setzt eine Sperrzone um den Esstisch</div></div>
+              <button class="sw ${map.chairs ? 'on' : ''}" role="switch" aria-checked=${map.chairs ? 'true' : 'false'} aria-label="Stühle am Boden" data-toggle="chairs" @click=${() => void this.api.toggle(map.chairsId)}></button></div>
+          </section>
+          <section class="b" data-slot="rooms">
+            <div class="hd"><h2><ha-icon icon="mdi:view-grid-outline"></ha-icon>Räume (Roboter-Werte)</h2></div>
+            <div class="hint">Modus, Saugstufe, Wasser, Route und Wiederholungen je Raum, wie in der Dreame-App. Änderungen gelten sofort.</div>
+            <button class="btn" data-open="rooms" style="align-self:flex-start" @click=${() => this.openOverlay({ kind: 'rooms', mode: 'robot' })}><ha-icon icon="mdi:view-grid-outline"></ha-icon>Räume einstellen …</button>
+          </section>
+        </div>
       </div>`;
   }
 
