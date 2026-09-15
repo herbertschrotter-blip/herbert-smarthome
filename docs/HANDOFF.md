@@ -239,8 +239,16 @@ Uhr (10:15). Einrichten im Ordner `heidi/tests`: `npm i` und dann `npx playwrigh
   (`sensor.heidi_task_status` in der Signatur + Raumreihenfolge des Eintrags mit Helfer `input_text.heidi_lauf_reihenfolge`,
   aus `main` übernommen). 0.4 `sensor.heidi_automatik_status` hat `rest_min`/`rest_quelle`, `heidi_planer` liest `rest_min`.
   Alles am 15.09. 06:24 eingespielt (HA-Neustart, Ressource `?v=1.6.2`). 0.2 (Fixtures per `dump-states.ps1`) offen.
-- **Nächstes:** 0.2 am PC, dann Phase 1 (Toolchain `dreame_x60/card/`, leere Lit-Shell `dreame-x60-panel`,
-  Dashboard `dreame_x60.yaml`, Ressource). Offene Entscheidungen stehen in Bauplan Abschnitt 10.
+- **Phase 1 (15.09.):** Toolchain `dreame_x60/card/` (Lit 3, TypeScript strict, esbuild, ESLint 9, Playwright), Shell
+  `dreame-x60-panel`, Dashboard `dreame_x60.yaml` (sechs Ansichten, URL `/dreame-x60/…`), Ressource `/local/dreame_x60.js?v=2.0.0-alpha.1`,
+  „Heidi v2“ in der Seitenleiste (Sichtprüfung durch Herbert offen). Namensregel: Bausteine/Ereignisse/Tokens `dx-*`, „Heidi“ nur als Titel.
+- **Phase 2 (15.09.):** `src/domain/` (raumwerte, estimate, timeline, calibration, status, labels, constants) mit Vergleichs-
+  vektoren aus v1 (`tools/v1-vectors.js` → `tests/fixtures/*.v1.json`) und handgeschriebenen Grenzfällen (`*.spec.json`).
+  2.7 (pytest gegen dieselben Vektoren) geschrieben, nicht ausgeführt: kein Python auf dem PC.
+- **Phase 3 (15.09.):** `src/ha/` (contract, memo-selector, selectors, api `DxApi`), Shell mit Overlay/Toast/Escape/`dx-navigate`,
+  E2E `render.js`/`nav.js`/`overlay.js`. 58 Unit-Tests, 3 E2E grün.
+- **Nächstes:** Phase 4 ab 4.0 (Bento-Übersicht und Navigation nach `dreame_x60/mockups/bento.html`; Karte 4.0 vorher
+  auf das Bento-Layout umschreiben). Offene Entscheidungen stehen in Bauplan Abschnitt 10 und in ClickUp.
 
 ## 4. Offene Punkte (Stand 14.09.2026, Claude-Code-Sitzung)
 Erledigt:
