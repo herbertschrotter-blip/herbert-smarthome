@@ -1,6 +1,21 @@
 // Nur Anzeige (Bauplan Abschnitt 5): Kurznamen, Icons, deutsche Texte. Keine Entitäts-IDs (die stehen in ha/contract.ts).
 // Werte 1:1 aus v1 (ROOMS, ROOMS_DE, STATUS_DE, ERR_DE, APP_SCENES, DAYS).
 import type { RoomId } from './ha/contract';
+import type { Page } from './pages';
+
+/** Navigationseintrag (Bauplan 4.0): `page` = Ziel, `overlay` = öffnet ein Overlay statt zu navigieren; `tab` = auch in der Tab-Leiste. */
+export interface NavEntry { key: string; label: string; icon: string; page?: Page; overlay?: 'rooms'; onlyWhen?: 'prognose'; tab: boolean }
+
+/** Reihenfolge wie im Mockup bento.html; Prognose nur bei aktiver Prognose; „Räume“ nur in Seiten-/Symbolleiste. */
+export const NAV: readonly NavEntry[] = [
+  { key: 'start', label: 'Übersicht', icon: 'mdi:home-outline', page: 'start', tab: true },
+  { key: 'reinigen', label: 'Karte', icon: 'mdi:map-outline', page: 'reinigen', tab: true },
+  { key: 'rooms', label: 'Räume', icon: 'mdi:view-grid-outline', overlay: 'rooms', tab: false },
+  { key: 'planer', label: 'Planer', icon: 'mdi:calendar-outline', page: 'planer', tab: true },
+  { key: 'protokoll', label: 'Verlauf', icon: 'mdi:format-list-bulleted', page: 'protokoll', tab: true },
+  { key: 'prognose', label: 'Prognose', icon: 'mdi:chart-line', page: 'prognose', onlyWhen: 'prognose', tab: true },
+  { key: 'einstellungen', label: 'Einstellungen', icon: 'mdi:cog-outline', page: 'einstellungen', tab: true },
+];
 
 export interface RoomInfo { id: RoomId; short: string; name: string; icon: string }
 

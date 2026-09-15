@@ -2,7 +2,7 @@
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 
-const browserGlobals = { window: 'readonly', document: 'readonly', customElements: 'readonly', HTMLElement: 'readonly', CustomEvent: 'readonly', history: 'readonly', location: 'readonly', console: 'readonly', setTimeout: 'readonly', clearTimeout: 'readonly', requestAnimationFrame: 'readonly' };
+const browserGlobals = { window: 'readonly', document: 'readonly', customElements: 'readonly', HTMLElement: 'readonly', CustomEvent: 'readonly', history: 'readonly', location: 'readonly', getComputedStyle: 'readonly', console: 'readonly', setTimeout: 'readonly', clearTimeout: 'readonly', requestAnimationFrame: 'readonly' };
 const nodeGlobals = { process: 'readonly', console: 'readonly', URL: 'readonly', setTimeout: 'readonly', clearTimeout: 'readonly', ...browserGlobals };
 
 export default tseslint.config(

@@ -1,13 +1,16 @@
-// dreame-x60-panel – Shell der Heidi-Karte v2 (Bauplan 3.3): erzeugt Sichten über memoisierte Selektoren, reicht
-// hass, Sichten und api an die Bausteine, rendert nach config.page, hält Overlay und Toast, hört auf dx-*-Ereignisse.
+// dreame-x60-panel – Shell der Heidi-Karte v2 (Bauplan 3.3 + 4.0): erzeugt Sichten über memoisierte Selektoren, reicht
+// hass, Sichten und api an die Bausteine, rendert Gerüst (dx-nav + Inhalt), Kopfzeile und die Seite nach config.page,
+// hält Overlay und Toast, hört auf dx-*-Ereignisse.
 // Kein shouldUpdate in der Shell (Regel 10) – Ruhe entsteht durch gleiche View-Referenzen in den Kindern.
 import { LitElement, html, nothing } from 'lit';
 import type { TemplateResult } from 'lit';
 import type { HomeAssistant, PanelConfig } from './ha/types';
 import { DxApi } from './ha/api';
 import { readAutomatik, readConsumables, readDiagnostics, readHistory, readLearn, readMap, readPlans, readPrognose, readRobot, readRobotSettings, readSettings, readStation } from './ha/selectors';
-import { PAGES, PAGE_PARTS, PAGE_TITLE, toPage } from './pages';
-import type { Page } from './pages';
+import type { RobotView } from './ha/selectors';
+import { PAGES, PAGE_PARTS, PAGE_TITLE, START_SLOTS, startSlot, toPage } from './pages';
+import type { Page, StartSlot } from './pages';
+import { ROOMS } from './config';
 import { EVENTS } from './shared/overlay';
 import type { Overlay } from './shared/overlay';
 import { navigate } from './shared/navigate';
@@ -15,6 +18,7 @@ import { tokens } from './styles/tokens';
 import { base } from './styles/base';
 import { shell } from './styles/shell';
 import { VERSION } from './version';
+import './components/dx-nav';
 
 export const ELEMENT = 'dreame-x60-panel';
 export { PAGES };
@@ -22,6 +26,8 @@ export type { Page };
 
 /** Anzeigedauer des Toasts in ms (wie v1). */
 const TOAST_MS = 1900;
+/** Tagesgruß der Übersicht: bis 11 Uhr Morgen, bis 18 Uhr Tag, danach Abend. */
+const GREETING = (h: number): string => (h < 11 ? 'Guten Morgen' : h < 18 ? 'Guten Tag' : 'Guten Abend');
 
 export class DreameX60Panel extends LitElement {
   static override styles = [tokens, base, shell];
@@ -31,16 +37,20 @@ export class DreameX60Panel extends LitElement {
     _config: { state: true },
     _overlay: { state: true },
     _toast: { state: true },
+    _now: { state: true },
   };
 
   declare hass?: HomeAssistant;
   declare private _config: PanelConfig;
   declare private _overlay: Overlay | null;
   declare private _toast: string | null;
+  /** Uhrzeit der Kopfzeile, im Minutentakt. */
+  declare private _now: number;
 
   /** Schreibzugriffe – eine Instanz je Shell, liest hass zur Laufzeit. */
   readonly api = new DxApi(() => this.hass);
   private _toastTimer: ReturnType<typeof setTimeout> | null = null;
+  private _clockTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly _onKey = (e: KeyboardEvent): void => { if (e.key === 'Escape' && this._overlay) this.closeOverlay(); };
 
   constructor() {
@@ -48,6 +58,7 @@ export class DreameX60Panel extends LitElement {
     this._config = { page: 'start' };
     this._overlay = null;
     this._toast = null;
+    this._now = Date.now();
     this.addEventListener(EVENTS.openOverlay, (e) => this.openOverlay((e as CustomEvent<Overlay>).detail));
     this.addEventListener(EVENTS.close, () => this.closeOverlay());
     this.addEventListener(EVENTS.back, () => this.backOverlay());
@@ -59,11 +70,19 @@ export class DreameX60Panel extends LitElement {
   override connectedCallback(): void {
     super.connectedCallback();
     window.addEventListener('keydown', this._onKey);
+    this.tickClock();
   }
 
   override disconnectedCallback(): void {
     window.removeEventListener('keydown', this._onKey);
+    if (this._clockTimer) { clearTimeout(this._clockTimer); this._clockTimer = null; }
     super.disconnectedCallback();
+  }
+
+  /** Nächster Tick zur vollen Minute (+50 ms), damit die Uhr nie eine Minute hinterherhinkt. */
+  private tickClock(): void {
+    this._now = Date.now();
+    this._clockTimer = setTimeout(() => this.tickClock(), 60_000 - (Date.now() % 60_000) + 50);
   }
 
   // ───────── HA-Schnittstelle der Karte ─────────
@@ -105,25 +124,81 @@ export class DreameX60Panel extends LitElement {
     const settings = readSettings(s);
     this.classList.toggle('light', !settings.dark);
     const page = this.page;
-    const t = PAGE_TITLE[page];
+    const robot = readRobot(s);
     return html`
-      <div class="page" data-page=${page}>
-        <div class="topbar">
-          <div><h1>${t.title}</h1><div class="sub">${t.sub}</div></div>
-          <span class="version">dreame_x60 v${VERSION}</span>
-        </div>
-        ${this.renderPage(page, s)}
-      </div>
+      <div class="root"><div class="app">
+        <dx-nav .page=${page} .prognoseAktiv=${readPrognose(s).aktiv} .version=${VERSION}></dx-nav>
+        <main class="content page" data-page=${page}>
+          ${this.renderTopbar(page, robot)}
+          ${page === 'start' ? this.renderStart(s, robot) : this.renderPage(page, s)}
+        </main>
+      </div></div>
       ${this.renderOverlay()}
       ${this._toast ? html`<div class="toast" role="status">${this._toast}</div>` : nothing}
     `;
   }
 
-  /** Seiteninhalt: bis Phase 4 Platzhalter mit einer Vorschau der Sichten, damit die Verdrahtung sichtbar ist. */
-  private renderPage(page: Page, s: HomeAssistant['states']): TemplateResult {
-    const robot = readRobot(s);
+  /** Kopfzeile: Übersicht mit Tagesgruß bzw. „Heidi ist unterwegs“, Unterseiten mit Zurück-Knopf; rechts Uhr, Zuhause, Nicht stören. */
+  private renderTopbar(page: Page, robot: RobotView): TemplateResult {
+    const now = new Date(this._now);
+    let title: string, sub: string;
+    if (page === 'start') {
+      const name = (this.hass?.user?.name ?? '').trim();
+      title = robot.running ? 'Heidi ist unterwegs' : `${GREETING(now.getHours())}${name ? ', ' + name : ''}!`;
+      sub = robot.hero.sub ? `${robot.hero.big} · ${robot.hero.sub}` : robot.hero.big;
+    } else {
+      ({ title, sub } = PAGE_TITLE[page]);
+    }
+    const home = robot.persons.filter((p) => p.known && p.home).map((p) => p.name);
+    return html`
+      <div class="topbar">
+        ${page !== 'start' ? html`<button class="back" @click=${() => navigate('start')}><ha-icon icon="mdi:chevron-left"></ha-icon>Übersicht</button>` : nothing}
+        <div><h1>${title}</h1><div class="sub">${sub}</div></div>
+        <div class="meta">
+          <div class="mi"><ha-icon icon="mdi:clock-outline"></ha-icon><div><b>${now.toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' })}</b><small>${now.toLocaleDateString('de-AT', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' })}</small></div></div>
+          <div class="mi"><ha-icon icon="mdi:home-outline"></ha-icon><div><b>${home.length ? 'Zu Hause' : 'Niemand zu Hause'}<span class="dot ${home.length ? 'on' : ''}"></span></b><small>${home.length ? home.join(' · ') + ' anwesend' : 'alle unterwegs'}</small></div></div>
+          <div class="mi"><ha-icon icon="mdi:weather-night"></ha-icon><div><b>${robot.hero.dnd}</b><small>Nicht stören</small></div></div>
+        </div>
+      </div>`;
+  }
+
+  /** Bento-Übersicht (Bauplan 4.0): zehn Flächen als Platzhalter mit einer Vorschau der Sichten, bis die Bausteine 4.1–4.10 sie füllen. */
+  private renderStart(s: HomeAssistant['states'], robot: RobotView): TemplateResult {
+    const entities = Object.keys(s).length;
+    const plans = readPlans(s); const prog = readPrognose(s); const hist = readHistory(s); const map = readMap(s);
+    const lines: Record<string, string[]> = {
+      hero: [entities ? `${entities} Entitäten verbunden` : 'keine Zustandsdaten', `Kopf: ${robot.hero.big}${robot.hero.sub ? ' · ' + robot.hero.sub : ''} · Akku ${robot.battery} %`],
+      map: [`Kartendarstellung: ${map.karte} · Kalibrierung: ${Array.isArray(map.calibrationPoints) ? map.calibrationPoints.length + ' Punkte' : 'fehlt'}`],
+      automatik: [`Automatik: ${readAutomatik(s).status || '–'}`],
+      auftrag: [`Auftrag: ${robot.hero.big} · Raum: ${robot.room || '–'} · ${robot.cleanedArea} m² · ${robot.cleaningTime} min`],
+      heute: [`Heutiger Eintrag: ${plans.heuteName || '–'}${plans.heuteZeit ? ' · ' + plans.heuteZeit : ''}`, prog.aktiv ? `Freies Fenster ${prog.freiesFenster} · Rückkehr ${prog.rueckkehr}` : 'Prognose aus'],
+      planer: plans.plans.slice(0, 3).map((x) => `${x.n} ${x.name || '–'} · ${x.aktiv ? 'aktiv' : 'inaktiv'} · ${x.zeit}`),
+      consumables: [readConsumables(s).map((c) => `${c.name} ${c.pct} %`).join(', ')],
+      station: [readStation(s).tiles.map((x) => `${x.label} ${x.value}`).join(', ')],
+      stats: [`${hist.count} Läufe · ${hist.totalArea} m² · ${hist.totalTime} min`],
+      quickstart: [`Räume: ${ROOMS.map((r) => r.short).join(', ')}`],
+      history: [`${hist.entries.length} Einträge${hist.stale ? ' · letzter Stand' : ''}`],
+    };
+    const box = (sl: StartSlot): TemplateResult => html`
+      <section class="b ${sl.span}" data-slot=${sl.slot}>
+        <div class="hd"><h2>${sl.title}</h2><span class="r">${sl.part}</span></div>
+        ${(lines[sl.slot] ?? []).map((l) => html`<div class="hint preview">${l}</div>`)}
+        <div class="hint">Platzhalter – entsteht in Aufgabe ${sl.task}.</div>
+      </section>`;
+    const right = [robot.running ? 'auftrag' : 'automatik', 'heute'];
+    const rest = START_SLOTS.filter((sl) => !['hero', 'map', 'automatik', 'auftrag', 'heute'].includes(sl.slot));
+    return html`
+      <div class="bento">
+        ${box(startSlot('hero'))}
+        ${box(startSlot('map'))}
+        <div class="span3 stack rightstack">${right.map((k) => box(startSlot(k)))}</div>
+        ${rest.map(box)}
+      </div>`;
+  }
+
+  /** Unterseiten: bis zur jeweiligen Karte in Phase 4 ein Platzhalter mit einer Vorschau der Sichten, damit die Verdrahtung sichtbar ist. */
+  private renderPage(page: Exclude<Page, 'start'>, s: HomeAssistant['states']): TemplateResult {
     const preview: string[] = [];
-    if (page === 'start') { preview.push(`Kopf: ${robot.hero.big}${robot.hero.sub ? ' · ' + robot.hero.sub : ''} · Akku ${robot.battery} %`); preview.push(`Automatik: ${readAutomatik(s).status || '–'}`); preview.push(`Verschleiß: ${readConsumables(s).map((c) => `${c.name} ${c.pct} %`).join(', ')}`); preview.push(`Station: ${readStation(s).tiles.map((x) => `${x.label} ${x.value}`).join(', ')}`); }
     if (page === 'reinigen') { const m = readMap(s); preview.push(`Kartendarstellung: ${m.karte} · Stühle am Boden: ${m.chairs ? 'an' : 'aus'} · Kalibrierung: ${Array.isArray(m.calibrationPoints) ? m.calibrationPoints.length + ' Punkte' : 'fehlt'}`); }
     if (page === 'planer') { const p = readPlans(s); preview.push(...p.plans.map((x) => `${x.n} ${x.name || '–'} · ${x.aktiv ? 'aktiv' : 'inaktiv'} · ${x.raeume.length} Räume · ${x.zeit}`)); preview.push(`Lernwerte: ${readLearn(s) ? 'vorhanden' : 'keine'}`); }
     if (page === 'protokoll') { const h = readHistory(s); preview.push(`${h.entries.length} Einträge · ${h.count} Läufe · ${h.totalArea} m² · ${h.totalTime} min${h.stale ? ' · letzter Stand' : ''}`); }
@@ -138,7 +213,7 @@ export class DreameX60Panel extends LitElement {
           <ul class="hint list">${PAGE_PARTS[page].map((p) => html`<li>${p}</li>`)}</ul>
           <div class="lbl">Sichten (Vorschau aus den Selektoren)</div>
           <ul class="hint list preview">${preview.map((p) => html`<li>${p}</li>`)}</ul>
-          <div class="hint">Leere Shell aus Aufgabe 3.3 – Optik nach Mockup <code>dreame_x60/mockups/bento.html</code>.</div>
+          <div class="hint">Platzhalter aus Aufgabe 3.3 – Optik nach Mockup <code>dreame_x60/mockups/bento.html</code>.</div>
         </section>
       </div>`;
   }

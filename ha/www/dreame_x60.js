@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.1 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.2 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -929,6 +929,15 @@ function memoizeSelector(ids, fn, compare = {}) {
 }
 
 // src/config.ts
+var NAV = [
+  { key: "start", label: "\xDCbersicht", icon: "mdi:home-outline", page: "start", tab: true },
+  { key: "reinigen", label: "Karte", icon: "mdi:map-outline", page: "reinigen", tab: true },
+  { key: "rooms", label: "R\xE4ume", icon: "mdi:view-grid-outline", overlay: "rooms", tab: false },
+  { key: "planer", label: "Planer", icon: "mdi:calendar-outline", page: "planer", tab: true },
+  { key: "protokoll", label: "Verlauf", icon: "mdi:format-list-bulleted", page: "protokoll", tab: true },
+  { key: "prognose", label: "Prognose", icon: "mdi:chart-line", page: "prognose", onlyWhen: "prognose", tab: true },
+  { key: "einstellungen", label: "Einstellungen", icon: "mdi:cog-outline", page: "einstellungen", tab: true }
+];
 var ROOMS = [
   { id: 7, short: "Wohnz.", name: "Wohnzimmer", icon: "mdi:sofa-outline" },
   { id: 6, short: "K\xFCche", name: "K\xFCche", icon: "mdi:chef-hat" },
@@ -1352,19 +1361,32 @@ var PAGES = ["start", "reinigen", "planer", "protokoll", "prognose", "einstellun
 var PAGE_TITLE = {
   start: { title: "Heidi", sub: "\xDCbersicht" },
   reinigen: { title: "Karte", sub: "R\xE4ume, Zone oder Punkt reinigen \xB7 Hinfahren \xB7 Sperrzonen" },
-  planer: { title: "Planer", sub: "Vier Eintr\xE4ge \xB7 Automatik" },
-  protokoll: { title: "Verlauf", sub: "Reinigungsprotokoll \xB7 Zeitleiste \xB7 Lernwerte" },
-  prognose: { title: "Prognose", sub: "Lernende Anwesenheit" },
+  planer: { title: "Planer", sub: "Vier Eintr\xE4ge \xB7 Automatik entscheidet voll, schnell oder warten" },
+  protokoll: { title: "Verlauf", sub: "Reinigungsprotokoll der App \xB7 Zeitleiste je Lauf \xB7 Lernwerte" },
+  prognose: { title: "Prognose", sub: "Lernende Anwesenheit \xB7 Grundlage f\xFCr Start, Schnellprogramm und R\xFCckkehr" },
   einstellungen: { title: "Einstellungen", sub: "Darstellung, Funktionen, Prognose, Roboter, Diagnose" }
 };
 var PAGE_PARTS = {
-  start: ["dx-hero (4.1)", "dx-map-card compact (4.3)", "dx-automatik (4.9)", "dx-consumables (4.9)", "dx-nav-tiles (4.0)", "dx-station (4.9)"],
   reinigen: ["dx-map-card full (4.3)", "App-Szenen", "St\xFChle am Boden", "R\xE4ume (Roboter-Werte) \u2192 dx-rooms-dialog (4.6)"],
   planer: ["dx-planer (4.4)", "dx-planer-editor + dx-clock-picker (4.5)", "Automatik-Regeln", "dx-estimate-dialog (4.8)"],
   protokoll: ["dx-history (4.7)", "Lernwerte-Tabelle"],
   prognose: ["dx-prognose-view (4.10)"],
   einstellungen: ["dx-settings-panel (4.11)", "dx-robot-settings (4.7)", "Diagnose", "Version"]
 };
+var START_SLOTS = [
+  { slot: "hero", title: "Heidi", span: "span3", part: "dx-hero", task: "4.1" },
+  { slot: "map", title: "Live-Karte", span: "span6", part: "dx-map-card compact", task: "4.3" },
+  { slot: "automatik", title: "Automatik", span: "", part: "dx-automatik", task: "4.9" },
+  { slot: "auftrag", title: "Aktueller Auftrag", span: "", part: "dx-auftrag", task: "4.1" },
+  { slot: "heute", title: "Heute", span: "", part: "dx-heute", task: "4.10" },
+  { slot: "planer", title: "Planer", span: "span3", part: "dx-planer compact", task: "4.4" },
+  { slot: "consumables", title: "Verschlei\xDF", span: "span3", part: "dx-consumables", task: "4.9" },
+  { slot: "station", title: "Station", span: "span3", part: "dx-station", task: "4.9" },
+  { slot: "stats", title: "Statistik", span: "span3", part: "dx-stats", task: "4.7" },
+  { slot: "quickstart", title: "Schnellstart \u2013 R\xE4ume ausw\xE4hlen", span: "span7", part: "dx-quickstart", task: "4.3" },
+  { slot: "history", title: "Letzte L\xE4ufe", span: "span5", part: "dx-history compact", task: "4.7" }
+];
+var startSlot = (slot) => START_SLOTS.find((s4) => s4.slot === slot);
 function toPage(value) {
   return PAGES.includes(String(value)) ? value : "start";
 }
@@ -1378,6 +1400,9 @@ var EVENTS = {
   toast: "dx-toast",
   navigate: "dx-navigate"
 };
+function emit(target, name, detail) {
+  target.dispatchEvent(new CustomEvent(name, { detail, bubbles: true, composed: true }));
+}
 
 // src/shared/navigate.ts
 var DASHBOARD_PATH = "/dreame-x60";
@@ -1476,6 +1501,11 @@ var base = i`
     min-height: 100%;
     box-sizing: border-box;
   }
+  /* Container „app“ = die Karte; Overlay und Toast liegen außerhalb (position: fixed bleibt am Viewport) */
+  .root {
+    container-type: inline-size;
+    container-name: app;
+  }
   *,
   *::before,
   *::after {
@@ -1507,9 +1537,23 @@ var base = i`
     outline: 2px solid var(--dx-accent);
     outline-offset: 2px;
   }
+  ha-icon {
+    --mdc-icon-size: 20px;
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    flex: none;
+  }
 
-  /* Seite */
-  .page {
+  /* Gerüst: Seitenleiste | Inhalt; schmal: Inhalt / Tab-Leiste */
+  .app {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    grid-template-areas: 'side content';
+    min-height: calc(100vh - var(--header-height, 56px));
+  }
+  .content {
+    grid-area: content;
     padding: var(--dx-space-5);
     display: grid;
     gap: var(--dx-space-4);
@@ -1518,6 +1562,8 @@ var base = i`
     container-name: content;
     min-width: 0;
   }
+
+  /* Kopfzeile */
   .topbar {
     display: flex;
     align-items: center;
@@ -1532,11 +1578,60 @@ var base = i`
     font-size: 14px;
     margin-top: 2px;
   }
-  .version {
+  .topbar .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 40px;
+    padding: 0 10px 0 6px;
+    border-radius: var(--dx-radius-md);
+    color: var(--dx-text-muted);
+    font-weight: 500;
+  }
+  .topbar .back:hover {
+    background: var(--dx-surface);
+    color: var(--dx-text);
+  }
+  .topbar .meta {
     margin-left: auto;
-    font-size: 11px;
-    color: var(--dx-text-faint);
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .meta .mi {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 12px;
+    border-left: 1px solid var(--dx-border);
+  }
+  .meta .mi:first-child {
+    border-left: 0;
+  }
+  .meta .mi ha-icon {
+    color: var(--dx-text-muted);
+  }
+  .meta .mi b {
+    display: block;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.1;
     font-variant-numeric: tabular-nums;
+  }
+  .meta .mi small {
+    color: var(--dx-text-muted);
+    font-size: 11px;
+  }
+  .meta .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--dx-text-faint);
+    display: inline-block;
+    margin-left: 6px;
+  }
+  .meta .dot.on {
+    background: var(--dx-positive);
   }
 
   /* Bento-Flächen */
@@ -1570,6 +1665,12 @@ var base = i`
     font-size: 12px;
     color: var(--dx-text-muted);
   }
+  .stack {
+    display: grid;
+    gap: var(--dx-space-4);
+    align-content: start;
+    min-width: 0;
+  }
   .lbl {
     font-size: 11px;
     letter-spacing: 0.08em;
@@ -1584,21 +1685,39 @@ var base = i`
   }
   .span3 { grid-column: span 3; }
   .span4 { grid-column: span 4; }
+  .span5 { grid-column: span 5; }
   .span6 { grid-column: span 6; }
+  .span7 { grid-column: span 7; }
   .span8 { grid-column: span 8; }
+  .span9 { grid-column: span 9; }
   .span12 { grid-column: span 12; }
 
-  @container content (max-width: 1099px) {
-    .bento { grid-template-columns: repeat(6, minmax(0, 1fr)); }
-    .span3, .span4 { grid-column: span 3; }
-    .span6, .span8 { grid-column: span 6; }
+  /* Navigationsform (Container app = die Karte) */
+  @container app (max-width: 1180px) {
+    .app { grid-template-columns: 72px minmax(0, 1fr); }
+    .content { padding: 20px; }
     .topbar h1 { font-size: 24px; }
   }
-  @container content (max-width: 640px) {
-    .page { padding: var(--dx-space-4); }
-    .bento { grid-template-columns: minmax(0, 1fr); gap: var(--dx-space-3); }
-    .span3, .span4, .span6, .span8, .span12 { grid-column: span 1; }
+  @container app (max-width: 760px) {
+    /* Inhalt wächst mit (1fr = minmax(auto, 1fr)), Tab-Leiste ganz unten und beim Scrollen am Viewport-Rand (sticky) */
+    .app { grid-template-columns: minmax(0, 1fr); grid-template-rows: 1fr auto; grid-template-areas: 'content' 'tab'; }
+    .content { padding: 16px 16px 24px; }
     .topbar h1 { font-size: 22px; }
+    .topbar .meta { display: none; }
+  }
+
+  /* Bento-Spalten (Container content = Inhaltsbereich) */
+  @container content (max-width: 1099px) {
+    .bento { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    .span3, .span4, .span5 { grid-column: span 3; }
+    .span6, .span7, .span8, .span9 { grid-column: span 6; }
+    /* Tablet: Roboter-Panel und rechte Spalte nebeneinander, Karte darunter in voller Breite */
+    [data-slot='hero'] { order: -2; }
+    .rightstack { order: -1; }
+  }
+  @container content (max-width: 640px) {
+    .bento { grid-template-columns: minmax(0, 1fr); gap: var(--dx-space-3); }
+    .span3, .span4, .span5, .span6, .span7, .span8, .span9, .span12 { grid-column: span 1; }
   }
 `;
 
@@ -1650,23 +1769,128 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.1";
+var VERSION = "2.0.0-alpha.2";
+
+// src/shared/robot-svg.ts
+var robotSvg = w`<svg viewBox="0 0 200 200" class="robotpic" aria-hidden="true">
+  <defs><radialGradient id="rg" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#2a3a48"/><stop offset=".7" stop-color="#131c25"/><stop offset="1" stop-color="#0c1219"/></radialGradient></defs>
+  <ellipse cx="100" cy="176" rx="72" ry="9" fill="rgba(0,0,0,.45)"/>
+  <circle cx="100" cy="100" r="84" fill="url(#rg)" stroke="#33465a" stroke-width="1.5"/>
+  <circle cx="100" cy="100" r="70" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="1"/>
+  <path d="M40 130a66 66 0 0 0 120 0" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="10"/>
+  <circle cx="100" cy="82" r="20" fill="#0d141b" stroke="#3a4f63" stroke-width="1.5"/><circle cx="100" cy="82" r="8" fill="#1a2733" stroke="#58b7f6" stroke-width="1.2"/>
+  <rect x="86" y="118" width="28" height="6" rx="3" fill="#1c2a36"/><circle cx="100" cy="150" r="3" fill="#39d98a"/>
+  <path d="M60 46a56 56 0 0 1 80 0" fill="none" stroke="rgba(88,183,246,.35)" stroke-width="2" stroke-linecap="round"/></svg>`;
+
+// src/components/dx-nav.ts
+var NAV_ELEMENT = "dx-nav";
+var TAB_MAX = 6;
+var DxNav = class extends i4 {
+  static {
+    // Keine eigenen Tokens: die --dx-*-Variablen kommen von der Shell (auch :host(.light)).
+    this.styles = [i`
+    :host { display: contents; font-family: var(--dx-font); font-size: 14px; color: var(--dx-text); }
+    button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    button:focus-visible { outline: 2px solid var(--dx-accent); outline-offset: 2px; }
+    ha-icon { --mdc-icon-size: 20px; width: 20px; height: 20px; display: inline-flex; flex: none; }
+
+    /* Seitenleiste: Fläche füllt die Spalte, der Inhalt klebt unter HAs Kopfzeile */
+    .side { grid-area: side; border-right: 1px solid var(--dx-border); background: var(--dx-bg-elevated); min-width: 0; }
+    .inner { position: sticky; top: var(--header-height, 56px); box-sizing: border-box; min-height: calc(100vh - var(--header-height, 56px));
+      display: flex; flex-direction: column; gap: var(--dx-space-5); padding: var(--dx-space-5) var(--dx-space-3); }
+    .brand { display: flex; align-items: center; gap: 12px; padding: 0 8px; }
+    .brand .logo { width: 36px; height: 36px; border-radius: 50%; border: 3px solid var(--dx-accent); border-right-color: transparent; transform: rotate(-30deg); flex: none; }
+    .brand .t { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+    .brand .s { font-size: 12px; color: var(--dx-text-muted); }
+    .navlist { display: grid; gap: 4px; }
+    .navlist button { display: flex; align-items: center; gap: 12px; height: var(--dx-touch); padding: 0 12px; border-radius: var(--dx-radius-md); border: 1px solid transparent;
+      color: var(--dx-text-muted); font-size: 14px; font-weight: 500; text-align: left; white-space: nowrap; transition: background var(--dx-dur) var(--dx-ease), color var(--dx-dur); }
+    .navlist button:hover { background: var(--dx-surface); color: var(--dx-text); }
+    .navlist button[aria-current] { background: var(--dx-surface-active); color: var(--dx-text); border-color: rgba(88, 183, 246, 0.35); box-shadow: inset 3px 0 0 var(--dx-accent); }
+    .foot { margin-top: auto; display: grid; justify-items: center; gap: 8px; color: var(--dx-text-muted); font-size: 12px; text-align: center; padding-bottom: 8px; }
+    .foot .robotpic { width: 120px; height: 120px; }
+    .foot .version { color: var(--dx-text-faint); font-size: 11px; font-variant-numeric: tabular-nums; }
+
+    /* Tab-Leiste: nur schmal */
+    .tabbar { display: none; }
+
+    @container app (max-width: 1180px) {
+      .inner { padding: 20px 10px; }
+      .brand { justify-content: center; padding: 0; }
+      .brand .t, .brand .s, .navlist button > span, .foot .robotpic, .foot .m, .foot .version { display: none; }
+      .navlist button { justify-content: center; padding: 0; width: 52px; margin: 0 auto; }
+      .navlist button[aria-current] { box-shadow: none; }
+    }
+    @container app (max-width: 760px) {
+      .side { display: none; }
+      .tabbar { grid-area: tab; display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); position: sticky; bottom: 0; z-index: 20;
+        background: color-mix(in srgb, var(--dx-bg-elevated) 92%, transparent); backdrop-filter: blur(10px); border-top: 1px solid var(--dx-border);
+        padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); }
+      .tabbar button { display: grid; justify-items: center; align-content: center; gap: 3px; height: 50px; border-radius: var(--dx-radius-sm); color: var(--dx-text-muted); font-size: 10px; font-weight: 500; }
+      .tabbar button[aria-current] { color: var(--dx-accent); background: var(--dx-accent-soft); }
+    }
+    @media (hover: none) { .navlist button:hover { background: transparent; } }
+  `];
+  }
+  static {
+    this.properties = {
+      page: { type: String },
+      prognoseAktiv: { type: Boolean, attribute: "prognose-aktiv" },
+      version: { type: String }
+    };
+  }
+  constructor() {
+    super();
+    this.page = "start";
+    this.prognoseAktiv = false;
+    this.version = "";
+  }
+  /** Sichtbare Einträge: Prognose nur bei aktiver Prognose. */
+  get entries() {
+    return NAV.filter((e4) => e4.onlyWhen !== "prognose" || this.prognoseAktiv);
+  }
+  pick(e4) {
+    if (e4.overlay === "rooms") emit(this, EVENTS.openOverlay, { kind: "rooms", mode: "robot" });
+    else if (e4.page) emit(this, EVENTS.navigate, { page: e4.page });
+  }
+  item(e4) {
+    const on2 = e4.page !== void 0 && e4.page === this.page;
+    return b2`<button data-nav=${e4.key} aria-current=${on2 ? "page" : A} title=${e4.label} aria-label=${e4.label} @click=${() => this.pick(e4)}>
+      <ha-icon icon=${e4.icon}></ha-icon><span>${e4.label}</span></button>`;
+  }
+  render() {
+    const es = this.entries;
+    return b2`
+      <nav class="side" aria-label="Seitenleiste">
+        <div class="inner">
+          <div class="brand"><span class="logo"></span><div><div class="t">Heidi</div><div class="s">Dein Saugroboter</div></div></div>
+          <div class="navlist">${es.map((e4) => this.item(e4))}</div>
+          <div class="foot">${robotSvg}<div class="m">Dreame X60 Ultra</div><div class="version">dreame_x60 v${this.version}</div></div>
+        </div>
+      </nav>
+      <nav class="tabbar" aria-label="Tab-Leiste">${es.filter((e4) => e4.tab).slice(0, TAB_MAX).map((e4) => this.item(e4))}</nav>`;
+  }
+};
+if (!customElements.get(NAV_ELEMENT)) customElements.define(NAV_ELEMENT, DxNav);
 
 // src/dreame-x60-panel.ts
 var ELEMENT = "dreame-x60-panel";
 var TOAST_MS = 1900;
+var GREETING = (h3) => h3 < 11 ? "Guten Morgen" : h3 < 18 ? "Guten Tag" : "Guten Abend";
 var DreameX60Panel = class extends i4 {
   constructor() {
     super();
     /** Schreibzugriffe – eine Instanz je Shell, liest hass zur Laufzeit. */
     this.api = new DxApi(() => this.hass);
     this._toastTimer = null;
+    this._clockTimer = null;
     this._onKey = (e4) => {
       if (e4.key === "Escape" && this._overlay) this.closeOverlay();
     };
     this._config = { page: "start" };
     this._overlay = null;
     this._toast = null;
+    this._now = Date.now();
     this.addEventListener(EVENTS.openOverlay, (e4) => this.openOverlay(e4.detail));
     this.addEventListener(EVENTS.close, () => this.closeOverlay());
     this.addEventListener(EVENTS.back, () => this.backOverlay());
@@ -1682,16 +1906,27 @@ var DreameX60Panel = class extends i4 {
       hass: { attribute: false },
       _config: { state: true },
       _overlay: { state: true },
-      _toast: { state: true }
+      _toast: { state: true },
+      _now: { state: true }
     };
   }
   connectedCallback() {
     super.connectedCallback();
     window.addEventListener("keydown", this._onKey);
+    this.tickClock();
   }
   disconnectedCallback() {
     window.removeEventListener("keydown", this._onKey);
+    if (this._clockTimer) {
+      clearTimeout(this._clockTimer);
+      this._clockTimer = null;
+    }
     super.disconnectedCallback();
+  }
+  /** Nächster Tick zur vollen Minute (+50 ms), damit die Uhr nie eine Minute hinterherhinkt. */
+  tickClock() {
+    this._now = Date.now();
+    this._clockTimer = setTimeout(() => this.tickClock(), 6e4 - Date.now() % 6e4 + 50);
   }
   // ───────── HA-Schnittstelle der Karte ─────────
   setConfig(config) {
@@ -1742,29 +1977,81 @@ var DreameX60Panel = class extends i4 {
     const settings = readSettings(s4);
     this.classList.toggle("light", !settings.dark);
     const page = this.page;
-    const t3 = PAGE_TITLE[page];
+    const robot = readRobot(s4);
     return b2`
-      <div class="page" data-page=${page}>
-        <div class="topbar">
-          <div><h1>${t3.title}</h1><div class="sub">${t3.sub}</div></div>
-          <span class="version">dreame_x60 v${VERSION}</span>
-        </div>
-        ${this.renderPage(page, s4)}
-      </div>
+      <div class="root"><div class="app">
+        <dx-nav .page=${page} .prognoseAktiv=${readPrognose(s4).aktiv} .version=${VERSION}></dx-nav>
+        <main class="content page" data-page=${page}>
+          ${this.renderTopbar(page, robot)}
+          ${page === "start" ? this.renderStart(s4, robot) : this.renderPage(page, s4)}
+        </main>
+      </div></div>
       ${this.renderOverlay()}
       ${this._toast ? b2`<div class="toast" role="status">${this._toast}</div>` : A}
     `;
   }
-  /** Seiteninhalt: bis Phase 4 Platzhalter mit einer Vorschau der Sichten, damit die Verdrahtung sichtbar ist. */
-  renderPage(page, s4) {
-    const robot = readRobot(s4);
-    const preview = [];
+  /** Kopfzeile: Übersicht mit Tagesgruß bzw. „Heidi ist unterwegs“, Unterseiten mit Zurück-Knopf; rechts Uhr, Zuhause, Nicht stören. */
+  renderTopbar(page, robot) {
+    const now = new Date(this._now);
+    let title, sub;
     if (page === "start") {
-      preview.push(`Kopf: ${robot.hero.big}${robot.hero.sub ? " \xB7 " + robot.hero.sub : ""} \xB7 Akku ${robot.battery} %`);
-      preview.push(`Automatik: ${readAutomatik(s4).status || "\u2013"}`);
-      preview.push(`Verschlei\xDF: ${readConsumables(s4).map((c4) => `${c4.name} ${c4.pct} %`).join(", ")}`);
-      preview.push(`Station: ${readStation(s4).tiles.map((x2) => `${x2.label} ${x2.value}`).join(", ")}`);
+      const name = (this.hass?.user?.name ?? "").trim();
+      title = robot.running ? "Heidi ist unterwegs" : `${GREETING(now.getHours())}${name ? ", " + name : ""}!`;
+      sub = robot.hero.sub ? `${robot.hero.big} \xB7 ${robot.hero.sub}` : robot.hero.big;
+    } else {
+      ({ title, sub } = PAGE_TITLE[page]);
     }
+    const home = robot.persons.filter((p3) => p3.known && p3.home).map((p3) => p3.name);
+    return b2`
+      <div class="topbar">
+        ${page !== "start" ? b2`<button class="back" @click=${() => navigate("start")}><ha-icon icon="mdi:chevron-left"></ha-icon>Übersicht</button>` : A}
+        <div><h1>${title}</h1><div class="sub">${sub}</div></div>
+        <div class="meta">
+          <div class="mi"><ha-icon icon="mdi:clock-outline"></ha-icon><div><b>${now.toLocaleTimeString("de-AT", { hour: "2-digit", minute: "2-digit" })}</b><small>${now.toLocaleDateString("de-AT", { weekday: "long", day: "numeric", month: "short", year: "numeric" })}</small></div></div>
+          <div class="mi"><ha-icon icon="mdi:home-outline"></ha-icon><div><b>${home.length ? "Zu Hause" : "Niemand zu Hause"}<span class="dot ${home.length ? "on" : ""}"></span></b><small>${home.length ? home.join(" \xB7 ") + " anwesend" : "alle unterwegs"}</small></div></div>
+          <div class="mi"><ha-icon icon="mdi:weather-night"></ha-icon><div><b>${robot.hero.dnd}</b><small>Nicht stören</small></div></div>
+        </div>
+      </div>`;
+  }
+  /** Bento-Übersicht (Bauplan 4.0): zehn Flächen als Platzhalter mit einer Vorschau der Sichten, bis die Bausteine 4.1–4.10 sie füllen. */
+  renderStart(s4, robot) {
+    const entities = Object.keys(s4).length;
+    const plans = readPlans(s4);
+    const prog = readPrognose(s4);
+    const hist = readHistory(s4);
+    const map = readMap(s4);
+    const lines = {
+      hero: [entities ? `${entities} Entit\xE4ten verbunden` : "keine Zustandsdaten", `Kopf: ${robot.hero.big}${robot.hero.sub ? " \xB7 " + robot.hero.sub : ""} \xB7 Akku ${robot.battery} %`],
+      map: [`Kartendarstellung: ${map.karte} \xB7 Kalibrierung: ${Array.isArray(map.calibrationPoints) ? map.calibrationPoints.length + " Punkte" : "fehlt"}`],
+      automatik: [`Automatik: ${readAutomatik(s4).status || "\u2013"}`],
+      auftrag: [`Auftrag: ${robot.hero.big} \xB7 Raum: ${robot.room || "\u2013"} \xB7 ${robot.cleanedArea} m\xB2 \xB7 ${robot.cleaningTime} min`],
+      heute: [`Heutiger Eintrag: ${plans.heuteName || "\u2013"}${plans.heuteZeit ? " \xB7 " + plans.heuteZeit : ""}`, prog.aktiv ? `Freies Fenster ${prog.freiesFenster} \xB7 R\xFCckkehr ${prog.rueckkehr}` : "Prognose aus"],
+      planer: plans.plans.slice(0, 3).map((x2) => `${x2.n} ${x2.name || "\u2013"} \xB7 ${x2.aktiv ? "aktiv" : "inaktiv"} \xB7 ${x2.zeit}`),
+      consumables: [readConsumables(s4).map((c4) => `${c4.name} ${c4.pct} %`).join(", ")],
+      station: [readStation(s4).tiles.map((x2) => `${x2.label} ${x2.value}`).join(", ")],
+      stats: [`${hist.count} L\xE4ufe \xB7 ${hist.totalArea} m\xB2 \xB7 ${hist.totalTime} min`],
+      quickstart: [`R\xE4ume: ${ROOMS.map((r4) => r4.short).join(", ")}`],
+      history: [`${hist.entries.length} Eintr\xE4ge${hist.stale ? " \xB7 letzter Stand" : ""}`]
+    };
+    const box = (sl) => b2`
+      <section class="b ${sl.span}" data-slot=${sl.slot}>
+        <div class="hd"><h2>${sl.title}</h2><span class="r">${sl.part}</span></div>
+        ${(lines[sl.slot] ?? []).map((l3) => b2`<div class="hint preview">${l3}</div>`)}
+        <div class="hint">Platzhalter – entsteht in Aufgabe ${sl.task}.</div>
+      </section>`;
+    const right = [robot.running ? "auftrag" : "automatik", "heute"];
+    const rest = START_SLOTS.filter((sl) => !["hero", "map", "automatik", "auftrag", "heute"].includes(sl.slot));
+    return b2`
+      <div class="bento">
+        ${box(startSlot("hero"))}
+        ${box(startSlot("map"))}
+        <div class="span3 stack rightstack">${right.map((k2) => box(startSlot(k2)))}</div>
+        ${rest.map(box)}
+      </div>`;
+  }
+  /** Unterseiten: bis zur jeweiligen Karte in Phase 4 ein Platzhalter mit einer Vorschau der Sichten, damit die Verdrahtung sichtbar ist. */
+  renderPage(page, s4) {
+    const preview = [];
     if (page === "reinigen") {
       const m2 = readMap(s4);
       preview.push(`Kartendarstellung: ${m2.karte} \xB7 St\xFChle am Boden: ${m2.chairs ? "an" : "aus"} \xB7 Kalibrierung: ${Array.isArray(m2.calibrationPoints) ? m2.calibrationPoints.length + " Punkte" : "fehlt"}`);
@@ -1797,7 +2084,7 @@ var DreameX60Panel = class extends i4 {
           <ul class="hint list">${PAGE_PARTS[page].map((p3) => b2`<li>${p3}</li>`)}</ul>
           <div class="lbl">Sichten (Vorschau aus den Selektoren)</div>
           <ul class="hint list preview">${preview.map((p3) => b2`<li>${p3}</li>`)}</ul>
-          <div class="hint">Leere Shell aus Aufgabe 3.3 – Optik nach Mockup <code>dreame_x60/mockups/bento.html</code>.</div>
+          <div class="hint">Platzhalter aus Aufgabe 3.3 – Optik nach Mockup <code>dreame_x60/mockups/bento.html</code>.</div>
         </section>
       </div>`;
   }

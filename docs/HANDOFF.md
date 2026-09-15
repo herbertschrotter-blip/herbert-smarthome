@@ -247,8 +247,13 @@ Uhr (10:15). Einrichten im Ordner `heidi/tests`: `npm i` und dann `npx playwrigh
   2.7 (pytest gegen dieselben Vektoren) geschrieben, nicht ausgeführt: kein Python auf dem PC.
 - **Phase 3 (15.09.):** `src/ha/` (contract, memo-selector, selectors, api `DxApi`), Shell mit Overlay/Toast/Escape/`dx-navigate`,
   E2E `render.js`/`nav.js`/`overlay.js`. 58 Unit-Tests, 3 E2E grün.
-- **Nächstes:** Phase 4 ab 4.0 (Bento-Übersicht und Navigation nach `dreame_x60/mockups/bento.html`; Karte 4.0 vorher
-  auf das Bento-Layout umschreiben). Offene Entscheidungen stehen in Bauplan Abschnitt 10 und in ClickUp.
+- **Phase 4 (15.09., Sitzung Teil 3):** Karte 4.0 und Abschnitt 7 des Bauplans auf das Bento-Mockup umgeschrieben (neue
+  Übersichts-Bausteine `dx-auftrag`, `dx-quickstart`, `dx-stats`, `dx-heute`; Abweichungen zur v1-Übersicht gesammelt in
+  **PD-007, offen** – Herbert liest gegen). 4.0 gebaut: `dx-nav` mit Seitenleiste (> 1180 px), Symbolleiste (761–1180 px),
+  Tab-Leiste (≤ 760 px), Kopfzeile mit Tagesgruß/Zurück-Knopf/Uhr/Zuhause/Nicht stören, Bento-Übersicht mit zehn
+  Platzhalter-Flächen. Version 2.0.0-alpha.2 eingespielt (Ressource per `ha-ws.js lovelace/resources/update`, kein Neustart).
+- **Nächstes:** Herbert: Karte 4.0 + PD-007 gegenlesen, „Heidi v2“ im Browser ansehen (Strg+F5; Handy: Tab-Leiste unten).
+  Dann 4.1 `dx-hero` + `dx-auftrag`, 4.2 `dx-dialog`, 4.3 Karte. Offene Entscheidungen: Bauplan Abschnitt 10 und ClickUp.
 
 ## 4. Offene Punkte (Stand 14.09.2026, Claude-Code-Sitzung)
 Erledigt:

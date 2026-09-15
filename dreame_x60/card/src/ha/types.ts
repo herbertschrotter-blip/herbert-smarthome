@@ -15,6 +15,8 @@ export interface HomeAssistant {
   callApi?<T = unknown>(method: 'GET' | 'POST', path: string, data?: Record<string, unknown>): Promise<T>;
   language?: string;
   themes?: { darkMode?: boolean };
+  /** Angemeldeter Benutzer (für den Tagesgruß der Übersicht, Bauplan 4.0). */
+  user?: { name?: string };
 }
 
 /** Konfiguration der Karte im Dashboard-YAML. */
