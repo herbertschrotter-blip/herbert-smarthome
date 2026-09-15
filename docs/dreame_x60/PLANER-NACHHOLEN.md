@@ -80,6 +80,34 @@ Regel (Herbert): Manuell läuft immer genau das, was gewählt wurde. Kommt danac
 - Abzug „Räume“ ≠ Karte: Raum 8 (Balkon, versteckt) taucht in `active_segments` auf, hat aber nie Fläche → nie in
   `letzter_lauf.raeume`.
 
+## Architektur-Entscheidung: Entscheider-Modul statt Warteschlange (Herbert, 15.09.2026)
+
+**Keine Queue.** Eine Warteschlange lohnt sich, wenn mehrere Aufträge auf Abarbeitung warten. Bei Heidi gibt es pro
+Tag genau einen geplanten Eintrag; manuelle Läufe fahren sofort und warten nicht. Die Frage ist nie „was kommt als
+Nächstes“, sondern „darf der heutige Eintrag jetzt fahren, in welcher Variante, mit welchen Räumen“. Das ist eine
+Entscheidung, kein Stapel. Eine Queue bräuchte zusätzlich gespeicherten Zustand in HA (Helfer), der bei Neustarts und
+Fehlern gepflegt werden müsste – Aufwand ohne Nutzen.
+
+**Stattdessen: Entscheider-Modul in Python auf dem Pi** (`ha/prognose/planer.py`, neben `runlog.py`, Aufruf per
+`shell_command` mit JSON wie heute `runlog.py schaetzung`):
+
+- Die Automation `heidi_planer` sammelt nur Fakten und übergibt sie: heutiger Eintrag (Räume, Modus, Uhrzeit,
+  Homeoffice-Verhalten, Schnell erlaubt), Uhrzeit, Arbeitszeit (Start/Ende), Anwesenheit/Störer/Homeoffice, Akku und
+  Mindest-Akku, `rest_min`/Rückkehr, `letzter_lauf` (Ende, Räume, manuell), Lernwerte-Schätzung (voll/schnell).
+- Das Modul antwortet mit **einer Entscheidung**:
+  `{ "entscheidung": "start" | "warten" | "uebersprungen" | "erledigt", "variante": "normal" | "schnell" | "leise",
+  "raeume": [IDs], "grund": "Text für die Automatik-Kachel" }`.
+- Die Automation führt nur noch aus (Skript starten, `erledigt` setzen, Statustext); die Karte zeigt `grund` in der
+  Automatik-Kachel (`detail`/`rest_quelle`, 4.9).
+- Vorteile: alle drei Stufen an einer Stelle; reine Funktion, mit pytest gegen feste Fälle prüfbar (wie 2.7:
+  Vektoren für Nachholen, Arbeitszeit, Ausgehen, Räume ausnehmen, Modus-Abdeckung); die Jinja-Templates der
+  Automation werden dünner statt dicker.
+- Später: Liefert der Familienkalender (UX-TRANSITIONS.md) mehrere Aufträge, bekommt das Modul eine Liste statt
+  eines Eintrags – dann ist es faktisch eine Queue, aber weiterhin ohne eigenen Zustand in HA.
+
+**Reihenfolge:** Stufe 1 und 2 sind klein genug für die Automation (Jinja). Das Entscheider-Modul kommt mit Stufe 3
+(nach 6.5), dann wandern auch Stufe 1/2 und die heutige Wahl normal/schnell/warten hinein.
+
 ## Einordnung und Reihenfolge
 
 - Alles Backend; die Karte v2 zeigt die Entscheidungen nur an (Automatik-Kachel 4.9: `detail`/`rest_quelle`,
