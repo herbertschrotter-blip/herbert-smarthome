@@ -32,21 +32,25 @@ export class DxAuftrag extends LitElement {
     if (!r || !r.running) return html``;
     const { order, idx, rest } = runOrder(r);
     const total = order.length;
-    const done = idx >= 0 ? idx : 0;
+    // Fläche 0 im Lauf = auf dem Weg zum Startpunkt (wie der Streifen): noch kein Raum fertig, Ziel ist der erste Raum
+    const startpunkt = r.vac === 'cleaning' && r.cleanedArea === 0;
+    const cur = startpunkt ? -1 : idx;
+    const done = startpunkt || idx < 0 ? 0 : idx;
     const pct = total ? Math.round((done / total) * 100) : 0;
-    const next = rest.length ? roomById(rest[0]!) : undefined;
+    const nextId = startpunkt ? order[0] : rest[0];
+    const next = nextId !== undefined ? roomById(nextId) : undefined;
     const nextVals = next && this.rooms ? this.rooms.rooms[next.id] : null;
     const short = (id: number): string => roomById(id)?.short ?? String(id);
     return html`
       <div class="hd"><h2>Aktueller Auftrag</h2><span class="st pill ${DOT_CLASS[r.hero.dot]}"><i></i>${r.hero.big}</span></div>
       <div>
-        <div class="lbl route">${total ? order.map((id, i) => html`${i ? ' → ' : ''}${i === idx ? html`<b>${short(id)}</b>` : short(id)}`) : (r.room !== '–' ? html`<b>${r.room}</b>` : 'Räume –')}</div>
+        <div class="lbl route">${total ? order.map((id, i) => html`${i ? ' → ' : ''}${i === cur ? html`<b>${short(id)}</b>` : short(id)}`) : (r.room !== '–' ? html`<b>${r.room}</b>` : 'Räume –')}</div>
         <div class="kv"><span class="v">${r.cleaningTime}<span class="u"> min</span></span><span class="u">· ${r.cleanedArea} m²</span></div>
       </div>
       ${total ? html`<div><div class="meter two"><span class="n">Räume</span><span class="p">${done} / ${total}</span></div><div class="bar" style="--p:${pct}"><i></i></div></div>` : nothing}
       ${next
-        ? html`<div class="row next"><div><div class="s">Nächster Raum</div><div class="t">${next.short}</div></div>${nextVals ? html`<span class="tag">${nextVals.modus}</span>` : nothing}</div>`
-        : (total ? html`<div class="row next"><div><div class="s">Letzter Raum</div><div class="t">${idx >= 0 ? short(order[idx]!) : '–'}</div></div></div>` : nothing)}
+        ? html`<div class="row next"><div><div class="s">${startpunkt ? 'Erster Raum' : 'Nächster Raum'}</div><div class="t">${next.short}</div></div>${nextVals ? html`<span class="tag">${nextVals.modus}</span>` : nothing}</div>`
+        : (total ? html`<div class="row next"><div><div class="s">Letzter Raum</div><div class="t">${cur >= 0 ? short(order[cur]!) : '–'}</div></div></div>` : nothing)}
     `;
   }
 }

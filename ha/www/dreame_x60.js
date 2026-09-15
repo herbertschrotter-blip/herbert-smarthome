@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.3 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.4 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -1774,7 +1774,7 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.3";
+var VERSION = "2.0.0-alpha.4";
 
 // src/shared/robot-svg.ts
 var robotSvg = w`<svg viewBox="0 0 200 200" class="robotpic" aria-hidden="true">
@@ -2104,19 +2104,22 @@ var DxAuftrag = class extends i4 {
     if (!r4 || !r4.running) return b2``;
     const { order, idx, rest } = runOrder(r4);
     const total = order.length;
-    const done = idx >= 0 ? idx : 0;
+    const startpunkt = r4.vac === "cleaning" && r4.cleanedArea === 0;
+    const cur = startpunkt ? -1 : idx;
+    const done = startpunkt || idx < 0 ? 0 : idx;
     const pct = total ? Math.round(done / total * 100) : 0;
-    const next = rest.length ? roomById(rest[0]) : void 0;
+    const nextId = startpunkt ? order[0] : rest[0];
+    const next = nextId !== void 0 ? roomById(nextId) : void 0;
     const nextVals = next && this.rooms ? this.rooms.rooms[next.id] : null;
     const short = (id) => roomById(id)?.short ?? String(id);
     return b2`
       <div class="hd"><h2>Aktueller Auftrag</h2><span class="st pill ${DOT_CLASS2[r4.hero.dot]}"><i></i>${r4.hero.big}</span></div>
       <div>
-        <div class="lbl route">${total ? order.map((id, i5) => b2`${i5 ? " \u2192 " : ""}${i5 === idx ? b2`<b>${short(id)}</b>` : short(id)}`) : r4.room !== "\u2013" ? b2`<b>${r4.room}</b>` : "R\xE4ume \u2013"}</div>
+        <div class="lbl route">${total ? order.map((id, i5) => b2`${i5 ? " \u2192 " : ""}${i5 === cur ? b2`<b>${short(id)}</b>` : short(id)}`) : r4.room !== "\u2013" ? b2`<b>${r4.room}</b>` : "R\xE4ume \u2013"}</div>
         <div class="kv"><span class="v">${r4.cleaningTime}<span class="u"> min</span></span><span class="u">· ${r4.cleanedArea} m²</span></div>
       </div>
       ${total ? b2`<div><div class="meter two"><span class="n">Räume</span><span class="p">${done} / ${total}</span></div><div class="bar" style="--p:${pct}"><i></i></div></div>` : A}
-      ${next ? b2`<div class="row next"><div><div class="s">Nächster Raum</div><div class="t">${next.short}</div></div>${nextVals ? b2`<span class="tag">${nextVals.modus}</span>` : A}</div>` : total ? b2`<div class="row next"><div><div class="s">Letzter Raum</div><div class="t">${idx >= 0 ? short(order[idx]) : "\u2013"}</div></div></div>` : A}
+      ${next ? b2`<div class="row next"><div><div class="s">${startpunkt ? "Erster Raum" : "N\xE4chster Raum"}</div><div class="t">${next.short}</div></div>${nextVals ? b2`<span class="tag">${nextVals.modus}</span>` : A}</div>` : total ? b2`<div class="row next"><div><div class="s">Letzter Raum</div><div class="t">${cur >= 0 ? short(order[cur]) : "\u2013"}</div></div></div>` : A}
     `;
   }
 };

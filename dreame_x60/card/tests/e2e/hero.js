@@ -62,6 +62,17 @@ const jetzt = v1.vektoren.find((v) => /Streifen · Jetzt/.test(v.name));
   H.checkEqual('Auftrag: Status-Pille = Kopftext', a && a.status, got.big);
 }
 
+// ── Startpunkt-Fall (Fläche 0): Auftrag zeigt 0 / n und den ersten Raum als Ziel ──
+{
+  await setStates(statesFor(v1.vektoren.find((v) => /Streifen · Fährt zum Startpunkt/.test(v.name))));
+  const a = await page.evaluate(() => {
+    const sr = document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-auftrag').shadowRoot;
+    const t = (sel) => { const e = sr.querySelector(sel); return e ? e.textContent.replace(/\s+/g, ' ').trim() : null; };
+    return [t('.meter .p'), t('.row.next .s'), t('.row.next .t'), !!sr.querySelector('.route b')];
+  });
+  H.checkEqual('Auftrag am Startpunkt: 0 / 3, „Erster Raum“ Wohnz., kein Raum hervorgehoben', a, ['0 / 3', 'Erster Raum', 'Wohnz.', false]);
+}
+
 // ── Leerlauf: gemeinsame Werte („–“ bei unavailable), kein Streifen, kein Auftrag ──
 await setStates(docked);
 {
