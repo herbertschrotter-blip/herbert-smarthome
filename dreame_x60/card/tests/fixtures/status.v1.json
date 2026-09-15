@@ -1,11 +1,400 @@
 {
  "quelle": "ha/www/heidi-panel.js v1.6.2",
- "erzeugt": "2026-09-15T05:13:49.052Z",
+ "erzeugt": "2026-09-15T05:32:26.832Z",
  "vektoren": [
   {
-   "name": "angedockt (Fixture)",
+   "name": "docked · Phase gesetzt · Automatik-Lauf · kein Fehler",
    "input": {
-    "overrides": {}
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "docked",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "no_error"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Wischt Küche",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "docked · Phase gesetzt · Automatik-Lauf · Hinweis clean_mop_pad",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "docked",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "clean_mop_pad"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Wischt Küche",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Mopps reinigen",
+      "cls": "chip warn"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "docked · Phase gesetzt · Automatik-Lauf · Fehler brush_stuck",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "docked",
+      "attributes": {
+       "has_error": true
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "brush_stuck"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Wischt Küche",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Bürste blockiert",
+      "cls": "chip bad"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "docked · Phase gesetzt · Hand-Lauf · kein Fehler",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "docked",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "no_error"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Wischt Küche",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "docked · Phase gesetzt · Hand-Lauf · Hinweis clean_mop_pad",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "docked",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "clean_mop_pad"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Wischt Küche",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Mopps reinigen",
+      "cls": "chip warn"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "docked · Phase gesetzt · Hand-Lauf · Fehler brush_stuck",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "docked",
+      "attributes": {
+       "has_error": true
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "brush_stuck"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Wischt Küche",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Bürste blockiert",
+      "cls": "chip bad"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "docked · Phase unbekannt · Automatik-Lauf · kein Fehler",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "docked",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "no_error"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
    },
    "output": {
     "big": "Schläft",
@@ -36,23 +425,4761 @@
    }
   },
   {
-   "name": "reinigt, Phase gesetzt",
+   "name": "docked · Phase unbekannt · Automatik-Lauf · Hinweis clean_mop_pad",
    "input": {
     "overrides": {
      "vacuum.heidi": {
-      "state": "cleaning"
+      "state": "docked",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "clean_mop_pad"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Schläft",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Mopps reinigen",
+      "cls": "chip warn"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "docked · Phase unbekannt · Automatik-Lauf · Fehler brush_stuck",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "docked",
+      "attributes": {
+       "has_error": true
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "brush_stuck"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Schläft",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Bürste blockiert",
+      "cls": "chip bad"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "docked · Phase unbekannt · Hand-Lauf · kein Fehler",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "docked",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "no_error"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Schläft",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "docked · Phase unbekannt · Hand-Lauf · Hinweis clean_mop_pad",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "docked",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "clean_mop_pad"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Schläft",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Mopps reinigen",
+      "cls": "chip warn"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "docked · Phase unbekannt · Hand-Lauf · Fehler brush_stuck",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "docked",
+      "attributes": {
+       "has_error": true
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "brush_stuck"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Schläft",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Bürste blockiert",
+      "cls": "chip bad"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "cleaning · Phase gesetzt · Automatik-Lauf · kein Fehler",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "cleaning",
+      "attributes": {
+       "has_error": false
+      }
      },
      "sensor.heidi_phase": {
       "state": "Wischt Küche"
      },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "no_error"
+     },
      "sensor.heidi_task_status": {
-      "state": "segment_cleaning"
+      "state": "room_cleaning"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Tägliches Saugen",
+    "sub": "Wischt Küche",
+    "btns": [
+     "Pause",
+     "Stopp",
+     "Station"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "cleaning · Phase gesetzt · Automatik-Lauf · Hinweis clean_mop_pad",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "cleaning",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "clean_mop_pad"
+     },
+     "sensor.heidi_task_status": {
+      "state": "room_cleaning"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Tägliches Saugen",
+    "sub": "Wischt Küche",
+    "btns": [
+     "Pause",
+     "Stopp",
+     "Station"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Mopps reinigen",
+      "cls": "chip warn"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "cleaning · Phase gesetzt · Automatik-Lauf · Fehler brush_stuck",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "cleaning",
+      "attributes": {
+       "has_error": true
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "brush_stuck"
+     },
+     "sensor.heidi_task_status": {
+      "state": "room_cleaning"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Tägliches Saugen",
+    "sub": "Wischt Küche",
+    "btns": [
+     "Pause",
+     "Stopp",
+     "Station"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Bürste blockiert",
+      "cls": "chip bad"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "cleaning · Phase gesetzt · Hand-Lauf · kein Fehler",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "cleaning",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "no_error"
+     },
+     "sensor.heidi_task_status": {
+      "state": "room_cleaning"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Reinigt Räume",
+    "sub": "Wischt Küche",
+    "btns": [
+     "Pause",
+     "Stopp",
+     "Station"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "cleaning · Phase gesetzt · Hand-Lauf · Hinweis clean_mop_pad",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "cleaning",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "clean_mop_pad"
+     },
+     "sensor.heidi_task_status": {
+      "state": "room_cleaning"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Reinigt Räume",
+    "sub": "Wischt Küche",
+    "btns": [
+     "Pause",
+     "Stopp",
+     "Station"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Mopps reinigen",
+      "cls": "chip warn"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "cleaning · Phase gesetzt · Hand-Lauf · Fehler brush_stuck",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "cleaning",
+      "attributes": {
+       "has_error": true
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "brush_stuck"
+     },
+     "sensor.heidi_task_status": {
+      "state": "room_cleaning"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Reinigt Räume",
+    "sub": "Wischt Küche",
+    "btns": [
+     "Pause",
+     "Stopp",
+     "Station"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Bürste blockiert",
+      "cls": "chip bad"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "cleaning · Phase unbekannt · Automatik-Lauf · kein Fehler",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "cleaning",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "no_error"
+     },
+     "sensor.heidi_task_status": {
+      "state": "room_cleaning"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Tägliches Saugen",
+    "sub": null,
+    "btns": [
+     "Pause",
+     "Stopp",
+     "Station"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Küche",
+      "cls": "chip on"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "cleaning · Phase unbekannt · Automatik-Lauf · Hinweis clean_mop_pad",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "cleaning",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "clean_mop_pad"
+     },
+     "sensor.heidi_task_status": {
+      "state": "room_cleaning"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Tägliches Saugen",
+    "sub": null,
+    "btns": [
+     "Pause",
+     "Stopp",
+     "Station"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Küche",
+      "cls": "chip on"
+     },
+     {
+      "text": "Mopps reinigen",
+      "cls": "chip warn"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "cleaning · Phase unbekannt · Automatik-Lauf · Fehler brush_stuck",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "cleaning",
+      "attributes": {
+       "has_error": true
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "brush_stuck"
+     },
+     "sensor.heidi_task_status": {
+      "state": "room_cleaning"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Tägliches Saugen",
+    "sub": null,
+    "btns": [
+     "Pause",
+     "Stopp",
+     "Station"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Küche",
+      "cls": "chip on"
+     },
+     {
+      "text": "Bürste blockiert",
+      "cls": "chip bad"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "cleaning · Phase unbekannt · Hand-Lauf · kein Fehler",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "cleaning",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "no_error"
+     },
+     "sensor.heidi_task_status": {
+      "state": "room_cleaning"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Reinigt Räume",
+    "sub": null,
+    "btns": [
+     "Pause",
+     "Stopp",
+     "Station"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Küche",
+      "cls": "chip on"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "cleaning · Phase unbekannt · Hand-Lauf · Hinweis clean_mop_pad",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "cleaning",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "clean_mop_pad"
+     },
+     "sensor.heidi_task_status": {
+      "state": "room_cleaning"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Reinigt Räume",
+    "sub": null,
+    "btns": [
+     "Pause",
+     "Stopp",
+     "Station"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Küche",
+      "cls": "chip on"
+     },
+     {
+      "text": "Mopps reinigen",
+      "cls": "chip warn"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "cleaning · Phase unbekannt · Hand-Lauf · Fehler brush_stuck",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "cleaning",
+      "attributes": {
+       "has_error": true
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "brush_stuck"
+     },
+     "sensor.heidi_task_status": {
+      "state": "room_cleaning"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Reinigt Räume",
+    "sub": null,
+    "btns": [
+     "Pause",
+     "Stopp",
+     "Station"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Küche",
+      "cls": "chip on"
+     },
+     {
+      "text": "Bürste blockiert",
+      "cls": "chip bad"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "paused · Phase gesetzt · Automatik-Lauf · kein Fehler",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "paused",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "no_error"
+     },
+     "sensor.heidi_task_status": {
+      "state": "room_cleaning"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Pausiert",
+    "sub": "Tägliches Saugen",
+    "btns": [
+     "Weiter",
+     "Stopp",
+     "Station"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "paused · Phase gesetzt · Automatik-Lauf · Hinweis clean_mop_pad",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "paused",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "clean_mop_pad"
+     },
+     "sensor.heidi_task_status": {
+      "state": "room_cleaning"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Pausiert",
+    "sub": "Tägliches Saugen",
+    "btns": [
+     "Weiter",
+     "Stopp",
+     "Station"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Mopps reinigen",
+      "cls": "chip warn"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "paused · Phase gesetzt · Automatik-Lauf · Fehler brush_stuck",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "paused",
+      "attributes": {
+       "has_error": true
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "brush_stuck"
+     },
+     "sensor.heidi_task_status": {
+      "state": "room_cleaning"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Pausiert",
+    "sub": "Tägliches Saugen",
+    "btns": [
+     "Weiter",
+     "Stopp",
+     "Station"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Bürste blockiert",
+      "cls": "chip bad"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "paused · Phase gesetzt · Hand-Lauf · kein Fehler",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "paused",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "no_error"
+     },
+     "sensor.heidi_task_status": {
+      "state": "room_cleaning"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Pausiert",
+    "sub": "Reinigt Räume",
+    "btns": [
+     "Weiter",
+     "Stopp",
+     "Station"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "paused · Phase gesetzt · Hand-Lauf · Hinweis clean_mop_pad",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "paused",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "clean_mop_pad"
+     },
+     "sensor.heidi_task_status": {
+      "state": "room_cleaning"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Pausiert",
+    "sub": "Reinigt Räume",
+    "btns": [
+     "Weiter",
+     "Stopp",
+     "Station"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Mopps reinigen",
+      "cls": "chip warn"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "paused · Phase gesetzt · Hand-Lauf · Fehler brush_stuck",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "paused",
+      "attributes": {
+       "has_error": true
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "brush_stuck"
+     },
+     "sensor.heidi_task_status": {
+      "state": "room_cleaning"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Pausiert",
+    "sub": "Reinigt Räume",
+    "btns": [
+     "Weiter",
+     "Stopp",
+     "Station"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Bürste blockiert",
+      "cls": "chip bad"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "paused · Phase unbekannt · Automatik-Lauf · kein Fehler",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "paused",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "no_error"
+     },
+     "sensor.heidi_task_status": {
+      "state": "room_cleaning"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Pausiert",
+    "sub": "Tägliches Saugen",
+    "btns": [
+     "Weiter",
+     "Stopp",
+     "Station"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "paused · Phase unbekannt · Automatik-Lauf · Hinweis clean_mop_pad",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "paused",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "clean_mop_pad"
+     },
+     "sensor.heidi_task_status": {
+      "state": "room_cleaning"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Pausiert",
+    "sub": "Tägliches Saugen",
+    "btns": [
+     "Weiter",
+     "Stopp",
+     "Station"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Mopps reinigen",
+      "cls": "chip warn"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "paused · Phase unbekannt · Automatik-Lauf · Fehler brush_stuck",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "paused",
+      "attributes": {
+       "has_error": true
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "brush_stuck"
+     },
+     "sensor.heidi_task_status": {
+      "state": "room_cleaning"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Pausiert",
+    "sub": "Tägliches Saugen",
+    "btns": [
+     "Weiter",
+     "Stopp",
+     "Station"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Bürste blockiert",
+      "cls": "chip bad"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "paused · Phase unbekannt · Hand-Lauf · kein Fehler",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "paused",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "no_error"
+     },
+     "sensor.heidi_task_status": {
+      "state": "room_cleaning"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Pausiert",
+    "sub": "Reinigt Räume",
+    "btns": [
+     "Weiter",
+     "Stopp",
+     "Station"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "paused · Phase unbekannt · Hand-Lauf · Hinweis clean_mop_pad",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "paused",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "clean_mop_pad"
+     },
+     "sensor.heidi_task_status": {
+      "state": "room_cleaning"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Pausiert",
+    "sub": "Reinigt Räume",
+    "btns": [
+     "Weiter",
+     "Stopp",
+     "Station"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Mopps reinigen",
+      "cls": "chip warn"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "paused · Phase unbekannt · Hand-Lauf · Fehler brush_stuck",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "paused",
+      "attributes": {
+       "has_error": true
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "brush_stuck"
+     },
+     "sensor.heidi_task_status": {
+      "state": "room_cleaning"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Pausiert",
+    "sub": "Reinigt Räume",
+    "btns": [
+     "Weiter",
+     "Stopp",
+     "Station"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Bürste blockiert",
+      "cls": "chip bad"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "returning · Phase gesetzt · Automatik-Lauf · kein Fehler",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "returning",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "no_error"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Fährt zur Station",
+    "sub": "Wischt Küche",
+    "btns": [
+     "Pause",
+     "Stopp",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "returning · Phase gesetzt · Automatik-Lauf · Hinweis clean_mop_pad",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "returning",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "clean_mop_pad"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Fährt zur Station",
+    "sub": "Wischt Küche",
+    "btns": [
+     "Pause",
+     "Stopp",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Mopps reinigen",
+      "cls": "chip warn"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "returning · Phase gesetzt · Automatik-Lauf · Fehler brush_stuck",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "returning",
+      "attributes": {
+       "has_error": true
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "brush_stuck"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Fährt zur Station",
+    "sub": "Wischt Küche",
+    "btns": [
+     "Pause",
+     "Stopp",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Bürste blockiert",
+      "cls": "chip bad"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "returning · Phase gesetzt · Hand-Lauf · kein Fehler",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "returning",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "no_error"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Fährt zur Station",
+    "sub": "Wischt Küche",
+    "btns": [
+     "Pause",
+     "Stopp",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "returning · Phase gesetzt · Hand-Lauf · Hinweis clean_mop_pad",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "returning",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "clean_mop_pad"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Fährt zur Station",
+    "sub": "Wischt Küche",
+    "btns": [
+     "Pause",
+     "Stopp",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Mopps reinigen",
+      "cls": "chip warn"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "returning · Phase gesetzt · Hand-Lauf · Fehler brush_stuck",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "returning",
+      "attributes": {
+       "has_error": true
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "brush_stuck"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Fährt zur Station",
+    "sub": "Wischt Küche",
+    "btns": [
+     "Pause",
+     "Stopp",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Bürste blockiert",
+      "cls": "chip bad"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "returning · Phase unbekannt · Automatik-Lauf · kein Fehler",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "returning",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "no_error"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Fährt zur Station",
+    "sub": null,
+    "btns": [
+     "Pause",
+     "Stopp",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "returning · Phase unbekannt · Automatik-Lauf · Hinweis clean_mop_pad",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "returning",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "clean_mop_pad"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Fährt zur Station",
+    "sub": null,
+    "btns": [
+     "Pause",
+     "Stopp",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Mopps reinigen",
+      "cls": "chip warn"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "returning · Phase unbekannt · Automatik-Lauf · Fehler brush_stuck",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "returning",
+      "attributes": {
+       "has_error": true
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "brush_stuck"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Fährt zur Station",
+    "sub": null,
+    "btns": [
+     "Pause",
+     "Stopp",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Bürste blockiert",
+      "cls": "chip bad"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "returning · Phase unbekannt · Hand-Lauf · kein Fehler",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "returning",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "no_error"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Fährt zur Station",
+    "sub": null,
+    "btns": [
+     "Pause",
+     "Stopp",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "returning · Phase unbekannt · Hand-Lauf · Hinweis clean_mop_pad",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "returning",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "clean_mop_pad"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Fährt zur Station",
+    "sub": null,
+    "btns": [
+     "Pause",
+     "Stopp",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Mopps reinigen",
+      "cls": "chip warn"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "returning · Phase unbekannt · Hand-Lauf · Fehler brush_stuck",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "returning",
+      "attributes": {
+       "has_error": true
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "brush_stuck"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Fährt zur Station",
+    "sub": null,
+    "btns": [
+     "Pause",
+     "Stopp",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Bürste blockiert",
+      "cls": "chip bad"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "error · Phase gesetzt · Automatik-Lauf · kein Fehler",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "error",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "no_error"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Fehler",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Station",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "error · Phase gesetzt · Automatik-Lauf · Hinweis clean_mop_pad",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "error",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "clean_mop_pad"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Fehler",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Station",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Mopps reinigen",
+      "cls": "chip warn"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "error · Phase gesetzt · Automatik-Lauf · Fehler brush_stuck",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "error",
+      "attributes": {
+       "has_error": true
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "brush_stuck"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Fehler",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Station",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Bürste blockiert",
+      "cls": "chip bad"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "error · Phase gesetzt · Hand-Lauf · kein Fehler",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "error",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "no_error"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Fehler",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Station",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "error · Phase gesetzt · Hand-Lauf · Hinweis clean_mop_pad",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "error",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "clean_mop_pad"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Fehler",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Station",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Mopps reinigen",
+      "cls": "chip warn"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "error · Phase gesetzt · Hand-Lauf · Fehler brush_stuck",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "error",
+      "attributes": {
+       "has_error": true
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "brush_stuck"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Fehler",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Station",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Bürste blockiert",
+      "cls": "chip bad"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "error · Phase unbekannt · Automatik-Lauf · kein Fehler",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "error",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "no_error"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Fehler",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Station",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "error · Phase unbekannt · Automatik-Lauf · Hinweis clean_mop_pad",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "error",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "clean_mop_pad"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Fehler",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Station",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Mopps reinigen",
+      "cls": "chip warn"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "error · Phase unbekannt · Automatik-Lauf · Fehler brush_stuck",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "error",
+      "attributes": {
+       "has_error": true
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "brush_stuck"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Fehler",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Station",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Bürste blockiert",
+      "cls": "chip bad"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "error · Phase unbekannt · Hand-Lauf · kein Fehler",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "error",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "no_error"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Fehler",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Station",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "error · Phase unbekannt · Hand-Lauf · Hinweis clean_mop_pad",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "error",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "clean_mop_pad"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Fehler",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Station",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Mopps reinigen",
+      "cls": "chip warn"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "error · Phase unbekannt · Hand-Lauf · Fehler brush_stuck",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "error",
+      "attributes": {
+       "has_error": true
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "brush_stuck"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Fehler",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Station",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Bürste blockiert",
+      "cls": "chip bad"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "idle · Phase gesetzt · Automatik-Lauf · kein Fehler",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "idle",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "no_error"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Wischt Küche",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Station",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "idle · Phase gesetzt · Automatik-Lauf · Hinweis clean_mop_pad",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "idle",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "clean_mop_pad"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Wischt Küche",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Station",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Mopps reinigen",
+      "cls": "chip warn"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "idle · Phase gesetzt · Automatik-Lauf · Fehler brush_stuck",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "idle",
+      "attributes": {
+       "has_error": true
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "brush_stuck"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Wischt Küche",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Station",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Bürste blockiert",
+      "cls": "chip bad"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "idle · Phase gesetzt · Hand-Lauf · kein Fehler",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "idle",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "no_error"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Wischt Küche",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Station",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "idle · Phase gesetzt · Hand-Lauf · Hinweis clean_mop_pad",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "idle",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "clean_mop_pad"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Wischt Küche",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Station",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Mopps reinigen",
+      "cls": "chip warn"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "idle · Phase gesetzt · Hand-Lauf · Fehler brush_stuck",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "idle",
+      "attributes": {
+       "has_error": true
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Wischt Küche"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "brush_stuck"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Wischt Küche",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Station",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Bürste blockiert",
+      "cls": "chip bad"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "idle · Phase unbekannt · Automatik-Lauf · kein Fehler",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "idle",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "no_error"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Schläft",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Station",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "idle · Phase unbekannt · Automatik-Lauf · Hinweis clean_mop_pad",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "idle",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "clean_mop_pad"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Schläft",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Station",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Mopps reinigen",
+      "cls": "chip warn"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "idle · Phase unbekannt · Automatik-Lauf · Fehler brush_stuck",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "idle",
+      "attributes": {
+       "has_error": true
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "brush_stuck"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Schläft",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Station",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Bürste blockiert",
+      "cls": "chip bad"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "idle · Phase unbekannt · Hand-Lauf · kein Fehler",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "idle",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "no_error"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Schläft",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Station",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "idle · Phase unbekannt · Hand-Lauf · Hinweis clean_mop_pad",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "idle",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "clean_mop_pad"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Schläft",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Station",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Mopps reinigen",
+      "cls": "chip warn"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "idle · Phase unbekannt · Hand-Lauf · Fehler brush_stuck",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "idle",
+      "attributes": {
+       "has_error": true
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": "Tägliches Saugen"
+     },
+     "sensor.heidi_error": {
+      "state": "brush_stuck"
+     },
+     "sensor.heidi_task_status": {
+      "state": "completed"
+     },
+     "sensor.heidi_current_room": {
+      "state": "Kitchen"
+     }
+    }
+   },
+   "output": {
+    "big": "Schläft",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Station",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Bürste blockiert",
+      "cls": "chip bad"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "cleaning · zone_cleaning ohne Automatik",
+   "input": {
+    "overrides": {
+     "sensor.heidi_error": {
+      "state": "no_error"
+     },
+     "vacuum.heidi": {
+      "state": "cleaning"
+     },
+     "sensor.heidi_phase": {
+      "state": "unknown"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "off"
+     },
+     "sensor.heidi_task_status": {
+      "state": "zone_cleaning"
+     }
+    }
+   },
+   "output": {
+    "big": "Reinigt Zone",
+    "sub": null,
+    "btns": [
+     "Pause",
+     "Stopp",
+     "Station"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "Büro",
+      "cls": "chip on"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "cleaning · Automatik an, aber Planname leer",
+   "input": {
+    "overrides": {
+     "sensor.heidi_error": {
+      "state": "no_error"
+     },
+     "vacuum.heidi": {
+      "state": "cleaning"
+     },
+     "sensor.heidi_phase": {
+      "state": "Saugt Bad"
+     },
+     "input_boolean.heidi_auto_lauf": {
+      "state": "on"
+     },
+     "input_text.heidi_auto_letzter_plan": {
+      "state": ""
+     },
+     "sensor.heidi_task_status": {
+      "state": "spot_cleaning"
+     }
+    }
+   },
+   "output": {
+    "big": "Reinigt Punkt",
+    "sub": "Saugt Bad",
+    "btns": [
+     "Pause",
+     "Stopp",
+     "Station"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "returning · Phase gleich Fährt zur Station → sub leer",
+   "input": {
+    "overrides": {
+     "sensor.heidi_error": {
+      "state": "no_error"
+     },
+     "vacuum.heidi": {
+      "state": "returning"
+     },
+     "sensor.heidi_phase": {
+      "state": "Fährt zur Station"
+     }
+    }
+   },
+   "output": {
+    "big": "Fährt zur Station",
+    "sub": null,
+    "btns": [
+     "Pause",
+     "Stopp",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "docked · Phase leer, status charging_completed",
+   "input": {
+    "overrides": {
+     "sensor.heidi_error": {
+      "state": "no_error"
+     },
+     "vacuum.heidi": {
+      "state": "docked"
+     },
+     "sensor.heidi_phase": {
+      "state": ""
+     },
+     "sensor.heidi_status": {
+      "state": "charging_completed"
+     }
+    }
+   },
+   "output": {
+    "big": "Voll geladen",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "docked · Phase unavailable, status unbekannt some_new_state",
+   "input": {
+    "overrides": {
+     "sensor.heidi_error": {
+      "state": "no_error"
+     },
+     "vacuum.heidi": {
+      "state": "docked"
+     },
+     "sensor.heidi_phase": {
+      "state": "unavailable"
+     },
+     "sensor.heidi_status": {
+      "state": "some_new_state"
+     }
+    }
+   },
+   "output": {
+    "big": "Some new state",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "Fehler unbekannt ohne Übersetzung",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "docked",
+      "attributes": {
+       "has_error": false
+      }
+     },
+     "sensor.heidi_error": {
+      "state": "strange_thing_happened"
+     }
+    }
+   },
+   "output": {
+    "big": "Schläft",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "strange thing happened",
+      "cls": "chip warn"
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "Fehler unavailable → kein Chip",
+   "input": {
+    "overrides": {
+     "vacuum.heidi": {
+      "state": "docked"
+     },
+     "sensor.heidi_error": {
+      "state": "unavailable"
+     }
+    }
+   },
+   "output": {
+    "big": "Schläft",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "DND leer",
+   "input": {
+    "overrides": {
+     "sensor.heidi_error": {
+      "state": "no_error"
+     },
+     "time.heidi_dnd_start": {
+      "state": ""
+     },
+     "time.heidi_dnd_end": {
+      "state": "unknown"
+     }
+    }
+   },
+   "output": {
+    "big": "Schläft",
+    "sub": null,
+    "btns": [
+     "Start",
+     "Orten"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "–unkno",
+      "cls": "chip"
+     }
+    ],
+    "strip": null
+   }
+  },
+  {
+   "name": "Streifen · Jetzt Küche, danach Büro (Reihenfolge aus Helfer)",
+   "input": {
+    "overrides": {
+     "sensor.heidi_error": {
+      "state": "no_error"
+     },
+     "select.heidi_room_6_cleaning_mode": {
+      "state": "sweeping_and_mopping"
+     },
+     "select.heidi_room_6_suction_level": {
+      "state": "turbo"
+     },
+     "select.heidi_room_6_mop_pad_humidity": {
+      "state": "moist"
+     },
+     "select.heidi_room_6_cleaning_route": {
+      "state": "standard"
+     },
+     "select.heidi_room_6_cleaning_times": {
+      "state": "2x"
+     },
+     "vacuum.heidi": {
+      "state": "cleaning",
+      "attributes": {
+       "current_segment": 6,
+       "cleaning_sequence": [
+        1,
+        6,
+        7,
+        2,
+        4,
+        3,
+        5
+       ],
+       "active_segments": [
+        7,
+        6,
+        5
+       ],
+       "cleaned_area": 12
+      }
+     },
+     "input_text.heidi_lauf_reihenfolge": {
+      "state": "7,6,5"
+     },
+     "sensor.heidi_phase": {
+      "state": "Saugt und wischt Küche"
      }
     }
    },
    "output": {
     "big": "Reinigt",
-    "sub": "Wischt Küche",
+    "sub": "Saugt und wischt Küche",
+    "btns": [
+     "Pause",
+     "Stopp",
+     "Station"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": "Jetzt: Küche danach Büro Saugen + WischenTurboMittel2×"
+   }
+  },
+  {
+   "name": "Streifen · Fährt zum Startpunkt (Fläche 0)",
+   "input": {
+    "overrides": {
+     "sensor.heidi_error": {
+      "state": "no_error"
+     },
+     "select.heidi_room_6_cleaning_mode": {
+      "state": "sweeping_and_mopping"
+     },
+     "select.heidi_room_6_suction_level": {
+      "state": "turbo"
+     },
+     "select.heidi_room_6_mop_pad_humidity": {
+      "state": "moist"
+     },
+     "select.heidi_room_6_cleaning_route": {
+      "state": "standard"
+     },
+     "select.heidi_room_6_cleaning_times": {
+      "state": "2x"
+     },
+     "vacuum.heidi": {
+      "state": "cleaning",
+      "attributes": {
+       "current_segment": 6,
+       "cleaning_sequence": [
+        1,
+        6,
+        7,
+        2,
+        4,
+        3,
+        5
+       ],
+       "active_segments": [
+        7,
+        6,
+        5
+       ],
+       "cleaned_area": 0
+      }
+     },
+     "input_text.heidi_lauf_reihenfolge": {
+      "state": "7,6,5"
+     },
+     "sensor.heidi_phase": {
+      "state": "Fährt zum Startpunkt"
+     }
+    }
+   },
+   "output": {
+    "big": "Reinigt",
+    "sub": "Fährt zum Startpunkt",
+    "btns": [
+     "Pause",
+     "Stopp",
+     "Station"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": "Fährt zum Startpunkt zu Wohnz."
+   }
+  },
+  {
+   "name": "Streifen · Fährt durch Raum außerhalb des Auftrags",
+   "input": {
+    "overrides": {
+     "sensor.heidi_error": {
+      "state": "no_error"
+     },
+     "select.heidi_room_6_cleaning_mode": {
+      "state": "sweeping_and_mopping"
+     },
+     "select.heidi_room_6_suction_level": {
+      "state": "turbo"
+     },
+     "select.heidi_room_6_mop_pad_humidity": {
+      "state": "moist"
+     },
+     "select.heidi_room_6_cleaning_route": {
+      "state": "standard"
+     },
+     "select.heidi_room_6_cleaning_times": {
+      "state": "2x"
+     },
+     "vacuum.heidi": {
+      "state": "cleaning",
+      "attributes": {
+       "current_segment": 6,
+       "cleaning_sequence": [
+        1,
+        6,
+        7,
+        2,
+        4,
+        3,
+        5
+       ],
+       "active_segments": [
+        7,
+        5
+       ],
+       "cleaned_area": 12
+      }
+     },
+     "input_text.heidi_lauf_reihenfolge": {
+      "state": ""
+     },
+     "sensor.heidi_phase": {
+      "state": "Fährt durch Küche"
+     }
+    }
+   },
+   "output": {
+    "big": "Reinigt",
+    "sub": "Fährt durch Küche",
+    "btns": [
+     "Pause",
+     "Stopp",
+     "Station"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": "Fährt durch Küche zu Wohnz. → Büro"
+   }
+  },
+  {
+   "name": "Streifen · letzter Raum, Roboter-Reihenfolge (Helfer passt nicht)",
+   "input": {
+    "overrides": {
+     "sensor.heidi_error": {
+      "state": "no_error"
+     },
+     "select.heidi_room_6_cleaning_mode": {
+      "state": "sweeping_and_mopping"
+     },
+     "select.heidi_room_6_suction_level": {
+      "state": "turbo"
+     },
+     "select.heidi_room_6_mop_pad_humidity": {
+      "state": "moist"
+     },
+     "select.heidi_room_6_cleaning_route": {
+      "state": "standard"
+     },
+     "select.heidi_room_6_cleaning_times": {
+      "state": "2x"
+     },
+     "vacuum.heidi": {
+      "state": "paused",
+      "attributes": {
+       "current_segment": 6,
+       "cleaning_sequence": [
+        1,
+        6,
+        7,
+        2,
+        4,
+        3,
+        5
+       ],
+       "active_segments": [
+        7,
+        6
+       ],
+       "cleaned_area": 12
+      }
+     },
+     "input_text.heidi_lauf_reihenfolge": {
+      "state": "7,6,5"
+     },
+     "sensor.heidi_phase": {
+      "state": "Pausiert"
+     }
+    }
+   },
+   "output": {
+    "big": "Pausiert",
+    "sub": "Reinigt",
+    "btns": [
+     "Weiter",
+     "Stopp",
+     "Station"
+    ],
+    "chips": [
+     {
+      "text": "Herbert",
+      "cls": "chip on"
+     },
+     {
+      "text": "Nicole",
+      "cls": "chip "
+     },
+     {
+      "text": "Nina",
+      "cls": "chip "
+     },
+     {
+      "text": "20:00–07:00",
+      "cls": "chip"
+     }
+    ],
+    "strip": "Jetzt: Küche letzter Raum Saugen + WischenTurboMittel2×"
+   }
+  },
+  {
+   "name": "Streifen · Raumwerte unavailable → kein Streifen",
+   "input": {
+    "overrides": {
+     "sensor.heidi_error": {
+      "state": "no_error"
+     },
+     "vacuum.heidi": {
+      "state": "cleaning",
+      "attributes": {
+       "current_segment": 6,
+       "cleaning_sequence": [
+        1,
+        6,
+        7,
+        2,
+        4,
+        3,
+        5
+       ],
+       "active_segments": [
+        7,
+        6
+       ],
+       "cleaned_area": 12
+      }
+     },
+     "sensor.heidi_phase": {
+      "state": "Saugt Küche"
+     }
+    }
+   },
+   "output": {
+    "big": "Reinigt",
+    "sub": "Saugt Küche",
     "btns": [
      "Pause",
      "Stopp",

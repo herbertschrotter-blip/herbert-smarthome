@@ -1,7 +1,49 @@
 {
  "quelle": "ha/www/heidi-panel.js v1.6.2",
- "erzeugt": "2026-09-15T05:13:50.225Z",
+ "erzeugt": "2026-09-15T05:32:36.438Z",
  "vektoren": [
+  {
+   "name": "dayLabel täglich",
+   "input": {
+    "fn": "_dayLabel",
+    "args": [
+     [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+     ]
+    ]
+   },
+   "output": {
+    "result": "Täglich",
+    "today": "2026-09-15T07:05:00.000Z"
+   }
+  },
+  {
+   "name": "dayLabel manuell",
+   "input": {
+    "fn": "_dayLabel",
+    "args": [
+     [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+     ]
+    ]
+   },
+   "output": {
+    "result": "Manuell",
+    "today": "2026-09-15T07:05:00.000Z"
+   }
+  },
   {
    "name": "dayLabel Mo–Fr",
    "input": {
@@ -19,11 +61,155 @@
     ]
    },
    "output": {
-    "result": "Mo–Fr"
+    "result": "Mo–Fr",
+    "today": "2026-09-15T07:05:00.000Z"
    }
   },
   {
-   "name": "roomLabel zwei Räume",
+   "name": "dayLabel Sa + So",
+   "input": {
+    "fn": "_dayLabel",
+    "args": [
+     [
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true
+     ]
+    ]
+   },
+   "output": {
+    "result": "Sa + So",
+    "today": "2026-09-15T07:05:00.000Z"
+   }
+  },
+  {
+   "name": "dayLabel drei Tage",
+   "input": {
+    "fn": "_dayLabel",
+    "args": [
+     [
+      true,
+      false,
+      true,
+      false,
+      true,
+      false,
+      false
+     ]
+    ]
+   },
+   "output": {
+    "result": "Mo + Mi + Fr",
+    "today": "2026-09-15T07:05:00.000Z"
+   }
+  },
+  {
+   "name": "dayLabel vier Tage",
+   "input": {
+    "fn": "_dayLabel",
+    "args": [
+     [
+      false,
+      true,
+      true,
+      false,
+      true,
+      true,
+      false
+     ]
+    ]
+   },
+   "output": {
+    "result": "Di Mi Fr Sa",
+    "today": "2026-09-15T07:05:00.000Z"
+   }
+  },
+  {
+   "name": "dayLabel ein Tag",
+   "input": {
+    "fn": "_dayLabel",
+    "args": [
+     [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true
+     ]
+    ]
+   },
+   "output": {
+    "result": "So",
+    "today": "2026-09-15T07:05:00.000Z"
+   }
+  },
+  {
+   "name": "dayLabel Plan 1 (0110111)",
+   "input": {
+    "fn": "_dayLabel",
+    "args": [
+     [
+      false,
+      true,
+      true,
+      false,
+      true,
+      true,
+      true
+     ]
+    ]
+   },
+   "output": {
+    "result": "Di Mi Fr Sa So",
+    "today": "2026-09-15T07:05:00.000Z"
+   }
+  },
+  {
+   "name": "roomLabel alle",
+   "input": {
+    "fn": "_roomLabel",
+    "args": [
+     {
+      "__set": [
+       7,
+       6,
+       5,
+       4,
+       3,
+       2,
+       1
+      ]
+     }
+    ]
+   },
+   "output": {
+    "result": "Alle",
+    "today": "2026-09-15T07:05:00.000Z"
+   }
+  },
+  {
+   "name": "roomLabel leer",
+   "input": {
+    "fn": "_roomLabel",
+    "args": [
+     {
+      "__set": []
+     }
+    ]
+   },
+   "output": {
+    "result": "keine Räume",
+    "today": "2026-09-15T07:05:00.000Z"
+   }
+  },
+  {
+   "name": "roomLabel zwei",
    "input": {
     "fn": "_roomLabel",
     "args": [
@@ -36,19 +222,201 @@
     ]
    },
    "output": {
-    "result": "Wohnz., Küche"
+    "result": "Wohnz., Küche",
+    "today": "2026-09-15T07:05:00.000Z"
    }
   },
   {
-   "name": "fmtMin 96",
+   "name": "roomLabel Reihenfolge wie gesetzt",
    "input": {
-    "fn": "_fmtMin",
+    "fn": "_roomLabel",
     "args": [
-     96
+     {
+      "__set": [
+       1,
+       7,
+       4
+      ]
+     }
     ]
    },
    "output": {
-    "result": "1 h 36 min"
+    "result": "Bad, Wohnz., Flur",
+    "today": "2026-09-15T07:05:00.000Z"
+   }
+  },
+  {
+   "name": "roomLabel unbekannte ID fällt weg",
+   "input": {
+    "fn": "_roomLabel",
+    "args": [
+     {
+      "__set": [
+       9,
+       3
+      ]
+     }
+    ]
+   },
+   "output": {
+    "result": "WC",
+    "today": "2026-09-15T07:05:00.000Z"
+   }
+  },
+  {
+   "name": "fmtMin 59",
+   "input": {
+    "fn": "_fmtMin",
+    "args": [
+     59
+    ]
+   },
+   "output": {
+    "result": "59 min",
+    "today": "2026-09-15T07:05:00.000Z"
+   }
+  },
+  {
+   "name": "fmtMin 60",
+   "input": {
+    "fn": "_fmtMin",
+    "args": [
+     60
+    ]
+   },
+   "output": {
+    "result": "1 h 00 min",
+    "today": "2026-09-15T07:05:00.000Z"
+   }
+  },
+  {
+   "name": "fmtMin 61",
+   "input": {
+    "fn": "_fmtMin",
+    "args": [
+     61
+    ]
+   },
+   "output": {
+    "result": "1 h 01 min",
+    "today": "2026-09-15T07:05:00.000Z"
+   }
+  },
+  {
+   "name": "fmtMin 125",
+   "input": {
+    "fn": "_fmtMin",
+    "args": [
+     125
+    ]
+   },
+   "output": {
+    "result": "2 h 05 min",
+    "today": "2026-09-15T07:05:00.000Z"
+   }
+  },
+  {
+   "name": "fmtMin 59.6 rundet auf 60",
+   "input": {
+    "fn": "_fmtMin",
+    "args": [
+     59.6
+    ]
+   },
+   "output": {
+    "result": "1 h 00 min",
+    "today": "2026-09-15T07:05:00.000Z"
+   }
+  },
+  {
+   "name": "fmtMin 0.4",
+   "input": {
+    "fn": "_fmtMin",
+    "args": [
+     0.4
+    ]
+   },
+   "output": {
+    "result": "0 min",
+    "today": "2026-09-15T07:05:00.000Z"
+   }
+  },
+  {
+   "name": "fmtDate heute",
+   "input": {
+    "fn": "fmtDate",
+    "args": [
+     "__today__"
+    ]
+   },
+   "output": {
+    "result": "heute 09:05",
+    "today": "2026-09-15T07:05:00.000Z"
+   }
+  },
+  {
+   "name": "fmtDate anderer Tag",
+   "input": {
+    "fn": "fmtDate",
+    "args": [
+     "2026-01-05T07:08:00"
+    ]
+   },
+   "output": {
+    "result": "05.01. 07:08",
+    "today": "2026-09-15T07:05:00.000Z"
+   }
+  },
+  {
+   "name": "fmtDate ungültig",
+   "input": {
+    "fn": "fmtDate",
+    "args": [
+     "nix"
+    ]
+   },
+   "output": {
+    "result": "–",
+    "today": "2026-09-15T07:05:00.000Z"
+   }
+  },
+  {
+   "name": "roomName Deutsch",
+   "input": {
+    "fn": "roomName",
+    "args": [
+     "Kitchen"
+    ]
+   },
+   "output": {
+    "result": "Küche",
+    "today": "2026-09-15T07:05:00.000Z"
+   }
+  },
+  {
+   "name": "roomName unbekannt",
+   "input": {
+    "fn": "roomName",
+    "args": [
+     "unknown"
+    ]
+   },
+   "output": {
+    "result": "–",
+    "today": "2026-09-15T07:05:00.000Z"
+   }
+  },
+  {
+   "name": "roomName fremd",
+   "input": {
+    "fn": "roomName",
+    "args": [
+     "Garage"
+    ]
+   },
+   "output": {
+    "result": "Garage",
+    "today": "2026-09-15T07:05:00.000Z"
    }
   }
  ]

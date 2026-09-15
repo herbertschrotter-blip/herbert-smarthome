@@ -1,4 +1,2449 @@
 [
-  { "name": "angedockt (Fixture)", "overrides": {} },
-  { "name": "reinigt, Phase gesetzt", "overrides": { "vacuum.heidi": { "state": "cleaning" }, "sensor.heidi_phase": { "state": "Wischt Küche" }, "sensor.heidi_task_status": { "state": "segment_cleaning" } } }
+ {
+  "name": "docked · Phase gesetzt · Automatik-Lauf · kein Fehler",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "docked",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "no_error"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "docked · Phase gesetzt · Automatik-Lauf · Hinweis clean_mop_pad",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "docked",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "clean_mop_pad"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "docked · Phase gesetzt · Automatik-Lauf · Fehler brush_stuck",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "docked",
+    "attributes": {
+     "has_error": true
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "brush_stuck"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "docked · Phase gesetzt · Hand-Lauf · kein Fehler",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "docked",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "no_error"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "docked · Phase gesetzt · Hand-Lauf · Hinweis clean_mop_pad",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "docked",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "clean_mop_pad"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "docked · Phase gesetzt · Hand-Lauf · Fehler brush_stuck",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "docked",
+    "attributes": {
+     "has_error": true
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "brush_stuck"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "docked · Phase unbekannt · Automatik-Lauf · kein Fehler",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "docked",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "no_error"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "docked · Phase unbekannt · Automatik-Lauf · Hinweis clean_mop_pad",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "docked",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "clean_mop_pad"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "docked · Phase unbekannt · Automatik-Lauf · Fehler brush_stuck",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "docked",
+    "attributes": {
+     "has_error": true
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "brush_stuck"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "docked · Phase unbekannt · Hand-Lauf · kein Fehler",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "docked",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "no_error"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "docked · Phase unbekannt · Hand-Lauf · Hinweis clean_mop_pad",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "docked",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "clean_mop_pad"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "docked · Phase unbekannt · Hand-Lauf · Fehler brush_stuck",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "docked",
+    "attributes": {
+     "has_error": true
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "brush_stuck"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "cleaning · Phase gesetzt · Automatik-Lauf · kein Fehler",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "cleaning",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "no_error"
+   },
+   "sensor.heidi_task_status": {
+    "state": "room_cleaning"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "cleaning · Phase gesetzt · Automatik-Lauf · Hinweis clean_mop_pad",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "cleaning",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "clean_mop_pad"
+   },
+   "sensor.heidi_task_status": {
+    "state": "room_cleaning"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "cleaning · Phase gesetzt · Automatik-Lauf · Fehler brush_stuck",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "cleaning",
+    "attributes": {
+     "has_error": true
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "brush_stuck"
+   },
+   "sensor.heidi_task_status": {
+    "state": "room_cleaning"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "cleaning · Phase gesetzt · Hand-Lauf · kein Fehler",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "cleaning",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "no_error"
+   },
+   "sensor.heidi_task_status": {
+    "state": "room_cleaning"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "cleaning · Phase gesetzt · Hand-Lauf · Hinweis clean_mop_pad",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "cleaning",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "clean_mop_pad"
+   },
+   "sensor.heidi_task_status": {
+    "state": "room_cleaning"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "cleaning · Phase gesetzt · Hand-Lauf · Fehler brush_stuck",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "cleaning",
+    "attributes": {
+     "has_error": true
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "brush_stuck"
+   },
+   "sensor.heidi_task_status": {
+    "state": "room_cleaning"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "cleaning · Phase unbekannt · Automatik-Lauf · kein Fehler",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "cleaning",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "no_error"
+   },
+   "sensor.heidi_task_status": {
+    "state": "room_cleaning"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "cleaning · Phase unbekannt · Automatik-Lauf · Hinweis clean_mop_pad",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "cleaning",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "clean_mop_pad"
+   },
+   "sensor.heidi_task_status": {
+    "state": "room_cleaning"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "cleaning · Phase unbekannt · Automatik-Lauf · Fehler brush_stuck",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "cleaning",
+    "attributes": {
+     "has_error": true
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "brush_stuck"
+   },
+   "sensor.heidi_task_status": {
+    "state": "room_cleaning"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "cleaning · Phase unbekannt · Hand-Lauf · kein Fehler",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "cleaning",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "no_error"
+   },
+   "sensor.heidi_task_status": {
+    "state": "room_cleaning"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "cleaning · Phase unbekannt · Hand-Lauf · Hinweis clean_mop_pad",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "cleaning",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "clean_mop_pad"
+   },
+   "sensor.heidi_task_status": {
+    "state": "room_cleaning"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "cleaning · Phase unbekannt · Hand-Lauf · Fehler brush_stuck",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "cleaning",
+    "attributes": {
+     "has_error": true
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "brush_stuck"
+   },
+   "sensor.heidi_task_status": {
+    "state": "room_cleaning"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "paused · Phase gesetzt · Automatik-Lauf · kein Fehler",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "paused",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "no_error"
+   },
+   "sensor.heidi_task_status": {
+    "state": "room_cleaning"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "paused · Phase gesetzt · Automatik-Lauf · Hinweis clean_mop_pad",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "paused",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "clean_mop_pad"
+   },
+   "sensor.heidi_task_status": {
+    "state": "room_cleaning"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "paused · Phase gesetzt · Automatik-Lauf · Fehler brush_stuck",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "paused",
+    "attributes": {
+     "has_error": true
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "brush_stuck"
+   },
+   "sensor.heidi_task_status": {
+    "state": "room_cleaning"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "paused · Phase gesetzt · Hand-Lauf · kein Fehler",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "paused",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "no_error"
+   },
+   "sensor.heidi_task_status": {
+    "state": "room_cleaning"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "paused · Phase gesetzt · Hand-Lauf · Hinweis clean_mop_pad",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "paused",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "clean_mop_pad"
+   },
+   "sensor.heidi_task_status": {
+    "state": "room_cleaning"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "paused · Phase gesetzt · Hand-Lauf · Fehler brush_stuck",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "paused",
+    "attributes": {
+     "has_error": true
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "brush_stuck"
+   },
+   "sensor.heidi_task_status": {
+    "state": "room_cleaning"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "paused · Phase unbekannt · Automatik-Lauf · kein Fehler",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "paused",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "no_error"
+   },
+   "sensor.heidi_task_status": {
+    "state": "room_cleaning"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "paused · Phase unbekannt · Automatik-Lauf · Hinweis clean_mop_pad",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "paused",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "clean_mop_pad"
+   },
+   "sensor.heidi_task_status": {
+    "state": "room_cleaning"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "paused · Phase unbekannt · Automatik-Lauf · Fehler brush_stuck",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "paused",
+    "attributes": {
+     "has_error": true
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "brush_stuck"
+   },
+   "sensor.heidi_task_status": {
+    "state": "room_cleaning"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "paused · Phase unbekannt · Hand-Lauf · kein Fehler",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "paused",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "no_error"
+   },
+   "sensor.heidi_task_status": {
+    "state": "room_cleaning"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "paused · Phase unbekannt · Hand-Lauf · Hinweis clean_mop_pad",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "paused",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "clean_mop_pad"
+   },
+   "sensor.heidi_task_status": {
+    "state": "room_cleaning"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "paused · Phase unbekannt · Hand-Lauf · Fehler brush_stuck",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "paused",
+    "attributes": {
+     "has_error": true
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "brush_stuck"
+   },
+   "sensor.heidi_task_status": {
+    "state": "room_cleaning"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "returning · Phase gesetzt · Automatik-Lauf · kein Fehler",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "returning",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "no_error"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "returning · Phase gesetzt · Automatik-Lauf · Hinweis clean_mop_pad",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "returning",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "clean_mop_pad"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "returning · Phase gesetzt · Automatik-Lauf · Fehler brush_stuck",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "returning",
+    "attributes": {
+     "has_error": true
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "brush_stuck"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "returning · Phase gesetzt · Hand-Lauf · kein Fehler",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "returning",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "no_error"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "returning · Phase gesetzt · Hand-Lauf · Hinweis clean_mop_pad",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "returning",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "clean_mop_pad"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "returning · Phase gesetzt · Hand-Lauf · Fehler brush_stuck",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "returning",
+    "attributes": {
+     "has_error": true
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "brush_stuck"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "returning · Phase unbekannt · Automatik-Lauf · kein Fehler",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "returning",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "no_error"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "returning · Phase unbekannt · Automatik-Lauf · Hinweis clean_mop_pad",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "returning",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "clean_mop_pad"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "returning · Phase unbekannt · Automatik-Lauf · Fehler brush_stuck",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "returning",
+    "attributes": {
+     "has_error": true
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "brush_stuck"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "returning · Phase unbekannt · Hand-Lauf · kein Fehler",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "returning",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "no_error"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "returning · Phase unbekannt · Hand-Lauf · Hinweis clean_mop_pad",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "returning",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "clean_mop_pad"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "returning · Phase unbekannt · Hand-Lauf · Fehler brush_stuck",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "returning",
+    "attributes": {
+     "has_error": true
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "brush_stuck"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "error · Phase gesetzt · Automatik-Lauf · kein Fehler",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "error",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "no_error"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "error · Phase gesetzt · Automatik-Lauf · Hinweis clean_mop_pad",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "error",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "clean_mop_pad"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "error · Phase gesetzt · Automatik-Lauf · Fehler brush_stuck",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "error",
+    "attributes": {
+     "has_error": true
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "brush_stuck"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "error · Phase gesetzt · Hand-Lauf · kein Fehler",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "error",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "no_error"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "error · Phase gesetzt · Hand-Lauf · Hinweis clean_mop_pad",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "error",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "clean_mop_pad"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "error · Phase gesetzt · Hand-Lauf · Fehler brush_stuck",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "error",
+    "attributes": {
+     "has_error": true
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "brush_stuck"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "error · Phase unbekannt · Automatik-Lauf · kein Fehler",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "error",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "no_error"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "error · Phase unbekannt · Automatik-Lauf · Hinweis clean_mop_pad",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "error",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "clean_mop_pad"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "error · Phase unbekannt · Automatik-Lauf · Fehler brush_stuck",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "error",
+    "attributes": {
+     "has_error": true
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "brush_stuck"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "error · Phase unbekannt · Hand-Lauf · kein Fehler",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "error",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "no_error"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "error · Phase unbekannt · Hand-Lauf · Hinweis clean_mop_pad",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "error",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "clean_mop_pad"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "error · Phase unbekannt · Hand-Lauf · Fehler brush_stuck",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "error",
+    "attributes": {
+     "has_error": true
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "brush_stuck"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "idle · Phase gesetzt · Automatik-Lauf · kein Fehler",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "idle",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "no_error"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "idle · Phase gesetzt · Automatik-Lauf · Hinweis clean_mop_pad",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "idle",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "clean_mop_pad"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "idle · Phase gesetzt · Automatik-Lauf · Fehler brush_stuck",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "idle",
+    "attributes": {
+     "has_error": true
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "brush_stuck"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "idle · Phase gesetzt · Hand-Lauf · kein Fehler",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "idle",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "no_error"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "idle · Phase gesetzt · Hand-Lauf · Hinweis clean_mop_pad",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "idle",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "clean_mop_pad"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "idle · Phase gesetzt · Hand-Lauf · Fehler brush_stuck",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "idle",
+    "attributes": {
+     "has_error": true
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Wischt Küche"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "brush_stuck"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "idle · Phase unbekannt · Automatik-Lauf · kein Fehler",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "idle",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "no_error"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "idle · Phase unbekannt · Automatik-Lauf · Hinweis clean_mop_pad",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "idle",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "clean_mop_pad"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "idle · Phase unbekannt · Automatik-Lauf · Fehler brush_stuck",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "idle",
+    "attributes": {
+     "has_error": true
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "brush_stuck"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "idle · Phase unbekannt · Hand-Lauf · kein Fehler",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "idle",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "no_error"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "idle · Phase unbekannt · Hand-Lauf · Hinweis clean_mop_pad",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "idle",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "clean_mop_pad"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "idle · Phase unbekannt · Hand-Lauf · Fehler brush_stuck",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "idle",
+    "attributes": {
+     "has_error": true
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": "Tägliches Saugen"
+   },
+   "sensor.heidi_error": {
+    "state": "brush_stuck"
+   },
+   "sensor.heidi_task_status": {
+    "state": "completed"
+   },
+   "sensor.heidi_current_room": {
+    "state": "Kitchen"
+   }
+  }
+ },
+ {
+  "name": "cleaning · zone_cleaning ohne Automatik",
+  "overrides": {
+   "sensor.heidi_error": {
+    "state": "no_error"
+   },
+   "vacuum.heidi": {
+    "state": "cleaning"
+   },
+   "sensor.heidi_phase": {
+    "state": "unknown"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "off"
+   },
+   "sensor.heidi_task_status": {
+    "state": "zone_cleaning"
+   }
+  }
+ },
+ {
+  "name": "cleaning · Automatik an, aber Planname leer",
+  "overrides": {
+   "sensor.heidi_error": {
+    "state": "no_error"
+   },
+   "vacuum.heidi": {
+    "state": "cleaning"
+   },
+   "sensor.heidi_phase": {
+    "state": "Saugt Bad"
+   },
+   "input_boolean.heidi_auto_lauf": {
+    "state": "on"
+   },
+   "input_text.heidi_auto_letzter_plan": {
+    "state": ""
+   },
+   "sensor.heidi_task_status": {
+    "state": "spot_cleaning"
+   }
+  }
+ },
+ {
+  "name": "returning · Phase gleich Fährt zur Station → sub leer",
+  "overrides": {
+   "sensor.heidi_error": {
+    "state": "no_error"
+   },
+   "vacuum.heidi": {
+    "state": "returning"
+   },
+   "sensor.heidi_phase": {
+    "state": "Fährt zur Station"
+   }
+  }
+ },
+ {
+  "name": "docked · Phase leer, status charging_completed",
+  "overrides": {
+   "sensor.heidi_error": {
+    "state": "no_error"
+   },
+   "vacuum.heidi": {
+    "state": "docked"
+   },
+   "sensor.heidi_phase": {
+    "state": ""
+   },
+   "sensor.heidi_status": {
+    "state": "charging_completed"
+   }
+  }
+ },
+ {
+  "name": "docked · Phase unavailable, status unbekannt some_new_state",
+  "overrides": {
+   "sensor.heidi_error": {
+    "state": "no_error"
+   },
+   "vacuum.heidi": {
+    "state": "docked"
+   },
+   "sensor.heidi_phase": {
+    "state": "unavailable"
+   },
+   "sensor.heidi_status": {
+    "state": "some_new_state"
+   }
+  }
+ },
+ {
+  "name": "Fehler unbekannt ohne Übersetzung",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "docked",
+    "attributes": {
+     "has_error": false
+    }
+   },
+   "sensor.heidi_error": {
+    "state": "strange_thing_happened"
+   }
+  }
+ },
+ {
+  "name": "Fehler unavailable → kein Chip",
+  "overrides": {
+   "vacuum.heidi": {
+    "state": "docked"
+   },
+   "sensor.heidi_error": {
+    "state": "unavailable"
+   }
+  }
+ },
+ {
+  "name": "DND leer",
+  "overrides": {
+   "sensor.heidi_error": {
+    "state": "no_error"
+   },
+   "time.heidi_dnd_start": {
+    "state": ""
+   },
+   "time.heidi_dnd_end": {
+    "state": "unknown"
+   }
+  }
+ },
+ {
+  "name": "Streifen · Jetzt Küche, danach Büro (Reihenfolge aus Helfer)",
+  "overrides": {
+   "sensor.heidi_error": {
+    "state": "no_error"
+   },
+   "select.heidi_room_6_cleaning_mode": {
+    "state": "sweeping_and_mopping"
+   },
+   "select.heidi_room_6_suction_level": {
+    "state": "turbo"
+   },
+   "select.heidi_room_6_mop_pad_humidity": {
+    "state": "moist"
+   },
+   "select.heidi_room_6_cleaning_route": {
+    "state": "standard"
+   },
+   "select.heidi_room_6_cleaning_times": {
+    "state": "2x"
+   },
+   "vacuum.heidi": {
+    "state": "cleaning",
+    "attributes": {
+     "current_segment": 6,
+     "cleaning_sequence": [
+      1,
+      6,
+      7,
+      2,
+      4,
+      3,
+      5
+     ],
+     "active_segments": [
+      7,
+      6,
+      5
+     ],
+     "cleaned_area": 12
+    }
+   },
+   "input_text.heidi_lauf_reihenfolge": {
+    "state": "7,6,5"
+   },
+   "sensor.heidi_phase": {
+    "state": "Saugt und wischt Küche"
+   }
+  }
+ },
+ {
+  "name": "Streifen · Fährt zum Startpunkt (Fläche 0)",
+  "overrides": {
+   "sensor.heidi_error": {
+    "state": "no_error"
+   },
+   "select.heidi_room_6_cleaning_mode": {
+    "state": "sweeping_and_mopping"
+   },
+   "select.heidi_room_6_suction_level": {
+    "state": "turbo"
+   },
+   "select.heidi_room_6_mop_pad_humidity": {
+    "state": "moist"
+   },
+   "select.heidi_room_6_cleaning_route": {
+    "state": "standard"
+   },
+   "select.heidi_room_6_cleaning_times": {
+    "state": "2x"
+   },
+   "vacuum.heidi": {
+    "state": "cleaning",
+    "attributes": {
+     "current_segment": 6,
+     "cleaning_sequence": [
+      1,
+      6,
+      7,
+      2,
+      4,
+      3,
+      5
+     ],
+     "active_segments": [
+      7,
+      6,
+      5
+     ],
+     "cleaned_area": 0
+    }
+   },
+   "input_text.heidi_lauf_reihenfolge": {
+    "state": "7,6,5"
+   },
+   "sensor.heidi_phase": {
+    "state": "Fährt zum Startpunkt"
+   }
+  }
+ },
+ {
+  "name": "Streifen · Fährt durch Raum außerhalb des Auftrags",
+  "overrides": {
+   "sensor.heidi_error": {
+    "state": "no_error"
+   },
+   "select.heidi_room_6_cleaning_mode": {
+    "state": "sweeping_and_mopping"
+   },
+   "select.heidi_room_6_suction_level": {
+    "state": "turbo"
+   },
+   "select.heidi_room_6_mop_pad_humidity": {
+    "state": "moist"
+   },
+   "select.heidi_room_6_cleaning_route": {
+    "state": "standard"
+   },
+   "select.heidi_room_6_cleaning_times": {
+    "state": "2x"
+   },
+   "vacuum.heidi": {
+    "state": "cleaning",
+    "attributes": {
+     "current_segment": 6,
+     "cleaning_sequence": [
+      1,
+      6,
+      7,
+      2,
+      4,
+      3,
+      5
+     ],
+     "active_segments": [
+      7,
+      5
+     ],
+     "cleaned_area": 12
+    }
+   },
+   "input_text.heidi_lauf_reihenfolge": {
+    "state": ""
+   },
+   "sensor.heidi_phase": {
+    "state": "Fährt durch Küche"
+   }
+  }
+ },
+ {
+  "name": "Streifen · letzter Raum, Roboter-Reihenfolge (Helfer passt nicht)",
+  "overrides": {
+   "sensor.heidi_error": {
+    "state": "no_error"
+   },
+   "select.heidi_room_6_cleaning_mode": {
+    "state": "sweeping_and_mopping"
+   },
+   "select.heidi_room_6_suction_level": {
+    "state": "turbo"
+   },
+   "select.heidi_room_6_mop_pad_humidity": {
+    "state": "moist"
+   },
+   "select.heidi_room_6_cleaning_route": {
+    "state": "standard"
+   },
+   "select.heidi_room_6_cleaning_times": {
+    "state": "2x"
+   },
+   "vacuum.heidi": {
+    "state": "paused",
+    "attributes": {
+     "current_segment": 6,
+     "cleaning_sequence": [
+      1,
+      6,
+      7,
+      2,
+      4,
+      3,
+      5
+     ],
+     "active_segments": [
+      7,
+      6
+     ],
+     "cleaned_area": 12
+    }
+   },
+   "input_text.heidi_lauf_reihenfolge": {
+    "state": "7,6,5"
+   },
+   "sensor.heidi_phase": {
+    "state": "Pausiert"
+   }
+  }
+ },
+ {
+  "name": "Streifen · Raumwerte unavailable → kein Streifen",
+  "overrides": {
+   "sensor.heidi_error": {
+    "state": "no_error"
+   },
+   "vacuum.heidi": {
+    "state": "cleaning",
+    "attributes": {
+     "current_segment": 6,
+     "cleaning_sequence": [
+      1,
+      6,
+      7,
+      2,
+      4,
+      3,
+      5
+     ],
+     "active_segments": [
+      7,
+      6
+     ],
+     "cleaned_area": 12
+    }
+   },
+   "sensor.heidi_phase": {
+    "state": "Saugt Küche"
+   }
+  }
+ }
 ]

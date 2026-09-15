@@ -136,8 +136,9 @@ const HANDLERS = {
     const { page, errs } = await mountV1(browser, baseStates);
     const out = await page.evaluate((inp) => {
       const el = document.querySelector('heidi-panel');
-      const args = (inp.args || []).map((a) => (a && a.__set ? new Set(a.__set) : a));
-      return { result: el[inp.fn](...args) };
+      const today = new Date(); today.setHours(9, 5, 0, 0); // heute 09:05 lokale Zeit
+      const args = (inp.args || []).map((a) => (a && a.__set ? new Set(a.__set) : a === '__today__' ? today.toISOString() : a));
+      return { result: el[inp.fn](...args), today: today.toISOString() };
     }, input);
     await page.close();
     return { out, errs };
