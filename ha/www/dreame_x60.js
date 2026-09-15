@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.19 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.20 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -557,6 +557,7 @@ var current = null;
 var generation = 0;
 var devicePrefix = () => current?.prefix ?? "";
 var deviceName = () => current?.name ?? "";
+var device = () => current;
 function apply(next) {
   if ((current?.vac ?? null) !== (next?.vac ?? null) || current?.name !== next?.name) generation++;
   current = next;
@@ -905,7 +906,7 @@ function roomsFromMap(rooms, deutsch = false, namesDe = {}) {
       name = deutsch ? namesDe[raw] ?? raw : raw;
       icon = roomIcon(name, r4.icon);
     }
-    out.push({ id, name, short: shortName(name), icon, order: typeof r4.order === "number" ? r4.order : id });
+    out.push({ id, name, short: shortName(name), icon, order: typeof r4.order === "number" ? r4.order : id, typed: !!typed });
   }
   return out.sort((a3, b3) => a3.order - b3.order || a3.id - b3.id);
 }
@@ -995,7 +996,7 @@ function roomsFromSelects(s4) {
     const n4 = parseInt(m2[1], 10);
     const fn = cleanName(s4[id]?.attributes.friendly_name);
     const name = fn.replace(new RegExp(`^${deviceName().replace(/[.*+?^${}()|[\\]\\\\]/g, "\\\\$&")}\\s*`, "i"), "").replace(/cleaning mode/i, "").trim() || `Raum ${n4}`;
-    out.push({ id: n4, name, short: shortName(name), icon: roomIcon(name), order: n4 });
+    out.push({ id: n4, name, short: shortName(name), icon: roomIcon(name), order: n4, typed: false });
   }
   return out.sort((a3, b3) => a3.order - b3.order || a3.id - b3.id);
 }
@@ -1218,6 +1219,68 @@ var DxApi = class {
     return h3.callApi("GET", historyPath(new Date(startSec * 1e3).toISOString(), new Date(endSec * 1e3).toISOString()));
   }
 };
+
+// src/domain/setup.ts
+var ok = (key, icon, label) => ({ key, icon, label, level: "ok", text: label });
+function setupChecks(i5) {
+  const out = [];
+  out.push(i5.robot ? ok("robot", "mdi:robot-vacuum", `Roboter erkannt: ${i5.robot.name}`) : { key: "robot", icon: "mdi:robot-vacuum", label: "Roboter", level: "error", text: "Kein Dreame-Roboter gefunden \u2013 Integration einrichten oder \u201Erobot:\u201C in der Kartenkonfiguration setzen", action: { kind: "ha-path", path: "/config/integrations" } });
+  out.push(i5.missingPackage.length ? { key: "package", icon: "mdi:package-variant", label: "Paket", level: "error", text: `${i5.missingPackage.length} Helfer des Pakets fehlen \u2013 Paket heidi.yaml und Automationen pr\xFCfen`, action: { kind: "page", page: "einstellungen" } } : ok("package", "mdi:package-variant", "Paket vollst\xE4ndig"));
+  if (i5.robot) out.push(i5.missingRobot.length ? { key: "entities", icon: "mdi:format-list-checks", label: "Roboter-Entit\xE4ten", level: "warn", text: `${i5.missingRobot.length} Entit\xE4ten des Roboters fehlen oder sind deaktiviert`, action: { kind: "page", page: "einstellungen" } } : ok("entities", "mdi:format-list-checks", "Roboter-Entit\xE4ten vollst\xE4ndig"));
+  if (i5.robot) out.push(i5.hasMapData ? ok("mapdata", "mdi:map-check", "Datenkarte aktiv") : { key: "mapdata", icon: "mdi:map-check", label: "Datenkarte", level: "warn", text: "Datenkarte nicht aktiviert \u2013 R\xE4ume in der Heidi-Karte fehlen (Entit\xE4t \u201ECurrent Map Data\u201C in der Dreame-Integration einschalten)", action: { kind: "ha-path", path: "/config/integrations/integration/dreame_vacuum" } });
+  if (i5.robot && i5.customizedCleaning !== null) {
+    const off = i5.customizedCleaning === "off" && !i5.running;
+    out.push(off ? { key: "customized", icon: "mdi:tune-variant", label: "Angepasste Reinigung", level: "warn", text: "Angepasste Reinigung ist aus \u2013 Raumwerte je Raum wirken nicht", action: { kind: "more-info", entity: i5.ids.customizedCleaning } } : ok("customized", "mdi:tune-variant", "Angepasste Reinigung an"));
+  }
+  if (i5.robot && i5.rooms.length) {
+    const known2 = new Set(Object.values(ROOM_TYPES).flatMap((t3) => [t3.name.toLowerCase(), t3.en.toLowerCase()]));
+    const custom = i5.rooms.filter((r4) => !r4.typed && known2.has(r4.name.trim().toLowerCase()));
+    out.push(custom.length ? { key: "roomtypes", icon: "mdi:tag-outline", label: "Raumtypen", level: "warn", text: `${custom.map((r4) => r4.name).join(", ")}: benutzerdefiniert, obwohl die App den Standardtyp kennt \u2013 f\xFCr die Sprachsteuerung in der App \u201ERaum umbenennen\u201C den Typ w\xE4hlen`, action: { kind: "more-info", entity: i5.ids.roomName(custom[0].id) } } : ok("roomtypes", "mdi:tag-outline", "Raumtypen passen"));
+  }
+  if (i5.robot && i5.mapping) {
+    const open = i5.mapping.segments.filter((s4) => !i5.mapping.assigned.has(s4.id));
+    out.push(open.length ? { key: "areas", icon: "mdi:home-map-marker", label: "R\xE4ume \u2194 Bereiche", level: "error", text: `${open.length === 1 ? "Ein Raum ist" : open.length + " R\xE4ume sind"} keinem HA-Bereich zugeordnet: ${open.map((s4) => s4.name).join(", ")}`, action: { kind: "more-info", entity: i5.robot.vac, hint: "Reinigung \u2192 Nach Bereich \u2192 Konfigurieren" } } : ok("areas", "mdi:home-map-marker", "Alle R\xE4ume einem HA-Bereich zugeordnet"));
+  }
+  if (i5.repairs) {
+    const mine = i5.repairs.filter((r4) => r4.domain === "dreame_vacuum" || r4.translation_key === "segments_changed" || r4.domain === "vacuum");
+    out.push(mine.length ? { key: "repairs", icon: "mdi:wrench-outline", label: "Reparaturen", level: "error", text: `${mine.length} offene ${mine.length === 1 ? "Reparatur" : "Reparaturen"} in HA (${mine.map((r4) => r4.translation_key ?? r4.issue_id).join(", ")})`, action: { kind: "ha-path", path: "/config/repairs" } } : ok("repairs", "mdi:wrench-outline", "Keine offenen Reparaturen"));
+  }
+  return out;
+}
+var setupProblems = (checks) => checks.filter((c4) => c4.level !== "ok");
+
+// src/ha/setup-loader.ts
+var TTL_MS = 5 * 60 * 1e3;
+var cache = /* @__PURE__ */ new Map();
+async function fetchSetup(hass, vac) {
+  if (!hass.callWS) return { mapping: null, repairs: null, at: Date.now() };
+  const safe = async (msg) => {
+    try {
+      return await hass.callWS(msg);
+    } catch {
+      return null;
+    }
+  };
+  const [entry, segs, issues] = await Promise.all([
+    safe({ type: "config/entity_registry/get", entity_id: vac }),
+    safe({ type: "vacuum/get_segments", entity_id: vac }),
+    safe({ type: "repairs/list_issues" })
+  ]);
+  let mapping = null;
+  if (segs?.segments) {
+    const assigned = /* @__PURE__ */ new Set();
+    for (const list of Object.values(entry?.options?.vacuum?.area_mapping ?? {})) for (const id of list) assigned.add(id);
+    mapping = { segments: segs.segments.map((s4) => ({ id: s4.id, name: s4.name })), assigned };
+  }
+  return { mapping, repairs: issues?.issues ?? null, at: Date.now() };
+}
+function loadSetupData(hass, vac, force = false) {
+  const c4 = cache.get(vac);
+  if (c4 && !force && Date.now() - c4.at < TTL_MS) return c4.promise;
+  const promise = fetchSetup(hass, vac);
+  cache.set(vac, { promise, at: Date.now() });
+  return promise;
+}
 
 // src/domain/status.ts
 var TASK_DE = {
@@ -1474,11 +1537,11 @@ var histCache = {};
 var histOk = (e4) => !!e4 && !EMPTY2.includes(e4.state) && Object.values(e4.attributes ?? {}).some((v2) => v2 && typeof v2 === "object" && "timestamp" in v2);
 var readHistory = memoizeSelector(() => [E2.cleaningHistory, E2.cleaningCount, E2.totalCleanedArea, E2.totalCleaningTime], (s4) => {
   const live = ent(s4, E2.cleaningHistory);
-  const ok = histOk(live);
-  if (ok && live) histCache = live.attributes;
-  const a3 = ok && live ? live.attributes : histCache;
+  const ok2 = histOk(live);
+  if (ok2 && live) histCache = live.attributes;
+  const a3 = ok2 && live ? live.attributes : histCache;
   const entries = Object.entries(a3).filter(([, v2]) => v2 && typeof v2 === "object" && "timestamp" in v2).map(([, v2]) => v2).sort((x2, y3) => Number(y3.timestamp) - Number(x2.timestamp)).slice(0, 30).map((v2) => ({ key: String(Math.floor(Number(v2.timestamp))), ts: Math.floor(Number(v2.timestamp)), area: parseInt(String(v2.cleaned_area ?? "").replace(/[^0-9]/g, ""), 10) || 0, min: parseInt(String(v2.cleaning_time ?? "").replace(/[^0-9]/g, ""), 10) || 0, raw: v2 }));
-  return { entries, count: num(s4, E2.cleaningCount, 0), totalArea: num(s4, E2.totalCleanedArea, 0), totalTime: num(s4, E2.totalCleaningTime, 0), stale: !ok };
+  return { entries, count: num(s4, E2.cleaningCount, 0), totalArea: num(s4, E2.totalCleanedArea, 0), totalTime: num(s4, E2.totalCleaningTime, 0), stale: !ok2 };
 });
 var readPrognose = memoizeSelector(() => [E2.prognose, E2.prognoseAktiv, E2.abweichungHeute, E2.progHerbert, E2.progNicole, E2.progNina, E2.prognoseWochen, E2.prognoseMindesttage], (s4) => {
   const p3 = ent(s4, E2.prognose);
@@ -1725,6 +1788,10 @@ function navigate(page, replace = false) {
   if (replace) history.replaceState(null, "", path);
   else history.pushState(null, "", path);
   window.dispatchEvent(new CustomEvent("location-changed", { detail: { replace } }));
+}
+function navigateHa(path) {
+  history.pushState(null, "", path);
+  window.dispatchEvent(new CustomEvent("location-changed", { detail: { replace: false } }));
 }
 
 // src/styles/tokens.ts
@@ -2055,7 +2122,7 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.19";
+var VERSION = "2.0.0-alpha.20";
 
 // src/shared/robot-svg.ts
 var robotSvg = w`<svg viewBox="0 0 200 200" class="robotpic" aria-hidden="true">
@@ -2815,7 +2882,7 @@ async function pngText(buf, key) {
 }
 
 // src/ha/mapdata-loader.ts
-var cache = /* @__PURE__ */ new Map();
+var cache2 = /* @__PURE__ */ new Map();
 var known = /* @__PURE__ */ new Map();
 var STORAGE_PREFIX = "dreame_x60.mapdata.";
 function loadKnown(mapKey) {
@@ -2841,7 +2908,7 @@ function storeKnown(mapKey, segs) {
 }
 function loadMapData(pictureUrl, version, mapKey = "0") {
   const key = `${version}|${pictureUrl.split("?")[0]}`;
-  let p3 = cache.get(key);
+  let p3 = cache2.get(key);
   if (!p3) {
     p3 = fetch(pictureUrl, { cache: "no-store" }).then(async (r4) => {
       if (!r4.ok) throw new Error(`HTTP ${r4.status}`);
@@ -2855,13 +2922,13 @@ function loadMapData(pictureUrl, version, mapKey = "0") {
       return mergeSegments(md, loadKnown(mapKey));
     }).catch((e4) => {
       console.warn("dreame_x60: Kartenpaket nicht ladbar", e4);
-      cache.delete(key);
+      cache2.delete(key);
       return null;
     });
-    cache.set(key, p3);
-    if (cache.size > 4) {
-      const first = cache.keys().next().value;
-      if (first !== void 0 && first !== key) cache.delete(first);
+    cache2.set(key, p3);
+    if (cache2.size > 4) {
+      const first = cache2.keys().next().value;
+      if (first !== void 0 && first !== key) cache2.delete(first);
     }
   }
   return p3;
@@ -3259,6 +3326,69 @@ var DxQuickstart = class extends i4 {
 };
 if (!customElements.get(QUICKSTART_ELEMENT)) customElements.define(QUICKSTART_ELEMENT, DxQuickstart);
 
+// src/components/dx-setup.ts
+var SETUP_ELEMENT = "dx-setup";
+var DxSetup = class extends i4 {
+  static {
+    this.styles = [controls, i`
+    :host { display: block; }
+    :host([hidden]) { display: none; }
+    .bar { display: flex; flex-direction: column; gap: 10px; padding: 12px 16px; border: 1px solid var(--dx-border); border-left: 4px solid var(--dx-danger); border-radius: var(--dx-radius-md); background: var(--dx-surface); }
+    .bar.warn { border-left-color: var(--dx-warning, #f0b35a); }
+    .icons { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .icons .t { font-size: 13px; color: var(--dx-text-muted); margin-right: 4px; }
+    .icons .sum { margin-left: auto; font-size: 13px; color: var(--dx-text-muted); }
+    .ic { width: 32px; height: 32px; border-radius: 50%; display: inline-grid; place-items: center; border: 1px solid var(--dx-border); background: var(--dx-surface-raised); color: var(--dx-text-muted); }
+    .ic ha-icon { --mdc-icon-size: 18px; width: 18px; height: 18px; }
+    .ic.error { background: color-mix(in srgb, var(--dx-danger) 22%, transparent); color: var(--dx-danger); border-color: var(--dx-danger); cursor: pointer; }
+    .ic.warn { background: color-mix(in srgb, var(--dx-warning, #f0b35a) 22%, transparent); color: var(--dx-warning, #f0b35a); border-color: var(--dx-warning, #f0b35a); cursor: pointer; }
+    .ic.ok { opacity: 0.55; }
+    .rows { display: flex; flex-direction: column; gap: 8px; }
+    .row { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; }
+    .row .tx { font-size: 13px; line-height: 1.4; }
+    .row .tx b { display: block; font-weight: 600; }
+    .row .hint { font-size: 12px; color: var(--dx-text-muted); }
+    @container content (max-width: 640px) { .row { grid-template-columns: auto 1fr; } .row .btn { grid-column: 2; justify-self: start; } }
+  `];
+  }
+  static {
+    this.properties = { checks: { attribute: false } };
+  }
+  constructor() {
+    super();
+    this.checks = [];
+  }
+  go(a3) {
+    if (!a3) return;
+    if (a3.kind === "more-info") moreInfo(this, a3.entity);
+    else if (a3.kind === "page") emit(this, EVENTS.navigate, { page: a3.page });
+    else navigateHa(a3.path);
+  }
+  render() {
+    const problems = setupProblems(this.checks);
+    if (!problems.length) return b2``;
+    const errors = problems.filter((p3) => p3.level === "error").length, warns = problems.length - errors;
+    const sum = [errors ? `${errors} ${errors === 1 ? "Problem" : "Probleme"}` : "", warns ? `${warns} ${warns === 1 ? "Hinweis" : "Hinweise"}` : ""].filter(Boolean).join(", ");
+    return b2`
+      <div class="bar ${errors ? "error" : "warn"}" role="status">
+        <div class="icons">
+          <span class="t">Einrichtung</span>
+          ${this.checks.map((c4) => b2`<button class="ic ${c4.level}" data-check=${c4.key} title=${c4.text} aria-label=${c4.text} @click=${() => this.go(c4.action)}><ha-icon icon=${c4.icon}></ha-icon></button>`)}
+          <span class="sum">${sum}</span>
+        </div>
+        <div class="rows">
+          ${problems.map((p3) => b2`
+            <div class="row" data-problem=${p3.key}>
+              <span class="ic ${p3.level}"><ha-icon icon=${p3.icon}></ha-icon></span>
+              <div class="tx"><b>${p3.label}</b>${p3.text}${p3.action?.kind === "more-info" && p3.action.hint ? b2`<div class="hint">Dort: ${p3.action.hint}</div>` : A}</div>
+              ${p3.action ? b2`<button class="btn sm" data-go=${p3.key} @click=${() => this.go(p3.action)}><ha-icon icon="mdi:arrow-right"></ha-icon>Öffnen</button>` : A}
+            </div>`)}
+        </div>
+      </div>`;
+  }
+};
+if (!customElements.get(SETUP_ELEMENT)) customElements.define(SETUP_ELEMENT, DxSetup);
+
 // src/dreame-x60-panel.ts
 var ELEMENT = "dreame-x60-panel";
 var TOAST_MS = 1900;
@@ -3266,6 +3396,7 @@ var GREETING = (h3) => h3 < 11 ? "Guten Morgen" : h3 < 18 ? "Guten Tag" : "Guten
 var DreameX60Panel = class extends i4 {
   constructor() {
     super();
+    this._setupVac = "";
     /** Schreibzugriffe – eine Instanz je Shell, liest hass zur Laufzeit. */
     this.api = new DxApi(() => this.hass);
     this._toastTimer = null;
@@ -3277,6 +3408,7 @@ var DreameX60Panel = class extends i4 {
     this._overlay = null;
     this._toast = null;
     this._now = Date.now();
+    this._setupData = null;
     this.addEventListener(EVENTS.openOverlay, (e4) => this.openOverlay(e4.detail));
     this.addEventListener(EVENTS.close, () => this.closeOverlay());
     this.addEventListener(EVENTS.back, () => this.backOverlay());
@@ -3293,12 +3425,47 @@ var DreameX60Panel = class extends i4 {
       _config: { state: true },
       _overlay: { state: true },
       _toast: { state: true },
-      _now: { state: true }
+      _now: { state: true },
+      _setupData: { state: true }
     };
   }
   /** Geräteerkennung vor jedem Render: Roboter-IDs und Anzeigename folgen HA (PD-012). */
   willUpdate(changed) {
-    if ((changed.has("hass") || changed.has("_config")) && this.hass) discoverDevice(this.hass, this._config.robot);
+    if ((changed.has("hass") || changed.has("_config")) && this.hass) {
+      discoverDevice(this.hass, this._config.robot);
+      const vac = device()?.vac ?? "";
+      if (vac && vac !== this._setupVac) {
+        this._setupVac = vac;
+        this.refreshSetup(false);
+      }
+    }
+  }
+  /** Bereichszuordnung/Reparaturen nachladen (Cache 5 min); Ergebnis nur setzen, wenn es sich geändert hat. */
+  refreshSetup(force) {
+    const hass = this.hass, vac = this._setupVac;
+    if (!hass || !vac) return;
+    void loadSetupData(hass, vac, force).then((d3) => {
+      if (this._setupVac === vac && d3 !== this._setupData) this._setupData = d3;
+    }, () => void 0);
+  }
+  /** Prüfungen aus Zuständen, Profil, Diagnose und nachgeladenen Daten (reine Funktion in domain/setup.ts). */
+  setupChecks(s4, robot) {
+    const dev = device();
+    const diag = readDiagnostics(s4);
+    const profile = readProfile(s4);
+    return setupChecks({
+      robot: dev ? { vac: dev.vac, name: dev.name } : null,
+      rooms: profile.rooms,
+      hasMapData: profile.has("mapData"),
+      missingRobot: (diag.groups[0]?.missing ?? []).filter((id) => id !== ENTITIES.mapData),
+      missingPackage: diag.groups[1]?.missing ?? [],
+      // Datenkarte hat eine eigene Prüfung
+      customizedCleaning: s4[ENTITIES.customizedCleaning]?.state ?? null,
+      running: robot.running,
+      ids: { customizedCleaning: ENTITIES.customizedCleaning, roomName: (id) => robotEntity("select", `room_${id}_name`) },
+      mapping: this._setupData?.mapping ?? null,
+      repairs: this._setupData?.repairs ?? null
+    });
   }
   connectedCallback() {
     super.connectedCallback();
@@ -3316,6 +3483,7 @@ var DreameX60Panel = class extends i4 {
   /** Nächster Tick zur vollen Minute (+50 ms), damit die Uhr nie eine Minute hinterherhinkt. */
   tickClock() {
     this._now = Date.now();
+    this.refreshSetup(false);
     this._clockTimer = setTimeout(() => this.tickClock(), 6e4 - Date.now() % 6e4 + 50);
   }
   // ───────── HA-Schnittstelle der Karte ─────────
@@ -3434,6 +3602,7 @@ var DreameX60Panel = class extends i4 {
     const rest = START_SLOTS.filter((sl) => !["hero", "map", "automatik", "auftrag", "heute", "quickstart"].includes(sl.slot));
     const dark = readSettings(s4).dark;
     return b2`
+      <dx-setup class="setup" .checks=${this.setupChecks(s4, robot)}></dx-setup>
       <div class="bento">
         <dx-hero class="b span3" data-slot="hero" .robot=${robot} .rooms=${rooms} .roomOrder=${map.roomOrder} .api=${this.api}></dx-hero>
         <dx-map-card class="b span6" data-slot="map" variant="compact" .hass=${this.hass} .map=${map} .robot=${robot} .history=${hist} .api=${this.api} ?dark=${dark}></dx-map-card>

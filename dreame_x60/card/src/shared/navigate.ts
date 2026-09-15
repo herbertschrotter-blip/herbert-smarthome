@@ -14,6 +14,12 @@ export function navigate(page: Page, replace = false): void {
   window.dispatchEvent(new CustomEvent('location-changed', { detail: { replace } }));
 }
 
+/** Zu einer HA-Seite außerhalb des Dashboards (z. B. /config/repairs) – derselbe Mechanismus wie HA selbst. */
+export function navigateHa(path: string): void {
+  history.pushState(null, '', path);
+  window.dispatchEvent(new CustomEvent('location-changed', { detail: { replace: false } }));
+}
+
 /** Seite aus dem aktuellen Pfad (für Tests und Rückfall); null, wenn nicht im Dashboard. */
 export function pageFromLocation(pathname: string = location.pathname, pages: readonly Page[]): Page | null {
   const m = pathname.match(/^\/dreame-x60\/([a-z]+)/);

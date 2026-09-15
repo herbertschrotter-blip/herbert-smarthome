@@ -12,6 +12,8 @@ export interface RoomInfo {
   icon: string;
   /** Reihenfolge aus der App (Attribut `order`), sonst die ID */
   order: number;
+  /** Standardtyp der App (type 1..15) – false = benutzerdefiniert */
+  typed: boolean;
 }
 
 /** Ein Eintrag aus `camera.<gerät>_map.rooms` (nur die Felder, die hier zählen). */
@@ -111,7 +113,7 @@ export function roomsFromMap(rooms: Record<string, MapRoomAttr | undefined> | nu
       name = deutsch ? (namesDe[raw] ?? raw) : raw;
       icon = roomIcon(name, r.icon);
     }
-    out.push({ id, name, short: shortName(name), icon, order: typeof r.order === 'number' ? r.order : id });
+    out.push({ id, name, short: shortName(name), icon, order: typeof r.order === 'number' ? r.order : id, typed: !!typed });
   }
   return out.sort((a, b) => a.order - b.order || a.id - b.id);
 }

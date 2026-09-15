@@ -6,7 +6,13 @@ import { LitElement, html, nothing } from 'lit';
 import type { PropertyValues, TemplateResult } from 'lit';
 import type { HomeAssistant, PanelConfig } from './ha/types';
 import { DxApi } from './ha/api';
-import { deviceName, discoverDevice } from './ha/device';
+import { device, deviceName, discoverDevice } from './ha/device';
+import { ENTITIES, robotEntity } from './ha/contract';
+import { readProfile } from './ha/profile';
+import { setupChecks } from './domain/setup';
+import type { SetupCheck } from './domain/setup';
+import { loadSetupData } from './ha/setup-loader';
+import type { SetupData } from './ha/setup-loader';
 import { readAllRoomValues, readAutomatik, readConsumables, readDiagnostics, readHistory, readLearn, readMap, readPlans, readPrognose, readRobot, readRobotSettings, readSettings, readStation } from './ha/selectors';
 import type { RobotView } from './ha/selectors';
 import { PAGES, PAGE_PARTS, PAGE_TITLE, START_SLOTS, startSlot, toPage } from './pages';
@@ -24,6 +30,7 @@ import './components/dx-auftrag';
 import './components/dx-dialog';
 import './components/dx-map-card';
 import './components/dx-quickstart';
+import './components/dx-setup';
 import { APP_SCENES } from './config';
 import { askConfirm } from './shared/overlay';
 import { controls } from './styles/controls';
@@ -46,6 +53,7 @@ export class DreameX60Panel extends LitElement {
     _overlay: { state: true },
     _toast: { state: true },
     _now: { state: true },
+    _setupData: { state: true },
   };
 
   declare hass?: HomeAssistant;
@@ -54,6 +62,9 @@ export class DreameX60Panel extends LitElement {
   declare private _toast: string | null;
   /** Uhrzeit der Kopfzeile, im Minutentakt. */
   declare private _now: number;
+  /** Einrichtungsprüfung (PD-014): nachgeladene Bereichszuordnung und Reparaturen, je Roboter */
+  declare private _setupData: SetupData | null;
+  private _setupVac = '';
 
   /** Schreibzugriffe – eine Instanz je Shell, liest hass zur Laufzeit. */
   readonly api = new DxApi(() => this.hass);
@@ -63,7 +74,36 @@ export class DreameX60Panel extends LitElement {
 
   /** Geräteerkennung vor jedem Render: Roboter-IDs und Anzeigename folgen HA (PD-012). */
   override willUpdate(changed: PropertyValues): void {
-    if ((changed.has('hass') || changed.has('_config')) && this.hass) discoverDevice(this.hass, this._config.robot);
+    if ((changed.has('hass') || changed.has('_config')) && this.hass) {
+      discoverDevice(this.hass, this._config.robot);
+      const vac = device()?.vac ?? '';
+      if (vac && vac !== this._setupVac) { this._setupVac = vac; this.refreshSetup(false); }
+    }
+  }
+
+  /** Bereichszuordnung/Reparaturen nachladen (Cache 5 min); Ergebnis nur setzen, wenn es sich geändert hat. */
+  private refreshSetup(force: boolean): void {
+    const hass = this.hass, vac = this._setupVac;
+    if (!hass || !vac) return;
+    void loadSetupData(hass, vac, force).then((d) => { if (this._setupVac === vac && d !== this._setupData) this._setupData = d; }, () => undefined);
+  }
+
+  /** Prüfungen aus Zuständen, Profil, Diagnose und nachgeladenen Daten (reine Funktion in domain/setup.ts). */
+  private setupChecks(s: HomeAssistant['states'], robot: RobotView): SetupCheck[] {
+    const dev = device();
+    const diag = readDiagnostics(s);
+    const profile = readProfile(s);
+    return setupChecks({
+      robot: dev ? { vac: dev.vac, name: dev.name } : null,
+      rooms: profile.rooms,
+      hasMapData: profile.has('mapData'),
+      missingRobot: (diag.groups[0]?.missing ?? []).filter((id) => id !== ENTITIES.mapData), missingPackage: diag.groups[1]?.missing ?? [], // Datenkarte hat eine eigene Prüfung
+      customizedCleaning: s[ENTITIES.customizedCleaning]?.state ?? null,
+      running: robot.running,
+      ids: { customizedCleaning: ENTITIES.customizedCleaning, roomName: (id) => robotEntity('select', `room_${id}_name`) },
+      mapping: this._setupData?.mapping ?? null,
+      repairs: this._setupData?.repairs ?? null,
+    });
   }
 
   constructor() {
@@ -72,6 +112,7 @@ export class DreameX60Panel extends LitElement {
     this._overlay = null;
     this._toast = null;
     this._now = Date.now();
+    this._setupData = null;
     this.addEventListener(EVENTS.openOverlay, (e) => this.openOverlay((e as CustomEvent<Overlay>).detail));
     this.addEventListener(EVENTS.close, () => this.closeOverlay());
     this.addEventListener(EVENTS.back, () => this.backOverlay());
@@ -95,6 +136,7 @@ export class DreameX60Panel extends LitElement {
   /** Nächster Tick zur vollen Minute (+50 ms), damit die Uhr nie eine Minute hinterherhinkt. */
   private tickClock(): void {
     this._now = Date.now();
+    this.refreshSetup(false); // alle fünf Minuten neu (Cache im Lader)
     this._clockTimer = setTimeout(() => this.tickClock(), 60_000 - (Date.now() % 60_000) + 50);
   }
 
@@ -203,6 +245,7 @@ export class DreameX60Panel extends LitElement {
     const rest = START_SLOTS.filter((sl) => !['hero', 'map', 'automatik', 'auftrag', 'heute', 'quickstart'].includes(sl.slot));
     const dark = readSettings(s).dark;
     return html`
+      <dx-setup class="setup" .checks=${this.setupChecks(s, robot)}></dx-setup>
       <div class="bento">
         <dx-hero class="b span3" data-slot="hero" .robot=${robot} .rooms=${rooms} .roomOrder=${map.roomOrder} .api=${this.api}></dx-hero>
         <dx-map-card class="b span6" data-slot="map" variant="compact" .hass=${this.hass} .map=${map} .robot=${robot} .history=${hist} .api=${this.api} ?dark=${dark}></dx-map-card>

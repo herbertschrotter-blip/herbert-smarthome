@@ -64,7 +64,7 @@ test('dayLabel / roomLabel / roomName Grenzfälle', () => {
   assert.equal(dayLabel([true, false, false, false, false, false, true]), 'Mo + So');
   assert.equal(roomLabel([7, 7, 7, 7, 7, 7, 7], HEIDI_ROOMS), 'Wohnz., Wohnz., Wohnz., Wohnz., Wohnz., Wohnz., Wohnz.', 'sieben gleiche IDs sind nicht „Alle“');
   assert.equal(roomLabel(new Set([2, 1]), HEIDI_ROOMS), 'Schlafz., Bad');
-  assert.equal(roomLabel([1, 2], [{ id: 1, name: 'Bad', short: 'Bad', icon: '', order: 1 }, { id: 2, name: 'Küche', short: 'Küche', icon: '', order: 2 }]), 'Alle', '„Alle“ hängt an der Raumliste des Roboters');
+  assert.equal(roomLabel([1, 2], [{ id: 1, name: 'Bad', short: 'Bad', icon: '', order: 1, typed: false }, { id: 2, name: 'Küche', short: 'Küche', icon: '', order: 2, typed: false }]), 'Alle', '„Alle“ hängt an der Raumliste des Roboters');
   assert.equal(roomName('Kitchen', false), 'Kitchen');
   assert.equal(roomName(null, true), '–');
 });

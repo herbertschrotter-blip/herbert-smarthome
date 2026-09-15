@@ -65,7 +65,7 @@ function roomsFromSelects(s: States): RoomInfo[] {
     const n = parseInt(m[1]!, 10);
     const fn = cleanName(s[id]?.attributes.friendly_name);
     const name = fn.replace(new RegExp(`^${deviceName().replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')}\\s*`, 'i'), '').replace(/cleaning mode/i, '').trim() || `Raum ${n}`;
-    out.push({ id: n, name, short: shortName(name), icon: roomIcon(name), order: n });
+    out.push({ id: n, name, short: shortName(name), icon: roomIcon(name), order: n, typed: false });
   }
   return out.sort((a, b) => a.order - b.order || a.id - b.id);
 }

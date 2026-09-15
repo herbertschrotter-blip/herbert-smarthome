@@ -13,6 +13,8 @@ export interface HomeAssistant {
   states: States;
   callService(domain: string, service: string, data?: Record<string, unknown>): Promise<unknown>;
   callApi?<T = unknown>(method: 'GET' | 'POST', path: string, data?: Record<string, unknown>): Promise<T>;
+  /** WebSocket-Befehl (Entitäts-Register, vacuum/get_segments, Reparaturen – Einrichtungsprüfung PD-014). */
+  callWS?<T = unknown>(msg: Record<string, unknown>): Promise<T>;
   language?: string;
   themes?: { darkMode?: boolean };
   /** Angemeldeter Benutzer (für den Tagesgruß der Übersicht, Bauplan 4.0). */
