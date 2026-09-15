@@ -14,9 +14,11 @@ export function toggleAll(sel: ReadonlySet<number>, order: readonly RoomInfo[]):
   return sel.size === order.length ? new Set() : new Set(order.map((r) => r.id));
 }
 
-/** Räume der Auswahl in Anzeigereihenfolge (wie die Kacheln). */
+/** Räume der Auswahl in der Reihenfolge des Antippens (Set behält die Einfügereihenfolge) – so fährt Heidi sie auch ab (Herbert, 15.09.). */
 export function selectedRooms(sel: ReadonlySet<number>, order: readonly RoomInfo[]): RoomInfo[] {
-  return order.filter((r) => sel.has(r.id));
+  const out: RoomInfo[] = [];
+  for (const id of sel) { const r = order.find((x) => x.id === id); if (r) out.push(r); }
+  return out;
 }
 
 /** Beschriftung der Startleiste: „Ganze Wohnung“, „1 Raum“, „3 Räume“. */
@@ -31,7 +33,7 @@ export function confirmText(sel: ReadonlySet<number>, order: readonly RoomInfo[]
   return `Jetzt reinigen: ${selectedRooms(sel, order).map((r) => r.short).join(', ')}?`;
 }
 
-/** Segmente für vacuum_clean_segment in Anzeigereihenfolge (der Roboter fährt in seiner eigenen Reihenfolge). */
+/** Segmente für vacuum_clean_segment in Reihenfolge der Auswahl. */
 export function segmentsOf(sel: ReadonlySet<number>, order: readonly RoomInfo[]): number[] {
   return selectedRooms(sel, order).map((r) => r.id);
 }

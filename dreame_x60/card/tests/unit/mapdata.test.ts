@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { pngText } from '../../src/domain/png-text';
-import { parseValetudo, pxToVac, vacToPx, rowIndex, segmentAt, segmentPath } from '../../src/domain/mapdata';
+import { parseValetudo, pxToVac, vacToPx, rowIndex, segmentAt, segmentPath, segmentOutline, mergeSegments } from '../../src/domain/mapdata';
 import { calibration } from '../../src/domain/calibration';
 import type { CalibPoint } from '../../src/domain/calibration';
 
@@ -56,7 +56,52 @@ test('SVG-Pfad: je Lauflänge ein Viereck, in Bildpixeln über die Kalibrierung'
   const d = segmentPath(md, wc, (x, y) => calib.toMap(x, y));
   assert.equal((d.match(/M/g) ?? []).length, wc.runs.length);
   assert.equal((d.match(/L/g) ?? []).length, wc.runs.length * 3);
-  // Alle Punkte innerhalb des Kartenbilds (1068×680)
+  // Alle Punkte innerhalb des Kartenbilds (1040×680)
   const nums = d.match(/-?\d+(\.\d+)?/g)!.map(Number);
   assert.ok(nums.every((n) => n >= -5 && n <= 1075), 'Koordinaten im Bild');
+});
+
+test('Umriss: geschlossene Schleifen aus Randkanten; jeder Eckpunkt liegt am Rand der Maske; Schwerpunkt im Raum', () => {
+  const rows = rowIndex(md);
+  const ident = (x: number, y: number): [number, number] => [x, y]; // Roboter-mm unverändert → Eckpunkte in mm
+  for (const s of md.segments) {
+    const d = segmentOutline(md, s, ident);
+    const loops = d.split('M').filter(Boolean);
+    assert.ok(loops.length >= 1 && loops.length < 30, `${s.name}: ${loops.length} Schleifen`);
+    const quads = segmentPath(md, s, ident);
+    assert.ok(d.length < quads.length, `${s.name}: Umriss kürzer als Vierecke`);
+    // Eckpunkte zurück ins Raster: jede Ecke grenzt an mindestens einen Raum-Pixel und einen Nicht-Raum-Pixel
+    for (const loop of loops) {
+      const pts = loop.replace('Z', '').split('L').map((p) => p.trim().split(' ').map(Number) as [number, number]);
+      assert.ok(pts.length >= 4, `${s.name}: Schleife mit ${pts.length} Punkten`);
+      for (const [mx, my] of pts) {
+        const { px, py } = vacToPx(md, mx, my); // Ecke = Rasterknoten; angrenzende Pixel: (px-1|px, py-1|py)
+        const around = [[px, py], [px - 1, py], [px, py - 1], [px - 1, py - 1]].map(([x, y]) => segmentAt(rows, x!, y!) === s.id);
+        assert.ok(around.some(Boolean) && !around.every(Boolean), `${s.name}: Ecke (${px},${py}) nicht am Rand`);
+      }
+    }
+    assert.ok(s.centroid.x >= s.bbox.x0 && s.centroid.x <= s.bbox.x1 && s.centroid.y >= s.bbox.y0 && s.centroid.y <= s.bbox.y1, `${s.name}: Schwerpunkt in der Bounding-Box`);
+  }
+  // Schwerpunkt liegt bei den Wohnungsräumen (keine ausgeprägten L-Formen) auf der Raumfläche
+  const inside = md.segments.filter((s) => segmentAt(rows, Math.round(s.centroid.x), Math.round(s.centroid.y)) === s.id);
+  assert.equal(inside.length, md.segments.length, `Schwerpunkt im Raum: ${inside.map((s) => s.name).join(', ')}`);
+});
+
+test('Teilpaket (Raumauftrag): nur aktive Räume im Paket → partial; Ergänzung aus dem letzten vollständigen Paket, aktive Räume bleiben die des Teilpakets', () => {
+  assert.equal(md.partial, false, 'Muster ist vollständig');
+  assert.equal(mergeSegments(md, null), md, 'vollständig: unverändert');
+  const j = JSON.parse(jsonText) as { layers: { type: string; metaData?: { segmentId?: number; active?: boolean }; compressedPixels?: number[] }[] };
+  const kueche = j.layers.find((l) => l.type === 'segment' && l.metaData?.segmentId === 6)!;
+  kueche.metaData!.active = true;
+  kueche.compressedPixels = kueche.compressedPixels!.slice(0, 30); // Lage im Lauf weicht ab
+  j.layers = [{ type: 'floor', compressedPixels: [100, 100, 3] }, kueche];
+  const part = parseValetudo(JSON.stringify(j));
+  assert.equal(part.partial, true);
+  assert.deepEqual(part.segments.map((s) => [s.id, s.active]), [[6, true]]);
+  assert.equal(mergeSegments(part, null).segments.length, 1, 'ohne bekannte Räume bleibt das Teilpaket');
+  const merged = mergeSegments(part, md.segments);
+  assert.deepEqual(merged.segments.map((s) => s.id), [7, 6, 5, 4, 3, 2, 1], 'Reihenfolge des vollständigen Pakets');
+  assert.equal(merged.segments.find((s) => s.id === 6)!.runs.length, 10, 'Küche aus dem Teilpaket');
+  assert.equal(merged.segments.find((s) => s.id === 7)!.runs.length, md.segments.find((s) => s.id === 7)!.runs.length, 'Wohnzimmer aus dem bekannten Paket');
+  assert.equal(merged.partial, true);
 });

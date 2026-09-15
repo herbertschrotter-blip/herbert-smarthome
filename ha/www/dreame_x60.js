@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.15 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.16 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -781,6 +781,14 @@ var DxApi = class {
   cleanSegments(segments) {
     return this.call(SERVICES.cleanSegment.domain, SERVICES.cleanSegment.service, { entity_id: ENTITIES.vac, segments });
   }
+  /**
+   * Räume in der gewählten Reihenfolge reinigen (Karte/Schnellstart, 4.3b): merkt die Reihenfolge wie das Planer-Skript
+   * in input_text.heidi_lauf_reihenfolge (Kopf-Streifen, Auftrag-Kachel) und ruft dann vacuum_clean_segment auf.
+   */
+  async startRooms(segments) {
+    await this.call(SERVICES.inputText.domain, SERVICES.inputText.service, { entity_id: ENTITIES.laufReihenfolge, value: segments.join(",") });
+    return this.cleanSegments(segments);
+  }
   /** Raumwert am Roboter sofort setzen; `'all'` = alle sieben Räume parallel. Wdh als „2x“, sonst HA-Option aus RV_HA. */
   setRoomValue(room, key, value) {
     const ids = room === "all" ? ROOM_IDS : [room];
@@ -1388,7 +1396,7 @@ var readMap = memoizeSelector([E2.map, E2.karte, E2.chairs, E2.selectedMap, E2.m
   const mdEnt = ent(s4, E2.mapData);
   const mdPic = String(attr(s4, E2.mapData, "entity_picture") ?? "");
   return {
-    mapData: mdEnt && !EMPTY2.includes(mdEnt.state) && mdPic ? { picture: mdPic, version: mdEnt.state } : null,
+    mapData: mdEnt && !EMPTY2.includes(mdEnt.state) && mdPic ? { picture: mdPic, version: mdEnt.state, mapKey: String(attr(s4, E2.mapData, "saved_map_id") ?? attr(s4, E2.mapData, "map_id") ?? "0") } : null,
     entityPicture: String(attr(s4, E2.map, "entity_picture") ?? ""),
     calibrationPoints: attr(s4, E2.map, "calibration_points") ?? null,
     noGoAreas: attr(s4, E2.map, "no_go_areas") ?? null,
@@ -1402,7 +1410,7 @@ var readMap = memoizeSelector([E2.map, E2.karte, E2.chairs, E2.selectedMap, E2.m
     roomShapes: roomShapes(s4),
     selectedMap: sm && !EMPTY2.includes(sm.state) ? { id: E2.selectedMap, value: sm.state, options: opts(s4, E2.selectedMap) } : null
   };
-}, { [E2.map]: stateAndAttributes(["entity_picture", "calibration_points", "no_go_areas", "no_mopping_areas", "virtual_walls", "rooms"]), [E2.mapData]: stateAndAttributes(["entity_picture"]) });
+}, { [E2.map]: stateAndAttributes(["entity_picture", "calibration_points", "no_go_areas", "no_mopping_areas", "virtual_walls", "rooms"]), [E2.mapData]: stateAndAttributes(["entity_picture", "saved_map_id", "map_id"]) });
 var isRobotId = (id) => /^(vacuum|camera|switch|button|select\.heidi_(room_|carpet|water|drying|auto_empty|self_clean|cleangenius|map_rotation)|number|time)\./.test(id) || /^sensor\.heidi_(status|error|task_status|battery_level|current_room|cleaned_area|cleaning_time|cleaning_history|cleaning_count|total_|first_cleaning|main_brush|side_brush|filter_left|sensor_dirty|wheel_dirty|dust_bag|clean_water|dirty_water|detergent|low_water|auto_empty|self_wash)/.test(id);
 var readDiagnostics = memoizeSelector(allContractIds(), (s4) => {
   const ids = allContractIds();
@@ -1821,7 +1829,7 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.15";
+var VERSION = "2.0.0-alpha.16";
 
 // src/shared/robot-svg.ts
 var robotSvg = w`<svg viewBox="0 0 200 200" class="robotpic" aria-hidden="true">
@@ -2428,7 +2436,7 @@ function calibration(points) {
 function parseValetudo(text) {
   const j = JSON.parse(text);
   if (!j || !j.size || !j.pixelSize || !Array.isArray(j.layers)) throw new Error("kein Valetudo-Kartenpaket");
-  const md = { size: { x: j.size.x, y: j.size.y }, pixelSize: j.pixelSize, rotation: j.metaData?.rotation ?? 0, segments: [], robot: null, charger: null, paths: [] };
+  const md = { size: { x: j.size.x, y: j.size.y }, pixelSize: j.pixelSize, rotation: j.metaData?.rotation ?? 0, segments: [], robot: null, charger: null, paths: [], partial: false };
   for (const l3 of j.layers) {
     if (l3.type !== "segment") continue;
     const id = parseInt(String(l3.metaData?.segmentId ?? ""), 10);
@@ -2440,8 +2448,9 @@ function parseValetudo(text) {
     const xs = runs.flatMap((r4) => [r4[0], r4[0] + r4[2] - 1]), ys = runs.map((r4) => r4[1]);
     const bbox = { x0: Math.min(...xs), y0: Math.min(...ys), x1: Math.max(...xs), y1: Math.max(...ys) };
     const d3 = l3.dimensions;
-    md.segments.push({ id, name: String(l3.metaData?.name ?? `Raum ${id}`), runs, pixelCount: d3?.pixelCount ?? count, mid: { x: d3?.x.mid ?? (bbox.x0 + bbox.x1) / 2, y: d3?.y.mid ?? (bbox.y0 + bbox.y1) / 2 }, bbox });
+    md.segments.push({ id, name: String(l3.metaData?.name ?? `Raum ${id}`), runs, pixelCount: d3?.pixelCount ?? count, mid: { x: d3?.x.mid ?? (bbox.x0 + bbox.x1) / 2, y: d3?.y.mid ?? (bbox.y0 + bbox.y1) / 2 }, centroid: anchorOf(runs, bbox), bbox, active: l3.metaData?.active === true });
   }
+  md.partial = md.segments.some((s4) => s4.active);
   const cm = (v2) => v2;
   for (const e4 of j.entities ?? []) {
     if (e4.type === "robot_position" && e4.points.length >= 2) md.robot = { ...cmToVac(md, cm(e4.points[0]), cm(e4.points[1])), angle: e4.metaData?.angle };
@@ -2460,16 +2469,82 @@ function parseValetudo(text) {
 function cmToVac(md, cx, cy) {
   return { x: (cx - md.size.x / 2) * 10, y: (md.size.y / 2 - cy) * 10 };
 }
-function segmentPath(md, seg, toTarget) {
+function pxToVac(md, px, py) {
+  return cmToVac(md, (px + 0.5) * md.pixelSize, (py + 0.5) * md.pixelSize);
+}
+function mergeSegments(md, known2) {
+  if (!md.partial || !known2?.length) return md;
+  const own = new Map(md.segments.map((s4) => [s4.id, s4]));
+  const segments = known2.map((k2) => own.get(k2.id) ?? k2);
+  for (const s4 of md.segments) if (!known2.some((k2) => k2.id === s4.id)) segments.push(s4);
+  return { ...md, segments };
+}
+function anchorOf(runs, bbox) {
+  const count = runs.reduce((n4, r5) => n4 + r5[2], 0);
+  if (!count) return { x: (bbox.x0 + bbox.x1) / 2, y: (bbox.y0 + bbox.y1) / 2 };
+  const cx = runs.reduce((a3, r5) => a3 + r5[2] * (r5[0] + (r5[2] - 1) / 2), 0) / count, cy = runs.reduce((a3, r5) => a3 + r5[2] * r5[1], 0) / count;
+  const rx = Math.round(cx), ry = Math.round(cy);
+  if (runs.some((r5) => r5[1] === ry && rx >= r5[0] && rx < r5[0] + r5[2])) return { x: cx, y: cy };
+  let best = null, bestD = Infinity;
+  for (const r5 of runs) {
+    const dy = Math.abs(r5[1] - cy), covers = rx >= r5[0] && rx < r5[0] + r5[2];
+    const d3 = dy * 1e3 + (covers ? 0 : 500 - Math.min(r5[2], 499));
+    if (d3 < bestD) {
+      bestD = d3;
+      best = r5;
+    }
+  }
+  const r4 = best;
+  return { x: r4[0] + (r4[2] - 1) / 2, y: r4[1] };
+}
+function segmentOutline(md, seg, toTarget) {
+  const K = 1 << 16;
+  const inSeg = /* @__PURE__ */ new Set();
+  for (const [x2, y3, n4] of seg.runs) for (let i5 = 0; i5 < n4; i5++) inSeg.add(x2 + i5 + y3 * K);
+  const has = (x2, y3) => inSeg.has(x2 + y3 * K);
+  const edges = /* @__PURE__ */ new Map();
+  const add = (fx, fy, tx, ty) => {
+    const k2 = fx + fy * K;
+    const l3 = edges.get(k2);
+    if (l3) l3.push(tx + ty * K);
+    else edges.set(k2, [tx + ty * K]);
+  };
+  for (const [x0, y3, n4] of seg.runs) for (let x2 = x0; x2 < x0 + n4; x2++) {
+    if (!has(x2, y3 - 1)) add(x2, y3, x2 + 1, y3);
+    if (!has(x2 + 1, y3)) add(x2 + 1, y3, x2 + 1, y3 + 1);
+    if (!has(x2, y3 + 1)) add(x2 + 1, y3 + 1, x2, y3 + 1);
+    if (!has(x2 - 1, y3)) add(x2, y3 + 1, x2, y3);
+  }
   const ps = md.pixelSize;
-  const corner = (px, py) => {
-    const v2 = cmToVac(md, px * ps, py * ps);
+  const pt = (k2) => {
+    const v2 = cmToVac(md, k2 % K * ps, Math.floor(k2 / K) * ps);
     return toTarget(v2.x, v2.y);
   };
   const parts = [];
-  for (const [x2, y3, n4] of seg.runs) {
-    const a3 = corner(x2, y3), b3 = corner(x2 + n4, y3), c4 = corner(x2 + n4, y3 + 1), d3 = corner(x2, y3 + 1);
-    parts.push(`M${a3[0].toFixed(1)} ${a3[1].toFixed(1)}L${b3[0].toFixed(1)} ${b3[1].toFixed(1)}L${c4[0].toFixed(1)} ${c4[1].toFixed(1)}L${d3[0].toFixed(1)} ${d3[1].toFixed(1)}Z`);
+  while (edges.size) {
+    const start = edges.keys().next().value;
+    const loop = [start];
+    let cur = start;
+    for (let guard = 0; guard < 2e5; guard++) {
+      const outs = edges.get(cur);
+      if (!outs || !outs.length) break;
+      const next = outs.shift();
+      if (!outs.length) edges.delete(cur);
+      if (next === start) break;
+      loop.push(next);
+      cur = next;
+    }
+    if (loop.length < 3) continue;
+    const keep = [];
+    for (let i5 = 0; i5 < loop.length; i5++) {
+      const a3 = loop[(i5 + loop.length - 1) % loop.length], b3 = loop[i5], c4 = loop[(i5 + 1) % loop.length];
+      const ax = a3 % K, ay = Math.floor(a3 / K), bx = b3 % K, by = Math.floor(b3 / K), cx = c4 % K, cy = Math.floor(c4 / K);
+      if ((bx - ax) * (cy - by) - (by - ay) * (cx - bx) !== 0) keep.push(b3);
+    }
+    parts.push("M" + keep.map((k2) => {
+      const [u3, v2] = pt(k2);
+      return `${u3.toFixed(1)} ${v2.toFixed(1)}`;
+    }).join("L") + "Z");
   }
   return parts.join("");
 }
@@ -2514,14 +2589,43 @@ async function pngText(buf, key) {
 
 // src/ha/mapdata-loader.ts
 var cache = /* @__PURE__ */ new Map();
-function loadMapData(pictureUrl, version) {
+var known = /* @__PURE__ */ new Map();
+var STORAGE_PREFIX = "dreame_x60.mapdata.";
+function loadKnown(mapKey) {
+  const m2 = known.get(mapKey);
+  if (m2) return m2;
+  try {
+    const raw = globalThis.localStorage?.getItem(STORAGE_PREFIX + mapKey);
+    if (!raw) return null;
+    const segs = JSON.parse(raw);
+    if (!Array.isArray(segs) || !segs.length) return null;
+    known.set(mapKey, segs);
+    return segs;
+  } catch {
+    return null;
+  }
+}
+function storeKnown(mapKey, segs) {
+  known.set(mapKey, segs);
+  try {
+    globalThis.localStorage?.setItem(STORAGE_PREFIX + mapKey, JSON.stringify(segs));
+  } catch {
+  }
+}
+function loadMapData(pictureUrl, version, mapKey = "0") {
   const key = `${version}|${pictureUrl.split("?")[0]}`;
   let p3 = cache.get(key);
   if (!p3) {
     p3 = fetch(pictureUrl, { cache: "no-store" }).then(async (r4) => {
       if (!r4.ok) throw new Error(`HTTP ${r4.status}`);
       const text = await pngText(await r4.arrayBuffer(), "ValetudoMap");
-      return text ? parseValetudo(text) : null;
+      if (!text) return null;
+      const md = parseValetudo(text);
+      if (!md.partial) {
+        if (md.segments.length) storeKnown(mapKey, md.segments);
+        return md;
+      }
+      return mergeSegments(md, loadKnown(mapKey));
     }).catch((e4) => {
       console.warn("dreame_x60: Kartenpaket nicht ladbar", e4);
       cache.delete(key);
@@ -2554,16 +2658,14 @@ var DxHeidiMap = class extends i4 {
     .wrap { position: relative; width: 100%; line-height: 0; }
     img { display: block; width: 100%; height: auto; }
     svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-    .room { fill: transparent; stroke: transparent; cursor: pointer; transition: fill var(--dx-dur), stroke var(--dx-dur); }
-    .room:hover { fill: color-mix(in srgb, var(--dx-accent) 14%, transparent); }
-    .room.sel { fill: color-mix(in srgb, var(--dx-accent) 38%, transparent); stroke: var(--dx-accent); stroke-width: 1.5; paint-order: stroke; }
-    .room.cur { stroke: var(--dx-positive); stroke-width: 1.5; stroke-dasharray: 4 3; }
-    .room.cur.sel { stroke: var(--dx-accent); stroke-dasharray: none; }
-    .label { pointer-events: none; }
-    .label rect { fill: rgba(12, 18, 30, 0.72); stroke: rgba(255, 255, 255, 0.18); }
-    .label.sel rect { fill: var(--dx-accent); stroke: transparent; }
-    .label text { fill: var(--dx-text); font: 600 12px var(--dx-font); dominant-baseline: middle; text-anchor: middle; }
-    .label.sel text { fill: var(--dx-on-accent); }
+    .room { fill: transparent; stroke: transparent; stroke-width: 2.5; stroke-linejoin: round; fill-rule: evenodd; cursor: pointer; transition: fill var(--dx-dur), stroke var(--dx-dur); }
+    .room:hover { fill: rgba(255, 255, 255, 0.1); }
+    .room.sel { fill: rgba(255, 255, 255, 0.24); stroke: var(--dx-accent); }
+    .room.cur { stroke: var(--dx-positive); }
+    .room.cur.sel { stroke: var(--dx-accent); }
+    /* Nummern-Chip als HTML über dem Bild: feste Bildschirmgröße unabhängig vom Kartenmaßstab, leicht nach rechts oben
+       versetzt, damit er nicht auf der Raumbeschriftung des Kartenbilds sitzt */
+    .badge { position: absolute; width: 24px; height: 24px; margin: -12px 0 0 -12px; transform: translate(18px, -18px); border-radius: 50%; background: var(--dx-accent); color: var(--dx-on-accent); font: 700 13px/24px var(--dx-font); text-align: center; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45), 0 0 0 2px rgba(255, 255, 255, 0.85); pointer-events: none; }
     .hint { position: absolute; left: 10px; top: 10px; font: 12px var(--dx-font); color: var(--dx-text-muted); background: rgba(12, 18, 30, 0.72); padding: 4px 8px; border-radius: 6px; line-height: 1.3; }
   `;
   }
@@ -2575,7 +2677,7 @@ var DxHeidiMap = class extends i4 {
       const src = this.map?.mapData;
       if (src && src.version !== this._loadedVersion) {
         this._loadedVersion = src.version;
-        void loadMapData(src.picture, src.version).then((md) => {
+        void loadMapData(src.picture, src.version, src.mapKey).then((md) => {
           if (this._loadedVersion === src.version) this._md = md;
         });
       }
@@ -2585,7 +2687,7 @@ var DxHeidiMap = class extends i4 {
     const img = e4.target;
     if (img.naturalWidth && img.naturalHeight) this._size = { w: img.naturalWidth, h: img.naturalHeight };
   }
-  /** Raumflächen in Bildpixeln; neu nur bei neuem Kartenpaket oder neuer Kalibrierung. */
+  /** Raum-Umrisse in Bildpixeln; neu nur bei neuem Kartenpaket oder neuer Kalibrierung. */
   paths(md, calib) {
     const key = `${this._loadedVersion}|${JSON.stringify(this.map?.calibrationPoints ?? null)}`;
     if (this._pathCache?.key === key) return this._pathCache.paths;
@@ -2594,9 +2696,9 @@ var DxHeidiMap = class extends i4 {
     for (const r4 of order) {
       const seg = md.segments.find((s4) => s4.id === r4.id);
       if (!seg) continue;
-      const c4 = pxCenter(md, seg.mid.x, seg.mid.y);
+      const c4 = pxToVac(md, seg.centroid.x, seg.centroid.y);
       const [cx, cy] = calib.toMap(c4.x, c4.y);
-      paths.push({ id: r4.id, name: seg.name, short: r4.short, d: segmentPath(md, seg, (x2, y3) => calib.toMap(x2, y3)), cx, cy });
+      paths.push({ id: r4.id, name: seg.name, short: r4.short, d: segmentOutline(md, seg, (x2, y3) => calib.toMap(x2, y3)), cx, cy });
     }
     this._pathCache = { key, paths };
     return paths;
@@ -2610,24 +2712,20 @@ var DxHeidiMap = class extends i4 {
     const md = this._md, size = this._size;
     const cur = this.robot && (this.robot.vac === "cleaning" || this.robot.vac === "paused") ? this.robot.currentSegment : null;
     const ready = !!(md && size && calib);
+    const order = [...this.selected];
+    const paths = ready ? this.paths(md, calib) : [];
     return b2`
       <div class="wrap">
         <img src=${m2?.entityPicture ?? ""} alt="Karte" @load=${this.onImgLoad}>
         ${ready ? w`<svg viewBox="0 0 ${size.w} ${size.h}" preserveAspectRatio="none">
-          ${this.paths(md, calib).map((p3) => w`<path class="room ${this.selected.has(p3.id) ? "sel" : ""} ${cur === p3.id ? "cur" : ""}" data-room=${p3.id} d=${p3.d} @click=${() => this.tap(p3.id)}><title>${p3.name}</title></path>`)}
-          ${this.paths(md, calib).map((p3) => {
-      const w2 = p3.short.length * 7.5 + 16;
-      return w`<g class="label ${this.selected.has(p3.id) ? "sel" : ""}" transform="translate(${p3.cx.toFixed(1)} ${p3.cy.toFixed(1)})"><rect x=${-w2 / 2} y="-10" width=${w2} height="20" rx="10"></rect><text>${p3.short}</text></g>`;
-    })}
+          ${paths.map((p3) => w`<path class="room ${this.selected.has(p3.id) ? "sel" : ""} ${cur === p3.id ? "cur" : ""}" data-room=${p3.id} d=${p3.d} @click=${() => this.tap(p3.id)}><title>${p3.name}</title></path>`)}
         </svg>` : A}
+        ${paths.filter((p3) => this.selected.has(p3.id)).map((p3) => b2`<span class="badge" data-room=${p3.id} style="left:${(p3.cx / size.w * 100).toFixed(2)}%;top:${(p3.cy / size.h * 100).toFixed(2)}%">${order.indexOf(p3.id) + 1}</span>`)}
         ${!m2?.mapData ? b2`<div class="hint">Datenkarte fehlt – <code>camera.heidi_map_data</code> in der Dreame-Integration aktivieren</div>` : !md && this._loadedVersion ? b2`<div class="hint">Kartenpaket wird geladen …</div>` : A}
         ${m2?.mapData && !calib ? b2`<div class="hint">Keine Kalibrierpunkte – Räume können nicht eingezeichnet werden</div>` : A}
       </div>`;
   }
 };
-function pxCenter(md, px, py) {
-  return { x: ((px + 0.5) * md.pixelSize - md.size.x / 2) * 10, y: (md.size.y / 2 - (py + 0.5) * md.pixelSize) * 10 };
-}
 if (!customElements.get(HEIDI_MAP_ELEMENT)) customElements.define(HEIDI_MAP_ELEMENT, DxHeidiMap);
 
 // src/shared/caches.ts
@@ -2644,7 +2742,12 @@ function toggleAll(sel, order) {
   return sel.size === order.length ? /* @__PURE__ */ new Set() : new Set(order.map((r4) => r4.id));
 }
 function selectedRooms(sel, order) {
-  return order.filter((r4) => sel.has(r4.id));
+  const out = [];
+  for (const id of sel) {
+    const r4 = order.find((x2) => x2.id === id);
+    if (r4) out.push(r4);
+  }
+  return out;
 }
 function selectionLabel(sel, order) {
   const n4 = sel.size;
@@ -2794,7 +2897,7 @@ var DxMapCard = class extends i4 {
     const segments = segmentsOf(this._sel, order);
     if (!segments.length) return;
     askConfirm(this, confirmText(this._sel, order), () => {
-      void this.api?.cleanSegments(segments).then(() => emit(this, EVENTS.toast, `Gestartet: ${selectionLabel(this._sel, order)}`), (e4) => emit(this, EVENTS.toast, `Start fehlgeschlagen: ${String(e4?.message ?? e4)}`));
+      void this.api?.startRooms(segments).then(() => emit(this, EVENTS.toast, `Gestartet: ${selectionLabel(this._sel, order)}`), (e4) => emit(this, EVENTS.toast, `Start fehlgeschlagen: ${String(e4?.message ?? e4)}`));
       this._sel = /* @__PURE__ */ new Set();
     });
   }
@@ -2905,7 +3008,7 @@ var DxQuickstart = class extends i4 {
     const segments = segmentsOf(this._sel, this.roomOrder);
     if (!segments.length) return;
     askConfirm(this, confirmText(this._sel, this.roomOrder), () => {
-      void this.api?.cleanSegments(segments).then(() => emit(this, EVENTS.toast, `Gestartet: ${selectionLabel(this._sel, this.roomOrder)}`), (e4) => emit(this, EVENTS.toast, `Start fehlgeschlagen: ${String(e4?.message ?? e4)}`));
+      void this.api?.startRooms(segments).then(() => emit(this, EVENTS.toast, `Gestartet: ${selectionLabel(this._sel, this.roomOrder)}`), (e4) => emit(this, EVENTS.toast, `Start fehlgeschlagen: ${String(e4?.message ?? e4)}`));
       this._sel = /* @__PURE__ */ new Set();
     });
   }

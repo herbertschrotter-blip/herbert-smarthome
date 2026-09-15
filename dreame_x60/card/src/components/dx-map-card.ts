@@ -154,7 +154,7 @@ export class DxMapCard extends LitElement {
     const segments = segmentsOf(this._sel, order);
     if (!segments.length) return;
     askConfirm(this, confirmText(this._sel, order), () => {
-      void this.api?.cleanSegments(segments).then(() => emit(this, EVENTS.toast, `Gestartet: ${selectionLabel(this._sel, order)}`), (e: unknown) => emit(this, EVENTS.toast, `Start fehlgeschlagen: ${String((e as Error)?.message ?? e)}`));
+      void this.api?.startRooms(segments).then(() => emit(this, EVENTS.toast, `Gestartet: ${selectionLabel(this._sel, order)}`), (e: unknown) => emit(this, EVENTS.toast, `Start fehlgeschlagen: ${String((e as Error)?.message ?? e)}`));
       this._sel = new Set();
     });
   }

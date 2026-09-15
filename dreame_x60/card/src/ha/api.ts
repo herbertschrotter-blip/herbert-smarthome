@@ -70,6 +70,15 @@ export class DxApi {
     return this.call(SERVICES.cleanSegment.domain, SERVICES.cleanSegment.service, { entity_id: ENTITIES.vac, segments });
   }
 
+  /**
+   * Räume in der gewählten Reihenfolge reinigen (Karte/Schnellstart, 4.3b): merkt die Reihenfolge wie das Planer-Skript
+   * in input_text.heidi_lauf_reihenfolge (Kopf-Streifen, Auftrag-Kachel) und ruft dann vacuum_clean_segment auf.
+   */
+  async startRooms(segments: number[]): Promise<unknown> {
+    await this.call(SERVICES.inputText.domain, SERVICES.inputText.service, { entity_id: ENTITIES.laufReihenfolge, value: segments.join(',') });
+    return this.cleanSegments(segments);
+  }
+
   /** Raumwert am Roboter sofort setzen; `'all'` = alle sieben Räume parallel. Wdh als „2x“, sonst HA-Option aus RV_HA. */
   setRoomValue(room: RoomId | 'all', key: RoomValueKey, value: string): Promise<WriteResult> {
     const ids: readonly RoomId[] = room === 'all' ? ROOM_IDS : [room];
