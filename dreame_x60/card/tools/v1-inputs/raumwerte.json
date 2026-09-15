@@ -1,5 +1,16 @@
 [
-  { "name": "zwei Räume mit Wasser und Route", "s": "1:B/T/V/-/2;6:W/L/M/I/1" },
   { "name": "leer", "s": "" },
-  { "name": "Objekt kodieren", "obj": { "7": { "modus": "Saugen", "saug": "Turbo", "wasser": "Mittel", "route": "Tief", "wdh": "3" } } }
+  { "name": "ein Raum vollständig", "s": "1:B/T/V/-/2" },
+  { "name": "alle sieben Räume", "s": "1:S/L/-/-/1;2:B/S/W/-/2;3:W/K/M/I/3;4:S/T/-/-/1;5:B/L/V/-/1;6:W/S/W/T/2;7:S/S/-/-/3" },
+  { "name": "nur Striche", "s": "4:-/-/-/-/-" },
+  { "name": "ungültige Raum-ID 9 und 0", "s": "9:S/T/-/-/1;0:B/T/M/-/1;2:S/T/-/-/1" },
+  { "name": "ungültige Wiederholung 5 und leer", "s": "1:S/T/-/-/5;2:S/T/-/-/" },
+  { "name": "Wasser bei Saugen (wird beim Kodieren verworfen)", "s": "3:S/T/V/-/1" },
+  { "name": "Route bei Saugen + Wischen (wird beim Kodieren verworfen)", "s": "5:B/T/M/I/1" },
+  { "name": "unbekannte Codes", "s": "6:X/Y/Z/Q/2" },
+  { "name": "unsortiert und doppelt", "s": "7:S/T/-/-/1;2:B/S/M/-/1;7:W/L/V/T/3" },
+  { "name": "Objekt kodieren: Nur Wischen mit Route", "obj": { "7": { "modus": "Nur Wischen", "saug": "Turbo", "wasser": "Mittel", "route": "Tief", "wdh": "3" } } },
+  { "name": "Objekt kodieren: Saugen mit Wasser und Route (beides weg)", "obj": { "1": { "modus": "Saugen", "saug": "Leise", "wasser": "Viel", "route": "Intensiv", "wdh": "2" } } },
+  { "name": "Objekt kodieren: ohne wdh, unbekannte Werte", "obj": { "3": { "modus": "Egal", "saug": "Sehr", "wasser": null, "route": null } } },
+  { "name": "Objekt kodieren: Reihenfolge nach ID", "obj": { "6": { "modus": "Saugen", "saug": "Standard", "wasser": null, "route": null, "wdh": "1" }, "2": { "modus": "Saugen + Wischen", "saug": "Turbo", "wasser": "Wenig", "route": null, "wdh": "1" } } }
 ]

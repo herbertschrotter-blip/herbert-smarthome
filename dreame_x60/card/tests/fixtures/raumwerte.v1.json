@@ -1,32 +1,7 @@
 {
  "quelle": "ha/www/heidi-panel.js v1.6.2",
- "erzeugt": "2026-09-15T05:13:46.550Z",
+ "erzeugt": "2026-09-15T05:17:03.663Z",
  "vektoren": [
-  {
-   "name": "zwei Räume mit Wasser und Route",
-   "input": {
-    "s": "1:B/T/V/-/2;6:W/L/M/I/1"
-   },
-   "output": {
-    "parsed": {
-     "1": {
-      "modus": "Saugen + Wischen",
-      "saug": "Turbo",
-      "wasser": "Viel",
-      "route": null,
-      "wdh": "2"
-     },
-     "6": {
-      "modus": "Nur Wischen",
-      "saug": "Leise",
-      "wasser": "Mittel",
-      "route": "Intensiv",
-      "wdh": "1"
-     }
-    },
-    "encoded": "1:B/T/V/-/2;6:W/L/M/I/1"
-   }
-  },
   {
    "name": "leer",
    "input": {
@@ -38,11 +13,229 @@
    }
   },
   {
-   "name": "Objekt kodieren",
+   "name": "ein Raum vollständig",
+   "input": {
+    "s": "1:B/T/V/-/2"
+   },
+   "output": {
+    "parsed": {
+     "1": {
+      "modus": "Saugen + Wischen",
+      "saug": "Turbo",
+      "wasser": "Viel",
+      "route": null,
+      "wdh": "2"
+     }
+    },
+    "encoded": "1:B/T/V/-/2"
+   }
+  },
+  {
+   "name": "alle sieben Räume",
+   "input": {
+    "s": "1:S/L/-/-/1;2:B/S/W/-/2;3:W/K/M/I/3;4:S/T/-/-/1;5:B/L/V/-/1;6:W/S/W/T/2;7:S/S/-/-/3"
+   },
+   "output": {
+    "parsed": {
+     "1": {
+      "modus": "Saugen",
+      "saug": "Leise",
+      "wasser": null,
+      "route": null,
+      "wdh": "1"
+     },
+     "2": {
+      "modus": "Saugen + Wischen",
+      "saug": "Standard",
+      "wasser": "Wenig",
+      "route": null,
+      "wdh": "2"
+     },
+     "3": {
+      "modus": "Nur Wischen",
+      "saug": "Stark",
+      "wasser": "Mittel",
+      "route": "Intensiv",
+      "wdh": "3"
+     },
+     "4": {
+      "modus": "Saugen",
+      "saug": "Turbo",
+      "wasser": null,
+      "route": null,
+      "wdh": "1"
+     },
+     "5": {
+      "modus": "Saugen + Wischen",
+      "saug": "Leise",
+      "wasser": "Viel",
+      "route": null,
+      "wdh": "1"
+     },
+     "6": {
+      "modus": "Nur Wischen",
+      "saug": "Standard",
+      "wasser": "Wenig",
+      "route": "Tief",
+      "wdh": "2"
+     },
+     "7": {
+      "modus": "Saugen",
+      "saug": "Standard",
+      "wasser": null,
+      "route": null,
+      "wdh": "3"
+     }
+    },
+    "encoded": "1:S/L/-/-/1;2:B/S/W/-/2;3:W/K/M/I/3;4:S/T/-/-/1;5:B/L/V/-/1;6:W/S/W/T/2;7:S/S/-/-/3"
+   }
+  },
+  {
+   "name": "nur Striche",
+   "input": {
+    "s": "4:-/-/-/-/-"
+   },
+   "output": {
+    "parsed": {
+     "4": {
+      "modus": "Saugen",
+      "saug": "Standard",
+      "wasser": null,
+      "route": null,
+      "wdh": "1"
+     }
+    },
+    "encoded": "4:S/S/-/-/1"
+   }
+  },
+  {
+   "name": "ungültige Raum-ID 9 und 0",
+   "input": {
+    "s": "9:S/T/-/-/1;0:B/T/M/-/1;2:S/T/-/-/1"
+   },
+   "output": {
+    "parsed": {
+     "2": {
+      "modus": "Saugen",
+      "saug": "Turbo",
+      "wasser": null,
+      "route": null,
+      "wdh": "1"
+     }
+    },
+    "encoded": "2:S/T/-/-/1"
+   }
+  },
+  {
+   "name": "ungültige Wiederholung 5 und leer",
+   "input": {
+    "s": "1:S/T/-/-/5;2:S/T/-/-/"
+   },
+   "output": {
+    "parsed": {
+     "1": {
+      "modus": "Saugen",
+      "saug": "Turbo",
+      "wasser": null,
+      "route": null,
+      "wdh": "1"
+     },
+     "2": {
+      "modus": "Saugen",
+      "saug": "Turbo",
+      "wasser": null,
+      "route": null,
+      "wdh": "1"
+     }
+    },
+    "encoded": "1:S/T/-/-/1;2:S/T/-/-/1"
+   }
+  },
+  {
+   "name": "Wasser bei Saugen (wird beim Kodieren verworfen)",
+   "input": {
+    "s": "3:S/T/V/-/1"
+   },
+   "output": {
+    "parsed": {
+     "3": {
+      "modus": "Saugen",
+      "saug": "Turbo",
+      "wasser": "Viel",
+      "route": null,
+      "wdh": "1"
+     }
+    },
+    "encoded": "3:S/T/-/-/1"
+   }
+  },
+  {
+   "name": "Route bei Saugen + Wischen (wird beim Kodieren verworfen)",
+   "input": {
+    "s": "5:B/T/M/I/1"
+   },
+   "output": {
+    "parsed": {
+     "5": {
+      "modus": "Saugen + Wischen",
+      "saug": "Turbo",
+      "wasser": "Mittel",
+      "route": "Intensiv",
+      "wdh": "1"
+     }
+    },
+    "encoded": "5:B/T/M/-/1"
+   }
+  },
+  {
+   "name": "unbekannte Codes",
+   "input": {
+    "s": "6:X/Y/Z/Q/2"
+   },
+   "output": {
+    "parsed": {
+     "6": {
+      "modus": "Saugen",
+      "saug": "Standard",
+      "wasser": null,
+      "route": null,
+      "wdh": "2"
+     }
+    },
+    "encoded": "6:S/S/-/-/2"
+   }
+  },
+  {
+   "name": "unsortiert und doppelt",
+   "input": {
+    "s": "7:S/T/-/-/1;2:B/S/M/-/1;7:W/L/V/T/3"
+   },
+   "output": {
+    "parsed": {
+     "2": {
+      "modus": "Saugen + Wischen",
+      "saug": "Standard",
+      "wasser": "Mittel",
+      "route": null,
+      "wdh": "1"
+     },
+     "7": {
+      "modus": "Nur Wischen",
+      "saug": "Leise",
+      "wasser": "Viel",
+      "route": "Tief",
+      "wdh": "3"
+     }
+    },
+    "encoded": "2:B/S/M/-/1;7:W/L/V/T/3"
+   }
+  },
+  {
+   "name": "Objekt kodieren: Nur Wischen mit Route",
    "input": {
     "obj": {
      "7": {
-      "modus": "Saugen",
+      "modus": "Nur Wischen",
       "saug": "Turbo",
       "wasser": "Mittel",
       "route": "Tief",
@@ -51,7 +244,64 @@
     }
    },
    "output": {
-    "encoded": "7:S/T/-/-/3"
+    "encoded": "7:W/T/M/T/3"
+   }
+  },
+  {
+   "name": "Objekt kodieren: Saugen mit Wasser und Route (beides weg)",
+   "input": {
+    "obj": {
+     "1": {
+      "modus": "Saugen",
+      "saug": "Leise",
+      "wasser": "Viel",
+      "route": "Intensiv",
+      "wdh": "2"
+     }
+    }
+   },
+   "output": {
+    "encoded": "1:S/L/-/-/2"
+   }
+  },
+  {
+   "name": "Objekt kodieren: ohne wdh, unbekannte Werte",
+   "input": {
+    "obj": {
+     "3": {
+      "modus": "Egal",
+      "saug": "Sehr",
+      "wasser": null,
+      "route": null
+     }
+    }
+   },
+   "output": {
+    "encoded": "3:-/-/-/-/1"
+   }
+  },
+  {
+   "name": "Objekt kodieren: Reihenfolge nach ID",
+   "input": {
+    "obj": {
+     "2": {
+      "modus": "Saugen + Wischen",
+      "saug": "Turbo",
+      "wasser": "Wenig",
+      "route": null,
+      "wdh": "1"
+     },
+     "6": {
+      "modus": "Saugen",
+      "saug": "Standard",
+      "wasser": null,
+      "route": null,
+      "wdh": "1"
+     }
+    }
+   },
+   "output": {
+    "encoded": "2:B/T/W/-/1;6:S/S/-/-/1"
    }
   }
  ]

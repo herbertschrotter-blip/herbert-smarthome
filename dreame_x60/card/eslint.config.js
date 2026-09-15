@@ -19,7 +19,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['tests/e2e/**/*.js', 'tools/**/*.js', 'build.mjs', 'eslint.config.js'],
+    files: ['tests/*.js', 'tests/e2e/**/*.js', 'tools/**/*.js', 'build.mjs', 'eslint.config.js'],
     languageOptions: { sourceType: 'module', globals: nodeGlobals },
     rules: { '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }] },
   },

@@ -9,7 +9,7 @@
     "watch": "node build.mjs --watch",
     "check": "tsc --noEmit",
     "lint": "eslint .",
-    "test:unit": "node --import tsx --test tests/unit/*.test.ts",
+    "test:unit": "node tests/run-unit.js",
     "test:e2e": "node tests/e2e/run.js",
     "test": "npm run check && npm run test:unit && npm run build && npm run test:e2e",
     "check-fixture": "node --import tsx tools/check-fixture.js",

@@ -39,7 +39,7 @@ Claude Code im Web bereitet diese Aufgaben vor, führt sie aber nicht aus.
 | 1.3 | Dashboard `dreame_x60.yaml` mit sechs Views, `configuration.yaml`, `deploy.ps1` | fertig (15.09.; YAML geprüft, check_config valid) |
 | 1.4 | **[PC]** Ressource anlegen, HA-Neustart, „Heidi v2“ sichtbar | fertig (15.09. 06:44: Ressource `/local/dreame_x60.js?v=2.0.0-alpha.1`, Dashboard `dreame-x60` in der Liste, Bundle wird ausgeliefert); Sichtprüfung im Browser durch Herbert offen |
 | 2.0 | `src/ha/contract.ts` + Vektor-Werkzeug `tools/v1-vectors.js` | fertig (15.09.; contract.test.ts grün, sechs Themen mit Beispiel-Vektoren) |
-| 2.1 | `domain/raumwerte.ts` + Vektoren | offen |
+| 2.1 | `domain/raumwerte.ts` + Vektoren | fertig (15.09.; 14 v1-Vektoren + spec grün) |
 | 2.2 | `domain/estimate.ts` + Vektoren | offen |
 | 2.3 | `domain/timeline.ts` + Vektoren | offen |
 | 2.4 | `domain/calibration.ts` + Tests | offen |
