@@ -167,12 +167,13 @@ Raum 8 = „Balkon“, in der App ausgeblendet (Bauplan Abschnitt 10). Raumnamen
 | `sensor.heidi_wheel_dirty_left` | Wheel Dirty Left | ja | diagnostic |  |
 | `sensor.heidi_wheel_dirty_time_left` | Wheel Dirty Time Left |  | diagnostic |  |
 
-## Hinderniserkennung, Kamera, KI (21)
+## Hinderniserkennung, Kamera, KI (22)
 
 | Entität | Name | v2 | Kat. | aus |
 |---|---|---|---|---|
 | `binary_sensor.heidi_lds_status` | LDS Status |  |  |  |
 | `number.heidi_camera_light_brightness` | Camera Light Brightness |  | config |  |
+| `select.heidi_auto_lds_coverage` | Auto Lds Coverage |  | config |  |
 | `switch.heidi_ai_fluid_detection` | AI Fluid Detection |  | config |  |
 | `switch.heidi_ai_furniture_detection` | AI Furniture Detection |  | config |  |
 | `switch.heidi_ai_obstacle_detection` | AI Obstacle Detection |  | config |  |
@@ -216,10 +217,4 @@ Raum 8 = „Balkon“, in der App ausgeblendet (Bauplan Abschnitt 10). Raumnamen
 | `button.heidi_reload_shortcuts` | Reload Shortcuts |  | diagnostic |  |
 | `button.heidi_shortcut_2` | Shortcut Bad Saugen/Wischen |  |  |  |
 | `button.heidi_shortcut_3` | Shortcut Wischen Nach Dem Saugen |  |  |  |
-
-## Nicht zugeordnet (1)
-
-| Entität | Name | v2 | Kat. | aus |
-|---|---|---|---|---|
-| `select.heidi_auto_lds_coverage` | Auto Lds Coverage |  | config |  |
 
