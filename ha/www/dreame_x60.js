@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.5 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.6 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -1068,7 +1068,7 @@ var available = (s4, id) => {
   const e4 = ent(s4, id);
   return !!e4 && !EMPTY2.includes(e4.state);
 };
-var VAC_ATTRS = ["has_error", "current_segment", "active_segments", "cleaning_sequence", "cleaned_area", "charging", "mop_pad", "paused", "washing", "drying", "returning_to_wash", "mapping", "cruising"];
+var VAC_ATTRS = ["has_error", "current_segment", "active_segments", "cleaning_sequence", "cleaned_area", "charging", "docked", "mop_pad", "paused", "washing", "drying", "returning_to_wash", "mapping", "cruising"];
 var ROBOT_IDS = [E2.vac, E2.status, E2.error, E2.taskStatus, E2.battery, E2.currentRoom, E2.cleanedArea, E2.cleaningTime, E2.phase, E2.autoLauf, E2.autoLetzterPlan, E2.laufReihenfolge, E2.dndStart, E2.dndEnd, E2.raumnamen, E2.ninaZaehlt, ...PERSONS.map((p3) => p3.id)];
 var intList = (v2) => Array.isArray(v2) ? v2.map((x2) => parseInt(String(x2), 10)).filter((x2) => !isNaN(x2)) : [];
 var readRobot = memoizeSelector(ROBOT_IDS, (s4) => {
@@ -1103,6 +1103,9 @@ var readRobot = memoizeSelector(ROBOT_IDS, (s4) => {
     cleanedArea: parseFloat(String(attr(s4, E2.vac, "cleaned_area") ?? "")) || 0,
     cleaningTime: num(s4, E2.cleaningTime, 0),
     charging: !!attr(s4, E2.vac, "charging"),
+    docked: !!attr(s4, E2.vac, "docked"),
+    washing: !!attr(s4, E2.vac, "washing"),
+    drying: !!attr(s4, E2.vac, "drying"),
     phase: st(s4, E2.phase),
     status: st(s4, E2.status),
     task: st(s4, E2.taskStatus),
@@ -1774,7 +1777,7 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.5";
+var VERSION = "2.0.0-alpha.6";
 
 // src/shared/robot-svg.ts
 var robotSvg = w`<svg viewBox="0 0 200 200" class="robotpic" aria-hidden="true">
@@ -2043,9 +2046,10 @@ var DxHero = class extends i4 {
     };
     return [common((v2) => v2.modus), common((v2) => v2.saug), common((v2) => v2.modus !== "Saugen" && v2.wasser ? v2.wasser : null)];
   }
+  /** Stationszeile aus den Attributen docked/washing/drying/charging – nicht aus dem Hauptzustand (der bleibt bei der Mopp-Wäsche „cleaning“). */
   stationText(r4) {
+    if (r4.docked) return [r4.washing ? "w\xE4scht Mopps" : r4.drying ? "trocknet" : "angedockt", r4.charging ? "l\xE4dt" : null].filter(Boolean).join(" \xB7 ");
     if (r4.running) return "unterwegs";
-    if (r4.vac === "docked") return r4.charging ? "angedockt \xB7 l\xE4dt" : "angedockt";
     return STATUS_DE[r4.vac] ?? r4.vac;
   }
   render() {
@@ -2248,7 +2252,7 @@ var DreameX60Panel = class extends i4 {
     let title, sub;
     if (page === "start") {
       const name = (this.hass?.user?.name ?? "").trim();
-      title = robot.running ? "Heidi ist unterwegs" : `${GREETING(now.getHours())}${name ? ", " + name : ""}!`;
+      title = robot.running && !robot.docked ? "Heidi ist unterwegs" : robot.running ? "Heidi ist in der Station" : `${GREETING(now.getHours())}${name ? ", " + name : ""}!`;
       sub = robot.hero.sub ? `${robot.hero.big} \xB7 ${robot.hero.sub}` : robot.hero.big;
     } else {
       ({ title, sub } = PAGE_TITLE[page]);

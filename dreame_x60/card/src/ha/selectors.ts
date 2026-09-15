@@ -42,6 +42,10 @@ export interface RobotView {
   cleanedArea: number;
   cleaningTime: number;
   charging: boolean;
+  /** Attribute docked/washing/drying von vacuum.heidi: in der Station kann der Hauptzustand noch „cleaning“ sein (Mopp-Wäsche nach dem Lauf). */
+  docked: boolean;
+  washing: boolean;
+  drying: boolean;
   phase: string;
   status: string;
   task: string;
@@ -57,7 +61,7 @@ export interface RobotView {
   moreInfo: { vac: string; battery: string; error: string };
 }
 
-const VAC_ATTRS = ['has_error', 'current_segment', 'active_segments', 'cleaning_sequence', 'cleaned_area', 'charging', 'mop_pad', 'paused', 'washing', 'drying', 'returning_to_wash', 'mapping', 'cruising'] as const;
+const VAC_ATTRS = ['has_error', 'current_segment', 'active_segments', 'cleaning_sequence', 'cleaned_area', 'charging', 'docked', 'mop_pad', 'paused', 'washing', 'drying', 'returning_to_wash', 'mapping', 'cruising'] as const;
 const ROBOT_IDS = [E.vac, E.status, E.error, E.taskStatus, E.battery, E.currentRoom, E.cleanedArea, E.cleaningTime, E.phase, E.autoLauf, E.autoLetzterPlan, E.laufReihenfolge, E.dndStart, E.dndEnd, E.raumnamen, E.ninaZaehlt, ...PERSONS.map((p) => p.id)];
 
 const intList = (v: unknown): number[] => (Array.isArray(v) ? v.map((x) => parseInt(String(x), 10)).filter((x) => !isNaN(x)) : []);
@@ -79,6 +83,7 @@ export const readRobot: Selector<RobotView> = memoizeSelector(ROBOT_IDS, (s) => 
     vac, running: ['cleaning', 'paused', 'returning'].includes(vac), hasError: !!attr(s, E.vac, 'has_error'), battery: num(s, E.battery, 0),
     currentSegment: isNaN(seg) ? null : seg, activeSegments: intList(attr(s, E.vac, 'active_segments')), cleaningSequence: intList(attr(s, E.vac, 'cleaning_sequence')),
     cleanedArea: parseFloat(String(attr(s, E.vac, 'cleaned_area') ?? '')) || 0, cleaningTime: num(s, E.cleaningTime, 0), charging: !!attr(s, E.vac, 'charging'),
+    docked: !!attr(s, E.vac, 'docked'), washing: !!attr(s, E.vac, 'washing'), drying: !!attr(s, E.vac, 'drying'),
     phase: st(s, E.phase), status: st(s, E.status), task: st(s, E.taskStatus), error: st(s, E.error),
     autoLauf: on(s, E.autoLauf), autoLetzterPlan: txt(s, E.autoLetzterPlan),
     laufReihenfolge: txt(s, E.laufReihenfolge).split(',').map((x) => parseInt(x, 10)).filter((x) => !isNaN(x)),

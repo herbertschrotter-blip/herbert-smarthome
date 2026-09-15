@@ -146,7 +146,8 @@ export class DreameX60Panel extends LitElement {
     let title: string, sub: string;
     if (page === 'start') {
       const name = (this.hass?.user?.name ?? '').trim();
-      title = robot.running ? 'Heidi ist unterwegs' : `${GREETING(now.getHours())}${name ? ', ' + name : ''}!`;
+      // In der Station (Mopp-Wäsche/Trocknen nach dem Lauf) ist der Hauptzustand noch „cleaning“ – dann nicht „unterwegs“
+      title = robot.running && !robot.docked ? 'Heidi ist unterwegs' : robot.running ? 'Heidi ist in der Station' : `${GREETING(now.getHours())}${name ? ', ' + name : ''}!`;
       sub = robot.hero.sub ? `${robot.hero.big} · ${robot.hero.sub}` : robot.hero.big;
     } else {
       ({ title, sub } = PAGE_TITLE[page]);

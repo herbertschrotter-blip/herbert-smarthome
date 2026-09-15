@@ -78,9 +78,10 @@ export class DxHero extends LitElement {
     return [common((v) => v.modus), common((v) => v.saug), common((v) => (v.modus !== 'Saugen' && v.wasser ? v.wasser : null))];
   }
 
+  /** Stationszeile aus den Attributen docked/washing/drying/charging – nicht aus dem Hauptzustand (der bleibt bei der Mopp-Wäsche „cleaning“). */
   private stationText(r: RobotView): string {
+    if (r.docked) return [r.washing ? 'wäscht Mopps' : r.drying ? 'trocknet' : 'angedockt', r.charging ? 'lädt' : null].filter(Boolean).join(' · ');
     if (r.running) return 'unterwegs';
-    if (r.vac === 'docked') return r.charging ? 'angedockt · lädt' : 'angedockt';
     return STATUS_DE[r.vac] ?? r.vac;
   }
 

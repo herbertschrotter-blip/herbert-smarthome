@@ -51,7 +51,7 @@ Claude Code im Web bereitet diese Aufgaben vor, führt sie aber nicht aus.
 | 3.3 | Shell: `page`-Config, Views, Overlay, Toast, Escape, more-info, Modul-Caches | fertig (15.09.; render/nav/overlay E2E grün) |
 | 3.4 | **[PC-Abnahme]** Mockup Seitenstruktur `dreame_x60/mockups/seiten.html` | fertig (15de525; Design-Referenz `dreame_x60/mockups/bento.html`, abgenommen 15.09.) |
 | 4.0 | Navigation `dx-nav` (Seitenleiste / Symbolleiste / Tab-Leiste) + Bento-Übersicht mit Platzhaltern | fertig (4788c68; nav.js 28, render.js 42 grün; Version 2.0.0-alpha.2 eingespielt; Herbert 15.09.: „passt“, PD-007 freigegeben) |
-| 4.1 | `dx-hero` + `dx-auftrag` | fertig (15.09.; hero.js 16 grün inkl. 85 v1-Kopf-Zustände und Render-Ruhe, strip.test.ts grün; Version 2.0.0-alpha.5 eingespielt, Startpunkt-Fall und Knopfbreite am echten Lauf nachgebessert); Sichtprüfung durch Herbert offen |
+| 4.1 | `dx-hero` + `dx-auftrag` | fertig (15.09.; hero.js 16 grün inkl. 85 v1-Kopf-Zustände und Render-Ruhe, strip.test.ts grün; Version 2.0.0-alpha.6 eingespielt; Startpunkt-Fall, Knopfbreite und Stationszeile am echten Lauf nachgebessert); Sichtprüfung durch Herbert offen |
 | 4.2 | `dx-dialog` (modal/sheet/confirm) | offen |
 | 4.3 | `dx-map-card` (Seite Reinigen) | offen |
 | 4.4 | `dx-planer` (Seite Planer) | offen |

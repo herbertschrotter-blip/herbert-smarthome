@@ -73,6 +73,19 @@ const jetzt = v1.vektoren.find((v) => /Streifen · Jetzt/.test(v.name));
   H.checkEqual('Auftrag am Startpunkt: 0 / 3, „Erster Raum“ Wohnz., kein Raum hervorgehoben', a, ['0 / 3', 'Erster Raum', 'Wohnz.', false]);
 }
 
+// ── In der Station nach dem Lauf (Hauptzustand noch cleaning, docked + washing + charging): Stationszeile und Titel ──
+{
+  const s = { ...docked };
+  s['vacuum.heidi'] = { ...s['vacuum.heidi'], state: 'cleaning', attributes: { ...s['vacuum.heidi'].attributes, docked: true, charging: true, washing: true, drying: false, current_segment: 0, active_segments: [], cleaned_area: 1 } };
+  s['sensor.heidi_phase'] = { ...s['sensor.heidi_phase'], state: 'Wäscht Mopps nach dem Lauf' };
+  await setStates(s);
+  const st = await page.evaluate(() => { const root = document.querySelector('dreame-x60-panel').shadowRoot; return [root.querySelector('dx-hero').shadowRoot.querySelector('.station div:last-child').textContent.trim(), root.querySelector('.topbar h1').textContent.trim(), !!root.querySelector('dx-auftrag')]; });
+  H.checkEqual('Mopp-Wäsche in der Station: „wäscht Mopps · lädt“, Titel „Heidi ist in der Station“, keine Auftrag-Kachel', st, ['wäscht Mopps · lädt', 'Heidi ist in der Station', false]);
+  s['vacuum.heidi'] = { ...s['vacuum.heidi'], attributes: { ...s['vacuum.heidi'].attributes, washing: false, drying: true } };
+  await setStates(s);
+  H.checkEqual('Trocknen: „trocknet · lädt“', await page.evaluate(() => document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-hero').shadowRoot.querySelector('.station div:last-child').textContent.trim()), 'trocknet · lädt');
+}
+
 // ── Leerlauf: gemeinsame Werte („–“ bei unavailable), kein Streifen, kein Auftrag ──
 await setStates(docked);
 {
