@@ -12,6 +12,7 @@ import type { States } from '../../src/ha/types';
 import { setDevice } from '../../src/ha/device';
 setDevice('heidi', 'Heidi'); // Vektoren und Erwartungen sind für das Gerät „heidi“ geschrieben
 import type { RoomId } from '../../src/ha/contract';
+import { HEIDI_ROOMS } from './helpers-rooms';
 import type { RoomValues } from '../../src/domain/raumwerte';
 
 const FIX = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'fixtures');
@@ -23,7 +24,10 @@ const v1 = read<{ quelle: string; vektoren: V1Vector[] }>('status.v1.json');
 
 function statesFor(v: V1Vector): States {
   const s: States = { ...docked };
-  delete s['camera.heidi_map']; // Parität: v1 kennt keinen Rückfall auf Kartendaten (PD-010, eigener Test in selectors.test.ts/hero.js)
+  // Parität: v1 kennt keinen Rückfall auf Kartendaten (PD-010, eigener Test in selectors.test.ts/hero.js) – Raumliste bleibt, Werte-Codes weg
+  const cam = docked['camera.heidi_map']!;
+  const rooms = Object.fromEntries(Object.entries(cam.attributes.rooms as Record<string, Record<string, unknown>>).map(([k, r]) => { const rest = { ...r }; delete rest.cleaning_mode; return [k, rest]; }));
+  s['camera.heidi_map'] = { ...cam, attributes: { ...cam.attributes, rooms } };
   for (const [id, o] of Object.entries(v.input.overrides ?? {})) {
     const cur = s[id] ?? { entity_id: id, state: 'unknown', attributes: {} };
     s[id] = { entity_id: id, state: o.state ?? cur.state, attributes: { ...cur.attributes, ...(o.attributes ?? {}) } };
@@ -37,7 +41,7 @@ test(`Parität mit ${v1.quelle}: Streifen aller ${v1.vektoren.length} Kopf-Zust�
   for (const v of v1.vektoren) {
     const s = statesFor(v);
     const robot = readRobot(s); const rooms = readAllRoomValues(s);
-    const got = stripText(stripModel(robot, (id: RoomId) => rooms.rooms[id]));
+    const got = stripText(stripModel(robot, (id: RoomId) => rooms.rooms[id] ?? null, HEIDI_ROOMS));
     assert.equal(got, v.output.strip, `${v.name}: strip`);
   }
 });
@@ -59,20 +63,20 @@ test('Reihenfolge: Helfer gilt nur, wenn er genau die active_segments enthält',
 });
 
 test('Streifen: Fälle und Reihenfolge der Prüfungen wie v1', () => {
-  assert.equal(stripModel({ ...base, vac: 'docked' }, rv), null, 'nur cleaning/paused');
-  assert.equal(stripModel({ ...base, vac: 'returning' }, rv), null, 'returning ohne Streifen');
-  assert.equal(stripModel(base, () => null), null, 'ohne Raumwerte kein Streifen');
-  assert.equal(stripModel({ ...base, currentSegment: 9 }, rv), null, 'Raum außerhalb 1..7');
+  assert.equal(stripModel({ ...base, vac: 'docked' }, rv, HEIDI_ROOMS), null, 'nur cleaning/paused');
+  assert.equal(stripModel({ ...base, vac: 'returning' }, rv, HEIDI_ROOMS), null, 'returning ohne Streifen');
+  assert.equal(stripModel(base, () => null, HEIDI_ROOMS), null, 'ohne Raumwerte kein Streifen');
+  assert.equal(stripModel({ ...base, currentSegment: 9 }, rv, HEIDI_ROOMS), null, 'Raum außerhalb 1..7');
   // Fläche 0 schlägt „Fährt durch“ (Prüfreihenfolge)
-  assert.equal(stripText(stripModel({ ...base, currentSegment: 2, cleanedArea: 0 }, rv)), 'Fährt zum Startpunkt zu Wohnz.');
+  assert.equal(stripText(stripModel({ ...base, currentSegment: 2, cleanedArea: 0 }, rv, HEIDI_ROOMS)), 'Fährt zum Startpunkt zu Wohnz.');
   // paused mit Fläche 0 → kein Startpunkt-Fall (nur cleaning)
-  assert.equal(stripText(stripModel({ ...base, vac: 'paused', cleanedArea: 0 }, rv)), 'Jetzt: Küche danach Büro SaugenStandard1×');
+  assert.equal(stripText(stripModel({ ...base, vac: 'paused', cleanedArea: 0 }, rv, HEIDI_ROOMS)), 'Jetzt: Küche danach Büro SaugenStandard1×');
   // Nur Wischen: Wasser und Route erscheinen
   const nass: RoomValues = { modus: 'Nur Wischen', saug: 'Leise', wasser: 'Viel', route: 'Intensiv', wdh: '3' };
-  assert.equal(stripText(stripModel({ ...base, currentSegment: 5 }, () => nass)), 'Jetzt: Büro letzter Raum Nur WischenLeiseVielIntensiv3×');
+  assert.equal(stripText(stripModel({ ...base, currentSegment: 5 }, () => nass, HEIDI_ROOMS)), 'Jetzt: Büro letzter Raum Nur WischenLeiseVielIntensiv3×');
   // Saugen: kein Wasser, keine Route, auch wenn gesetzt
   const trocken: RoomValues = { modus: 'Saugen', saug: 'Turbo', wasser: 'Viel', route: 'Intensiv', wdh: '2' };
-  assert.equal(stripText(stripModel({ ...base, currentSegment: 5 }, () => trocken)), 'Jetzt: Büro letzter Raum SaugenTurbo2×');
+  assert.equal(stripText(stripModel({ ...base, currentSegment: 5 }, () => trocken, HEIDI_ROOMS)), 'Jetzt: Büro letzter Raum SaugenTurbo2×');
   // Leere active_segments: „Fährt durch“ greift nicht, Reihenfolge leer → letzter Raum
-  assert.equal(stripText(stripModel({ ...base, activeSegments: [], laufReihenfolge: [] }, rv)), 'Jetzt: Küche letzter Raum SaugenStandard1×');
+  assert.equal(stripText(stripModel({ ...base, activeSegments: [], laufReihenfolge: [] }, rv, HEIDI_ROOMS)), 'Jetzt: Küche letzter Raum SaugenStandard1×');
 });

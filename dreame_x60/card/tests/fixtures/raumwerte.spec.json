@@ -1,29 +1,151 @@
 {
   "zweck": "Handgeschriebene Regeln für den Raumwerte-Codec (Bauplan 2.1, Abschnitt 6). Unabhängig von v1.",
   "parse": [
-    { "name": "unbekannter Modus → Saugen, unbekannte Saugstufe → Standard, unbekanntes Wasser/Route → null, Wdh außerhalb 1–3 → 1",
-      "s": "2:Q/Q/Q/Q/9", "erwartet": { "2": { "modus": "Saugen", "saug": "Standard", "wasser": null, "route": null, "wdh": "1" } } },
-    { "name": "Raum-ID außerhalb 1..7 wird ignoriert", "s": "0:S/T/-/-/1;8:S/T/-/-/1;7:S/T/-/-/1",
-      "erwartet": { "7": { "modus": "Saugen", "saug": "Turbo", "wasser": null, "route": null, "wdh": "1" } } },
-    { "name": "Eintrag ohne Doppelpunkt oder ohne Werte wird ignoriert", "s": "3;4:;:S/T/-/-/1;5:S/T/-/-/2",
-      "erwartet": { "5": { "modus": "Saugen", "saug": "Turbo", "wasser": null, "route": null, "wdh": "2" } } },
-    { "name": "null und undefined ergeben leer", "s": null, "erwartet": {} },
-    { "name": "doppelte ID: der spätere Eintrag gewinnt", "s": "1:S/L/-/-/1;1:W/T/V/T/3",
-      "erwartet": { "1": { "modus": "Nur Wischen", "saug": "Turbo", "wasser": "Viel", "route": "Tief", "wdh": "3" } } }
+    {
+      "name": "unbekannter Modus → Saugen, unbekannte Saugstufe → Standard, unbekanntes Wasser/Route → null, Wdh außerhalb 1–3 → 1",
+      "s": "2:Q/Q/Q/Q/9",
+      "erwartet": {
+        "2": {
+          "modus": "Saugen",
+          "saug": "Standard",
+          "wasser": null,
+          "route": null,
+          "wdh": "1"
+        }
+      }
+    },
+    {
+      "name": "Raum-ID 0 wird ignoriert, IDs über 7 sind erlaubt (Räume kommen aus der Karte, Stufe 2)",
+      "s": "0:S/T/-/-/1;8:S/T/-/-/1;7:S/T/-/-/1",
+      "erwartet": {
+        "7": {
+          "modus": "Saugen",
+          "saug": "Turbo",
+          "wasser": null,
+          "route": null,
+          "wdh": "1"
+        },
+        "8": {
+          "modus": "Saugen",
+          "saug": "Turbo",
+          "wasser": null,
+          "route": null,
+          "wdh": "1"
+        }
+      }
+    },
+    {
+      "name": "Eintrag ohne Doppelpunkt oder ohne Werte wird ignoriert",
+      "s": "3;4:;:S/T/-/-/1;5:S/T/-/-/2",
+      "erwartet": {
+        "5": {
+          "modus": "Saugen",
+          "saug": "Turbo",
+          "wasser": null,
+          "route": null,
+          "wdh": "2"
+        }
+      }
+    },
+    {
+      "name": "null und undefined ergeben leer",
+      "s": null,
+      "erwartet": {}
+    },
+    {
+      "name": "doppelte ID: der spätere Eintrag gewinnt",
+      "s": "1:S/L/-/-/1;1:W/T/V/T/3",
+      "erwartet": {
+        "1": {
+          "modus": "Nur Wischen",
+          "saug": "Turbo",
+          "wasser": "Viel",
+          "route": "Tief",
+          "wdh": "3"
+        }
+      }
+    }
   ],
   "encode": [
-    { "name": "Ausgabe nach ID sortiert", "obj": { "7": { "modus": "Saugen", "saug": "Turbo", "wasser": null, "route": null, "wdh": "1" }, "1": { "modus": "Saugen", "saug": "Leise", "wasser": null, "route": null, "wdh": "2" } },
-      "erwartet": "1:S/L/-/-/2;7:S/T/-/-/1" },
-    { "name": "Wasser nur bei Modus ≠ Saugen, Route nur bei Nur Wischen",
-      "obj": { "1": { "modus": "Saugen", "saug": "Turbo", "wasser": "Viel", "route": "Tief", "wdh": "1" }, "2": { "modus": "Saugen + Wischen", "saug": "Turbo", "wasser": "Viel", "route": "Tief", "wdh": "1" }, "3": { "modus": "Nur Wischen", "saug": "Turbo", "wasser": "Viel", "route": "Tief", "wdh": "1" } },
-      "erwartet": "1:S/T/-/-/1;2:B/T/V/-/1;3:W/T/V/T/1" },
-    { "name": "unbekannte Werte werden -, fehlende Wdh wird 1", "obj": { "4": { "modus": "Egal", "saug": "Sehr", "wasser": "Nass", "route": "Krumm" } },
-      "erwartet": "4:-/-/-/-/1" },
-    { "name": "leeres Objekt → leerer String", "obj": {}, "erwartet": "" }
+    {
+      "name": "Ausgabe nach ID sortiert",
+      "obj": {
+        "1": {
+          "modus": "Saugen",
+          "saug": "Leise",
+          "wasser": null,
+          "route": null,
+          "wdh": "2"
+        },
+        "7": {
+          "modus": "Saugen",
+          "saug": "Turbo",
+          "wasser": null,
+          "route": null,
+          "wdh": "1"
+        }
+      },
+      "erwartet": "1:S/L/-/-/2;7:S/T/-/-/1"
+    },
+    {
+      "name": "Wasser nur bei Modus ≠ Saugen, Route nur bei Nur Wischen",
+      "obj": {
+        "1": {
+          "modus": "Saugen",
+          "saug": "Turbo",
+          "wasser": "Viel",
+          "route": "Tief",
+          "wdh": "1"
+        },
+        "2": {
+          "modus": "Saugen + Wischen",
+          "saug": "Turbo",
+          "wasser": "Viel",
+          "route": "Tief",
+          "wdh": "1"
+        },
+        "3": {
+          "modus": "Nur Wischen",
+          "saug": "Turbo",
+          "wasser": "Viel",
+          "route": "Tief",
+          "wdh": "1"
+        }
+      },
+      "erwartet": "1:S/T/-/-/1;2:B/T/V/-/1;3:W/T/V/T/1"
+    },
+    {
+      "name": "unbekannte Werte werden -, fehlende Wdh wird 1",
+      "obj": {
+        "4": {
+          "modus": "Egal",
+          "saug": "Sehr",
+          "wasser": "Nass",
+          "route": "Krumm"
+        }
+      },
+      "erwartet": "4:-/-/-/-/1"
+    },
+    {
+      "name": "leeres Objekt → leerer String",
+      "obj": {},
+      "erwartet": ""
+    }
   ],
   "roundtrip": [
-    { "name": "encode(parse(s)) stabil für vollständige Eingaben", "s": "1:B/T/V/-/2;3:W/K/M/I/3;7:S/L/-/-/1" },
-    { "name": "encode(parse(s)) normalisiert Striche und Reihenfolge", "s": "7:S/T/-/-/1;2:B/S/M/-/1", "erwartet": "2:B/S/M/-/1;7:S/T/-/-/1" }
+    {
+      "name": "encode(parse(s)) stabil für vollständige Eingaben",
+      "s": "1:B/T/V/-/2;3:W/K/M/I/3;7:S/L/-/-/1"
+    },
+    {
+      "name": "encode(parse(s)) normalisiert Striche und Reihenfolge",
+      "s": "7:S/T/-/-/1;2:B/S/M/-/1",
+      "erwartet": "2:B/S/M/-/1;7:S/T/-/-/1"
+    }
   ],
-  "laenge": { "name": "sieben Räume mit allen Feldern passen in input_text (max 255)", "s": "1:B/T/V/-/3;2:B/T/V/-/3;3:W/T/V/I/3;4:B/T/V/-/3;5:B/T/V/-/3;6:W/T/V/T/3;7:B/T/V/-/3", "max": 255 }
+  "laenge": {
+    "name": "sieben Räume mit allen Feldern passen in input_text (max 255)",
+    "s": "1:B/T/V/-/3;2:B/T/V/-/3;3:W/T/V/I/3;4:B/T/V/-/3;5:B/T/V/-/3;6:W/T/V/T/3;7:B/T/V/-/3",
+    "max": 255
+  }
 }

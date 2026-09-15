@@ -9,12 +9,13 @@ import { encodeRaum, parseRaum } from '../../src/domain/raumwerte';
 const FIX = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'fixtures');
 const read = <T>(name: string): T => JSON.parse(fs.readFileSync(path.join(FIX, name), 'utf8')) as T;
 
-interface V1Vector { name: string; input: { s?: string; obj?: Record<string, never> }; output: { parsed?: unknown; encoded: string } }
+interface V1Vector { name: string; pd?: string; input: { s?: string; obj?: Record<string, never> }; output: { parsed?: unknown; encoded: string } }
 const v1 = read<{ quelle: string; vektoren: V1Vector[] }>('raumwerte.v1.json');
 
 test(`Parität mit ${v1.quelle}: ${v1.vektoren.length} Vektoren`, () => {
   assert.ok(v1.vektoren.length >= 10, 'zu wenige v1-Vektoren');
   for (const v of v1.vektoren) {
+    if (v.pd) continue; // bewusste Abweichung von v1 (Abschnitt 10a), Verhalten in raumwerte.spec.json festgelegt
     if (v.input.s !== undefined) {
       const parsed = parseRaum(v.input.s);
       assert.deepEqual(parsed, v.output.parsed, `${v.name}: parseRaum`);

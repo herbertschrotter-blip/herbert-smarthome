@@ -1,6 +1,7 @@
 // Schreibzugriffe (Bauplan 3.2): einzige Stelle, die hass.callService/callApi aufruft. Dienste und Payloads wie v1
 // (Abschnitt 6). Mehrteilige Schreibvorgänge melden Teilfehler (Regel 20) statt still zu scheitern.
-import { ENTITIES, HA_OPTIONS, ROOM_IDS, ROOM_VALUE_CODES, SERVICES, historyPath, planEntity, roomEntity } from './contract';
+import { ENTITIES, HA_OPTIONS, ROOM_VALUE_CODES, SERVICES, historyPath, planEntity, roomEntity } from './contract';
+import { readProfile } from './profile';
 import type { PlanNumber, RoomId, RoomValueKey } from './contract';
 import type { HomeAssistant } from './types';
 import { encodeRaum } from '../domain/raumwerte';
@@ -79,9 +80,9 @@ export class DxApi {
     return this.cleanSegments(segments);
   }
 
-  /** Raumwert am Roboter sofort setzen; `'all'` = alle sieben Räume parallel. Wdh als „2x“, sonst HA-Option aus RV_HA. */
+  /** Raumwert am Roboter sofort setzen; `'all'` = alle Räume des Profils parallel. Wdh als „2x“, sonst HA-Option aus RV_HA. */
   setRoomValue(room: RoomId | 'all', key: RoomValueKey, value: string): Promise<WriteResult> {
-    const ids: readonly RoomId[] = room === 'all' ? ROOM_IDS : [room];
+    const ids: readonly RoomId[] = room === 'all' ? readProfile(this.hass().states).roomIds : [room];
     const option = key === 'wdh' ? `${value}x` : (RV_HA_INV[key][value] ?? value);
     const field = ROOM_VALUE_CODES.RV_ENT[key];
     return this.many(ids.map((id) => ({ key: roomEntity(id, field), run: () => this.call(SERVICES.selectOption.domain, SERVICES.selectOption.service, { entity_id: roomEntity(id, field), option }) })));

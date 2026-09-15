@@ -1,13 +1,13 @@
 // Memoisierte Selektoren (Bauplan 3.1, Regel 10): Ein Selektor nennt seine Entitäts-IDs und liefert dasselbe
 // View-Objekt (gleiche Referenz), solange sich für keine dieser IDs `state` oder `last_updated` geändert hat.
 // Ein Selektor darf einen eigenen Vergleich mitbringen (z. B. nur bestimmte Attribute). Kein Store, keine Observables.
-// IDs dürfen als Funktion kommen (Geräteerkennung, device.ts): dann werden sie bei jedem Aufruf neu gebildet, und eine
-// geänderte Liste (anderer Roboter) erzwingt eine Neuberechnung.
+// IDs dürfen als Funktion der Zustände kommen (Geräteerkennung device.ts, Räume aus der Karte profile.ts): dann werden sie
+// bei jedem Aufruf neu gebildet, und eine geänderte Liste (anderer Roboter, andere Räume) erzwingt eine Neuberechnung.
 import type { HassEntity, States } from './types';
 
 /** true = für diese ID unverändert (Standard: state + last_updated; fehlend ↔ fehlend gilt als gleich). */
 export type EntityCompare = (prev: HassEntity | undefined, next: HassEntity | undefined) => boolean;
-export type IdList = readonly string[] | (() => readonly string[]);
+export type IdList = readonly string[] | ((states: States) => readonly string[]);
 export type CompareMap = Record<string, EntityCompare> | (() => Record<string, EntityCompare>);
 
 export interface Selector<T> {
@@ -53,13 +53,13 @@ export function sameValue(x: unknown, y: unknown): boolean {
  * @param compare je ID ein eigener Vergleich (Schlüssel = ID), sonst `sameStateAndUpdated`
  */
 export function memoizeSelector<T>(ids: IdList, fn: (states: States) => T, compare: CompareMap = {}): Selector<T> {
-  const list = (): readonly string[] => (typeof ids === 'function' ? ids() : ids);
+  const list = (states: States): readonly string[] => (typeof ids === 'function' ? ids(states) : ids);
   const cmpMap = (): Record<string, EntityCompare> => (typeof compare === 'function' ? compare() : compare);
   let prev: States | null = null;
   let prevKey = '';
   let result: T;
   const sel = ((states: States): T => {
-    const cur = list();
+    const cur = list(states);
     const key = cur.join('|');
     if (prev !== null && key === prevKey) {
       const cm = cmpMap();
@@ -75,7 +75,7 @@ export function memoizeSelector<T>(ids: IdList, fn: (states: States) => T, compa
     prevKey = key;
     return result;
   }) as Selector<T>;
-  Object.defineProperty(sel, 'ids', { get: list });
+  Object.defineProperty(sel, 'ids', { get: () => list(prev ?? {}) });
   sel.reset = () => { prev = null; prevKey = ''; };
   return sel;
 }

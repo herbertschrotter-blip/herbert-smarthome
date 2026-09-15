@@ -26,7 +26,7 @@ Gerät“. Die Antwort gibt ein Modul, das Geräteprofil.
 
 ## Drei Stufen
 
-### Stufe 2 – jeder Dreame-Roboter (gleiche Integration)
+### Stufe 2 – jeder Dreame-Roboter (gleiche Integration) – **gebaut 15.09. (PD-013, Version 2.0.0-alpha.18)**
 
 Ein Modul `src/ha/profile.ts` baut aus HA ein Profil:
 
@@ -82,6 +82,14 @@ Abzug von Heidi dasselbe Profil ergibt wie die feste Liste heute; dazu kommt ein
 (weniger Räume, ohne Station) als Fixture.
 
 Stufe 3 nach der Parität (6.x), weil sie nur mit einem echten zweiten Roboter oder einem Valetudo-Abzug prüfbar ist.
+
+## Stand nach Stufe 2 (15.09.)
+
+Gebaut: `src/domain/rooms.ts`, `src/ha/profile.ts`, Selektoren mit zustandsabhängigen ID-Listen, Kacheln mit `auto-fill`.
+Entschieden: Stufe 2 vor 4.4 (ja), Kurznamen/Symbole per Standardregel (Menü später), Übersetzung per Wörterliste
+(unbekannte Werte lesbar). Noch fest: `HA_OPTIONS` für die Paket-Helfer (Planer-Einträge speichern deutsche Optionen –
+bleibt, weil das Paket sie so erwartet), die fünf Raumwert-Felder je Raum, das Kurzformat der Raumwerte (3 Modi-Codes –
+„Wischen nach Saugen“ ist im Planer noch nicht speicherbar, Ausbau mit 4.5).
 
 ## Offene Entscheidungen (Herbert)
 

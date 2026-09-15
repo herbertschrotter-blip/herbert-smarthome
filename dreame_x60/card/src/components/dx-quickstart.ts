@@ -14,7 +14,8 @@ export const QUICKSTART_ELEMENT = 'dx-quickstart';
 export class DxQuickstart extends LitElement {
   static override styles = [controls, css`
     :host { display: flex; flex-direction: column; gap: var(--dx-space-3); min-width: 0; }
-    .qs { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 8px; }
+    /* „Alles“ + Räume des Roboters: Spalten nach Platz (2 … 20 Räume) */
+    .qs { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
     .qs button { display: grid; justify-items: center; gap: 6px; padding: 12px 6px 10px; min-height: 72px; border-radius: var(--dx-radius-md); background: var(--dx-surface-raised); border: 1px solid var(--dx-border); font-size: 12px; font-weight: 500; color: var(--dx-text-muted); transition: background var(--dx-dur), border-color var(--dx-dur), color var(--dx-dur); }
     .qs button ha-icon { --mdc-icon-size: 20px; width: 20px; height: 20px; }
     .qs button:hover { background: var(--dx-surface-active); color: var(--dx-text); }
@@ -22,7 +23,6 @@ export class DxQuickstart extends LitElement {
     .qs button.sel ha-icon { color: var(--dx-accent); }
     .runbar { display: flex; gap: 8px; align-items: center; }
     .runbar .btn.primary { flex: 1; }
-    @container content (max-width: 1099px) { .qs { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
   `];
 
   static override properties = { roomOrder: { attribute: false }, api: { attribute: false }, _sel: { state: true } };
@@ -49,8 +49,8 @@ export class DxQuickstart extends LitElement {
     return html`
       <div class="hd"><h2><ha-icon icon="mdi:view-grid-outline"></ha-icon>Schnellstart – Räume auswählen</h2><span class="r">${sel.size ? `${sel.size} gewählt` : 'Mehrfachauswahl'}</span></div>
       <div class="qs">
-        <button class=${sel.size && sel.size === order.length ? 'sel' : ''} data-room="all" @click=${() => { this._sel = toggleAll(sel, order); }}><ha-icon icon="mdi:home-outline"></ha-icon>Alles</button>
-        ${order.map((r) => html`<button class=${sel.has(r.id) ? 'sel' : ''} data-room=${r.id} @click=${() => { this._sel = toggleRoom(sel, r.id); }}><ha-icon icon=${r.icon}></ha-icon>${r.short}</button>`)}
+        <button class=${sel.size && sel.size === order.length ? 'sel' : ''} data-room="all" @click=${() => { this._sel = toggleAll(this._sel, order); }}><ha-icon icon="mdi:home-outline"></ha-icon>Alles</button>
+        ${order.map((r) => html`<button class=${sel.has(r.id) ? 'sel' : ''} data-room=${r.id} @click=${() => { this._sel = toggleRoom(this._sel, r.id); }}><ha-icon icon=${r.icon}></ha-icon>${r.short}</button>`)}
       </div>
       ${sel.size
         ? html`<div class="runbar"><button class="btn primary" @click=${this.run}><ha-icon icon="mdi:play"></ha-icon>${selectionLabel(sel, order)} reinigen</button><button class="btn icon" aria-label="Auswahl aufheben" title="Auswahl aufheben" @click=${() => { this._sel = new Set(); }}><ha-icon icon="mdi:close"></ha-icon></button></div>`

@@ -6,6 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargeMin, estimate, rate, restMinFallback } from '../../src/domain/estimate';
 import type { Estimate, Lernwerte, PlanForEstimate, Variante } from '../../src/domain/estimate';
+import { HEIDI_ROOMS } from './helpers-rooms';
 
 const FIX = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'fixtures');
 const read = <T>(name: string): T => JSON.parse(fs.readFileSync(path.join(FIX, name), 'utf8')) as T;
@@ -29,7 +30,7 @@ test(`Parität mit ${v1.quelle}: ${v1.vektoren.length} Schätzungen`, () => {
     const unavailable = v.input.overrides?.['sensor.heidi_lernwerte']?.state === 'unavailable';
     const lern = unavailable ? null : (v.input.lern ?? fixtureLern);
     const batt0 = v.input.batt0 ?? v.input.batt ?? 100;
-    const got = estimate(v.output.plan, lern, { variante: v.input.variante ?? 'normal', uniform: v.input.uniform ?? null, batt0, selfCleanArea });
+    const got = estimate(v.output.plan, lern, { variante: v.input.variante ?? 'normal', uniform: v.input.uniform ?? null, batt0, selfCleanArea, rooms: HEIDI_ROOMS });
     const want = v.output.estimate;
     if (want === null) { assert.equal(got, null, `${v.name}: null erwartet`); continue; }
     assert.ok(got, `${v.name}: Ergebnis fehlt`);
@@ -63,7 +64,7 @@ const spec = read<Spec>('estimate.spec.json');
 test('spec: Grenzfälle der Simulation', () => {
   for (const c of spec.faelle) {
     const plan = { ...spec.plan, ...c.plan } as PlanForEstimate;
-    const e = estimate(plan, spec.lern, { variante: c.variante ?? 'normal', uniform: c.uniform ?? null, batt0: c.batt0 });
+    const e = estimate(plan, spec.lern, { variante: c.variante ?? 'normal', uniform: c.uniform ?? null, batt0: c.batt0, rooms: HEIDI_ROOMS });
     assert.ok(e, c.name);
     if (c.erwartet.charges !== undefined) assert.equal(e.charges, c.erwartet.charges, `${c.name}: charges`);
     if (c.erwartet.battEnd !== undefined) near(e.battEnd, c.erwartet.battEnd, `${c.name}: battEnd`);

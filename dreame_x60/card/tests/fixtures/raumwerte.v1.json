@@ -124,7 +124,8 @@
      }
     },
     "encoded": "2:S/T/-/-/1"
-   }
+   },
+   "pd": "PD-013: Raum-IDs sind nicht auf 1..7 begrenzt (Räume aus der Karte); 9 gilt seit Stufe 2 – siehe raumwerte.spec.json"
   },
   {
    "name": "ungültige Wiederholung 5 und leer",

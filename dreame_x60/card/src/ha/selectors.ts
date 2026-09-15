@@ -1,7 +1,9 @@
 // Selektoren (Bauplan 3.1): aus hass.states typisierte Sichten, memoisiert je Sicht. Fehlende Entitäten und
 // unknown/unavailable ergeben typisierte Leerwerte (Regel 9); nie eine Exception, nie undefined ins Template.
 // Nur contract.ts kennt IDs; hier werden sie nur benutzt. Sichten dürfen IDs für Bedienelemente mitführen.
-import { ENTITIES, PERSONS, PLAN_NUMBERS, ROOM_IDS, ROOM_SELECT_FIELDS, ROOM_VALUE_CODES, allContractIds, planEntity, roomEntity, robotIds } from './contract';
+import { ENTITIES, PERSONS, PLAN_NUMBERS, ROOM_SELECT_FIELDS, ROOM_VALUE_CODES, allContractIds, planEntity, roomEntity, robotIds } from './contract';
+import { profileIds, readProfile } from './profile';
+import type { RoomInfo } from '../domain/rooms';
 import { deviceName } from './device';
 import type { PlanNumber, RoomId, PersonKey } from './contract';
 import { memoizeSelector, sameValue, stateAndAttributes } from './memo-selector';
@@ -13,7 +15,6 @@ import { parseRaum } from '../domain/raumwerte';
 import type { RaumMap, RoomValues } from '../domain/raumwerte';
 import type { Lernwerte } from '../domain/estimate';
 import { roomName } from '../domain/labels';
-import { ROOMS } from '../config';
 
 const EMPTY = ['unknown', 'unavailable'];
 const E = ENTITIES;
@@ -138,7 +139,7 @@ export const readPlans: Selector<PlansView> = memoizeSelector(() => [...PLAN_NUM
 
 // ───────── Raumwerte des Roboters ─────────
 const { RV_HA, RV_ENT } = ROOM_VALUE_CODES;
-const roomIds = (id: RoomId): string[] => ROOM_SELECT_FIELDS.map((f) => roomEntity(id, f));
+const roomSelectIds = (id: RoomId): string[] => ROOM_SELECT_FIELDS.map((f) => roomEntity(id, f));
 
 /** Zahlencodes der Kartendaten (camera.heidi_map, Attribut rooms) → HA-Optionen der Selects (wie Automation heidi_laufprotokoll). */
 const MAP_CODES = {
@@ -184,8 +185,13 @@ export function roomValuesOf(s: States, id: RoomId): RoomValues | null {
     wdh: (g('wdh') ?? '1x').replace('x', '') as RoomValues['wdh'],
   };
 }
-const ROOM_SELECTORS = Object.fromEntries(ROOM_IDS.map((id) => [id, memoizeSelector(() => [...roomIds(id), E.map], (s) => roomValuesOf(s, id), () => ({ [E.map]: mapRoomsOnly }))])) as Record<RoomId, Selector<RoomValues | null>>;
-export const readRoomValues = (id: RoomId): Selector<RoomValues | null> => ROOM_SELECTORS[id];
+const ROOM_SELECTORS = new Map<number, Selector<RoomValues | null>>();
+/** Raumwerte eines Raums; Selektor je ID wird beim ersten Zugriff angelegt (Räume kommen aus der Karte, beliebig viele). */
+export const readRoomValues = (id: RoomId): Selector<RoomValues | null> => {
+  let sel = ROOM_SELECTORS.get(id);
+  if (!sel) { sel = memoizeSelector(() => [...roomSelectIds(id), E.map], (s) => roomValuesOf(s, id), () => ({ [E.map]: mapRoomsOnly })); ROOM_SELECTORS.set(id, sel); }
+  return sel;
+};
 
 export interface AllRoomValuesView {
   rooms: Record<RoomId, RoomValues | null>;
@@ -195,10 +201,11 @@ export interface AllRoomValuesView {
   /** Räume, deren Werte aus den Kartendaten kommen (Selects unavailable, PD-010) – dort ist Schreiben nicht möglich */
   vonKarte: RoomId[];
 }
-export const readAllRoomValues: Selector<AllRoomValuesView> = memoizeSelector(() => [...ROOM_IDS.flatMap(roomIds), E.customizedCleaning, E.map], (s) => {
-  const rooms = Object.fromEntries(ROOM_IDS.map((id) => [id, ROOM_SELECTORS[id](s)])) as Record<RoomId, RoomValues | null>;
-  const vonKarte = ROOM_IDS.filter((id) => rooms[id] !== null && EMPTY.includes(st(s, roomEntity(id, RV_ENT.modus))));
-  return { rooms, customized: on(s, E.customizedCleaning), anyUnavailable: ROOM_IDS.some((id) => rooms[id] === null), vonKarte };
+export const readAllRoomValues: Selector<AllRoomValuesView> = memoizeSelector((s) => [...profileIds(s), ...readProfile(s).roomIds.flatMap(roomSelectIds), E.customizedCleaning], (s) => {
+  const ids = readProfile(s).roomIds;
+  const rooms = Object.fromEntries(ids.map((id) => [id, readRoomValues(id)(s)])) as Record<RoomId, RoomValues | null>;
+  const vonKarte = ids.filter((id) => rooms[id] !== null && EMPTY.includes(st(s, roomEntity(id, RV_ENT.modus))));
+  return { rooms, customized: on(s, E.customizedCleaning), anyUnavailable: ids.some((id) => rooms[id] === null), vonKarte };
 }, () => ({ [E.map]: mapRoomsOnly }));
 
 // ───────── Lernwerte ─────────
@@ -353,8 +360,10 @@ export const readRobotSettings: Selector<RobotSettingsView> = memoizeSelector(()
 export interface RoomShape { id: RoomId; name: string; short: string; icon: string; x: number; y: number; outline: [number, number][] }
 export interface MapView {
   entityPicture: string; calibrationPoints: unknown; noGoAreas: unknown; noMoppingAreas: unknown; virtualWalls: unknown; rooms: unknown;
-  karte: string; chairs: boolean; chairsId: string; roomOrder: typeof ROOMS;
-  /** Sichtbare Räume 1..7 mit Koordinaten aus `camera.heidi_map` (Reihenfolge wie `roomOrder`) */
+  karte: string; chairs: boolean; chairsId: string;
+  /** Sichtbare Räume des Roboters in App-Reihenfolge (Geräteprofil) */
+  roomOrder: RoomInfo[];
+  /** Sichtbare Räume mit Koordinaten aus der Karten-Kamera (Reihenfolge wie `roomOrder`) */
   roomShapes: RoomShape[];
   /** Kartenwahl (`select.heidi_selected_map`), null wenn die Entität fehlt oder unavailable ist */
   selectedMap: { id: string; value: string; options: string[] } | null;
@@ -362,11 +371,11 @@ export interface MapView {
   mapData: { picture: string; version: string; mapKey: string } | null;
 }
 const coord = (v: unknown): number | null => (typeof v === 'number' && isFinite(v) ? v : null);
-function roomShapes(s: States): RoomShape[] {
+function roomShapes(s: States, order: readonly RoomInfo[]): RoomShape[] {
   const rooms = attr<Record<string, Record<string, unknown>>>(s, E.map, 'rooms');
   if (!rooms || typeof rooms !== 'object') return [];
   const out: RoomShape[] = [];
-  for (const r of ROOMS) {
+  for (const r of order) {
     const m = rooms[String(r.id)];
     if (!m || m.visibility === 'Hidden') continue;
     const x0 = coord(m.x0), y0 = coord(m.y0), x1 = coord(m.x1), y1 = coord(m.y1);
@@ -376,26 +385,28 @@ function roomShapes(s: States): RoomShape[] {
   }
   return out;
 }
-export const readMap: Selector<MapView> = memoizeSelector(() => [E.map, E.karte, E.chairs, E.selectedMap, E.mapData], (s) => {
+export const readMap: Selector<MapView> = memoizeSelector((s) => [...profileIds(s), E.karte, E.chairs, E.selectedMap, E.mapData], (s) => {
   const sm = ent(s, E.selectedMap);
+  const roomOrder = readProfile(s).rooms;
   const mdEnt = ent(s, E.mapData);
   const mdPic = String(attr(s, E.mapData, 'entity_picture') ?? '');
   return {
     mapData: mdEnt && !EMPTY.includes(mdEnt.state) && mdPic ? { picture: mdPic, version: mdEnt.state, mapKey: String(attr(s, E.mapData, 'saved_map_id') ?? attr(s, E.mapData, 'map_id') ?? '0') } : null,
     entityPicture: String(attr(s, E.map, 'entity_picture') ?? ''), calibrationPoints: attr(s, E.map, 'calibration_points') ?? null,
     noGoAreas: attr(s, E.map, 'no_go_areas') ?? null, noMoppingAreas: attr(s, E.map, 'no_mopping_areas') ?? null, virtualWalls: attr(s, E.map, 'virtual_walls') ?? null,
-    rooms: attr(s, E.map, 'rooms') ?? null, karte: st(s, E.karte), chairs: on(s, E.chairs), chairsId: E.chairs, roomOrder: ROOMS,
-    roomShapes: roomShapes(s),
+    rooms: attr(s, E.map, 'rooms') ?? null, karte: st(s, E.karte), chairs: on(s, E.chairs), chairsId: E.chairs, roomOrder,
+    roomShapes: roomShapes(s, roomOrder),
     selectedMap: sm && !EMPTY.includes(sm.state) ? { id: E.selectedMap, value: sm.state, options: opts(s, E.selectedMap) } : null,
   };
 }, () => ({ [E.map]: stateAndAttributes(['entity_picture', 'calibration_points', 'no_go_areas', 'no_mopping_areas', 'virtual_walls', 'rooms']), [E.mapData]: stateAndAttributes(['entity_picture', 'saved_map_id', 'map_id']) }));
 
 // ───────── Diagnose ─────────
 export interface DiagnosticsView { total: number; missing: string[]; unavailable: string[]; groups: { name: string; total: number; missing: string[]; unavailable: string[] }[] }
-export const readDiagnostics: Selector<DiagnosticsView> = memoizeSelector(() => allContractIds(), (s) => {
-  const ids = allContractIds();
+export const readDiagnostics: Selector<DiagnosticsView> = memoizeSelector((s) => [...profileIds(s), ...allContractIds(readProfile(s).roomIds)], (s) => {
+  const roomIds = readProfile(s).roomIds;
+  const ids = allContractIds(roomIds);
   const group = (name: string, list: string[]) => ({ name, total: list.length, missing: list.filter((id) => !s[id]), unavailable: list.filter((id) => s[id] && EMPTY.includes(s[id]!.state)) });
-  const robotSet = new Set(robotIds());
+  const robotSet = new Set(robotIds(roomIds));
   const robot = group(`Roboter (${deviceName() || 'nicht erkannt'})`, ids.filter((id) => robotSet.has(id)));
   const paket = group('Paket (Helfer, Sensoren)', ids.filter((id) => !robotSet.has(id)));
   return { total: ids.length, missing: [...robot.missing, ...paket.missing], unavailable: [...robot.unavailable, ...paket.unavailable], groups: [robot, paket] };
@@ -403,7 +414,6 @@ export const readDiagnostics: Selector<DiagnosticsView> = memoizeSelector(() => 
 
 /** Alle Selektoren (für Tests: ids-Abdeckung, reset). */
 export const ALL_SELECTORS: Record<string, Selector<unknown>> = {
-  readRobot, readPlans, readAllRoomValues, readLearn, readHistory, readPrognose, readAutomatik, readConsumables, readStation, readSettings, readRobotSettings, readMap, readDiagnostics,
+  readProfile, readRobot, readPlans, readAllRoomValues, readLearn, readHistory, readPrognose, readAutomatik, readConsumables, readStation, readSettings, readRobotSettings, readMap, readDiagnostics,
   ...Object.fromEntries(PLAN_NUMBERS.map((n) => [`readPlan(${n})`, PLAN_SELECTORS[n]])),
-  ...Object.fromEntries(ROOM_IDS.map((id) => [`readRoomValues(${id})`, ROOM_SELECTORS[id]])),
 };

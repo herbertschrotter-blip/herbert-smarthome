@@ -8,6 +8,7 @@ import type { TemplateResult } from 'lit';
 import type { RobotView, AllRoomValuesView } from '../ha/selectors';
 import type { DxApi } from '../ha/api';
 import type { RoomId } from '../ha/contract';
+import type { RoomInfo } from '../domain/rooms';
 import type { DotLevel } from '../domain/status';
 import { stripModel } from '../domain/strip';
 import type { StripModel } from '../domain/strip';
@@ -54,10 +55,12 @@ export class DxHero extends LitElement {
     @container content (max-width: 640px) { .robotpic { max-width: 170px; } }
   `];
 
-  static override properties = { robot: { attribute: false }, rooms: { attribute: false }, api: { attribute: false } };
+  static override properties = { robot: { attribute: false }, rooms: { attribute: false }, roomOrder: { attribute: false }, api: { attribute: false } };
 
   declare robot?: RobotView;
   declare rooms?: AllRoomValuesView;
+  /** Räume des Roboters (Profil) für Streifen-Namen */
+  declare roomOrder: readonly RoomInfo[];
   declare api?: DxApi;
 
   private openRooms(): void { emit<Overlay>(this, EVENTS.openOverlay, { kind: 'rooms', mode: 'robot' }); }
@@ -65,7 +68,7 @@ export class DxHero extends LitElement {
   /** Streifen aus Roboterzustand und Raumwerten (reine Funktion, billig). */
   get strip(): StripModel | null {
     const r = this.robot, rooms = this.rooms;
-    return r && rooms ? stripModel(r, (id: RoomId) => rooms.rooms[id]) : null;
+    return r && rooms ? stripModel(r, (id: RoomId) => rooms.rooms[id] ?? null, this.roomOrder ?? []) : null;
   }
 
   /** Drei Werte: im Lauf die des aktuellen Raums, sonst der gemeinsame Wert aller Räume („–“ bei Abweichung oder unavailable). */

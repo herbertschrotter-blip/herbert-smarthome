@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { dayLabel, fmtDate, fmtDur, fmtHistTs, fmtMin, fmtTime, roomLabel, roomName } from '../../src/domain/labels';
+import { HEIDI_ROOMS } from './helpers-rooms';
 
 const FIX = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'fixtures');
 const read = <T>(name: string): T => JSON.parse(fs.readFileSync(path.join(FIX, name), 'utf8')) as T;
@@ -20,7 +21,7 @@ test(`Parität mit ${v1.quelle}: ${v1.vektoren.length} Beschriftungen`, () => {
     const a = v.input.args[0] as never;
     const today = new Date(v.output.today);
     const got = v.input.fn === '_dayLabel' ? dayLabel(a)
-      : v.input.fn === '_roomLabel' ? roomLabel((a as { __set: number[] }).__set)
+      : v.input.fn === '_roomLabel' ? roomLabel((a as { __set: number[] }).__set, HEIDI_ROOMS)
       : v.input.fn === '_fmtMin' ? fmtMin(a)
       : v.input.fn === 'fmtDate' ? fmtDate(a === '__today__' ? v.output.today : a, today)
       : v.input.fn === 'roomName' ? roomName(a, deutsch)
@@ -61,8 +62,9 @@ test('dayLabel / roomLabel / roomName Grenzfälle', () => {
   assert.equal(dayLabel([true, true, true, true, true, false, false]), 'Mo–Fr');
   assert.equal(dayLabel([true, true, true, true, false, false, false]), 'Mo Di Mi Do');
   assert.equal(dayLabel([true, false, false, false, false, false, true]), 'Mo + So');
-  assert.equal(roomLabel([7, 7, 7, 7, 7, 7, 7]), 'Wohnz., Wohnz., Wohnz., Wohnz., Wohnz., Wohnz., Wohnz.', 'sieben gleiche IDs sind nicht „Alle“');
-  assert.equal(roomLabel(new Set([2, 1])), 'Schlafz., Bad');
+  assert.equal(roomLabel([7, 7, 7, 7, 7, 7, 7], HEIDI_ROOMS), 'Wohnz., Wohnz., Wohnz., Wohnz., Wohnz., Wohnz., Wohnz.', 'sieben gleiche IDs sind nicht „Alle“');
+  assert.equal(roomLabel(new Set([2, 1]), HEIDI_ROOMS), 'Schlafz., Bad');
+  assert.equal(roomLabel([1, 2], [{ id: 1, name: 'Bad', short: 'Bad', icon: '', order: 1 }, { id: 2, name: 'Küche', short: 'Küche', icon: '', order: 2 }]), 'Alle', '„Alle“ hängt an der Raumliste des Roboters');
   assert.equal(roomName('Kitchen', false), 'Kitchen');
   assert.equal(roomName(null, true), '–');
 });

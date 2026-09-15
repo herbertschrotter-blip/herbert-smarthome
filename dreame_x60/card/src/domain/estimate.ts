@@ -1,6 +1,7 @@
 // Dauer & Akku (Bauplan 2.2, Regeln Abschnitt 6): simuliert einen Planer-Eintrag Raum für Raum – Mopp-Wäschen,
 // Ladestopps, Heimfahrt. Reine Funktionen, Verhalten 1:1 wie v1 _estimate/_rate/_chargeMin/_restMin.
-import { roomById } from '../config';
+import { roomById } from './rooms';
+import type { RoomInfo } from './rooms';
 import { CHARGE_EXTRA_MIN, CHARGE_FAST_LIMIT_PCT, DEFAULT_LADEN, DEFAULT_MINDESTTAGE, DEFAULT_RATES, DEFAULT_ROOM_AREA_M2, DEFAULT_RUECKKEHR, DEFAULT_WAESCHE, HOME_MIN, SUCT_F } from './constants';
 import type { RoomValuesInput } from './raumwerte';
 
@@ -58,6 +59,8 @@ export interface EstimateOptions {
   batt0: number;
   /** number.heidi_self_clean_area – Standard für nach_m2, wenn die Lernwerte keine Wäsche kennen. */
   selfCleanArea?: number;
+  /** Räume des Roboters (Profil) für die Schritt-Texte; ohne Liste steht die Raum-ID im Text */
+  rooms?: readonly RoomInfo[];
 }
 
 /** Rate für Modus/Saugstufe: gelernt, sonst gelernte Rate desselben Modus × Faktor, sonst Erfahrungswert. */
@@ -109,7 +112,7 @@ export function estimate(p: PlanForEstimate, lern: Lernwerte | null, opts: Estim
       t += cmin; batt = L.weiter_pct; charges++;
     }
     batt -= drain; t += min; since += area; used += drain;
-    steps.push({ typ: 'raum', id, text: roomById(id)?.short ?? String(id), sub: `${modus} · ${saug} · ${s.wdh}×${modus !== 'Saugen' && s.wasser ? ' · ' + s.wasser : ''}`, min, batt, area, gelernt: r.gelernt });
+    steps.push({ typ: 'raum', id, text: roomById(opts.rooms ?? [], id)?.short ?? String(id), sub: `${modus} · ${saug} · ${s.wdh}×${modus !== 'Saugen' && s.wasser ? ' · ' + s.wasser : ''}`, min, batt, area, gelernt: r.gelernt });
     if (modus !== 'Saugen' && since >= W.nach_m2) { steps.push({ typ: 'wasch', text: 'Wäscht Mopp zwischendurch', min: W.zwischen_min, batt }); t += W.zwischen_min; since = 0; }
   }
   steps.push({ typ: 'heim', text: 'Fährt zur Station', min: HOME_MIN, batt }); t += HOME_MIN;

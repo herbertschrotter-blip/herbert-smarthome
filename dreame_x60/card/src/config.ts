@@ -1,7 +1,8 @@
 // Nur Anzeige (Bauplan Abschnitt 5): Kurznamen, Icons, deutsche Texte. Keine Entitäts-IDs (die stehen in ha/contract.ts).
-// Werte 1:1 aus v1 (ROOMS, ROOMS_DE, STATUS_DE, ERR_DE, APP_SCENES, DAYS).
-import type { RoomId } from './ha/contract';
+// Werte 1:1 aus v1 (ROOMS_DE, STATUS_DE, ERR_DE, APP_SCENES, DAYS). Die Raumliste selbst kommt seit Stufe 2 aus der
+// Karte des Roboters (domain/rooms.ts, ha/profile.ts) – hier steht nur noch die deutsche Übersetzung der Integrationsnamen.
 import type { Page } from './pages';
+export type { RoomInfo } from './domain/rooms';
 
 /** Navigationseintrag (Bauplan 4.0): `page` = Ziel, `overlay` = öffnet ein Overlay statt zu navigieren; `tab` = auch in der Tab-Leiste. */
 export interface NavEntry { key: string; label: string; icon: string; page?: Page; overlay?: 'rooms'; onlyWhen?: 'prognose'; tab: boolean }
@@ -16,20 +17,6 @@ export const NAV: readonly NavEntry[] = [
   { key: 'prognose', label: 'Prognose', icon: 'mdi:chart-line', page: 'prognose', onlyWhen: 'prognose', tab: true },
   { key: 'einstellungen', label: 'Einstellungen', icon: 'mdi:cog-outline', page: 'einstellungen', tab: true },
 ];
-
-export interface RoomInfo { id: RoomId; short: string; name: string; icon: string }
-
-/** Räume in Chip-Reihenfolge 7..1 (Anzeige); Kurzname wie v1, voller Name wie am Roboter. */
-export const ROOMS: readonly RoomInfo[] = [
-  { id: 7, short: 'Wohnz.', name: 'Wohnzimmer', icon: 'mdi:sofa-outline' },
-  { id: 6, short: 'Küche', name: 'Küche', icon: 'mdi:chef-hat' },
-  { id: 5, short: 'Büro', name: 'Büro', icon: 'mdi:desk' },
-  { id: 4, short: 'Flur', name: 'Flur', icon: 'mdi:foot-print' },
-  { id: 3, short: 'WC', name: 'WC', icon: 'mdi:toilet' },
-  { id: 2, short: 'Schlafz.', name: 'Schlafzimmer', icon: 'mdi:bed-king-outline' },
-  { id: 1, short: 'Bad', name: 'Bad', icon: 'mdi:shower' },
-];
-export const roomById = (id: number): RoomInfo | undefined => ROOMS.find((r) => r.id === id);
 
 /** Englische Raumnamen aus dem Kartenbild → deutsch. */
 export const ROOMS_DE: Record<string, string> = { Bathroom: 'Bad', 'Primary Bedroom': 'Schlafzimmer', WC: 'WC', Corridor: 'Flur', Study: 'Büro', Kitchen: 'Küche', 'Living Room': 'Wohnzimmer' };

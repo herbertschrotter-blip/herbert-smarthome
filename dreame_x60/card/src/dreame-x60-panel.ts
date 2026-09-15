@@ -11,7 +11,6 @@ import { readAllRoomValues, readAutomatik, readConsumables, readDiagnostics, rea
 import type { RobotView } from './ha/selectors';
 import { PAGES, PAGE_PARTS, PAGE_TITLE, START_SLOTS, startSlot, toPage } from './pages';
 import type { Page, StartSlot } from './pages';
-import { ROOMS } from './config';
 import { EVENTS } from './shared/overlay';
 import type { Overlay } from './shared/overlay';
 import { navigate } from './shared/navigate';
@@ -192,7 +191,7 @@ export class DreameX60Panel extends LitElement {
       consumables: [readConsumables(s).map((c) => `${c.name} ${c.pct} %`).join(', ')],
       station: [readStation(s).tiles.map((x) => `${x.label} ${x.value}`).join(', ')],
       stats: [`${hist.count} Läufe · ${hist.totalArea} m² · ${hist.totalTime} min`],
-      quickstart: [`Räume: ${ROOMS.map((r) => r.short).join(', ')}`],
+      quickstart: [`Räume: ${map.roomOrder.map((r) => r.short).join(', ') || 'keine (Karte fehlt)'}`],
       history: [`${hist.entries.length} Einträge${hist.stale ? ' · letzter Stand' : ''}`],
     };
     const box = (sl: StartSlot): TemplateResult => html`
@@ -205,10 +204,10 @@ export class DreameX60Panel extends LitElement {
     const dark = readSettings(s).dark;
     return html`
       <div class="bento">
-        <dx-hero class="b span3" data-slot="hero" .robot=${robot} .rooms=${rooms} .api=${this.api}></dx-hero>
+        <dx-hero class="b span3" data-slot="hero" .robot=${robot} .rooms=${rooms} .roomOrder=${map.roomOrder} .api=${this.api}></dx-hero>
         <dx-map-card class="b span6" data-slot="map" variant="compact" .hass=${this.hass} .map=${map} .robot=${robot} .history=${hist} .api=${this.api} ?dark=${dark}></dx-map-card>
         <div class="span3 stack rightstack">
-          ${(robot.vac === 'cleaning' || robot.vac === 'paused') && !robot.docked ? html`<dx-auftrag class="b" data-slot="auftrag" .robot=${robot} .rooms=${rooms}></dx-auftrag>` : box(startSlot('automatik'))}
+          ${(robot.vac === 'cleaning' || robot.vac === 'paused') && !robot.docked ? html`<dx-auftrag class="b" data-slot="auftrag" .robot=${robot} .rooms=${rooms} .roomOrder=${map.roomOrder}></dx-auftrag>` : box(startSlot('automatik'))}
           ${box(startSlot('heute'))}
         </div>
         ${rest.map((sl) => (sl.slot === 'history' ? html`<dx-quickstart class="b span7" data-slot="quickstart" .roomOrder=${map.roomOrder} .api=${this.api}></dx-quickstart>${box(sl)}` : box(sl)))}

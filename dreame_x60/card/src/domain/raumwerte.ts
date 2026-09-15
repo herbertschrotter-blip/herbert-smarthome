@@ -20,7 +20,7 @@ export interface RoomValues {
   wdh: Wdh;
 }
 
-/** Raumwerte je Raum-ID (nur 1..7). */
+/** Raumwerte je Raum-ID (beliebig viele Räume, IDs ≥ 1). */
 export type RaumMap = Partial<Record<RoomId, RoomValues>>;
 
 /** Eingabe für encodeRaum: darf unvollständig oder mit fremden Werten sein (Draft aus dem Editor). */
@@ -44,7 +44,7 @@ const INV = { modus: inverse(RV.modus), saug: inverse(RV.saug), wasser: inverse(
 /**
  * Kurzformat → Raumwerte. Unbekannter Modus → „Saugen“, unbekannte Saugstufe → „Standard“,
  * Wasser/Route nur, wenn der Code bekannt ist (sonst null), Wdh nur 1–3 (sonst „1“),
- * IDs außerhalb 1..7 und Einträge ohne Doppelpunkt werden ignoriert; spätere Einträge überschreiben frühere.
+ * IDs < 1 und Einträge ohne Doppelpunkt werden ignoriert; spätere Einträge überschreiben frühere.
  */
 export function parseRaum(s: string | null | undefined): RaumMap {
   const out: RaumMap = {};
@@ -53,7 +53,7 @@ export function parseRaum(s: string | null | undefined): RaumMap {
     if (!id || !rest) return;
     const f = rest.split('/');
     const n = parseInt(id, 10);
-    if (!(n >= 1 && n <= 7)) return;
+    if (!(n >= 1)) return;
     out[n as RoomId] = {
       modus: lookup(RV.modus, f[0]) ?? 'Saugen',
       saug: lookup(RV.saug, f[1]) ?? 'Standard',

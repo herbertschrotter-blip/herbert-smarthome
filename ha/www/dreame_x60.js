@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.17 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.18 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -602,7 +602,6 @@ function discoverDevice(hass, override) {
 }
 
 // src/ha/contract.ts
-var ROOM_IDS = [1, 2, 3, 4, 5, 6, 7];
 var PLAN_NUMBERS = [1, 2, 3, 4];
 var PACKAGE_PREFIX = "heidi";
 var ROBOT_FEATURES = {
@@ -646,6 +645,11 @@ var ROBOT_FEATURES = {
   manualDrying: ["button", "manual_drying"],
   baseStationCleaning: ["button", "base_station_cleaning"],
   customizedCleaning: ["switch", "customized_cleaning"],
+  cleaningMode: ["select", "cleaning_mode"],
+  // globale Selects (Optionslisten für das Geräteprofil)
+  suctionLevel: ["select", "suction_level"],
+  mopPadHumidity: ["select", "mop_pad_humidity"],
+  cleaningRoute: ["select", "cleaning_route"],
   carpetCleaning: ["select", "carpet_cleaning"],
   waterTemperature: ["select", "water_temperature"],
   dryingTime: ["select", "drying_time"],
@@ -763,17 +767,248 @@ var SERVICES = {
 function historyPath(startIso, endIso) {
   return `history/period/${startIso}?filter_entity_id=${ENTITIES.phase},${ENTITIES.vac}&end_time=${encodeURIComponent(endIso)}&minimal_response&no_attributes`;
 }
-function robotIds() {
+function robotIds(roomIds = []) {
   const ids = Object.keys(ROBOT_FEATURES).map((k2) => ENTITIES[k2]);
-  for (const r4 of ROOM_IDS) for (const f3 of ROOM_SELECT_FIELDS) ids.push(roomEntity(r4, f3));
+  for (const r4 of roomIds) for (const f3 of ROOM_SELECT_FIELDS) ids.push(roomEntity(r4, f3));
   return ids;
 }
-function allContractIds() {
+function allContractIds(roomIds = []) {
   const ids = [...Object.values(ENTITIES), ...PERSONS.map((p3) => p3.id)];
   for (const n4 of PLAN_NUMBERS) for (const f3 of [...PLAN_TEXT_FIELDS, ...PLAN_SELECT_FIELDS, ...PLAN_BOOL_FIELDS, ...PLAN_TIME_FIELDS]) ids.push(planEntity(n4, f3));
-  for (const r4 of ROOM_IDS) for (const f3 of ROOM_SELECT_FIELDS) ids.push(roomEntity(r4, f3));
+  for (const r4 of roomIds) for (const f3 of ROOM_SELECT_FIELDS) ids.push(roomEntity(r4, f3));
   return [...new Set(ids)];
 }
+
+// src/ha/memo-selector.ts
+var sameStateAndUpdated = (a3, b3) => {
+  if (a3 === b3) return true;
+  if (!a3 || !b3) return false;
+  return a3.state === b3.state && a3.last_updated === b3.last_updated;
+};
+function stateAndAttributes(attrs) {
+  return (a3, b3) => {
+    if (a3 === b3) return true;
+    if (!a3 || !b3) return false;
+    if (a3.state !== b3.state) return false;
+    for (const k2 of attrs) if (!sameValue(a3.attributes[k2], b3.attributes[k2])) return false;
+    return true;
+  };
+}
+function sameValue(x2, y3) {
+  if (x2 === y3) return true;
+  if (Array.isArray(x2) && Array.isArray(y3)) return x2.length === y3.length && x2.every((v2, i5) => sameValue(v2, y3[i5]));
+  if (x2 && y3 && typeof x2 === "object" && typeof y3 === "object") {
+    const kx = Object.keys(x2), ky = Object.keys(y3);
+    return kx.length === ky.length && kx.every((k2) => sameValue(x2[k2], y3[k2]));
+  }
+  return false;
+}
+function memoizeSelector(ids, fn, compare = {}) {
+  const list = (states) => typeof ids === "function" ? ids(states) : ids;
+  const cmpMap = () => typeof compare === "function" ? compare() : compare;
+  let prev = null;
+  let prevKey = "";
+  let result;
+  const sel = (states) => {
+    const cur = list(states);
+    const key = cur.join("|");
+    if (prev !== null && key === prevKey) {
+      const cm = cmpMap();
+      let same = true;
+      for (const id of cur) {
+        const cmp = cm[id] ?? sameStateAndUpdated;
+        if (!cmp(prev[id], states[id])) {
+          same = false;
+          break;
+        }
+      }
+      if (same) return result;
+    }
+    result = fn(states);
+    prev = states;
+    prevKey = key;
+    return result;
+  };
+  Object.defineProperty(sel, "ids", { get: () => list(prev ?? {}) });
+  sel.reset = () => {
+    prev = null;
+    prevKey = "";
+  };
+  return sel;
+}
+
+// src/domain/rooms.ts
+var ICON_BY_KEYWORD = [
+  [/\b(wc|toilet|gäste-?wc|gaeste-?wc)\b/i, "mdi:toilet"],
+  [/bad|bath|dusche|shower/i, "mdi:shower"],
+  [/küche|kueche|kitchen|kochen/i, "mdi:chef-hat"],
+  [/schlaf|bed|nacht/i, "mdi:bed-king-outline"],
+  [/kinder|child|kid|baby|nursery/i, "mdi:teddy-bear"],
+  [/wohn|living|lounge|stube/i, "mdi:sofa-outline"],
+  [/büro|buero|office|study|arbeit|work/i, "mdi:desk"],
+  [/ess|dining|speise/i, "mdi:silverware-fork-knife"],
+  [/flur|gang|diele|corridor|hall|vorraum|vorzimmer|entry|entrance/i, "mdi:foot-print"],
+  [/balkon|terrasse|balcony|terrace|patio/i, "mdi:balcony"],
+  [/abstell|storage|utility|lager|kammer|speis/i, "mdi:wardrobe-outline"],
+  [/wasch|laundry|hauswirtschaft/i, "mdi:washing-machine"],
+  [/garage|carport/i, "mdi:garage"],
+  [/fitness|sport|gym/i, "mdi:dumbbell"],
+  [/spiel|play|hobby|game/i, "mdi:gamepad-variant-outline"]
+];
+var GENERIC_ICONS = /* @__PURE__ */ new Set(["mdi:home-outline", "mdi:home", ""]);
+function roomIcon(name, fallback) {
+  for (const [re, icon] of ICON_BY_KEYWORD) if (re.test(name)) return icon;
+  return fallback && !GENERIC_ICONS.has(fallback) ? fallback : "mdi:floor-plan";
+}
+function shortName(name) {
+  const n4 = name.trim();
+  const m2 = /^(.+?)zimmer$/i.exec(n4);
+  if (m2 && m2[1].length <= 7) return `${m2[1]}z.`;
+  if (n4.length <= 7) return n4;
+  return `${n4.slice(0, 6)}.`;
+}
+function roomsFromMap(rooms, deutsch = false, namesDe = {}) {
+  if (!rooms || typeof rooms !== "object") return [];
+  const out = [];
+  for (const [key, r4] of Object.entries(rooms)) {
+    if (!r4 || typeof r4 !== "object") continue;
+    const id = typeof r4.room_id === "number" ? r4.room_id : parseInt(key, 10);
+    if (!Number.isInteger(id) || id <= 0) continue;
+    if (String(r4.visibility ?? "").toLowerCase() === "hidden") continue;
+    const raw = String(r4.custom_name ?? r4.name ?? "").trim() || `Raum ${id}`;
+    const name = deutsch ? namesDe[raw] ?? raw : raw;
+    out.push({ id, name, short: shortName(name), icon: roomIcon(name, r4.icon), order: typeof r4.order === "number" ? r4.order : id });
+  }
+  return out.sort((a3, b3) => a3.order - b3.order || a3.id - b3.id);
+}
+var roomById = (rooms, id) => rooms.find((r4) => r4.id === id);
+
+// src/config.ts
+var NAV = [
+  { key: "start", label: "\xDCbersicht", icon: "mdi:home-outline", page: "start", tab: true },
+  { key: "reinigen", label: "Karte", icon: "mdi:map-outline", page: "reinigen", tab: true },
+  { key: "rooms", label: "R\xE4ume", icon: "mdi:view-grid-outline", overlay: "rooms", tab: false },
+  { key: "planer", label: "Planer", icon: "mdi:calendar-outline", page: "planer", tab: true },
+  { key: "protokoll", label: "Verlauf", icon: "mdi:format-list-bulleted", page: "protokoll", tab: true },
+  { key: "prognose", label: "Prognose", icon: "mdi:chart-line", page: "prognose", onlyWhen: "prognose", tab: true },
+  { key: "einstellungen", label: "Einstellungen", icon: "mdi:cog-outline", page: "einstellungen", tab: true }
+];
+var ROOMS_DE = { Bathroom: "Bad", "Primary Bedroom": "Schlafzimmer", WC: "WC", Corridor: "Flur", Study: "B\xFCro", Kitchen: "K\xFCche", "Living Room": "Wohnzimmer" };
+var STATUS_DE = {
+  sleeping: "schl\xE4ft",
+  charging: "l\xE4dt",
+  cleaning: "reinigt",
+  sweeping: "saugt",
+  mopping: "wischt",
+  sweeping_and_mopping: "saugt und wischt",
+  returning: "f\xE4hrt zur Station",
+  paused: "pausiert",
+  idle: "bereit",
+  docked: "angedockt",
+  washing: "Mopp-W\xE4sche",
+  drying: "trocknet",
+  auto_emptying: "saugt ab",
+  error: "Fehler",
+  charging_completed: "voll geladen",
+  segment_cleaning: "reinigt R\xE4ume",
+  zone_cleaning: "reinigt Zone",
+  spot_cleaning: "reinigt Punkt",
+  cruising: "f\xE4hrt"
+};
+var ERR_DE = {
+  clean_mop_pad: "Mopp reinigen",
+  dust_bag_full: "Staubbeutel voll",
+  clean_water_tank_empty: "Frischwasser leer",
+  dirty_water_tank_full: "Abwasser voll",
+  dust_box_missing: "Staubbox fehlt",
+  mop_pad_stop_rotate: "Mopp blockiert",
+  wheels_stuck: "Rad blockiert",
+  brush_stuck: "B\xFCrste blockiert",
+  low_battery: "Akku leer",
+  station_disconnected: "Station getrennt",
+  detergent_empty: "Reinigungsmittel leer",
+  water_tank_missing: "Wassertank fehlt",
+  clean_water_tank_missing: "Frischwassertank fehlt",
+  dirty_water_tank_missing: "Abwassertank fehlt"
+};
+var APP_SCENES = [
+  { id: 32, name: "Eingang reinigen", sub: "Flur \xB7 Saugen + Wischen \xB7 2\xD7", icon: "mdi:door-open" },
+  { id: 33, name: "Bad Saugen/Wischen", sub: "Bad \xB7 1\xD7", icon: "mdi:shower" },
+  { id: 34, name: "Wischen nach dem Saugen", sub: "Ganze Wohnung \xB7 nur Wischen", icon: "mdi:water" }
+];
+
+// src/ha/profile.ts
+var OPTION_DE = { mopping_after_sweeping: "Wischen nach Saugen", quick: "Schnell", off: "Aus", on: "An" };
+var humanize = (v2) => v2.replace(/_/g, " ").replace(/^\w/, (c4) => c4.toUpperCase());
+function optionLabel(key, value) {
+  if (key === "wdh") return value.replace(/x$/i, "");
+  const table = ROOM_VALUE_CODES.RV_HA[key];
+  return table[value] ?? OPTION_DE[value] ?? humanize(value);
+}
+var optionsOf = (s4, id, key) => {
+  const e4 = s4[id];
+  const list = Array.isArray(e4?.attributes.options) ? e4.attributes.options.map(String) : [];
+  return list.map((value) => ({ value, label: optionLabel(key, value) }));
+};
+var mapRoomsOnly = (a3, b3) => sameValue(a3?.attributes?.rooms, b3?.attributes?.rooms);
+var existsOnly = (a3, b3) => !!a3 === !!b3;
+var FEATURE_IDS = () => Object.keys(ROBOT_FEATURES).map((k2) => ENTITIES[k2]);
+var optionsOnly = (a3, b3) => a3 === b3 || !!a3 && !!b3 && sameValue(a3.attributes.options, b3.attributes.options);
+var GLOBAL = { modus: "cleaningMode", saug: "suctionLevel", wasser: "mopPadHumidity", route: "cleaningRoute" };
+var { RV_ENT } = ROOM_VALUE_CODES;
+function roomsFromSelects(s4) {
+  const p3 = devicePrefix();
+  if (!p3) return [];
+  const re = new RegExp(`^select\\.${p3}_room_(\\d+)_cleaning_mode$`);
+  const out = [];
+  for (const id of Object.keys(s4)) {
+    const m2 = re.exec(id);
+    if (!m2) continue;
+    const n4 = parseInt(m2[1], 10);
+    const fn = cleanName(s4[id]?.attributes.friendly_name);
+    const name = fn.replace(new RegExp(`^${deviceName().replace(/[.*+?^${}()|[\\]\\\\]/g, "\\\\$&")}\\s*`, "i"), "").replace(/cleaning mode/i, "").trim() || `Raum ${n4}`;
+    out.push({ id: n4, name, short: shortName(name), icon: roomIcon(name), order: n4 });
+  }
+  return out.sort((a3, b3) => a3.order - b3.order || a3.id - b3.id);
+}
+var fallbackSelectIds = (s4) => {
+  const p3 = devicePrefix();
+  if (!p3) return [];
+  const re = new RegExp(`^select\\.${p3}_room_\\d+_cleaning_mode$`);
+  return Object.keys(s4).filter((id) => re.test(id));
+};
+function roomsOf(s4) {
+  const deutsch = s4[ENTITIES.raumnamen]?.state === "Deutsch";
+  const fromMap = roomsFromMap(s4[ENTITIES.map]?.attributes.rooms, deutsch, ROOMS_DE);
+  return fromMap.length ? fromMap : roomsFromSelects(s4);
+}
+function profileIds(s4) {
+  const first = roomsOf(s4)[0]?.id;
+  const opt = Object.values(GLOBAL).map((k2) => ENTITIES[k2]);
+  const fb = s4[ENTITIES.map]?.attributes.rooms ? [] : fallbackSelectIds(s4);
+  return [.../* @__PURE__ */ new Set([ENTITIES.map, ENTITIES.raumnamen, ...opt, ...FEATURE_IDS(), ...fb, ...first === void 0 ? [] : [roomEntity(first, RV_ENT.wdh), ...Object.keys(GLOBAL).map((k2) => roomEntity(first, RV_ENT[k2]))]])];
+}
+var readProfile = memoizeSelector(
+  profileIds,
+  (s4) => {
+    const rooms = roomsOf(s4);
+    const first = rooms[0]?.id ?? null;
+    const opt = (key) => {
+      const global = optionsOf(s4, ENTITIES[GLOBAL[key]], key);
+      if (global.length || first === null) return global;
+      return optionsOf(s4, roomEntity(first, RV_ENT[key]), key);
+    };
+    const options = {
+      modus: opt("modus"),
+      saug: opt("saug"),
+      wasser: opt("wasser"),
+      route: opt("route"),
+      wdh: first === null ? [] : optionsOf(s4, roomEntity(first, RV_ENT.wdh), "wdh")
+    };
+    return { rooms, roomIds: rooms.map((r4) => r4.id), options, has: (key) => !!s4[ENTITIES[key]] };
+  },
+  () => ({ ...Object.fromEntries(FEATURE_IDS().map((id) => [id, existsOnly])), [ENTITIES.map]: mapRoomsOnly, ...Object.fromEntries(Object.values(GLOBAL).map((k2) => [ENTITIES[k2], optionsOnly])) })
+);
 
 // src/domain/raumwerte.ts
 var { RV } = ROOM_VALUE_CODES;
@@ -791,7 +1026,7 @@ function parseRaum(s4) {
     if (!id || !rest) return;
     const f3 = rest.split("/");
     const n4 = parseInt(id, 10);
-    if (!(n4 >= 1 && n4 <= 7)) return;
+    if (!(n4 >= 1)) return;
     out[n4] = {
       modus: lookup(RV.modus, f3[0]) ?? "Saugen",
       saug: lookup(RV.saug, f3[1]) ?? "Standard",
@@ -855,9 +1090,9 @@ var DxApi = class {
     await this.call(SERVICES.inputText.domain, SERVICES.inputText.service, { entity_id: ENTITIES.laufReihenfolge, value: segments.join(",") });
     return this.cleanSegments(segments);
   }
-  /** Raumwert am Roboter sofort setzen; `'all'` = alle sieben Räume parallel. Wdh als „2x“, sonst HA-Option aus RV_HA. */
+  /** Raumwert am Roboter sofort setzen; `'all'` = alle Räume des Profils parallel. Wdh als „2x“, sonst HA-Option aus RV_HA. */
   setRoomValue(room, key, value) {
-    const ids = room === "all" ? ROOM_IDS : [room];
+    const ids = room === "all" ? readProfile(this.hass().states).roomIds : [room];
     const option = key === "wdh" ? `${value}x` : RV_HA_INV[key][value] ?? value;
     const field = ROOM_VALUE_CODES.RV_ENT[key];
     return this.many(ids.map((id) => ({ key: roomEntity(id, field), run: () => this.call(SERVICES.selectOption.domain, SERVICES.selectOption.service, { entity_id: roomEntity(id, field), option }) })));
@@ -955,128 +1190,6 @@ var DxApi = class {
     return h3.callApi("GET", historyPath(new Date(startSec * 1e3).toISOString(), new Date(endSec * 1e3).toISOString()));
   }
 };
-
-// src/ha/memo-selector.ts
-var sameStateAndUpdated = (a3, b3) => {
-  if (a3 === b3) return true;
-  if (!a3 || !b3) return false;
-  return a3.state === b3.state && a3.last_updated === b3.last_updated;
-};
-function stateAndAttributes(attrs) {
-  return (a3, b3) => {
-    if (a3 === b3) return true;
-    if (!a3 || !b3) return false;
-    if (a3.state !== b3.state) return false;
-    for (const k2 of attrs) if (!sameValue(a3.attributes[k2], b3.attributes[k2])) return false;
-    return true;
-  };
-}
-function sameValue(x2, y3) {
-  if (x2 === y3) return true;
-  if (Array.isArray(x2) && Array.isArray(y3)) return x2.length === y3.length && x2.every((v2, i5) => sameValue(v2, y3[i5]));
-  if (x2 && y3 && typeof x2 === "object" && typeof y3 === "object") {
-    const kx = Object.keys(x2), ky = Object.keys(y3);
-    return kx.length === ky.length && kx.every((k2) => sameValue(x2[k2], y3[k2]));
-  }
-  return false;
-}
-function memoizeSelector(ids, fn, compare = {}) {
-  const list = () => typeof ids === "function" ? ids() : ids;
-  const cmpMap = () => typeof compare === "function" ? compare() : compare;
-  let prev = null;
-  let prevKey = "";
-  let result;
-  const sel = (states) => {
-    const cur = list();
-    const key = cur.join("|");
-    if (prev !== null && key === prevKey) {
-      const cm = cmpMap();
-      let same = true;
-      for (const id of cur) {
-        const cmp = cm[id] ?? sameStateAndUpdated;
-        if (!cmp(prev[id], states[id])) {
-          same = false;
-          break;
-        }
-      }
-      if (same) return result;
-    }
-    result = fn(states);
-    prev = states;
-    prevKey = key;
-    return result;
-  };
-  Object.defineProperty(sel, "ids", { get: list });
-  sel.reset = () => {
-    prev = null;
-    prevKey = "";
-  };
-  return sel;
-}
-
-// src/config.ts
-var NAV = [
-  { key: "start", label: "\xDCbersicht", icon: "mdi:home-outline", page: "start", tab: true },
-  { key: "reinigen", label: "Karte", icon: "mdi:map-outline", page: "reinigen", tab: true },
-  { key: "rooms", label: "R\xE4ume", icon: "mdi:view-grid-outline", overlay: "rooms", tab: false },
-  { key: "planer", label: "Planer", icon: "mdi:calendar-outline", page: "planer", tab: true },
-  { key: "protokoll", label: "Verlauf", icon: "mdi:format-list-bulleted", page: "protokoll", tab: true },
-  { key: "prognose", label: "Prognose", icon: "mdi:chart-line", page: "prognose", onlyWhen: "prognose", tab: true },
-  { key: "einstellungen", label: "Einstellungen", icon: "mdi:cog-outline", page: "einstellungen", tab: true }
-];
-var ROOMS = [
-  { id: 7, short: "Wohnz.", name: "Wohnzimmer", icon: "mdi:sofa-outline" },
-  { id: 6, short: "K\xFCche", name: "K\xFCche", icon: "mdi:chef-hat" },
-  { id: 5, short: "B\xFCro", name: "B\xFCro", icon: "mdi:desk" },
-  { id: 4, short: "Flur", name: "Flur", icon: "mdi:foot-print" },
-  { id: 3, short: "WC", name: "WC", icon: "mdi:toilet" },
-  { id: 2, short: "Schlafz.", name: "Schlafzimmer", icon: "mdi:bed-king-outline" },
-  { id: 1, short: "Bad", name: "Bad", icon: "mdi:shower" }
-];
-var roomById = (id) => ROOMS.find((r4) => r4.id === id);
-var ROOMS_DE = { Bathroom: "Bad", "Primary Bedroom": "Schlafzimmer", WC: "WC", Corridor: "Flur", Study: "B\xFCro", Kitchen: "K\xFCche", "Living Room": "Wohnzimmer" };
-var STATUS_DE = {
-  sleeping: "schl\xE4ft",
-  charging: "l\xE4dt",
-  cleaning: "reinigt",
-  sweeping: "saugt",
-  mopping: "wischt",
-  sweeping_and_mopping: "saugt und wischt",
-  returning: "f\xE4hrt zur Station",
-  paused: "pausiert",
-  idle: "bereit",
-  docked: "angedockt",
-  washing: "Mopp-W\xE4sche",
-  drying: "trocknet",
-  auto_emptying: "saugt ab",
-  error: "Fehler",
-  charging_completed: "voll geladen",
-  segment_cleaning: "reinigt R\xE4ume",
-  zone_cleaning: "reinigt Zone",
-  spot_cleaning: "reinigt Punkt",
-  cruising: "f\xE4hrt"
-};
-var ERR_DE = {
-  clean_mop_pad: "Mopp reinigen",
-  dust_bag_full: "Staubbeutel voll",
-  clean_water_tank_empty: "Frischwasser leer",
-  dirty_water_tank_full: "Abwasser voll",
-  dust_box_missing: "Staubbox fehlt",
-  mop_pad_stop_rotate: "Mopp blockiert",
-  wheels_stuck: "Rad blockiert",
-  brush_stuck: "B\xFCrste blockiert",
-  low_battery: "Akku leer",
-  station_disconnected: "Station getrennt",
-  detergent_empty: "Reinigungsmittel leer",
-  water_tank_missing: "Wassertank fehlt",
-  clean_water_tank_missing: "Frischwassertank fehlt",
-  dirty_water_tank_missing: "Abwassertank fehlt"
-};
-var APP_SCENES = [
-  { id: 32, name: "Eingang reinigen", sub: "Flur \xB7 Saugen + Wischen \xB7 2\xD7", icon: "mdi:door-open" },
-  { id: 33, name: "Bad Saugen/Wischen", sub: "Bad \xB7 1\xD7", icon: "mdi:shower" },
-  { id: 34, name: "Wischen nach dem Saugen", sub: "Ganze Wohnung \xB7 nur Wischen", icon: "mdi:water" }
-];
 
 // src/domain/status.ts
 var TASK_DE = {
@@ -1265,15 +1378,15 @@ var readPlans = memoizeSelector(() => [...PLAN_NUMBERS.flatMap(planIds), E2.heut
     planerBereich: on(s4, E2.planerBereich)
   };
 });
-var { RV_HA, RV_ENT } = ROOM_VALUE_CODES;
-var roomIds = (id) => ROOM_SELECT_FIELDS.map((f3) => roomEntity(id, f3));
+var { RV_HA, RV_ENT: RV_ENT2 } = ROOM_VALUE_CODES;
+var roomSelectIds = (id) => ROOM_SELECT_FIELDS.map((f3) => roomEntity(id, f3));
 var MAP_CODES = {
   modus: { 0: "sweeping", 1: "mopping", 2: "sweeping_and_mopping", 3: "mopping_after_sweeping" },
   saug: { 0: "quiet", 1: "standard", 2: "strong", 3: "turbo" },
   wasser: { 1: "slightly_dry", 2: "moist", 3: "wet" },
   route: { 1: "standard", 2: "intensive", 3: "deep" }
 };
-var mapRoomsOnly = (a3, b3) => sameValue(a3?.attributes?.rooms, b3?.attributes?.rooms);
+var mapRoomsOnly2 = (a3, b3) => sameValue(a3?.attributes?.rooms, b3?.attributes?.rooms);
 function roomValuesFromMap(s4, id) {
   const rooms = attr(s4, E2.map, "rooms");
   const r4 = rooms && typeof rooms === "object" ? rooms[String(id)] : void 0;
@@ -1296,7 +1409,7 @@ function roomValuesFromMap(s4, id) {
 }
 function roomValuesOf(s4, id) {
   const g2 = (k2) => {
-    const v2 = st(s4, roomEntity(id, RV_ENT[k2]));
+    const v2 = st(s4, roomEntity(id, RV_ENT2[k2]));
     return EMPTY2.includes(v2) ? null : v2;
   };
   const m2 = g2("modus");
@@ -1310,12 +1423,21 @@ function roomValuesOf(s4, id) {
     wdh: (g2("wdh") ?? "1x").replace("x", "")
   };
 }
-var ROOM_SELECTORS = Object.fromEntries(ROOM_IDS.map((id) => [id, memoizeSelector(() => [...roomIds(id), E2.map], (s4) => roomValuesOf(s4, id), () => ({ [E2.map]: mapRoomsOnly }))]));
-var readAllRoomValues = memoizeSelector(() => [...ROOM_IDS.flatMap(roomIds), E2.customizedCleaning, E2.map], (s4) => {
-  const rooms = Object.fromEntries(ROOM_IDS.map((id) => [id, ROOM_SELECTORS[id](s4)]));
-  const vonKarte = ROOM_IDS.filter((id) => rooms[id] !== null && EMPTY2.includes(st(s4, roomEntity(id, RV_ENT.modus))));
-  return { rooms, customized: on(s4, E2.customizedCleaning), anyUnavailable: ROOM_IDS.some((id) => rooms[id] === null), vonKarte };
-}, () => ({ [E2.map]: mapRoomsOnly }));
+var ROOM_SELECTORS = /* @__PURE__ */ new Map();
+var readRoomValues = (id) => {
+  let sel = ROOM_SELECTORS.get(id);
+  if (!sel) {
+    sel = memoizeSelector(() => [...roomSelectIds(id), E2.map], (s4) => roomValuesOf(s4, id), () => ({ [E2.map]: mapRoomsOnly2 }));
+    ROOM_SELECTORS.set(id, sel);
+  }
+  return sel;
+};
+var readAllRoomValues = memoizeSelector((s4) => [...profileIds(s4), ...readProfile(s4).roomIds.flatMap(roomSelectIds), E2.customizedCleaning], (s4) => {
+  const ids = readProfile(s4).roomIds;
+  const rooms = Object.fromEntries(ids.map((id) => [id, readRoomValues(id)(s4)]));
+  const vonKarte = ids.filter((id) => rooms[id] !== null && EMPTY2.includes(st(s4, roomEntity(id, RV_ENT2.modus))));
+  return { rooms, customized: on(s4, E2.customizedCleaning), anyUnavailable: ids.some((id) => rooms[id] === null), vonKarte };
+}, () => ({ [E2.map]: mapRoomsOnly2 }));
 var readLearn = memoizeSelector(() => [E2.lern], (s4) => {
   const e4 = ent(s4, E2.lern);
   return e4 && !EMPTY2.includes(e4.state) && e4.attributes?.raten ? e4.attributes : null;
@@ -1451,11 +1573,11 @@ var readRobotSettings = memoizeSelector(() => [E2.carpetCleaning, E2.waterTemper
   };
 });
 var coord = (v2) => typeof v2 === "number" && isFinite(v2) ? v2 : null;
-function roomShapes(s4) {
+function roomShapes(s4, order) {
   const rooms = attr(s4, E2.map, "rooms");
   if (!rooms || typeof rooms !== "object") return [];
   const out = [];
-  for (const r4 of ROOMS) {
+  for (const r4 of order) {
     const m2 = rooms[String(r4.id)];
     if (!m2 || m2.visibility === "Hidden") continue;
     const x0 = coord(m2.x0), y0 = coord(m2.y0), x1 = coord(m2.x1), y1 = coord(m2.y1);
@@ -1465,8 +1587,9 @@ function roomShapes(s4) {
   }
   return out;
 }
-var readMap = memoizeSelector(() => [E2.map, E2.karte, E2.chairs, E2.selectedMap, E2.mapData], (s4) => {
+var readMap = memoizeSelector((s4) => [...profileIds(s4), E2.karte, E2.chairs, E2.selectedMap, E2.mapData], (s4) => {
   const sm = ent(s4, E2.selectedMap);
+  const roomOrder = readProfile(s4).rooms;
   const mdEnt = ent(s4, E2.mapData);
   const mdPic = String(attr(s4, E2.mapData, "entity_picture") ?? "");
   return {
@@ -1480,20 +1603,22 @@ var readMap = memoizeSelector(() => [E2.map, E2.karte, E2.chairs, E2.selectedMap
     karte: st(s4, E2.karte),
     chairs: on(s4, E2.chairs),
     chairsId: E2.chairs,
-    roomOrder: ROOMS,
-    roomShapes: roomShapes(s4),
+    roomOrder,
+    roomShapes: roomShapes(s4, roomOrder),
     selectedMap: sm && !EMPTY2.includes(sm.state) ? { id: E2.selectedMap, value: sm.state, options: opts(s4, E2.selectedMap) } : null
   };
 }, () => ({ [E2.map]: stateAndAttributes(["entity_picture", "calibration_points", "no_go_areas", "no_mopping_areas", "virtual_walls", "rooms"]), [E2.mapData]: stateAndAttributes(["entity_picture", "saved_map_id", "map_id"]) }));
-var readDiagnostics = memoizeSelector(() => allContractIds(), (s4) => {
-  const ids = allContractIds();
+var readDiagnostics = memoizeSelector((s4) => [...profileIds(s4), ...allContractIds(readProfile(s4).roomIds)], (s4) => {
+  const roomIds = readProfile(s4).roomIds;
+  const ids = allContractIds(roomIds);
   const group = (name, list) => ({ name, total: list.length, missing: list.filter((id) => !s4[id]), unavailable: list.filter((id) => s4[id] && EMPTY2.includes(s4[id].state)) });
-  const robotSet = new Set(robotIds());
+  const robotSet = new Set(robotIds(roomIds));
   const robot = group(`Roboter (${deviceName() || "nicht erkannt"})`, ids.filter((id) => robotSet.has(id)));
   const paket = group("Paket (Helfer, Sensoren)", ids.filter((id) => !robotSet.has(id)));
   return { total: ids.length, missing: [...robot.missing, ...paket.missing], unavailable: [...robot.unavailable, ...paket.unavailable], groups: [robot, paket] };
 });
 var ALL_SELECTORS = {
+  readProfile,
   readRobot,
   readPlans,
   readAllRoomValues,
@@ -1507,8 +1632,7 @@ var ALL_SELECTORS = {
   readRobotSettings,
   readMap,
   readDiagnostics,
-  ...Object.fromEntries(PLAN_NUMBERS.map((n4) => [`readPlan(${n4})`, PLAN_SELECTORS[n4]])),
-  ...Object.fromEntries(ROOM_IDS.map((id) => [`readRoomValues(${id})`, ROOM_SELECTORS[id]]))
+  ...Object.fromEntries(PLAN_NUMBERS.map((n4) => [`readPlan(${n4})`, PLAN_SELECTORS[n4]]))
 };
 
 // src/pages.ts
@@ -1903,7 +2027,7 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.17";
+var VERSION = "2.0.0-alpha.18";
 
 // src/shared/robot-svg.ts
 var robotSvg = w`<svg viewBox="0 0 200 200" class="robotpic" aria-hidden="true">
@@ -2015,7 +2139,7 @@ function runOrder(r4) {
   const idx = r4.currentSegment === null ? -1 : order.indexOf(r4.currentSegment);
   return { order, idx, rest: idx >= 0 ? order.slice(idx + 1) : order };
 }
-var shortOf = (id) => roomById(id)?.short;
+var shortOf = (rooms, id) => roomById(rooms, id)?.short;
 var FAN_ICON = { Leise: "mdi:fan-speed-1", Standard: "mdi:fan-speed-2", Stark: "mdi:fan-speed-3", Turbo: "mdi:fan" };
 var modusIcons = (modus) => modus === "Saugen" ? ["mdi:broom"] : modus === "Nur Wischen" ? ["mdi:water"] : ["mdi:broom", "mdi:water"];
 function roomValueChips(v2) {
@@ -2025,15 +2149,15 @@ function roomValueChips(v2) {
   chips.push({ icons: ["mdi:repeat"], text: `${v2.wdh}\xD7` });
   return chips;
 }
-function stripModel(r4, roomValues) {
+function stripModel(r4, roomValues, rooms) {
   if (!["cleaning", "paused"].includes(r4.vac)) return null;
   const seg = r4.currentSegment;
-  const room = seg === null ? void 0 : roomById(seg);
+  const room = seg === null ? void 0 : roomById(rooms, seg);
   const v2 = room ? roomValues(room.id) : null;
   if (!room || !v2) return null;
   const { order, rest } = runOrder(r4);
-  const restTxt = rest.map(shortOf).filter(Boolean).join(" \u2192 ");
-  const first = order.length ? shortOf(order[0]) : void 0;
+  const restTxt = rest.map((id) => shortOf(rooms, id)).filter(Boolean).join(" \u2192 ");
+  const first = order.length ? shortOf(rooms, order[0]) : void 0;
   if (r4.vac === "cleaning" && r4.cleanedArea === 0) {
     return { kind: "startpunkt", roomId: room.id, icon: "mdi:map-marker-path", head: "F\xE4hrt zum Startpunkt", right: first ? `zu ${first}` : "", chips: [] };
   }
@@ -2168,7 +2292,7 @@ var DxHero = class extends i4 {
   `];
   }
   static {
-    this.properties = { robot: { attribute: false }, rooms: { attribute: false }, api: { attribute: false } };
+    this.properties = { robot: { attribute: false }, rooms: { attribute: false }, roomOrder: { attribute: false }, api: { attribute: false } };
   }
   openRooms() {
     emit(this, EVENTS.openOverlay, { kind: "rooms", mode: "robot" });
@@ -2176,7 +2300,7 @@ var DxHero = class extends i4 {
   /** Streifen aus Roboterzustand und Raumwerten (reine Funktion, billig). */
   get strip() {
     const r4 = this.robot, rooms = this.rooms;
-    return r4 && rooms ? stripModel(r4, (id) => rooms.rooms[id]) : null;
+    return r4 && rooms ? stripModel(r4, (id) => rooms.rooms[id] ?? null, this.roomOrder ?? []) : null;
   }
   /** Drei Werte: im Lauf die des aktuellen Raums, sonst der gemeinsame Wert aller Räume („–“ bei Abweichung oder unavailable). */
   params(strip) {
@@ -2246,7 +2370,7 @@ var DxAuftrag = class extends i4 {
   `];
   }
   static {
-    this.properties = { robot: { attribute: false }, rooms: { attribute: false } };
+    this.properties = { robot: { attribute: false }, rooms: { attribute: false }, roomOrder: { attribute: false } };
   }
   render() {
     const r4 = this.robot;
@@ -2258,9 +2382,10 @@ var DxAuftrag = class extends i4 {
     const done = startpunkt || idx < 0 ? 0 : idx;
     const pct = total ? Math.round(done / total * 100) : 0;
     const nextId = startpunkt ? order[0] : rest[0];
-    const next = nextId !== void 0 ? roomById(nextId) : void 0;
+    const rl = this.roomOrder ?? [];
+    const next = nextId !== void 0 ? roomById(rl, nextId) : void 0;
     const nextVals = next && this.rooms ? this.rooms.rooms[next.id] : null;
-    const short = (id) => roomById(id)?.short ?? String(id);
+    const short = (id) => roomById(rl, id)?.short ?? String(id);
     return b2`
       <div class="hd"><h2>Aktueller Auftrag</h2><span class="st pill ${DOT_CLASS2[r4.hero.dot]}"><i></i>${r4.hero.big}</span></div>
       <div>
@@ -2885,7 +3010,8 @@ var DxMapCard = class extends i4 {
     .mapcap .r { margin-left: auto; }
     .mapmodes { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     .mapmodes .hint { flex: 1; }
-    .rooms { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+    /* Raumkacheln: so viele, wie die Karte liefert – Spalten nach Platz (2 … 20 Räume), nie horizontal scrollen */
+    .rooms { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
     .rooms button { display: grid; justify-items: center; gap: 6px; padding: 12px 6px 10px; min-height: 72px; border-radius: var(--dx-radius-md); background: var(--dx-surface-raised); border: 1px solid var(--dx-border); font-size: 12px; font-weight: 500; color: var(--dx-text-muted); transition: background var(--dx-dur), border-color var(--dx-dur), color var(--dx-dur); }
     .rooms button ha-icon { --mdc-icon-size: 20px; width: 20px; height: 20px; }
     .rooms button:hover { background: var(--dx-surface-active); color: var(--dx-text); }
@@ -2894,7 +3020,6 @@ var DxMapCard = class extends i4 {
     .runbar { display: flex; gap: 8px; align-items: center; }
     .runbar .btn.primary { flex: 1; }
     .err { color: var(--dx-danger); font-size: 12px; }
-    @container content (max-width: 1099px) { .rooms { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
   `];
   }
   static {
@@ -2986,7 +3111,7 @@ var DxMapCard = class extends i4 {
   caption() {
     const r4 = this.robot;
     if (r4 && (r4.vac === "cleaning" || r4.vac === "paused") && !r4.docked) {
-      const rest = runOrder(r4).rest.map((id) => roomById(id)?.short).filter(Boolean).join(", ");
+      const rest = runOrder(r4).rest.map((id) => roomById(this.map?.roomOrder ?? [], id)?.short).filter(Boolean).join(", ");
       return b2`<b>Live-Karte</b> · ${r4.room !== "\u2013" ? r4.room : "unterwegs"} · ${r4.cleanedArea} m²${rest ? b2` · noch ${rest}` : A}`;
     }
     const last = this.history?.entries[0];
@@ -3037,7 +3162,7 @@ var DxMapCard = class extends i4 {
       </div>
       ${!modes || this._mode === "raeume" ? b2`
         <div class="rooms">${order.map((r4) => b2`<button class=${sel.has(r4.id) ? "sel" : ""} data-room=${r4.id} @click=${() => {
-      this._sel = toggleRoom(sel, r4.id);
+      this._sel = toggleRoom(this._sel, r4.id);
     }}><ha-icon icon=${r4.icon}></ha-icon>${r4.short}</button>`)}</div>
         ${sel.size ? b2`<div class="runbar"><button class="btn primary" data-act="run" @click=${this.runRooms}><ha-icon icon="mdi:play"></ha-icon>${selectionLabel(sel, order)} reinigen</button><button class="btn icon" aria-label="Auswahl aufheben" @click=${() => {
       this._sel = /* @__PURE__ */ new Set();
@@ -3056,7 +3181,8 @@ var DxQuickstart = class extends i4 {
   static {
     this.styles = [controls, i`
     :host { display: flex; flex-direction: column; gap: var(--dx-space-3); min-width: 0; }
-    .qs { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 8px; }
+    /* „Alles“ + Räume des Roboters: Spalten nach Platz (2 … 20 Räume) */
+    .qs { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
     .qs button { display: grid; justify-items: center; gap: 6px; padding: 12px 6px 10px; min-height: 72px; border-radius: var(--dx-radius-md); background: var(--dx-surface-raised); border: 1px solid var(--dx-border); font-size: 12px; font-weight: 500; color: var(--dx-text-muted); transition: background var(--dx-dur), border-color var(--dx-dur), color var(--dx-dur); }
     .qs button ha-icon { --mdc-icon-size: 20px; width: 20px; height: 20px; }
     .qs button:hover { background: var(--dx-surface-active); color: var(--dx-text); }
@@ -3064,7 +3190,6 @@ var DxQuickstart = class extends i4 {
     .qs button.sel ha-icon { color: var(--dx-accent); }
     .runbar { display: flex; gap: 8px; align-items: center; }
     .runbar .btn.primary { flex: 1; }
-    @container content (max-width: 1099px) { .qs { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
   `];
   }
   static {
@@ -3092,10 +3217,10 @@ var DxQuickstart = class extends i4 {
       <div class="hd"><h2><ha-icon icon="mdi:view-grid-outline"></ha-icon>Schnellstart – Räume auswählen</h2><span class="r">${sel.size ? `${sel.size} gew\xE4hlt` : "Mehrfachauswahl"}</span></div>
       <div class="qs">
         <button class=${sel.size && sel.size === order.length ? "sel" : ""} data-room="all" @click=${() => {
-      this._sel = toggleAll(sel, order);
+      this._sel = toggleAll(this._sel, order);
     }}><ha-icon icon="mdi:home-outline"></ha-icon>Alles</button>
         ${order.map((r4) => b2`<button class=${sel.has(r4.id) ? "sel" : ""} data-room=${r4.id} @click=${() => {
-      this._sel = toggleRoom(sel, r4.id);
+      this._sel = toggleRoom(this._sel, r4.id);
     }}><ha-icon icon=${r4.icon}></ha-icon>${r4.short}</button>`)}
       </div>
       ${sel.size ? b2`<div class="runbar"><button class="btn primary" @click=${this.run}><ha-icon icon="mdi:play"></ha-icon>${selectionLabel(sel, order)} reinigen</button><button class="btn icon" aria-label="Auswahl aufheben" title="Auswahl aufheben" @click=${() => {
@@ -3269,7 +3394,7 @@ var DreameX60Panel = class extends i4 {
       consumables: [readConsumables(s4).map((c4) => `${c4.name} ${c4.pct} %`).join(", ")],
       station: [readStation(s4).tiles.map((x2) => `${x2.label} ${x2.value}`).join(", ")],
       stats: [`${hist.count} L\xE4ufe \xB7 ${hist.totalArea} m\xB2 \xB7 ${hist.totalTime} min`],
-      quickstart: [`R\xE4ume: ${ROOMS.map((r4) => r4.short).join(", ")}`],
+      quickstart: [`R\xE4ume: ${map.roomOrder.map((r4) => r4.short).join(", ") || "keine (Karte fehlt)"}`],
       history: [`${hist.entries.length} Eintr\xE4ge${hist.stale ? " \xB7 letzter Stand" : ""}`]
     };
     const box = (sl) => b2`
@@ -3282,10 +3407,10 @@ var DreameX60Panel = class extends i4 {
     const dark = readSettings(s4).dark;
     return b2`
       <div class="bento">
-        <dx-hero class="b span3" data-slot="hero" .robot=${robot} .rooms=${rooms} .api=${this.api}></dx-hero>
+        <dx-hero class="b span3" data-slot="hero" .robot=${robot} .rooms=${rooms} .roomOrder=${map.roomOrder} .api=${this.api}></dx-hero>
         <dx-map-card class="b span6" data-slot="map" variant="compact" .hass=${this.hass} .map=${map} .robot=${robot} .history=${hist} .api=${this.api} ?dark=${dark}></dx-map-card>
         <div class="span3 stack rightstack">
-          ${(robot.vac === "cleaning" || robot.vac === "paused") && !robot.docked ? b2`<dx-auftrag class="b" data-slot="auftrag" .robot=${robot} .rooms=${rooms}></dx-auftrag>` : box(startSlot("automatik"))}
+          ${(robot.vac === "cleaning" || robot.vac === "paused") && !robot.docked ? b2`<dx-auftrag class="b" data-slot="auftrag" .robot=${robot} .rooms=${rooms} .roomOrder=${map.roomOrder}></dx-auftrag>` : box(startSlot("automatik"))}
           ${box(startSlot("heute"))}
         </div>
         ${rest.map((sl) => sl.slot === "history" ? b2`<dx-quickstart class="b span7" data-slot="quickstart" .roomOrder=${map.roomOrder} .api=${this.api}></dx-quickstart>${box(sl)}` : box(sl))}

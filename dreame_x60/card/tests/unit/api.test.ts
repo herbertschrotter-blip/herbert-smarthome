@@ -75,7 +75,8 @@ test('savePlan: Fehlerinjektion Call 5 → Ergebnis nennt genau diese Entität, 
 });
 
 test('setRoomValue: Optionen über RV_HA-Inverse, Wdh mit x, „all“ = 7 parallel, Teilfehler', async () => {
-  const { hass, calls } = mockHass({}, { entity: ['select.heidi_room_3_suction_level'] });
+  const docked = JSON.parse(fs.readFileSync(path.resolve(HERE, '..', 'fixtures', 'states-docked.json'), 'utf8')) as States;
+  const { hass, calls } = mockHass({ 'camera.heidi_map': docked['camera.heidi_map']! }, { entity: ['select.heidi_room_3_suction_level'] }); // „all“ = Räume der Karte
   const api = new DxApi(() => hass);
   await api.setRoomValue(6, 'modus', 'Saugen + Wischen');
   assert.deepEqual(calls[0], ['select', 'select_option', { entity_id: 'select.heidi_room_6_cleaning_mode', option: 'sweeping_and_mopping' }]);
@@ -87,7 +88,7 @@ test('setRoomValue: Optionen über RV_HA-Inverse, Wdh mit x, „all“ = 7 paral
   assert.deepEqual(calls[3], ['select', 'select_option', { entity_id: 'select.heidi_room_7_cleaning_times', option: '2x' }]);
   const r = await api.setRoomValue('all', 'saug', 'Turbo');
   assert.equal(calls.length, 4 + 7);
-  assert.deepEqual(calls.slice(4).map((c) => c[2].entity_id), [1, 2, 3, 4, 5, 6, 7].map((i) => `select.heidi_room_${i}_suction_level`));
+  assert.deepEqual(calls.slice(4).map((c) => c[2].entity_id), [1, 6, 7, 2, 4, 3, 5].map((i) => `select.heidi_room_${i}_suction_level`), 'alle Räume der Karte in App-Reihenfolge');
   assert.ok(calls.slice(4).every((c) => c[2].option === 'turbo'));
   assert.deepEqual(r, { ok: false, fehlgeschlagen: ['select.heidi_room_3_suction_level'] });
 });

@@ -13,7 +13,7 @@ import type { MapConfig, MapModeKey } from '../ha/map-config';
 import { mapElements } from '../shared/caches';
 import { runOrder } from '../domain/strip';
 import { fmtDate } from '../domain/labels';
-import { roomById } from '../config';
+import { roomById } from '../domain/rooms';
 import { askConfirm, emit, EVENTS } from '../shared/overlay';
 import type { Overlay } from '../shared/overlay';
 import { confirmText, segmentsOf, selectionLabel, toggleRoom } from '../shared/rooms';
@@ -66,7 +66,8 @@ export class DxMapCard extends LitElement {
     .mapcap .r { margin-left: auto; }
     .mapmodes { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     .mapmodes .hint { flex: 1; }
-    .rooms { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+    /* Raumkacheln: so viele, wie die Karte liefert – Spalten nach Platz (2 … 20 Räume), nie horizontal scrollen */
+    .rooms { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
     .rooms button { display: grid; justify-items: center; gap: 6px; padding: 12px 6px 10px; min-height: 72px; border-radius: var(--dx-radius-md); background: var(--dx-surface-raised); border: 1px solid var(--dx-border); font-size: 12px; font-weight: 500; color: var(--dx-text-muted); transition: background var(--dx-dur), border-color var(--dx-dur), color var(--dx-dur); }
     .rooms button ha-icon { --mdc-icon-size: 20px; width: 20px; height: 20px; }
     .rooms button:hover { background: var(--dx-surface-active); color: var(--dx-text); }
@@ -75,7 +76,6 @@ export class DxMapCard extends LitElement {
     .runbar { display: flex; gap: 8px; align-items: center; }
     .runbar .btn.primary { flex: 1; }
     .err { color: var(--dx-danger); font-size: 12px; }
-    @container content (max-width: 1099px) { .rooms { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
   `];
 
   static override properties = {
@@ -169,7 +169,7 @@ export class DxMapCard extends LitElement {
   private caption(): TemplateResult {
     const r = this.robot;
     if (r && (r.vac === 'cleaning' || r.vac === 'paused') && !r.docked) {
-      const rest = runOrder(r).rest.map((id) => roomById(id)?.short).filter(Boolean).join(', ');
+      const rest = runOrder(r).rest.map((id) => roomById(this.map?.roomOrder ?? [], id)?.short).filter(Boolean).join(', ');
       return html`<b>Live-Karte</b> · ${r.room !== '–' ? r.room : 'unterwegs'} · ${r.cleanedArea} m²${rest ? html` · noch ${rest}` : nothing}`;
     }
     const last = this.history?.entries[0];
@@ -223,7 +223,7 @@ export class DxMapCard extends LitElement {
         <button class="btn primary sm" data-act="all" @click=${this.runAll}><ha-icon icon="mdi:play"></ha-icon>Alles</button>
       </div>
       ${!modes || this._mode === 'raeume' ? html`
-        <div class="rooms">${order.map((r) => html`<button class=${sel.has(r.id) ? 'sel' : ''} data-room=${r.id} @click=${() => { this._sel = toggleRoom(sel, r.id); }}><ha-icon icon=${r.icon}></ha-icon>${r.short}</button>`)}</div>
+        <div class="rooms">${order.map((r) => html`<button class=${sel.has(r.id) ? 'sel' : ''} data-room=${r.id} @click=${() => { this._sel = toggleRoom(this._sel, r.id); }}><ha-icon icon=${r.icon}></ha-icon>${r.short}</button>`)}</div>
         ${sel.size ? html`<div class="runbar"><button class="btn primary" data-act="run" @click=${this.runRooms}><ha-icon icon="mdi:play"></ha-icon>${selectionLabel(sel, order)} reinigen</button><button class="btn icon" aria-label="Auswahl aufheben" @click=${() => { this._sel = new Set(); }}><ha-icon icon="mdi:close"></ha-icon></button></div>` : nothing}
       ` : nothing}`;
   }

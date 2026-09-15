@@ -6,7 +6,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { load as loadYaml } from 'js-yaml';
-import { ENTITIES, HA_OPTIONS, PERSONS, PLAN_NUMBERS, ROOM_IDS, ROOM_VALUE_CODES, allContractIds, historyPath, planEntity, roomEntity } from '../../src/ha/contract';
+import { ENTITIES, HA_OPTIONS, PERSONS, PLAN_NUMBERS, ROOM_VALUE_CODES, allContractIds, historyPath, planEntity, roomEntity } from '../../src/ha/contract';
+import { HEIDI_ROOM_IDS } from './helpers-rooms';
 import { setDevice } from '../../src/ha/device';
 setDevice('heidi', 'Heidi'); // Abschnitt 4 ist für das Gerät „heidi“ geschrieben
 
@@ -22,6 +23,7 @@ const SECTION4: string[] = [
   ...['dust_bag_status', 'clean_water_tank_status', 'dirty_water_tank_status', 'detergent_status', 'low_water_warning', 'auto_empty_status', 'self_wash_base_status'].map((s) => `sensor.heidi_${s}`),
   ...['start_auto_empty', 'self_clean', 'manual_drying', 'base_station_cleaning'].map((s) => `button.heidi_${s}`),
   'switch.heidi_customized_cleaning',
+  ...['cleaning_mode', 'suction_level', 'mop_pad_humidity', 'cleaning_route'].map((s) => `select.heidi_${s}`), // globale Selects (Optionslisten, Geräteprofil Stufe 2)
   ...['carpet_cleaning', 'water_temperature', 'drying_time', 'auto_empty_mode', 'self_clean_frequency', 'cleangenius', 'map_rotation'].map((s) => `select.heidi_${s}`),
   'number.heidi_self_clean_area', 'number.heidi_volume', 'time.heidi_dnd_start', 'time.heidi_dnd_end',
   'sensor.heidi_heutiger_plan', 'sensor.heidi_automatik_status', 'sensor.heidi_phase', 'sensor.heidi_prognose', 'sensor.heidi_lernwerte',
@@ -42,7 +44,7 @@ for (const n of [1, 2, 3, 4]) {
 for (const r of [1, 2, 3, 4, 5, 6, 7]) for (const k of ['cleaning_mode', 'suction_level', 'cleaning_times', 'mop_pad_humidity', 'cleaning_route']) SECTION4.push(`select.heidi_room_${r}_${k}`);
 
 test('jede ID aus Abschnitt 4 ist über contract.ts erreichbar – und umgekehrt', () => {
-  const ids = new Set(allContractIds());
+  const ids = new Set(allContractIds(HEIDI_ROOM_IDS));
   const missing = SECTION4.filter((id) => !ids.has(id));
   assert.deepEqual(missing, [], 'fehlen in contract.ts');
   const extra = [...ids].filter((id) => !SECTION4.includes(id));
@@ -58,7 +60,7 @@ test('Generatoren bilden die IDs wie v1', () => {
   assert.equal(roomEntity(5, 'suction_level'), 'select.heidi_room_5_suction_level');
   assert.equal(roomEntity(1, ROOM_VALUE_CODES.RV_ENT.wdh), 'select.heidi_room_1_cleaning_times');
   assert.deepEqual([...PLAN_NUMBERS], [1, 2, 3, 4]);
-  assert.deepEqual([...ROOM_IDS], [1, 2, 3, 4, 5, 6, 7]);
+  assert.equal(roomEntity(20, 'cleaning_mode'), 'select.heidi_room_20_cleaning_mode', 'Raum-IDs sind nicht auf 1..7 begrenzt');
   assert.equal(ENTITIES.nichtStoeren, 'binary_sensor.heidi_nicht_storen');
   assert.equal(PERSONS[2].optional, 'input_boolean.heidi_nina_zaehlt');
   assert.match(historyPath('2026-09-15T00:00:00.000Z', '2026-09-15T08:00:00.000Z'), /^history\/period\/2026-09-15T00:00:00\.000Z\?filter_entity_id=sensor\.heidi_phase,vacuum\.heidi&end_time=2026-09-15T08%3A00%3A00\.000Z&minimal_response&no_attributes$/);
@@ -87,6 +89,6 @@ test('Optionsstrings entsprechen ha/packages/heidi.yaml', () => {
 
 test('Abzug „angedockt“ enthält jede Vertrags-ID', () => {
   const states = JSON.parse(fs.readFileSync(path.join(HERE, '..', 'fixtures', 'states-docked.json'), 'utf8')) as Record<string, unknown>;
-  const missing = allContractIds().filter((id) => !(id in states));
+  const missing = allContractIds(HEIDI_ROOM_IDS).filter((id) => !(id in states));
   assert.deepEqual(missing, []);
 });

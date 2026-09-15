@@ -1,5 +1,7 @@
 // Beschriftungen (Bauplan 2.6): Tage, Räume, Minuten, Datum, Uhrzeit – Ausgabeformate 1:1 wie v1.
-import { DAYS, ROOMS, ROOMS_DE, roomById } from '../config';
+import { DAYS, ROOMS_DE } from '../config';
+import { roomById } from './rooms';
+import type { RoomInfo } from './rooms';
 
 const LOCALE = 'de-AT';
 
@@ -13,12 +15,12 @@ export function dayLabel(tage: readonly boolean[]): string {
   return DAYS.filter((_, i) => tage[i]).join(n > 3 ? ' ' : ' + ');
 }
 
-/** Raum-IDs (in gegebener Reihenfolge) → „Alle“, „keine Räume“ oder Kurznamen mit Komma; unbekannte IDs entfallen. */
-export function roomLabel(ids: Iterable<number>): string {
+/** Raum-IDs (in gegebener Reihenfolge) → „Alle“, „keine Räume“ oder Kurznamen mit Komma; unbekannte IDs entfallen. `rooms` = Räume des Roboters (Profil). */
+export function roomLabel(ids: Iterable<number>, rooms: readonly RoomInfo[]): string {
   const list = [...ids];
-  if (list.length === ROOMS.length && new Set(list).size === ROOMS.length) return 'Alle';
+  if (rooms.length && list.length === rooms.length && new Set(list).size === rooms.length) return 'Alle';
   if (!list.length) return 'keine Räume';
-  return list.map((id) => roomById(id)?.short).filter((s): s is string => !!s).join(', ');
+  return list.map((id) => roomById(rooms, id)?.short).filter((s): s is string => !!s).join(', ');
 }
 
 /** Minuten → „N min“ oder „H h MM min“ (gerundet). */

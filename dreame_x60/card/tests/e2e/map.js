@@ -27,7 +27,7 @@ const tick = (page, ms = 80) => page.waitForTimeout(ms);
   const bad = c[0].sel.find((r) => r.id === 1);
   H.checkEqual('Umriss Bad aus camera.heidi_map (x0/y0/x1/y1)', bad && bad.outline, [[-5700, 3550], [-2750, 3550], [-2750, 6650], [-5700, 6650]]);
   H.check('Beschriftung und Symbol je Raum aus den Kartendaten', bad && bad.label.text === 'Bad' && bad.icon.name === 'mdi:shower' && bad.label.x === -4225 && c[0].sel.length === 7, bad);
-  H.checkEqual('Räume in Anzeigereihenfolge 7..1', c[0].sel.map((r) => r.id), [7, 6, 5, 4, 3, 2, 1]);
+  H.checkEqual('Räume in App-Reihenfolge (Attribut order der Karte: Bad, Küche, Wohnz., Schlafz., Flur, WC, Büro)', c[0].sel.map((r) => r.id), [1, 6, 7, 2, 4, 3, 5]);
   const first = await slotEl(page);
   // 20 irrelevante Ticks → dasselbe Element, keine Neuerzeugung
   for (let i = 0; i < 20; i++) {
@@ -105,7 +105,7 @@ const tick = (page, ms = 80) => page.waitForTimeout(ms);
   H.checkEqual('Leiste „1 Raum reinigen“', await hm(() => document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-map-card').shadowRoot.querySelector('.runbar .btn.primary').textContent.trim()), '1 Raum reinigen');
   await hm(() => document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-map-card').shadowRoot.querySelector('dx-heidi-map').shadowRoot.querySelector('path.room[data-room="6"]').dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true })));
   await tick(page);
-  H.checkEqual('zweiter Tipp Küche → Nummern-Chips 1 (Bad) und 2 (Küche) in Tipp-Reihenfolge', await hm(() => [...document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-map-card').shadowRoot.querySelector('dx-heidi-map').shadowRoot.querySelectorAll('.badge')].map((g) => g.dataset.room + ':' + g.textContent.trim())), ['6:2', '1:1']);
+  H.checkEqual('zweiter Tipp Küche → Nummern-Chips 1 (Bad) und 2 (Küche) in Tipp-Reihenfolge (DOM in App-Reihenfolge)', await hm(() => [...document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-map-card').shadowRoot.querySelector('dx-heidi-map').shadowRoot.querySelectorAll('.badge')].map((g) => g.dataset.room + ':' + g.textContent.trim())), ['1:1', '6:2']);
   await hm(() => document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-map-card').shadowRoot.querySelector('dx-heidi-map').shadowRoot.querySelector('path.room[data-room="6"]').dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true })));
   await tick(page);
   await click(page, '.rooms [data-room="1"]'); await tick(page);
@@ -164,7 +164,7 @@ const tick = (page, ms = 80) => page.waitForTimeout(ms);
   H.checkEqual('Schnellstart: „Alles“ → „Ganze Wohnung reinigen“', await qsText('.runbar .btn.primary'), 'Ganze Wohnung reinigen');
   await page.evaluate(() => { window._calls.length = 0; });
   await qs('.runbar .btn.primary'); await tick(page); await confirmOk(page); await tick(page);
-  H.checkEqual('Schnellstart OK → Reihenfolge merken + vacuum_clean_segment mit allen sieben Räumen (7..1)', await page.evaluate(() => window._calls), [['input_text', 'set_value', { entity_id: 'input_text.heidi_lauf_reihenfolge', value: '7,6,5,4,3,2,1' }], ['dreame_vacuum', 'vacuum_clean_segment', { entity_id: 'vacuum.heidi', segments: [7, 6, 5, 4, 3, 2, 1] }]]);
+  H.checkEqual('Schnellstart OK → Reihenfolge merken + vacuum_clean_segment mit allen sieben Räumen in App-Reihenfolge', await page.evaluate(() => window._calls), [['input_text', 'set_value', { entity_id: 'input_text.heidi_lauf_reihenfolge', value: '1,6,7,2,4,3,5' }], ['dreame_vacuum', 'vacuum_clean_segment', { entity_id: 'vacuum.heidi', segments: [1, 6, 7, 2, 4, 3, 5] }]]);
   await qs('[data-room="all"]'); await qs('[data-room="all"]'); await tick(page);
   H.check('Schnellstart: „Alles“ zweimal → Auswahl leer', !(await page.evaluate(() => !!document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-quickstart').shadowRoot.querySelector('.runbar'))));
   H.check('Übersicht: keine Seiten-/Konsolenfehler', errs.length === 0, errs);

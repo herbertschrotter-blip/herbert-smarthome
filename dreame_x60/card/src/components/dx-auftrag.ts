@@ -6,7 +6,8 @@ import type { TemplateResult } from 'lit';
 import type { RobotView, AllRoomValuesView } from '../ha/selectors';
 import type { DotLevel } from '../domain/status';
 import { runOrder } from '../domain/strip';
-import { roomById } from '../config';
+import { roomById } from '../domain/rooms';
+import type { RoomInfo } from '../domain/rooms';
 import { controls } from '../styles/controls';
 
 export const AUFTRAG_ELEMENT = 'dx-auftrag';
@@ -22,10 +23,12 @@ export class DxAuftrag extends LitElement {
     .row.next { border-top: 1px solid var(--dx-border); }
   `];
 
-  static override properties = { robot: { attribute: false }, rooms: { attribute: false } };
+  static override properties = { robot: { attribute: false }, rooms: { attribute: false }, roomOrder: { attribute: false } };
 
   declare robot?: RobotView;
   declare rooms?: AllRoomValuesView;
+  /** Räume des Roboters (Profil) für Namen */
+  declare roomOrder: readonly RoomInfo[];
 
   override render(): TemplateResult {
     const r = this.robot;
@@ -38,9 +41,10 @@ export class DxAuftrag extends LitElement {
     const done = startpunkt || idx < 0 ? 0 : idx;
     const pct = total ? Math.round((done / total) * 100) : 0;
     const nextId = startpunkt ? order[0] : rest[0];
-    const next = nextId !== undefined ? roomById(nextId) : undefined;
+    const rl = this.roomOrder ?? [];
+    const next = nextId !== undefined ? roomById(rl, nextId) : undefined;
     const nextVals = next && this.rooms ? this.rooms.rooms[next.id] : null;
-    const short = (id: number): string => roomById(id)?.short ?? String(id);
+    const short = (id: number): string => roomById(rl, id)?.short ?? String(id);
     return html`
       <div class="hd"><h2>Aktueller Auftrag</h2><span class="st pill ${DOT_CLASS[r.hero.dot]}"><i></i>${r.hero.big}</span></div>
       <div>

@@ -9,6 +9,7 @@ import { cleanName, device, deviceName, devicePrefix, discoverDevice, discoverFr
 import { ENTITIES, PACKAGE_PREFIX, ROBOT_FEATURES, allContractIds, robotEntity, robotIds, roomEntity } from '../../src/ha/contract';
 import { readRobot, readConsumables, readDiagnostics, ALL_SELECTORS } from '../../src/ha/selectors';
 import type { HomeAssistant, States } from '../../src/ha/types';
+import { HEIDI_ROOM_IDS } from './helpers-rooms';
 
 const FIX = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'fixtures');
 const docked = JSON.parse(fs.readFileSync(path.join(FIX, 'states-docked.json'), 'utf8')) as States;
@@ -16,7 +17,7 @@ const docked = JSON.parse(fs.readFileSync(path.join(FIX, 'states-docked.json'), 
 /** Abzug mit umbenanntem Roboter: jede Roboter-ID heidi→berta (Paket-IDs bleiben), friendly_name „Berta“. */
 function renamed(states: States, to: string): States {
   setDevice('heidi', 'Heidi'); // Roboter-IDs des Abzugs
-  const robot = new Set(robotIds());
+  const robot = new Set(robotIds(HEIDI_ROOM_IDS));
   const out: States = {};
   for (const [id, e] of Object.entries(states)) {
     if (!e) continue;
@@ -88,10 +89,10 @@ test('umbenannter Roboter: Selektoren lesen die neuen IDs, Ergebnisse gleich; R�
 test('robotIds/allContractIds: Roboter-IDs tragen das Präfix, Paket-IDs nie; robotEntity ohne Merkmal = vacuum', () => {
   setDevice('x60', 'X60');
   assert.equal(robotEntity('vacuum', ''), 'vacuum.x60');
-  assert.ok(robotIds().every((id) => id.split('.')[1]!.startsWith('x60')), 'alle Roboter-IDs mit Präfix');
-  const pkg = allContractIds().filter((id) => !robotIds().includes(id));
+  assert.ok(robotIds(HEIDI_ROOM_IDS).every((id) => id.split('.')[1]!.startsWith('x60')), 'alle Roboter-IDs mit Präfix');
+  const pkg = allContractIds(HEIDI_ROOM_IDS).filter((id) => !robotIds(HEIDI_ROOM_IDS).includes(id));
   assert.ok(pkg.every((id) => !id.includes('x60')), 'Paket-IDs ohne Gerätepräfix');
   assert.ok(pkg.includes('input_boolean.stuehle_am_boden') && pkg.includes('sensor.heidi_phase'));
-  assert.equal(robotIds().length, Object.keys(ROBOT_FEATURES).length + 7 * 5);
+  assert.equal(robotIds(HEIDI_ROOM_IDS).length, Object.keys(ROBOT_FEATURES).length + 7 * 5);
   discoverFromStates(docked);
 });

@@ -135,7 +135,7 @@ test('Raumwerte im Lauf (PD-010): Modus-Select unavailable → Werte aus den Kar
   const all = readAllRoomValues(driving);
   assert.equal(driving['select.heidi_room_6_cleaning_mode']?.state, 'unavailable', 'Fixture: Modus-Select im App-Lauf unavailable');
   assert.deepEqual(all.rooms[6], { modus: 'Saugen', saug: 'Standard', wasser: 'Mittel', route: 'Standard', wdh: '1' }, 'Küche aus camera.heidi_map.rooms');
-  assert.deepEqual(all.vonKarte, [1, 2, 3, 4, 5, 6, 7], 'alle sieben aus der Karte');
+  assert.deepEqual([...all.vonKarte].sort((a, b) => a - b), [1, 2, 3, 4, 5, 6, 7], 'alle sieben aus der Karte');
   assert.equal(all.anyUnavailable, false);
   // Neues Kamerabild (state/last_updated/entity_picture ändern sich, rooms nicht) → gleiche Referenz
   const cam = driving['camera.heidi_map']!;

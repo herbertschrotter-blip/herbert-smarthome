@@ -5,8 +5,8 @@
 // aus der Erkennung in device.ts. Paket-Helfer (heidi.yaml) behalten ihr festes Präfix.
 import { devicePrefix } from './device';
 
-export const ROOM_IDS = [1, 2, 3, 4, 5, 6, 7] as const;
-export type RoomId = (typeof ROOM_IDS)[number];
+/** Raum-ID des Roboters (Segment-Nummer); die Liste der Räume kommt aus der Karte (profile.ts), nicht aus dem Code. */
+export type RoomId = number;
 export const PLAN_NUMBERS = [1, 2, 3, 4] as const;
 export type PlanNumber = (typeof PLAN_NUMBERS)[number];
 
@@ -56,6 +56,10 @@ export const ROBOT_FEATURES = {
   manualDrying: ['button', 'manual_drying'],
   baseStationCleaning: ['button', 'base_station_cleaning'],
   customizedCleaning: ['switch', 'customized_cleaning'],
+  cleaningMode: ['select', 'cleaning_mode'], // globale Selects (Optionslisten für das Geräteprofil)
+  suctionLevel: ['select', 'suction_level'],
+  mopPadHumidity: ['select', 'mop_pad_humidity'],
+  cleaningRoute: ['select', 'cleaning_route'],
   carpetCleaning: ['select', 'carpet_cleaning'],
   waterTemperature: ['select', 'water_temperature'],
   dryingTime: ['select', 'drying_time'],
@@ -145,7 +149,7 @@ export function planEntity(n: PlanNumber, feld: PlanField): string {
   return `${domain}.${PACKAGE_PREFIX}_plan${n}_${feld}`;
 }
 
-/** Raum-Selects des Roboters je Raum-ID (1..7). */
+/** Raum-Selects des Roboters je Raum-ID. */
 export const ROOM_SELECT_FIELDS = ['cleaning_mode', 'suction_level', 'cleaning_times', 'mop_pad_humidity', 'cleaning_route'] as const;
 export type RoomSelectField = (typeof ROOM_SELECT_FIELDS)[number];
 
@@ -211,17 +215,17 @@ export function historyPath(startIso: string, endIso: string): string {
   return `history/period/${startIso}?filter_entity_id=${ENTITIES.phase},${ENTITIES.vac}&end_time=${encodeURIComponent(endIso)}&minimal_response&no_attributes`;
 }
 
-/** IDs des Roboters (Dreame-Integration): feste Merkmale plus Raum-Selects. */
-export function robotIds(): string[] {
+/** IDs des Roboters (Dreame-Integration): feste Merkmale plus Raum-Selects der übergebenen Räume. */
+export function robotIds(roomIds: readonly number[] = []): string[] {
   const ids = (Object.keys(ROBOT_FEATURES) as RobotKey[]).map((k) => ENTITIES[k]);
-  for (const r of ROOM_IDS) for (const f of ROOM_SELECT_FIELDS) ids.push(roomEntity(r, f));
+  for (const r of roomIds) for (const f of ROOM_SELECT_FIELDS) ids.push(roomEntity(r, f));
   return ids;
 }
 
-/** Alle Vertrags-IDs (für Diagnose-Selektor und check-fixture). */
-export function allContractIds(): string[] {
+/** Alle Vertrags-IDs (für Diagnose-Selektor und check-fixture); Räume wie sie die Karte liefert. */
+export function allContractIds(roomIds: readonly number[] = []): string[] {
   const ids: string[] = [...Object.values(ENTITIES), ...PERSONS.map((p) => p.id)];
   for (const n of PLAN_NUMBERS) for (const f of [...PLAN_TEXT_FIELDS, ...PLAN_SELECT_FIELDS, ...PLAN_BOOL_FIELDS, ...PLAN_TIME_FIELDS]) ids.push(planEntity(n, f));
-  for (const r of ROOM_IDS) for (const f of ROOM_SELECT_FIELDS) ids.push(roomEntity(r, f));
+  for (const r of roomIds) for (const f of ROOM_SELECT_FIELDS) ids.push(roomEntity(r, f));
   return [...new Set(ids)];
 }

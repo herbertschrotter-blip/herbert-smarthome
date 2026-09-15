@@ -54,7 +54,7 @@ const hero = (page, fn) => page.evaluate((f) => { const h = document.querySelect
   const { page, errs } = await H.mount(b, { page: 'einstellungen', states, viewport: { width: 1400, height: 1200 } });
   const text = await H.shadowText(page, '.page');
   const m = /Diagnose: (\d+) fehlend/.exec(text || '');
-  H.check('ohne Roboter: Seite rendert, Diagnose zählt alle Roboter-IDs als fehlend (≥ 84)', !!m && parseInt(m[1], 10) >= 84, text && text.slice(0, 200));
+  H.check('ohne Roboter: Seite rendert, Diagnose zählt alle Roboter-Merkmale als fehlend (≥ 50)', !!m && parseInt(m[1], 10) >= 50, text && text.slice(0, 200));
   H.check('keine Konsolenfehler', errs.length === 0, errs);
   await page.close();
 }

@@ -3,7 +3,8 @@
 // active_segments enthält, sonst cleaning_sequence ∩ active_segments.
 import type { RoomId } from '../ha/contract';
 import type { RoomValues } from './raumwerte';
-import { roomById } from '../config';
+import { roomById } from './rooms';
+import type { RoomInfo } from './rooms';
 
 export interface RunInput {
   vac: string;
@@ -43,7 +44,7 @@ export interface StripModel {
   chips: StripChip[];
 }
 
-const shortOf = (id: number): string | undefined => roomById(id)?.short;
+const shortOf = (rooms: readonly RoomInfo[], id: number): string | undefined => roomById(rooms, id)?.short;
 const FAN_ICON: Record<string, string> = { Leise: 'mdi:fan-speed-1', Standard: 'mdi:fan-speed-2', Stark: 'mdi:fan-speed-3', Turbo: 'mdi:fan' };
 const modusIcons = (modus: string): string[] => (modus === 'Saugen' ? ['mdi:broom'] : modus === 'Nur Wischen' ? ['mdi:water'] : ['mdi:broom', 'mdi:water']);
 
@@ -56,15 +57,15 @@ export function roomValueChips(v: RoomValues): StripChip[] {
   return chips;
 }
 
-export function stripModel(r: RunInput, roomValues: (id: RoomId) => RoomValues | null): StripModel | null {
+export function stripModel(r: RunInput, roomValues: (id: RoomId) => RoomValues | null, rooms: readonly RoomInfo[]): StripModel | null {
   if (!['cleaning', 'paused'].includes(r.vac)) return null;
   const seg = r.currentSegment;
-  const room = seg === null ? undefined : roomById(seg);
+  const room = seg === null ? undefined : roomById(rooms, seg);
   const v = room ? roomValues(room.id) : null;
   if (!room || !v) return null;
   const { order, rest } = runOrder(r);
-  const restTxt = rest.map(shortOf).filter(Boolean).join(' → ');
-  const first = order.length ? shortOf(order[0]!) : undefined;
+  const restTxt = rest.map((id) => shortOf(rooms, id)).filter(Boolean).join(' → ');
+  const first = order.length ? shortOf(rooms, order[0]!) : undefined;
   if (r.vac === 'cleaning' && r.cleanedArea === 0) {
     return { kind: 'startpunkt', roomId: room.id, icon: 'mdi:map-marker-path', head: 'Fährt zum Startpunkt', right: first ? `zu ${first}` : '', chips: [] };
   }
