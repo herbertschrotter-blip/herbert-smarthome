@@ -199,22 +199,22 @@ herbert-smarthome/
 │  │  │  ├─ status.ts           big/sub/Knöpfe aus vac-Zustand + Phase + Task
 │  │  │  └─ labels.ts           dayLabel, roomLabel, fmtMin, fmtDate
 │  │  ├─ components/
-│  │  │  ├─ heidi-hero.ts       Kopf: Ring, Status, Chips, Knöpfe, Streifen
-│  │  │  ├─ heidi-map-card.ts   Kartenslot (loadCardHelpers), Raum-Chips, Zonen-/Stühle-Knopf
-│  │  │  ├─ heidi-consumables.ts
-│  │  │  ├─ heidi-automatik.ts
-│  │  │  ├─ heidi-planer.ts     Liste der 4 Einträge + App-Szenen
-│  │  │  ├─ heidi-planer-editor.ts
-│  │  │  ├─ heidi-clock-picker.ts   (eigener Zustand h/m → eigenes Element lohnt sich)
-│  │  │  ├─ heidi-rooms-dialog.ts
-│  │  │  ├─ heidi-estimate-dialog.ts  (inkl. SVG-Diagramm)
-│  │  │  ├─ heidi-prognose-card.ts, heidi-prognose-view.ts
-│  │  │  ├─ heidi-station.ts
-│  │  │  ├─ heidi-history.ts    Letzter Lauf + Protokoll + Zeitleisten-Zeilen
-│  │  │  ├─ heidi-robot-settings.ts
-│  │  │  ├─ heidi-settings-panel.ts
-│  │  │  ├─ heidi-zones-editor.ts
-│  │  │  └─ heidi-dialog.ts     gemeinsamer Rahmen (Scrim, Box, Kopf, Fuß, Escape)
+│  │  │  ├─ dx-hero.ts       Kopf: Ring, Status, Chips, Knöpfe, Streifen
+│  │  │  ├─ dx-map-card.ts   Kartenslot (loadCardHelpers), Raum-Chips, Zonen-/Stühle-Knopf
+│  │  │  ├─ dx-consumables.ts
+│  │  │  ├─ dx-automatik.ts
+│  │  │  ├─ dx-planer.ts     Liste der 4 Einträge + App-Szenen
+│  │  │  ├─ dx-planer-editor.ts
+│  │  │  ├─ dx-clock-picker.ts   (eigener Zustand h/m → eigenes Element lohnt sich)
+│  │  │  ├─ dx-rooms-dialog.ts
+│  │  │  ├─ dx-estimate-dialog.ts  (inkl. SVG-Diagramm)
+│  │  │  ├─ dx-prognose-card.ts, dx-prognose-view.ts
+│  │  │  ├─ dx-station.ts
+│  │  │  ├─ dx-history.ts    Letzter Lauf + Protokoll + Zeitleisten-Zeilen
+│  │  │  ├─ dx-robot-settings.ts
+│  │  │  ├─ dx-settings-panel.ts
+│  │  │  ├─ dx-zones-editor.ts
+│  │  │  └─ dx-dialog.ts     gemeinsamer Rahmen (Scrim, Box, Kopf, Fuß, Escape)
 │  │  ├─ shared/
 │  │  │  ├─ templates.ts        chip(), tile(), seg(), ring(), icon() als lit-html-Funktionen
 │  │  │  └─ toast.ts
@@ -304,7 +304,7 @@ Prop-Drilling durch eine fremde Welt; im HA-Umfeld unüblich. Nein.
 | Map (Slot + Raum-Chips + Zonen-/Stühle-Knopf) | **Ja** | Verwaltet das fremde Karten-Element; braucht eigenen Lebenszyklus (`firstUpdated`, Kartenwechsel) |
 | Room Selector (Chips unter der Karte) | **Nein**, Teil von Map | Eigener Zustand `_selRooms` ist klein; Trennung nur, wenn er anderswo gebraucht wird |
 | Planner (Liste) | **Ja** | Kandidat für das allgemeine Dashboard (kompakte Variante) |
-| Planner Editor | **Ja** | Größter Dialog, eigener Zustand; Uhr als eigenes `heidi-clock-picker` |
+| Planner Editor | **Ja** | Größter Dialog, eigener Zustand; Uhr als eigenes `dx-clock-picker` |
 | Räume-Dialog | **Ja** | Zwei Modi (Roboter/Eintrag), Live-Daten im Roboter-Modus |
 | Dauer & Akku | **Ja** | SVG-Diagramm + Zusammenfassung; nutzt `estimate.ts` |
 | Forecast (Karte + Tab) | **Ja, zwei Elemente** | Kachel-Karte und Tab-Ansicht sind unterschiedliche Layouts derselben Daten |
@@ -314,17 +314,17 @@ Prop-Drilling durch eine fremde Welt; im HA-Umfeld unüblich. Nein.
 | Robot Settings | **Ja** | Eigenständiger `<details>`-Block |
 | Settings-Panel | **Ja** | |
 | Zonen-Editor | **Ja** | Pointer-Events, SVG, `calibration.ts` |
-| Dialog-Rahmen | **Ja, ein `heidi-dialog`** | Scrim/Box/Kopf/Fuß/Escape ist heute 4× kopiert |
+| Dialog-Rahmen | **Ja, ein `dx-dialog`** | Scrim/Box/Kopf/Fuß/Escape ist heute 4× kopiert |
 | Chip, Tile, Ring, Segmented Control, Toast | **Nein** | Template-Funktionen + geteiltes CSS. Als Elemente wären sie Overhead ohne Nutzen |
 
 Ergebnis: ~14 Elemente + 1 Dialog-Rahmen. Feiner wäre zu kleinteilig.
 
 ### Wiederverwendung
 
-- **Innerhalb Heidi**: `heidi-dialog`, `shared/templates.ts` (chip/tile/seg/ring), `tokens`,
+- **Innerhalb Heidi**: `dx-dialog`, `shared/templates.ts` (chip/tile/seg/ring), `tokens`,
   `HeidiApi`, Selektoren. Das ist die Wiederverwendung, die sich heute schon auszahlt.
-- **Für das spätere allgemeine Dashboard**: nur `heidi-hero`, `heidi-planer` (kompakt),
-  eventuell `heidi-consumables`/`heidi-station`. Bau sie so, dass sie `hass` + minimale Config
+- **Für das spätere allgemeine Dashboard**: nur `dx-hero`, `dx-planer` (kompakt),
+  eventuell `dx-consumables`/`dx-station`. Bau sie so, dass sie `hass` + minimale Config
   bekommen – und registriere die `custom:`-Typen **erst, wenn das Dashboard sie braucht**. Keine
   universelle UI-Bibliothek: die Glas-Optik ist Heidi-spezifisch; ob das allgemeine Dashboard
   dieselbe Sprache spricht, ist eine offene Designfrage, nicht eine Codefrage.
@@ -360,7 +360,7 @@ class HeidiApi { constructor(private hass) {}
   setRoomValue(roomId, key, value) { /* kennt "x"-Suffix und RV_HA */ }
   cleanRooms(ids) …  startPlan(n, variante) …  setZones(zones, noMops) …  history(start, end) … }
 
-// components/heidi-rooms-dialog.ts – nur UI
+// components/dx-rooms-dialog.ts – nur UI
 @click=${() => this.api.setRoomValue(id, k, v).then(() => toast("Gesetzt"))}
 ```
 
@@ -385,7 +385,7 @@ für die Spaltenaufteilung der Shell. Keine getrennten Views.**
 
 Warum Container statt Viewport: Auf einem Tablet mit angedockter HA-Seitenleiste ist der
 Viewport 1024 px breit, die Karte aber ~770 px. Die heutigen `@media (max-width: 900px)`-Regeln
-sehen 1024 und wählen das Zweispalten-Layout, obwohl der Platz fehlt. Und dieselbe `heidi-hero`
+sehen 1024 und wählen das Zweispalten-Layout, obwohl der Platz fehlt. Und dieselbe `dx-hero`
 wird später im allgemeinen Dashboard in einer schmalen Spalte stehen – da hilft nur die
 Containerbreite. Container Queries sind in allen Browsern verfügbar, die HA 2026 unterstützt.
 
@@ -397,16 +397,16 @@ Konkret:
 - Komponenten: `@container (max-width: 480px)` für Raum-Raster 7→4, Verschleiß 5→3, Tiles 4→2,
   Zweispalt-Editor → einspaltig. Das ersetzt die 12 heutigen Media Queries eins zu eins.
 - Dialoge: auf schmalen Containern als Bottom-Sheet (unten angedockt, volle Breite, Scroll im
-  Inhalt, Fußleiste fix) statt zentrierter Box; ab Tablet wie heute. Ein `heidi-dialog` macht das
+  Inhalt, Fußleiste fix) statt zentrierter Box; ab Tablet wie heute. Ein `dx-dialog` macht das
   einmal für alle.
 - Protokoll-Liste: `max-height: 320px` mit innerem Scroll auf dem Handy durch „mehr anzeigen“
   (30 → alle) ersetzen; verschachteltes Scrollen ist auf Touch unangenehm.
-- Varianten: genau eine geplante Property `dense` für `heidi-planer` (für das allgemeine
+- Varianten: genau eine geplante Property `dense` für `dx-planer` (für das allgemeine
   Dashboard). Sonst keine Varianten – wenn sich eine Komponente auf dem Handy anders *verhalten*
   muss (nicht nur anders umbrechen), ist das der Moment für eine bewusste Entscheidung, nicht
   vorher.
 - Touch: Ziel-Größen ≥ 40 px für Knöpfe im Streifen und in der Zeitleiste; `window.confirm`
-  durch einen Bestätigungs-Dialog im `heidi-dialog` ersetzen (in der Companion-App ist `confirm`
+  durch einen Bestätigungs-Dialog im `dx-dialog` ersetzen (in der Companion-App ist `confirm`
   unschön, aber funktional – niedrige Priorität).
 - Test: E2E-Render bei 390, 820, 1200 px Breite mit Prüfung „kein horizontales Scrollen“
   (`scrollWidth <= clientWidth`) und Screenshots als Sichtkontrolle.
@@ -486,7 +486,7 @@ Jeder Schritt endet mit einer deploybaren `ha/www/heidi-panel.js`, grünen Tests
 | **2. Fachlogik herausziehen** | `domain/raumwerte`, `estimate`, `timeline`, `calibration`, `status`, `labels` als TS-Module; Panel importiert sie; Unit-Tests + gemeinsame Vektoren mit Python; `rest_min` nach Jinja verlagern (Attribut) | 1–2 Tage | gering – reine Verschiebung, Tests belegen Gleichheit |
 | **3. Selektoren und API** | `ha/selectors.ts`, `ha/api.ts`; `_saveEditor`, `_rvClick`, `_zonesAction`, `_onClick`-Service-Zweige rufen `HeidiApi`; `test-editor` prüft `api`-Calls | 1 Tag | gering |
 | **4. Lit in die Shell, Bereiche einzeln** | Shell wird `LitElement`; alte String-Renderer werden übergangsweise mit `unsafeHTML(this._hero())` eingebettet – **das ist der Trick, der die Karte in jedem Zwischenstand funktionsfähig hält**. Reihenfolge nach Schmerz: Editor-Dialog (hebt das Einfrieren auf), History (Scroll), Hero, Map, Räume-Dialog, Dauer & Akku, Rest | 3–5 Tage verteilt | mittel – deshalb Bereich für Bereich mit Deploy dazwischen |
-| **5. CSS aufteilen** | Tokens/Basis geteilt, Rest in `static styles`; Media → Container Queries; Bottom-Sheet im `heidi-dialog` | 1 Tag | gering |
+| **5. CSS aufteilen** | Tokens/Basis geteilt, Rest in `static styles`; Media → Container Queries; Bottom-Sheet im `dx-dialog` | 1 Tag | gering |
 | **6. Aufräumen** | Signaturliste durch `shouldUpdate` aus `entityIds` ersetzen; `data-*`-Dispatcher entfernen; Overlay-Zustand vereinheitlichen; Google-Fonts entweder lokal unter `/local/fonts/` oder System-Fonts | 1 Tag | gering |
 
 Schritte 0–2 sind auch dann richtig, wenn du Lit nie einführst. Schritt 4 ist der einzige mit
@@ -563,7 +563,7 @@ fremden Themes.
 9. CSS-Tokens/Basis trennen, Container Queries, Bottom-Sheet-Dialoge, „mehr anzeigen“ im Protokoll.
 10. `shouldUpdate` aus `entityIds`, Overlay als ein Zustand, Fonts lokal oder System.
 11. GitHub Actions für `check` + `test`.
-12. `custom:heidi-hero-card` / `heidi-planer` (dense) registrieren – erst wenn das allgemeine
+12. `custom:dx-hero-card` / `dx-planer` (dense) registrieren – erst wenn das allgemeine
     Dashboard sie will.
 
 ### Nicht notwendig

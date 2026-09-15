@@ -50,19 +50,19 @@ Claude Code im Web bereitet diese Aufgaben vor, führt sie aber nicht aus.
 | 3.2 | `ha/api.ts` (`HeidiApi`) + Tests inkl. Teilfehler | offen |
 | 3.3 | Shell: `page`-Config, Views, Overlay, Toast, Escape, more-info, Modul-Caches | offen |
 | 3.4 | **[PC-Abnahme]** Mockup Seitenstruktur `dreame_x60/mockups/seiten.html` | fertig (15de525; Design-Referenz `dreame_x60/mockups/bento.html`, abgenommen 15.09.) |
-| 4.0 | Startseite: `heidi-nav-tiles` + Seitenaufbau nach Mockup | offen |
-| 4.1 | `heidi-hero` | offen |
-| 4.2 | `heidi-dialog` (modal/sheet/confirm) | offen |
-| 4.3 | `heidi-map-card` (Seite Reinigen) | offen |
-| 4.4 | `heidi-planer` (Seite Planer) | offen |
-| 4.5 | `heidi-planer-editor` + `heidi-clock-picker` | offen |
-| 4.6 | `heidi-rooms-dialog` | offen |
-| 4.7 | `heidi-history` + `heidi-robot-settings` (Seiten Protokoll, Einstellungen) | offen |
-| 4.8 | `heidi-estimate-dialog` | offen |
-| 4.9 | `heidi-automatik`, `heidi-station`, `heidi-consumables` | offen |
-| 4.10 | `heidi-prognose-card` + `heidi-prognose-view` | offen |
-| 4.11 | `heidi-settings-panel` (Seite Einstellungen, inkl. Diagnose) | offen |
-| 4.12 | `heidi-zones-editor` | offen |
+| 4.0 | Startseite: `dx-nav-tiles` + Seitenaufbau nach Mockup | offen |
+| 4.1 | `dx-hero` | offen |
+| 4.2 | `dx-dialog` (modal/sheet/confirm) | offen |
+| 4.3 | `dx-map-card` (Seite Reinigen) | offen |
+| 4.4 | `dx-planer` (Seite Planer) | offen |
+| 4.5 | `dx-planer-editor` + `dx-clock-picker` | offen |
+| 4.6 | `dx-rooms-dialog` | offen |
+| 4.7 | `dx-history` + `dx-robot-settings` (Seiten Protokoll, Einstellungen) | offen |
+| 4.8 | `dx-estimate-dialog` | offen |
+| 4.9 | `dx-automatik`, `dx-station`, `dx-consumables` | offen |
+| 4.10 | `dx-prognose-card` + `dx-prognose-view` | offen |
+| 4.11 | `dx-settings-panel` (Seite Einstellungen, inkl. Diagnose) | offen |
+| 4.12 | `dx-zones-editor` | offen |
 | 4.13 | Render-Messung (`perf.js`), Erwartung 0/0/0 bei irrelevanten Ticks | offen |
 | 5.1 | Container Queries, Bottom-Sheet, „mehr anzeigen“, Safe Area | offen |
 | 5.2 | E2E Breiten 390/820/1200 + Overflow | offen |
@@ -126,7 +126,7 @@ freigegeben).
     HA-Navigation per `navigate`-Event (`location-changed`). Keine Stabilitätsgarantie, deshalb
     nichts darüber hinaus (`ha-switch`, `ha-slider`, `mwc-*`, `ha-dialog` sind tabu); v2 bringt
     eigene Primitive.
-13. **Kein `window.confirm`**: Bestätigungen über `heidi-dialog` (Variante `confirm`).
+13. **Kein `window.confirm`**: Bestätigungen über `dx-dialog` (Variante `confirm`).
 14. **Keine externen Ressourcen zur Laufzeit.** System-Schriftstapel bis 2.0; Fonts als
     `Post-2.0`-Wunsch.
 15. **Deutsch** in Bezeichnern der Domäne (`raeume`, `saug`, `wdh`), Englisch für Technik.
@@ -153,7 +153,7 @@ zweites Repo.
 | Sprache | TypeScript, `strict: true`, `target: es2022`; `any` nur an der HA-Grenze |
 | UI | Lit 3; Elemente nach Verantwortungsbereich (Abschnitt 7 = Orientierung); `static styles`; Shadow DOM |
 | Build | esbuild `--bundle --format=esm --target=es2022 --outfile=../../ha/www/dreame_x60.js --define:HP_VERSION`; kein Sourcemap im Deploy |
-| Element/Typ | `dreame-x60-panel` / `custom:dreame-x60-panel` (v1 belegt `heidi-panel`) |
+| Element/Typ | `dreame-x60-panel` / `custom:dreame-x60-panel` (v1 belegt `heidi-panel`). Bausteine `dx-*` (z. B. `dx-hero`), Ereignisse `dx-*` (`dx-navigate`, `dx-open-overlay` …), Design-Tokens `--dx-*`. „Heidi“ erscheint nur noch als Anzeigetitel und im Dashboard-Namen; Entitäten `heidi_*` bleiben (Herbert, 15.09.) |
 | Seiten | Karte bekommt `page: start \| reinigen \| planer \| protokoll \| prognose \| einstellungen` (Standard `start`). Ein YAML-Dashboard mit sechs Views: `start` normal, die anderen `subview: true`, `back_path: /dreame-x60/start`, alle `type: panel` mit dieser Karte. Navigation über `navigate`-Event von HA |
 | Caches | Karten-Element, Zeitleisten-Cache, History-Cache auf Modulebene (überleben Seitenwechsel) |
 | Unit-Tests | `node --test` über `tsx`, `tests/unit/*.test.ts` |
@@ -263,7 +263,7 @@ dreame_x60/card/
 | `_loadTimeline` (Mitte), `_timelineHtml` (Dauer) | `domain/timeline.ts` | Lauf = `cleaning|paused|returning`; Halt < 45 s unterbricht nicht; Ende = erster Halt ≥ 45 s; `cur` = letzter Lauf, sonst Lauf mit Ende > Start − 60 s; Zeilen in [start − 5 s, stop), ohne `PHASE_IDLE`, Duplikate zusammen, erste Zeile weg solange zweite < 30 s danach, A-B-A mit B < 45 s glätten; letzte Dauer bis `stop`; Fenster `cur` = jetzt − 8 h; Fenster Eintrag = start … min(start + Dauer + 90 min, nächster Lauf, jetzt) |
 | `_calib`, `_rectsFromAttr` | `domain/calibration.ts` | Affin aus 3 Punkten (Cramer); `null` bei < 3 Punkten oder Determinante 0; Rechtecke min/max aus `x0..x3/y0..y3` |
 | `_hero` (Textlogik), `STATUS_DE`, `TASK` | `domain/status.ts` | Phase gilt wenn nicht `unknown/unavailable/""`; `error` → „Fehler“; `paused` → „Pausiert“ + Auftrag; `returning` → „Fährt zur Station“ + Phase; `cleaning` → Auftrag (Planername wenn `heidi_auto_lauf`, sonst TASK) + Phase; sonst Phase bzw. STATUS_DE; `sub === big` → leer. Knöpfe: cleaning Pause/Stopp/Station; paused Weiter/Stopp/Station; returning Pause/Stopp/Orten; docked Start/Orten; sonst Start/Station/Orten. Fehler-Chip rot bei `has_error`, sonst gelb; `no_error`/`unavailable` kein Chip |
-| `_strip`, `_roomVals` | `heidi-hero`, `selectors.readRoomValues` | Nur cleaning/paused; Reihenfolge des Laufs = `input_text.heidi_lauf_reihenfolge`, wenn sie genau die `active_segments` enthält, sonst `cleaning_sequence` ∩ `active_segments` (v1 1.6.2); `cleaned_area == 0` ∧ cleaning → „Fährt zum Startpunkt zu <erster Raum>“; Raum ∉ `active_segments` (nicht leer) → „Fährt durch <Raum>“; sonst „Jetzt: <Raum>“ + Chips Modus/Saug/(Wasser wenn nass)/(Route wenn nur Wischen)/Wdh, rechts „danach A → B“ oder „letzter Raum“ |
+| `_strip`, `_roomVals` | `dx-hero`, `selectors.readRoomValues` | Nur cleaning/paused; Reihenfolge des Laufs = `input_text.heidi_lauf_reihenfolge`, wenn sie genau die `active_segments` enthält, sonst `cleaning_sequence` ∩ `active_segments` (v1 1.6.2); `cleaned_area == 0` ∧ cleaning → „Fährt zum Startpunkt zu <erster Raum>“; Raum ∉ `active_segments` (nicht leer) → „Fährt durch <Raum>“; sonst „Jetzt: <Raum>“ + Chips Modus/Saug/(Wasser wenn nass)/(Route wenn nur Wischen)/Wdh, rechts „danach A → B“ oder „letzter Raum“ |
 | `_dayLabel`, `_roomLabel`, `_fmtMin`, `fmtDate` | `domain/labels.ts` | 7 „Täglich“, 0 „Manuell“, Mo–Fr, Sa + So, sonst Kürzel mit „ + “ bei ≤ 3 und Leerzeichen bei > 3; 7 Räume „Alle“, 0 „keine Räume“, sonst Kurznamen in der Reihenfolge der Raumliste (v1 1.6.2); `de-AT`, „heute“ |
 | `_planRead` | `selectors.readPlan` | Maske auf 7 auffüllen, Räume nur 1..7, Zeit Standard „09:30“, Personen getrimmt |
 | `_histAttrs` | `selectors.readHistory` | Bei `unknown/unavailable` oder ohne `timestamp`-Attribute letzten Stand behalten (Modul-Cache) |
@@ -273,19 +273,19 @@ dreame_x60/card/
 | `_rvClick` (Roboter) | `HeidiApi.setRoomValue` | Option über `RV_HA`-Inverse, Wdh + `x`; „Alle“ = 7 parallel |
 | `_zonesAction("save")` | `HeidiApi.setZones` | Beide Listen senden |
 | `_onClick` svc/press/reset/run/app/shell/toggle/option | `HeidiApi.vacuum/press/runPlan/runScene/shell/toggle/selectOption/setNumber/setTime` | `runPlan` verweigert bei inaktiv; `setTime` unterscheidet `time.` und `input_datetime`; Intervall auf 5/10/15/20/30/60 runden; Dark-Mode `turn_on/off` |
-| `_mountMap` | `heidi-map-card` | Drei Konfigurationen 1:1; Cache je `kind|dark` auf Modulebene |
-| `_clockHtml`, clock-Zweige | `heidi-clock-picker` | 24-h-Ring (0–11 außen, 12–23 innen), 5-min-Schritte, Stunde → Minutenmodus, OK/Abbrechen |
-| `_roomsHtml`, `_rvClick` (Plan) | `heidi-rooms-dialog` | Plan: nur gewählte Räume, „eigene Werte“, Standard sonst, Wasser nur nass, Route nur „Nur Wischen“, „Alle auf Standard“; Roboter: „Alle Räume“ mit gemeinsamen Werten (`–` bei Abweichung), sofort schreiben, Hinweis bei unavailable |
-| `_estHtml`, `_estLine` | `heidi-estimate-dialog`, Kurzzeile in `heidi-planer` | Kurzzeile nur mit Lernwerten; ✓/✗ gegen `restMin`; Stecker bei Nachladen; Dialog: Summe, Schritte, SVG 600×190, 25-%-Linien, Rückkehr-Linie, Vergleich Standard↔Turbo, gestrichelt = geschätzt |
-| `_history`, `_timelineHtml` | `heidi-history` | 30 absteigend; „Läuft gerade“ nur unterwegs, Nachladen bei `last_changed`-Wechsel; Protokoll offen im Lauf; Klick lädt einmal (Cache) |
-| `_zonesHtml`, `_zonesBind` | `heidi-zones-editor` | `viewBox` = Bildgröße (Fallback 1332×716); Pointer-Events; < 8 px verwerfen; Klick wählt + wechselt Typ; Speichern ersetzt beide Listen; Cache-Buster außer `data:` |
-| `_panelHtml`, `_lernHtml` | `heidi-settings-panel` | Erscheinungsbild, Karte + Drehung, Raumnamen, Funktionen, Nina zählt, 5 Slider live, Lernwerte, Version, neu: Diagnose |
-| `_renderProg` | `heidi-prognose-view` | Heute, Lernstatus (`tage/(wochen×7)`), 4 Schalter, Reset mit Bestätigung, Heatmaps `/local/prognose_<name>.png?v=<aktualisiert>` |
-| `_prognoseCard` | `heidi-prognose-card` | Nur bei `prognose_aktiv`; 3 Kacheln; Klick → Seite Prognose |
-| `_automatik` | `heidi-automatik` | Einzeiler + Schalter (Start); Regeln-Details (Planer) |
-| `_station`, `_consumables` | `heidi-station`, `heidi-consumables` | Kacheltexte; Ringfarben ≤ 10 rot, ≤ 25 gelb; Reset mit Bestätigung |
-| `_robot` | `heidi-robot-settings` | 7 Felder + DND + „Räume …“ |
-| `_renderTop`, Tabs | Shell + `heidi-nav-tiles` | Tabs entfallen (PD-000); Prognose-Kachel nur bei aktiv |
+| `_mountMap` | `dx-map-card` | Drei Konfigurationen 1:1; Cache je `kind|dark` auf Modulebene |
+| `_clockHtml`, clock-Zweige | `dx-clock-picker` | 24-h-Ring (0–11 außen, 12–23 innen), 5-min-Schritte, Stunde → Minutenmodus, OK/Abbrechen |
+| `_roomsHtml`, `_rvClick` (Plan) | `dx-rooms-dialog` | Plan: nur gewählte Räume, „eigene Werte“, Standard sonst, Wasser nur nass, Route nur „Nur Wischen“, „Alle auf Standard“; Roboter: „Alle Räume“ mit gemeinsamen Werten (`–` bei Abweichung), sofort schreiben, Hinweis bei unavailable |
+| `_estHtml`, `_estLine` | `dx-estimate-dialog`, Kurzzeile in `dx-planer` | Kurzzeile nur mit Lernwerten; ✓/✗ gegen `restMin`; Stecker bei Nachladen; Dialog: Summe, Schritte, SVG 600×190, 25-%-Linien, Rückkehr-Linie, Vergleich Standard↔Turbo, gestrichelt = geschätzt |
+| `_history`, `_timelineHtml` | `dx-history` | 30 absteigend; „Läuft gerade“ nur unterwegs, Nachladen bei `last_changed`-Wechsel; Protokoll offen im Lauf; Klick lädt einmal (Cache) |
+| `_zonesHtml`, `_zonesBind` | `dx-zones-editor` | `viewBox` = Bildgröße (Fallback 1332×716); Pointer-Events; < 8 px verwerfen; Klick wählt + wechselt Typ; Speichern ersetzt beide Listen; Cache-Buster außer `data:` |
+| `_panelHtml`, `_lernHtml` | `dx-settings-panel` | Erscheinungsbild, Karte + Drehung, Raumnamen, Funktionen, Nina zählt, 5 Slider live, Lernwerte, Version, neu: Diagnose |
+| `_renderProg` | `dx-prognose-view` | Heute, Lernstatus (`tage/(wochen×7)`), 4 Schalter, Reset mit Bestätigung, Heatmaps `/local/prognose_<name>.png?v=<aktualisiert>` |
+| `_prognoseCard` | `dx-prognose-card` | Nur bei `prognose_aktiv`; 3 Kacheln; Klick → Seite Prognose |
+| `_automatik` | `dx-automatik` | Einzeiler + Schalter (Start); Regeln-Details (Planer) |
+| `_station`, `_consumables` | `dx-station`, `dx-consumables` | Kacheltexte; Ringfarben ≤ 10 rot, ≤ 25 gelb; Reset mit Bestätigung |
+| `_robot` | `dx-robot-settings` | 7 Felder + DND + „Räume …“ |
+| `_renderTop`, Tabs | Shell + `dx-nav-tiles` | Tabs entfallen (PD-000); Prognose-Kachel nur bei aktiv |
 | CSS `.root`, `.root.light` | `styles/tokens.ts` | Werte 1:1; `light` auf `:host` wenn `dark_mode` aus |
 
 ---
@@ -296,37 +296,37 @@ dreame_x60/card/
 
 | Seite | Inhalt |
 |---|---|
-| `start` | **Links:** `heidi-hero` (Akku, Status, Personen, Knöpfe, Streifen im Lauf) und darunter `heidi-map-card` in der Variante `compact` (immer sichtbar: im Lauf Live-Karte mit Roboterposition und fertigen Räumen, sonst Übersicht; keine Werkzeuge, Antippen navigiert zu `reinigen`). **Rechts:** `heidi-automatik` (Einzeiler + Schalter), `heidi-consumables`, `heidi-nav-tiles` (Reinigen, Planer, Protokoll, Prognose mit drei Tageswerten nur bei aktiv, Räume, Einstellungen), `heidi-station`. Linke Spalte wächst auf die Höhe der rechten, die Karte füllt den Rest; auf schmalen Containern eine Spalte in dieser Reihenfolge. Abgenommen von Herbert am 14.09. (Mockup `dreame_x60/mockups/seiten.html`, Commit 76631e4) |
-| `reinigen` | `heidi-map-card` (Kartenwahl in der Kopfzeile, Karte mit Knöpfen „Hinfahren“ und „Sperrzonen“ unten links, Segment Räume / Zone / Punkt mit „Alles“, Raum-Chips im Modus Räume), App-Szenen, Schalter „Stühle am Boden“ als Zeile, Knopf „Räume (Roboter-Werte)“. Referenz: `dreame_x60/mockups/karte.html` (echte Xiaomi-Karte im Glas-Design) und Seite Reinigen in `dreame_x60/mockups/seiten.html` |
-| `planer` | `heidi-planer` (Liste, Dauer-Kurzzeile), Automatik-Regeln, Editor/Räume/Dauer-Dialoge |
-| `protokoll` | `heidi-history` (Letzter Lauf, Protokoll, Zeitleiste), Lernwerte-Tabelle |
-| `prognose` | `heidi-prognose-view` |
-| `einstellungen` | `heidi-settings-panel` als Seite (statt Seitenleiste), `heidi-robot-settings`, Diagnose, Version |
+| `start` | **Links:** `dx-hero` (Akku, Status, Personen, Knöpfe, Streifen im Lauf) und darunter `dx-map-card` in der Variante `compact` (immer sichtbar: im Lauf Live-Karte mit Roboterposition und fertigen Räumen, sonst Übersicht; keine Werkzeuge, Antippen navigiert zu `reinigen`). **Rechts:** `dx-automatik` (Einzeiler + Schalter), `dx-consumables`, `dx-nav-tiles` (Reinigen, Planer, Protokoll, Prognose mit drei Tageswerten nur bei aktiv, Räume, Einstellungen), `dx-station`. Linke Spalte wächst auf die Höhe der rechten, die Karte füllt den Rest; auf schmalen Containern eine Spalte in dieser Reihenfolge. Abgenommen von Herbert am 14.09. (Mockup `dreame_x60/mockups/seiten.html`, Commit 76631e4) |
+| `reinigen` | `dx-map-card` (Kartenwahl in der Kopfzeile, Karte mit Knöpfen „Hinfahren“ und „Sperrzonen“ unten links, Segment Räume / Zone / Punkt mit „Alles“, Raum-Chips im Modus Räume), App-Szenen, Schalter „Stühle am Boden“ als Zeile, Knopf „Räume (Roboter-Werte)“. Referenz: `dreame_x60/mockups/karte.html` (echte Xiaomi-Karte im Glas-Design) und Seite Reinigen in `dreame_x60/mockups/seiten.html` |
+| `planer` | `dx-planer` (Liste, Dauer-Kurzzeile), Automatik-Regeln, Editor/Räume/Dauer-Dialoge |
+| `protokoll` | `dx-history` (Letzter Lauf, Protokoll, Zeitleiste), Lernwerte-Tabelle |
+| `prognose` | `dx-prognose-view` |
+| `einstellungen` | `dx-settings-panel` als Seite (statt Seitenleiste), `dx-robot-settings`, Diagnose, Version |
 
-**Design-Referenz (14.09., Herberts Designvorgabe „Automotive Dark Bento“):** `dreame_x60/mockups/bento.html` zeigt alle sechs Seiten und Dialoge im neuen Look (dunkles Graphit, Bento-Flächen, Seitenleiste auf Desktop, Symbolleiste auf Tablet, Tab-Leiste und Bottom-Sheets auf Smartphone, Design-Tokens `--heidi-*`). Es löst die Glas-Optik der Mockups `dreame_x60/mockups/start.html`/`dreame_x60/mockups/seiten.html` ab; die Seitenschnitte und Funktionen bleiben. Von Herbert abgenommen am 15.09. (Chat Teil 2); die Optik aller Komponenten in Phase 4 folgt diesem Mockup. Regel 14 gilt: System-Schriftstapel, keine externen Ressourcen.
+**Design-Referenz (14.09., Herberts Designvorgabe „Automotive Dark Bento“):** `dreame_x60/mockups/bento.html` zeigt alle sechs Seiten und Dialoge im neuen Look (dunkles Graphit, Bento-Flächen, Seitenleiste auf Desktop, Symbolleiste auf Tablet, Tab-Leiste und Bottom-Sheets auf Smartphone, Design-Tokens `--dx-*`). Es löst die Glas-Optik der Mockups `dreame_x60/mockups/start.html`/`dreame_x60/mockups/seiten.html` ab; die Seitenschnitte und Funktionen bleiben. Von Herbert abgenommen am 15.09. (Chat Teil 2); die Optik aller Komponenten in Phase 4 folgt diesem Mockup. Regel 14 gilt: System-Schriftstapel, keine externen Ressourcen.
 
 Jede Komponente: `hass`, ihre Sicht (memoisiert), `api` als Properties; Ereignisse nach oben
-(`heidi-open-overlay`, `heidi-toast`, `heidi-navigate`, `heidi-close`, `heidi-back`). Keine
+(`dx-open-overlay`, `dx-toast`, `dx-navigate`, `dx-close`, `dx-back`). Keine
 Komponente ruft `hass.callService` direkt. Teilen zwei Elemente Zustand, werden sie eines;
 trägt eines zwei unabhängige Zustände, werden es zwei.
 
 | Element | Bekommt | Sendet | Abnahme |
 |---|---|---|---|
 | `dreame-x60-panel` | hass, config.page | – | Rendert jede Seite mit `states-docked.json` ohne Konsolenfehler |
-| `heidi-nav-tiles` | prognoseView | `heidi-navigate {page}` | Klick löst `location-changed` mit `/dreame-x60/<page>` aus (E2E `nav.js`) |
-| `heidi-hero` | robotView, api | `heidi-open-overlay {rooms}` | Kopf-Tabelle aus 0.1; Streifen-Fälle |
-| `heidi-dialog` | title, variant | `heidi-close`, `heidi-confirm` | Escape; Sheet < 600 px Container |
-| `heidi-map-card` | hass, mapView, api, kind, dark, variant (`full` \| `compact`) | `heidi-open-overlay {zones}`, `heidi-navigate {reinigen}` (compact) | Element über 20 Ticks identisch; `vacuum_clean_segment` nach Bestätigung; Moduswechsel gibt der Karte genau einen `map_modes`-Eintrag; `compact` ohne Segment, Knöpfe und Chips, mit Bildunterschrift |
-| `heidi-planer` | plans[], today, lern, restMin, api | `{editor n}`, `{estimate n}` | 4 Zeilen, heutiger markiert, ▶ verweigert bei inaktiv |
-| `heidi-planer-editor` | api, n, draft | `heidi-close` | 18 Calls; Draft überlebt hass-Update; Teilfehler sichtbar; Hinweis „außerhalb geändert“ |
-| `heidi-clock-picker` | value | `change` | 10 → Minuten → 15 → OK = „10:15“ |
-| `heidi-rooms-dialog` | roomValues, api, mode, draft? | `heidi-close`, `heidi-back` | Roboter: sofort `select_option`; Plan: nur Draft |
-| `heidi-history` | historyView, api | – | 7 Zeilen aus 0.1; bleibt bei unavailable; ein `callApi` je Klick |
-| `heidi-estimate-dialog` | plan, lern, restMin | `heidi-close`/`back` | Summen = `estimate.v1.json` Plan 2 |
-| `heidi-automatik`, `heidi-station`, `heidi-consumables`, `heidi-robot-settings` | Sicht, api | – | Jeder Knopf/Select/Slider → erwarteter Call |
-| `heidi-prognose-view` | prognoseView, api | – | Balken = `tage/(wochen×7)`; Reset → `shell_command` |
-| `heidi-settings-panel` | settingsView, diagnostics, api | – | Slider-Rundung; Diagnose listet fehlende IDs |
-| `heidi-zones-editor` | mapView, api | `heidi-close` | Geste aus 0.1 → gleiche mm-Koordinaten |
+| `dx-nav-tiles` | prognoseView | `dx-navigate {page}` | Klick löst `location-changed` mit `/dreame-x60/<page>` aus (E2E `nav.js`) |
+| `dx-hero` | robotView, api | `dx-open-overlay {rooms}` | Kopf-Tabelle aus 0.1; Streifen-Fälle |
+| `dx-dialog` | title, variant | `dx-close`, `dx-confirm` | Escape; Sheet < 600 px Container |
+| `dx-map-card` | hass, mapView, api, kind, dark, variant (`full` \| `compact`) | `dx-open-overlay {zones}`, `dx-navigate {reinigen}` (compact) | Element über 20 Ticks identisch; `vacuum_clean_segment` nach Bestätigung; Moduswechsel gibt der Karte genau einen `map_modes`-Eintrag; `compact` ohne Segment, Knöpfe und Chips, mit Bildunterschrift |
+| `dx-planer` | plans[], today, lern, restMin, api | `{editor n}`, `{estimate n}` | 4 Zeilen, heutiger markiert, ▶ verweigert bei inaktiv |
+| `dx-planer-editor` | api, n, draft | `dx-close` | 18 Calls; Draft überlebt hass-Update; Teilfehler sichtbar; Hinweis „außerhalb geändert“ |
+| `dx-clock-picker` | value | `change` | 10 → Minuten → 15 → OK = „10:15“ |
+| `dx-rooms-dialog` | roomValues, api, mode, draft? | `dx-close`, `dx-back` | Roboter: sofort `select_option`; Plan: nur Draft |
+| `dx-history` | historyView, api | – | 7 Zeilen aus 0.1; bleibt bei unavailable; ein `callApi` je Klick |
+| `dx-estimate-dialog` | plan, lern, restMin | `dx-close`/`back` | Summen = `estimate.v1.json` Plan 2 |
+| `dx-automatik`, `dx-station`, `dx-consumables`, `dx-robot-settings` | Sicht, api | – | Jeder Knopf/Select/Slider → erwarteter Call |
+| `dx-prognose-view` | prognoseView, api | – | Balken = `tage/(wochen×7)`; Reset → `shell_command` |
+| `dx-settings-panel` | settingsView, diagnostics, api | – | Slider-Rundung; Diagnose listet fehlende IDs |
+| `dx-zones-editor` | mapView, api | `dx-close` | Geste aus 0.1 → gleiche mm-Koordinaten |
 
 ---
 
@@ -491,7 +491,7 @@ Sechs Felder je Karte: **Voraussetzung** (Aufgaben, die `fertig` sein müssen), 
 - Voraussetzung: 3.1, 3.2
 - Ziel: Shell erzeugt Views über memoisierte Selektoren und reicht `hass`, Views, `api` nach unten; rendert nach `config.page`; Overlay-Union; Toast; Escape; `hass-more-info`; `shared/navigate.ts` (`history.pushState` + `location-changed`); Modul-Caches.
 - Nicht ändern: kein `shouldUpdate` in der Shell.
-- Akzeptanz: `render.js` grün für alle Seiten; Overlay öffnen/schließen mit Platzhalter; `nav.js`: `heidi-navigate` löst `location-changed` mit richtigem Pfad aus.
+- Akzeptanz: `render.js` grün für alle Seiten; Overlay öffnen/schließen mit Platzhalter; `nav.js`: `dx-navigate` löst `location-changed` mit richtigem Pfad aus.
 - Tests: `npm test`
 - Dateien: `src/dreame-x60-panel.ts`, `src/shared/{overlay,toast,navigate}.ts`, `tests/e2e/nav.js`
 
@@ -509,77 +509,77 @@ Nach jedem Build v2 neben v1 ansehen; Unterschiede → Abschnitt 10/10a.
 
 **4.0 Startseite und Navigations-Kacheln**
 - Voraussetzung: 3.3, 3.4
-- Ziel: `heidi-nav-tiles` (Kacheln laut Mockup, Prognose-Kachel mit drei Werten nur bei aktiv); Seitenaufbau aller sechs Seiten mit Platzhaltern für noch fehlende Komponenten. Startseite zweispaltig ab 880 px Container: links Hero + Karte (`compact`, Platzhalter bis 4.3), rechts Automatik, Verschleiß, Kacheln, Station; linke Spalte streckt sich auf die rechte (Flex), Karte füllt den Rest (Abschnitt 7).
+- Ziel: `dx-nav-tiles` (Kacheln laut Mockup, Prognose-Kachel mit drei Werten nur bei aktiv); Seitenaufbau aller sechs Seiten mit Platzhaltern für noch fehlende Komponenten. Startseite zweispaltig ab 880 px Container: links Hero + Karte (`compact`, Platzhalter bis 4.3), rechts Automatik, Verschleiß, Kacheln, Station; linke Spalte streckt sich auf die rechte (Flex), Karte füllt den Rest (Abschnitt 7).
 - Nicht ändern: `navigate.ts`.
 - Akzeptanz: `nav.js` prüft jede Kachel; Prognose-Kachel fehlt bei `prognose_aktiv` aus.
 - Tests: `npm test`
-- Dateien: `src/components/heidi-nav-tiles.ts`, `src/dreame-x60-panel.ts`, `src/config.ts` (NAV_TILES)
+- Dateien: `src/components/dx-nav-tiles.ts`, `src/dreame-x60-panel.ts`, `src/config.ts` (NAV_TILES)
 
-**4.1 `heidi-hero`**
+**4.1 `dx-hero`**
 - Voraussetzung: 4.0
 - Ziel: Ring, Texte aus `status.ts`, Personen-Chips, Fehler-Chip, DND-Chip, Knöpfe, Streifen.
 - Nicht ändern: `status.ts`, `contract.ts`.
 - Akzeptanz: Kopf-Tabelle aus 0.1 grün gegen v2; Streifen-Fälle mit `states-cleaning.json`; Knöpfe → `vacuum.*`-Calls; bei 20 irrelevanten Ticks 0 Renderaufrufe (Zähler im Harness).
 - Tests: `npm test`
-- Dateien: `src/components/heidi-hero.ts`, `tests/e2e/hero.js`
+- Dateien: `src/components/dx-hero.ts`, `tests/e2e/hero.js`
 
-**4.2 `heidi-dialog`**
+**4.2 `dx-dialog`**
 - Voraussetzung: 3.3
 - Ziel: Rahmen mit Varianten `modal | sheet | confirm`, Scrim, Kopf, Fuß, Escape, Fokus in den Dialog.
 - Nicht ändern: –
-- Akzeptanz: `confirm` liefert Ereignis `heidi-confirm`; Escape schließt; Fokus liegt nach Öffnen im Dialog.
+- Akzeptanz: `confirm` liefert Ereignis `dx-confirm`; Escape schließt; Fokus liegt nach Öffnen im Dialog.
 - Tests: `npm test`
-- Dateien: `src/components/heidi-dialog.ts`, `tests/e2e/dialog.js`
+- Dateien: `src/components/dx-dialog.ts`, `tests/e2e/dialog.js`
 
-**4.3 `heidi-map-card` (Seite Reinigen)**
+**4.3 `dx-map-card` (Seite Reinigen)**
 - Voraussetzung: 4.2, 2.4
-- Ziel: Zwei Varianten: `compact` für die Startseite (nur Karte + Bildunterschrift „Live-Karte · <Raum> · <m²> · noch <Räume>“ bzw. „Karte · Heidi in der Station · letzter Lauf <Zeit>“, Antippen navigiert zu `reinigen`, Karten-Element aus demselben Modul-Cache) und `full` für die Seite Reinigen. Für `full`: Kartenslot mit Modul-Cache. Kopfzeile mit Kartenwahl (nur wenn `select.heidi_selected_map` existiert; schreibt `select_option`). Auf der Karte unten links zwei Knöpfe: „Hinfahren“ (schaltet die Karte in den Modus `vacuum_goto`) und „Sperrzonen“ (öffnet Dialog). Darunter Segment Räume / Zone / Punkt und Knopf „Alles“ (`vacuum.start` nach Bestätigung); das Segment gibt der eingebetteten Karte genau **einen** `map_modes`-Eintrag (`vacuum_clean_segment` mit `predefined_selections` inkl. `outline` je Raum, `vacuum_clean_zone`, `vacuum_clean_point`), sodass die Karte kein eigenes Modus-Menü zeigt. Im Modus Räume: Raum-Chips (Reihenfolge 7..1) und Leiste „N Räume reinigen“ mit Bestätigung; in den anderen Modi eine Hinweiszeile. Raum-Marker und Umrisse werden aus `camera.heidi_map` (Attribut `rooms`, Koordinaten) berechnet, nicht von Hand gesetzt. Glas-Optik über die CSS-Variablen aus `dreame_x60/mockups/karte.html` (Abschnitt „Was hier gesetzt ist“), `tiles: []`, `icons: []`, kein Titel. Sperrzonen-Dialog (`heidi-zones-editor`, 4.12) mit drei Reitern Sperrzonen / Wisch-Sperrzonen / Virtuelle Wände: bestehende Einträge aus `camera.heidi_map` als Heidi-Overlay (verschieben, löschen), neue über die Karte im Modus `MANUAL_RECTANGLE` bzw. `MANUAL_PATH` (Großschreibung, siehe Abschnitt 10). Schalter „Stühle am Boden“ als Zeile in einer eigenen Kachel, nicht auf der Karte. App-Szenen und Knopf „Räume (Roboter-Werte)“ wie bisher.
+- Ziel: Zwei Varianten: `compact` für die Startseite (nur Karte + Bildunterschrift „Live-Karte · <Raum> · <m²> · noch <Räume>“ bzw. „Karte · Heidi in der Station · letzter Lauf <Zeit>“, Antippen navigiert zu `reinigen`, Karten-Element aus demselben Modul-Cache) und `full` für die Seite Reinigen. Für `full`: Kartenslot mit Modul-Cache. Kopfzeile mit Kartenwahl (nur wenn `select.heidi_selected_map` existiert; schreibt `select_option`). Auf der Karte unten links zwei Knöpfe: „Hinfahren“ (schaltet die Karte in den Modus `vacuum_goto`) und „Sperrzonen“ (öffnet Dialog). Darunter Segment Räume / Zone / Punkt und Knopf „Alles“ (`vacuum.start` nach Bestätigung); das Segment gibt der eingebetteten Karte genau **einen** `map_modes`-Eintrag (`vacuum_clean_segment` mit `predefined_selections` inkl. `outline` je Raum, `vacuum_clean_zone`, `vacuum_clean_point`), sodass die Karte kein eigenes Modus-Menü zeigt. Im Modus Räume: Raum-Chips (Reihenfolge 7..1) und Leiste „N Räume reinigen“ mit Bestätigung; in den anderen Modi eine Hinweiszeile. Raum-Marker und Umrisse werden aus `camera.heidi_map` (Attribut `rooms`, Koordinaten) berechnet, nicht von Hand gesetzt. Glas-Optik über die CSS-Variablen aus `dreame_x60/mockups/karte.html` (Abschnitt „Was hier gesetzt ist“), `tiles: []`, `icons: []`, kein Titel. Sperrzonen-Dialog (`dx-zones-editor`, 4.12) mit drei Reitern Sperrzonen / Wisch-Sperrzonen / Virtuelle Wände: bestehende Einträge aus `camera.heidi_map` als Heidi-Overlay (verschieben, löschen), neue über die Karte im Modus `MANUAL_RECTANGLE` bzw. `MANUAL_PATH` (Großschreibung, siehe Abschnitt 10). Schalter „Stühle am Boden“ als Zeile in einer eigenen Kachel, nicht auf der Karte. App-Szenen und Knopf „Räume (Roboter-Werte)“ wie bisher.
 - Nicht ändern: Dreame-App- und Nur-Bild-Konfiguration; Dienste und Payloads (Abschnitt 4); die Zeile der Karte mit Wiederholungen und ▶ bleibt (sie führt Zeichnungen aus und lässt sich per YAML nicht abschalten).
 - Akzeptanz: Karten-Element über 20 Ticks identisch und 0 Neuerzeugungen; Raumauswahl per Chip oder per Tipp in die Raumfläche → `vacuum_clean_segment` mit richtigen `segments`; Segmentwechsel setzt genau einen Modus; „Hinfahren“ setzt `vacuum_goto`; Kartenwahl fehlt ohne `select.heidi_selected_map`; App-Szene → `heidi_app_szene` nach Bestätigung; Umrisse stimmen mit `rooms` aus der Fixture überein.
 - Tests: `npm test`
-- Dateien: `src/components/heidi-map-card.ts`, `src/ha/selectors.ts` (`readMap` mit Räumen/Umrissen), `tests/e2e/map.js`
+- Dateien: `src/components/dx-map-card.ts`, `src/ha/selectors.ts` (`readMap` mit Räumen/Umrissen), `tests/e2e/map.js`
 
-**4.4 `heidi-planer` (Seite Planer)**
+**4.4 `dx-planer` (Seite Planer)**
 - Voraussetzung: 4.0, 2.2
 - Ziel: Vier Zeilen, Dauer-Kurzzeile (nur mit Lernwerten), ▶ mit Bestätigung, ✎ öffnet Editor; Automatik-Regeln-Details auf derselben Seite.
 - Nicht ändern: `estimate.ts`.
 - Akzeptanz: vier Zeilen, heutiger markiert, Manuell-Tag; ▶ bei inaktiv nur Toast.
 - Tests: `npm test`
-- Dateien: `src/components/heidi-planer.ts`, `tests/e2e/planer.js`
+- Dateien: `src/components/dx-planer.ts`, `tests/e2e/planer.js`
 
-**4.5 `heidi-planer-editor`, `heidi-clock-picker`**
+**4.5 `dx-planer-editor`, `dx-clock-picker`**
 - Voraussetzung: 4.2, 4.4, 3.2
 - Ziel: Editor mit `PlanDraft` (Snapshot beim Öffnen), Uhr, Speichern über `savePlan`, Teilfehler-Meldung „Speichern unvollständig: <Felder>“ und Editor bleibt offen, Hinweis „Eintrag wurde außerhalb geändert“ (Vergleich `last_updated` der Plan-Helfer beim Öffnen vs. jetzt).
 - Nicht ändern: die 18 Calls.
 - Akzeptanz: `editor.js` (Klickfolge aus 0.1) → dieselben 18 Calls; `live-update.js`: bei offenem Editor neuen Akkuwert setzen → Kopf aktualisiert, Draft unverändert, Fokus bleibt; Fehlerinjektion Call 5 → Meldung sichtbar, Dialog offen; Änderung eines Plan-Helfers → Hinweis sichtbar.
 - Tests: `npm test`
-- Dateien: `src/components/heidi-planer-editor.ts`, `src/components/heidi-clock-picker.ts`, `tests/e2e/{editor,live-update}.js`
+- Dateien: `src/components/dx-planer-editor.ts`, `src/components/dx-clock-picker.ts`, `tests/e2e/{editor,live-update}.js`
 
-**4.6 `heidi-rooms-dialog`**
+**4.6 `dx-rooms-dialog`**
 - Voraussetzung: 4.5
 - Ziel: Roboter- und Eintrag-Modus, Umschalter im Editor-Kontext, „Alle Räume“, Zurück zum Eintrag.
 - Nicht ändern: `setRoomValue`.
 - Akzeptanz: Roboter-Modus → `select_option` sofort; Plan-Modus nur Draft; Hinweis bei einem Raum auf `unavailable`.
 - Tests: `npm test`
-- Dateien: `src/components/heidi-rooms-dialog.ts`, `tests/e2e/rooms.js`
+- Dateien: `src/components/dx-rooms-dialog.ts`, `tests/e2e/rooms.js`
 
-**4.7 `heidi-history`, `heidi-robot-settings` (Seiten Protokoll, Einstellungen)**
+**4.7 `dx-history`, `dx-robot-settings` (Seiten Protokoll, Einstellungen)**
 - Voraussetzung: 4.0, 2.3
 - Ziel: Letzter Lauf, Protokoll, Zeitleiste (Nachladen nur bei `last_changed`-Wechsel), Lernwerte-Tabelle auf Protokoll; Roboter-Einstellungen auf Einstellungen.
 - Nicht ändern: `timeline.ts`.
 - Akzeptanz: `timeline.js` → dieselben 7 Zeilen; Protokoll bleibt bei unavailable; genau ein `callApi` je Klick; 0 Renderaufrufe bei irrelevanten Ticks.
 - Tests: `npm test`
-- Dateien: `src/components/heidi-history.ts`, `src/components/heidi-robot-settings.ts`, `tests/e2e/timeline.js`
+- Dateien: `src/components/dx-history.ts`, `src/components/dx-robot-settings.ts`, `tests/e2e/timeline.js`
 
-**4.8 `heidi-estimate-dialog`**
+**4.8 `dx-estimate-dialog`**
 - Voraussetzung: 4.5
 - Ziel: Zusammenfassung, Schnellprogramm-Zeile, Schrittliste, SVG, Vergleich.
 - Nicht ändern: `estimate.ts`.
 - Akzeptanz: Summen für Plan 2 = `estimate.v1.json`; Vergleichslinie beim Umschalten.
 - Tests: `npm test`
-- Dateien: `src/components/heidi-estimate-dialog.ts`, `tests/e2e/estimate.js`
+- Dateien: `src/components/dx-estimate-dialog.ts`, `tests/e2e/estimate.js`
 
-**4.9 `heidi-automatik`, `heidi-station`, `heidi-consumables`**
+**4.9 `dx-automatik`, `dx-station`, `dx-consumables`**
 - Voraussetzung: 4.0, 4.2
 - Ziel: Automatik-Einzeiler mit Schalter (Start), Station, Verschleiß.
 - Nicht ändern: Kacheltexte.
@@ -587,29 +587,29 @@ Nach jedem Build v2 neben v1 ansehen; Unterschiede → Abschnitt 10/10a.
 - Tests: `npm test`
 - Dateien: `src/components/heidi-{automatik,station,consumables}.ts`, `tests/e2e/start.js`
 
-**4.10 `heidi-prognose-view` (Seite Prognose)**
+**4.10 `dx-prognose-view` (Seite Prognose)**
 - Voraussetzung: 4.0
 - Ziel: Heute, Lernstatus, Schalter, Reset mit Bestätigung, Heatmaps.
 - Nicht ändern: Bild-URLs.
 - Akzeptanz: Balken = `tage/(wochen×7)`; Reset → `shell_command`; Seite leer mit Hinweis bei `prognose_aktiv` aus.
 - Tests: `npm test`
-- Dateien: `src/components/heidi-prognose-view.ts`, `tests/e2e/prognose.js`
+- Dateien: `src/components/dx-prognose-view.ts`, `tests/e2e/prognose.js`
 
-**4.11 `heidi-settings-panel` (Seite Einstellungen)**
+**4.11 `dx-settings-panel` (Seite Einstellungen)**
 - Voraussetzung: 4.7, 3.1
 - Ziel: alle v1-Abschnitte als Seite, Diagnose (fehlende/unavailable IDs aus `readDiagnostics`), Version.
 - Nicht ändern: Rundungsregel Intervall.
 - Akzeptanz: Slider → `set_value` gerundet; Dark/Hell schaltet `light`; Diagnose listet eine absichtlich entfernte ID.
 - Tests: `npm test`
-- Dateien: `src/components/heidi-settings-panel.ts`, `tests/e2e/settings.js`
+- Dateien: `src/components/dx-settings-panel.ts`, `tests/e2e/settings.js`
 
-**4.12 `heidi-zones-editor`**
+**4.12 `dx-zones-editor`**
 - Voraussetzung: 4.3, 2.4
 - Ziel: Dialog mit drei Reitern (Sperrzonen, Wisch-Sperrzonen, Virtuelle Wände). Bestehende Einträge aus `camera.heidi_map` (`no_go_areas`, `no_mopping_areas`, `virtual_walls`) als Overlay über dem Kartenbild wie in v1: auswählen, verschieben, löschen. Neue Einträge über die eingebettete Karte im Modus `MANUAL_RECTANGLE` (Zonen) bzw. `MANUAL_PATH` (Wände) oder über v1s Aufziehen auf dem Bild (eine der beiden Arten wird beim Bau gewählt und in Abschnitt 10 begründet). Speichern über `setZones` mit allen drei Listen und Teilfehler-Meldung; Hinweis, dass Speichern alle Einträge eines Typs ersetzt.
 - Nicht ändern: `calibration.ts`.
 - Akzeptanz: `zones.js` (Geste aus 0.1) → gleiche mm-Koordinaten wie v1; Hinweis ohne Kalibrierung; Reiter Wände sendet `walls`.
 - Tests: `npm test`
-- Dateien: `src/components/heidi-zones-editor.ts`, `tests/e2e/zones.js`
+- Dateien: `src/components/dx-zones-editor.ts`, `tests/e2e/zones.js`
 
 **4.13 Render-Messung**
 - Voraussetzung: 4.1–4.12
@@ -623,7 +623,7 @@ Nach jedem Build v2 neben v1 ansehen; Unterschiede → Abschnitt 10/10a.
 
 **5.1 Layout**
 - Voraussetzung: 4.13
-- Ziel: `container-type: inline-size` auf dem Seiten-Wrapper; 2 Spalten ab 880 px Container; `@container`-Regeln in Komponenten entsprechend den 12 v1-Media-Queries; Media Queries nur für Safe Area (`env(safe-area-inset-*)`), Pointer/Hover, sehr kleine Viewports; `heidi-dialog` als Sheet < 600 px Container; Protokoll 30 + „mehr anzeigen“; kein fester Smartphone-Modus.
+- Ziel: `container-type: inline-size` auf dem Seiten-Wrapper; 2 Spalten ab 880 px Container; `@container`-Regeln in Komponenten entsprechend den 12 v1-Media-Queries; Media Queries nur für Safe Area (`env(safe-area-inset-*)`), Pointer/Hover, sehr kleine Viewports; `dx-dialog` als Sheet < 600 px Container; Protokoll 30 + „mehr anzeigen“; kein fester Smartphone-Modus.
 - Nicht ändern: Komponentenschnitt.
 - Akzeptanz: Sichtprüfung 390/820/1200; Sheet bei 390.
 - Tests: `npm test`
@@ -731,7 +731,7 @@ ist eine Abweichung ein Fehler.
 | PD-001 | Editor | Live-Daten eingefroren bei offenem Editor | Kopf/Streifen aktualisieren sich, Draft bleibt | Folge des Render-Modells, nicht gewollt | `live-update.js` | freigegeben (Herbert, 2026-09-14) |
 | PD-002 | Speichern | Fehler beim Speichern → Toast, Editor schließt | Teilfehler benannt, Editor bleibt offen | Regel 20 | `api.test.ts` Fehlerinjektion | freigegeben (Herbert, 2026-09-14) |
 | PD-006 | Übersicht | keine Statistik-Kachel | Kachel „Statistik“: Balken der letzten 7 Tage aus `sensor.heidi_cleaning_history`, Summen aus `cleaning_count`/`total_cleaned_area`/`total_cleaning_time` | Designvorgabe Abschnitt 14; nur Anzeige vorhandener Sensoren, keine neue Fachlogik | `render.js` | freigegeben (Herbert, 2026-09-15) |
-| PD-003 | Bestätigungen | `window.confirm` | `heidi-dialog confirm` | Regel 13 | `dialog.js` | freigegeben (Herbert, 2026-09-14) |
+| PD-003 | Bestätigungen | `window.confirm` | `dx-dialog confirm` | Regel 13 | `dialog.js` | freigegeben (Herbert, 2026-09-14) |
 
 ---
 

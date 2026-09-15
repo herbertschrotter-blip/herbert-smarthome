@@ -24,12 +24,12 @@ const PAGE_TITLE: Record<Page, { title: string; sub: string }> = {
 
 /** Platzhalter je Seite: welche Komponenten hier laut Bauplan Abschnitt 7 entstehen. */
 const PAGE_PARTS: Record<Page, string[]> = {
-  start: ['heidi-hero (4.1)', 'heidi-map-card compact (4.3)', 'heidi-automatik (4.9)', 'heidi-consumables (4.9)', 'heidi-nav-tiles (4.0)', 'heidi-station (4.9)'],
-  reinigen: ['heidi-map-card full (4.3)', 'App-Szenen', 'Stühle am Boden', 'Räume (Roboter-Werte) → heidi-rooms-dialog (4.6)'],
-  planer: ['heidi-planer (4.4)', 'heidi-planer-editor + heidi-clock-picker (4.5)', 'Automatik-Regeln', 'heidi-estimate-dialog (4.8)'],
-  protokoll: ['heidi-history (4.7)', 'Lernwerte-Tabelle'],
-  prognose: ['heidi-prognose-view (4.10)'],
-  einstellungen: ['heidi-settings-panel (4.11)', 'heidi-robot-settings (4.7)', 'Diagnose', 'Version'],
+  start: ['dx-hero (4.1)', 'dx-map-card compact (4.3)', 'dx-automatik (4.9)', 'dx-consumables (4.9)', 'dx-nav-tiles (4.0)', 'dx-station (4.9)'],
+  reinigen: ['dx-map-card full (4.3)', 'App-Szenen', 'Stühle am Boden', 'Räume (Roboter-Werte) → dx-rooms-dialog (4.6)'],
+  planer: ['dx-planer (4.4)', 'dx-planer-editor + dx-clock-picker (4.5)', 'Automatik-Regeln', 'dx-estimate-dialog (4.8)'],
+  protokoll: ['dx-history (4.7)', 'Lernwerte-Tabelle'],
+  prognose: ['dx-prognose-view (4.10)'],
+  einstellungen: ['dx-settings-panel (4.11)', 'dx-robot-settings (4.7)', 'Diagnose', 'Version'],
 };
 
 function toPage(value: unknown): Page {

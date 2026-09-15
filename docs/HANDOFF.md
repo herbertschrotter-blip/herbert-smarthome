@@ -232,7 +232,7 @@ Uhr (10:15). Einrichten im Ordner `heidi/tests`: `npm i` und dann `npx playwrigh
   Abschnitt 4), Begründungen `docs/dreame_x60/ARCHITEKTUR-REVIEW.md`, ClickUp-Liste „dreame_x60 – Bauplan“.
   `main` bleibt die Linie, die auf `H:\` läuft; `main` wird regelmäßig in `dreame_x60` gemergt.
 - **Design abgenommen (15.09.):** `dreame_x60/mockups/bento.html` – „Automotive Dark Bento“ (dunkles Graphit,
-  Bento-Flächen, Seitenleiste/Symbolleiste/Tab-Leiste je nach Breite, Design-Tokens `--heidi-*`, System-Schriften).
+  Bento-Flächen, Seitenleiste/Symbolleiste/Tab-Leiste je nach Breite, Design-Tokens `--dx-*`, System-Schriften).
   Ältere Glas-Mockups daneben (start, seiten, karte) nur noch als Funktionsreferenz. Heidi bleibt der Name in der Oberfläche.
 - **Phase 0 (15.09.):** 0.1 v1-Tests mit gemeinsamem Gerüst `heidi/tests/harness.js`, `npm test` rot bei Abweichung,
   18 Service-Calls beim Speichern festgeschrieben (`heidi/tests/expected/editor-calls.json`). 0.3 Karte 1.6.2

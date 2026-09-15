@@ -554,73 +554,73 @@ o4?.({ LitElement: i4 });
 var tokens = i`
   :host {
     /* Flächen: Seite → Bento-Fläche → interaktive Fläche → aktiv */
-    --heidi-bg: #0b1015;
-    --heidi-bg-elevated: #10171e;
-    --heidi-surface: #111a22;
-    --heidi-surface-raised: #16212a;
-    --heidi-surface-active: #1c2a36;
+    --dx-bg: #0b1015;
+    --dx-bg-elevated: #10171e;
+    --dx-surface: #111a22;
+    --dx-surface-raised: #16212a;
+    --dx-surface-active: #1c2a36;
 
-    --heidi-text: #e7edf3;
-    --heidi-text-muted: #8a97a6;
-    --heidi-text-faint: #5d6b7a;
+    --dx-text: #e7edf3;
+    --dx-text-muted: #8a97a6;
+    --dx-text-faint: #5d6b7a;
 
     /* Farben mit Bedeutung (Abschnitt 3): Grün = aktiv/OK, Blau = Auswahl/Interaktion, Amber = Hinweis, Rot = Fehler */
-    --heidi-accent: #58b7f6;
-    --heidi-accent-soft: rgba(88, 183, 246, 0.14);
-    --heidi-positive: #39d98a;
-    --heidi-positive-soft: rgba(57, 217, 138, 0.14);
-    --heidi-warning: #f2b544;
-    --heidi-warning-soft: rgba(242, 181, 68, 0.14);
-    --heidi-danger: #ef5b5b;
-    --heidi-danger-soft: rgba(239, 91, 91, 0.14);
-    --heidi-on-positive: #062014;
-    --heidi-on-accent: #041623;
+    --dx-accent: #58b7f6;
+    --dx-accent-soft: rgba(88, 183, 246, 0.14);
+    --dx-positive: #39d98a;
+    --dx-positive-soft: rgba(57, 217, 138, 0.14);
+    --dx-warning: #f2b544;
+    --dx-warning-soft: rgba(242, 181, 68, 0.14);
+    --dx-danger: #ef5b5b;
+    --dx-danger-soft: rgba(239, 91, 91, 0.14);
+    --dx-on-positive: #062014;
+    --dx-on-accent: #041623;
 
-    --heidi-border: rgba(255, 255, 255, 0.08);
-    --heidi-border-strong: rgba(255, 255, 255, 0.14);
+    --dx-border: rgba(255, 255, 255, 0.08);
+    --dx-border-strong: rgba(255, 255, 255, 0.14);
 
-    --heidi-radius-sm: 8px;
-    --heidi-radius-md: 10px;
-    --heidi-radius-lg: 14px;
-    --heidi-radius-xl: 18px;
+    --dx-radius-sm: 8px;
+    --dx-radius-md: 10px;
+    --dx-radius-lg: 14px;
+    --dx-radius-xl: 18px;
 
-    --heidi-space-1: 4px;
-    --heidi-space-2: 8px;
-    --heidi-space-3: 12px;
-    --heidi-space-4: 16px;
-    --heidi-space-5: 24px;
+    --dx-space-1: 4px;
+    --dx-space-2: 8px;
+    --dx-space-3: 12px;
+    --dx-space-4: 16px;
+    --dx-space-5: 24px;
 
-    --heidi-shadow-float: 0 12px 32px rgba(0, 0, 0, 0.45);
-    --heidi-dur: 160ms;
-    --heidi-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
-    --heidi-touch: 44px;
+    --dx-shadow-float: 0 12px 32px rgba(0, 0, 0, 0.45);
+    --dx-dur: 160ms;
+    --dx-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+    --dx-touch: 44px;
 
-    --heidi-font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --dx-font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   }
 
   /* Hell (vorbereitet, Abschnitt 28): dieselben Rollen, andere Werte. Wird gesetzt, wenn input_boolean.heidi_dark_mode aus ist. */
   :host(.light) {
-    --heidi-bg: #eef1f4;
-    --heidi-bg-elevated: #f6f8fa;
-    --heidi-surface: #ffffff;
-    --heidi-surface-raised: #f1f4f7;
-    --heidi-surface-active: #e3e9ef;
-    --heidi-text: #10171e;
-    --heidi-text-muted: #55636f;
-    --heidi-text-faint: #8a97a6;
-    --heidi-accent: #1f7fc4;
-    --heidi-accent-soft: rgba(31, 127, 196, 0.12);
-    --heidi-positive: #1d9a5f;
-    --heidi-positive-soft: rgba(29, 154, 95, 0.12);
-    --heidi-warning: #b7791f;
-    --heidi-warning-soft: rgba(183, 121, 31, 0.12);
-    --heidi-danger: #c8403f;
-    --heidi-danger-soft: rgba(200, 64, 63, 0.12);
-    --heidi-on-positive: #ffffff;
-    --heidi-on-accent: #ffffff;
-    --heidi-border: rgba(0, 0, 0, 0.08);
-    --heidi-border-strong: rgba(0, 0, 0, 0.16);
-    --heidi-shadow-float: 0 12px 32px rgba(0, 0, 0, 0.18);
+    --dx-bg: #eef1f4;
+    --dx-bg-elevated: #f6f8fa;
+    --dx-surface: #ffffff;
+    --dx-surface-raised: #f1f4f7;
+    --dx-surface-active: #e3e9ef;
+    --dx-text: #10171e;
+    --dx-text-muted: #55636f;
+    --dx-text-faint: #8a97a6;
+    --dx-accent: #1f7fc4;
+    --dx-accent-soft: rgba(31, 127, 196, 0.12);
+    --dx-positive: #1d9a5f;
+    --dx-positive-soft: rgba(29, 154, 95, 0.12);
+    --dx-warning: #b7791f;
+    --dx-warning-soft: rgba(183, 121, 31, 0.12);
+    --dx-danger: #c8403f;
+    --dx-danger-soft: rgba(200, 64, 63, 0.12);
+    --dx-on-positive: #ffffff;
+    --dx-on-accent: #ffffff;
+    --dx-border: rgba(0, 0, 0, 0.08);
+    --dx-border-strong: rgba(0, 0, 0, 0.16);
+    --dx-shadow-float: 0 12px 32px rgba(0, 0, 0, 0.18);
   }
 `;
 
@@ -628,9 +628,9 @@ var tokens = i`
 var base = i`
   :host {
     display: block;
-    background: var(--heidi-bg);
-    color: var(--heidi-text);
-    font-family: var(--heidi-font);
+    background: var(--dx-bg);
+    color: var(--dx-text);
+    font-family: var(--dx-font);
     font-size: 14px;
     line-height: 1.4;
     -webkit-font-smoothing: antialiased;
@@ -665,15 +665,15 @@ var base = i`
   }
   button:focus-visible,
   [tabindex]:focus-visible {
-    outline: 2px solid var(--heidi-accent);
+    outline: 2px solid var(--dx-accent);
     outline-offset: 2px;
   }
 
   /* Seite */
   .page {
-    padding: var(--heidi-space-5);
+    padding: var(--dx-space-5);
     display: grid;
-    gap: var(--heidi-space-4);
+    gap: var(--dx-space-4);
     align-content: start;
     container-type: inline-size;
     container-name: content;
@@ -682,21 +682,21 @@ var base = i`
   .topbar {
     display: flex;
     align-items: center;
-    gap: var(--heidi-space-4);
+    gap: var(--dx-space-4);
     flex-wrap: wrap;
   }
   .topbar h1 {
     font-size: 28px;
   }
   .topbar .sub {
-    color: var(--heidi-text-muted);
+    color: var(--dx-text-muted);
     font-size: 14px;
     margin-top: 2px;
   }
   .version {
     margin-left: auto;
     font-size: 11px;
-    color: var(--heidi-text-faint);
+    color: var(--dx-text-faint);
     font-variant-numeric: tabular-nums;
   }
 
@@ -704,23 +704,23 @@ var base = i`
   .bento {
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
-    gap: var(--heidi-space-4);
+    gap: var(--dx-space-4);
     grid-auto-rows: min-content;
   }
   .b {
-    background: var(--heidi-surface);
-    border: 1px solid var(--heidi-border);
-    border-radius: var(--heidi-radius-lg);
-    padding: var(--heidi-space-4);
+    background: var(--dx-surface);
+    border: 1px solid var(--dx-border);
+    border-radius: var(--dx-radius-lg);
+    padding: var(--dx-space-4);
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: var(--heidi-space-3);
+    gap: var(--dx-space-3);
   }
   .b > .hd {
     display: flex;
     align-items: center;
-    gap: var(--heidi-space-2);
+    gap: var(--dx-space-2);
     min-height: 24px;
   }
   .b > .hd h2 {
@@ -729,18 +729,18 @@ var base = i`
   .b > .hd .r {
     margin-left: auto;
     font-size: 12px;
-    color: var(--heidi-text-muted);
+    color: var(--dx-text-muted);
   }
   .lbl {
     font-size: 11px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--heidi-text-muted);
+    color: var(--dx-text-muted);
     font-weight: 600;
   }
   .hint {
     font-size: 12px;
-    color: var(--heidi-text-muted);
+    color: var(--dx-text-muted);
     line-height: 1.45;
   }
   .span3 { grid-column: span 3; }
@@ -756,8 +756,8 @@ var base = i`
     .topbar h1 { font-size: 24px; }
   }
   @container content (max-width: 640px) {
-    .page { padding: var(--heidi-space-4); }
-    .bento { grid-template-columns: minmax(0, 1fr); gap: var(--heidi-space-3); }
+    .page { padding: var(--dx-space-4); }
+    .bento { grid-template-columns: minmax(0, 1fr); gap: var(--dx-space-3); }
     .span3, .span4, .span6, .span8, .span12 { grid-column: span 1; }
     .topbar h1 { font-size: 22px; }
   }
@@ -778,12 +778,12 @@ var PAGE_TITLE = {
   einstellungen: { title: "Einstellungen", sub: "Darstellung, Funktionen, Prognose, Roboter, Diagnose" }
 };
 var PAGE_PARTS = {
-  start: ["heidi-hero (4.1)", "heidi-map-card compact (4.3)", "heidi-automatik (4.9)", "heidi-consumables (4.9)", "heidi-nav-tiles (4.0)", "heidi-station (4.9)"],
-  reinigen: ["heidi-map-card full (4.3)", "App-Szenen", "St\xFChle am Boden", "R\xE4ume (Roboter-Werte) \u2192 heidi-rooms-dialog (4.6)"],
-  planer: ["heidi-planer (4.4)", "heidi-planer-editor + heidi-clock-picker (4.5)", "Automatik-Regeln", "heidi-estimate-dialog (4.8)"],
-  protokoll: ["heidi-history (4.7)", "Lernwerte-Tabelle"],
-  prognose: ["heidi-prognose-view (4.10)"],
-  einstellungen: ["heidi-settings-panel (4.11)", "heidi-robot-settings (4.7)", "Diagnose", "Version"]
+  start: ["dx-hero (4.1)", "dx-map-card compact (4.3)", "dx-automatik (4.9)", "dx-consumables (4.9)", "dx-nav-tiles (4.0)", "dx-station (4.9)"],
+  reinigen: ["dx-map-card full (4.3)", "App-Szenen", "St\xFChle am Boden", "R\xE4ume (Roboter-Werte) \u2192 dx-rooms-dialog (4.6)"],
+  planer: ["dx-planer (4.4)", "dx-planer-editor + dx-clock-picker (4.5)", "Automatik-Regeln", "dx-estimate-dialog (4.8)"],
+  protokoll: ["dx-history (4.7)", "Lernwerte-Tabelle"],
+  prognose: ["dx-prognose-view (4.10)"],
+  einstellungen: ["dx-settings-panel (4.11)", "dx-robot-settings (4.7)", "Diagnose", "Version"]
 };
 function toPage(value) {
   return PAGES.includes(String(value)) ? value : "start";
