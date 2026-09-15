@@ -29,7 +29,7 @@ export class DxAuftrag extends LitElement {
 
   override render(): TemplateResult {
     const r = this.robot;
-    if (!r || !r.running) return html``;
+    if (!r || !['cleaning', 'paused'].includes(r.vac)) return html``; // wie der Streifen: nur cleaning/paused, nicht returning
     const { order, idx, rest } = runOrder(r);
     const total = order.length;
     // Fläche 0 im Lauf = auf dem Weg zum Startpunkt (wie der Streifen): noch kein Raum fertig, Ziel ist der erste Raum

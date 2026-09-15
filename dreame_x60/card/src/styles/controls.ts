@@ -22,7 +22,7 @@ export const controls = css`
   .st i { width: 8px; height: 8px; border-radius: 50%; background: var(--dx-text-muted); flex: none; }
   .st.good i { background: var(--dx-positive); } .st.acc i { background: var(--dx-accent); } .st.warn i { background: var(--dx-warning); } .st.bad i { background: var(--dx-danger); }
   .st.good { color: var(--dx-positive); } .st.warn { color: var(--dx-warning); } .st.bad { color: var(--dx-danger); }
-  .st.pill { padding: 4px 10px; border-radius: 999px; font-size: 12px; background: var(--dx-surface-raised); border: 1px solid var(--dx-border); }
+  .st.pill { padding: 4px 10px; border-radius: 999px; font-size: 12px; background: var(--dx-surface-raised); border: 1px solid var(--dx-border); white-space: nowrap; }
 
   /* Werte */
   .kv { display: flex; align-items: baseline; gap: 10px; }
