@@ -44,3 +44,12 @@ Personen werden in der HA-Oberfläche verwaltet.
 Installiert: dreame-vacuum (Tasshack, 2.0.0b25, Beta nötig), dreame-vacuum-map-card,
 xiaomi-vacuum-map-card. Nicht mehr benötigt seit v1 aus ist (in HACS deinstallieren, Herbert):
 Mushroom, card-mod, expander-card, stack-in-card.
+
+## Commit-Profil
+Commit-Format in allen Projekten: `[vX.Y.Z] Modul, Typ: Kurztitel` (Skill git-commit-helper); die Bauplan-Aufgabe
+(z. B. 4.3e) steht am Anfang des Kurztitels.
+- Modul-Namen: Karte (dreame_x60/card), Backend (ha/ – Paket, Automationen, Skripte, Prognose), Doku (docs/), Werkzeuge (tools/)
+- Versionsquelle: dreame_x60/card/package.json "version" (und package-lock.json Zeilen 1–12); Backend/Doku ohne eigene Version → Version der Karte
+- Bump-Regel: Vorabversion – jede eingespielte Änderung der Karte zählt die alpha-Nummer hoch, unabhängig vom Typ; reine Doku-Commits behalten die aktuelle Version
+- Doku-Checkliste: Bauschritt fertig → docs/dreame_x60/BAUPLAN.md Statusliste; Befund oder Entscheidung → BAUPLAN.md Abschnitt 10 (Abweichung → 10a als PD-Eintrag); Stand geändert → docs/HANDOFF.md Abschnitt 3e; neue Entität oder Dienst → BAUPLAN.md Abschnitt 4 + contract.ts; Backend geändert → deployen und im Bauplan vermerken
+- Tests vor jedem Commit: `npm test` in dreame_x60/card muss grün sein (Exit-Code 0), sonst kein Commit
