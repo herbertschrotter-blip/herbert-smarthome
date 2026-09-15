@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.2 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.3 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -947,6 +947,7 @@ var ROOMS = [
   { id: 2, short: "Schlafz.", name: "Schlafzimmer", icon: "mdi:bed-king-outline" },
   { id: 1, short: "Bad", name: "Bad", icon: "mdi:shower" }
 ];
+var roomById = (id) => ROOMS.find((r4) => r4.id === id);
 var ROOMS_DE = { Bathroom: "Bad", "Primary Bedroom": "Schlafzimmer", WC: "WC", Corridor: "Flur", Study: "B\xFCro", Kitchen: "K\xFCche", "Living Room": "Wohnzimmer" };
 var STATUS_DE = {
   sleeping: "schl\xE4ft",
@@ -1112,7 +1113,8 @@ var readRobot = memoizeSelector(ROBOT_IDS, (s4) => {
     room: roomName(st(s4, E2.currentRoom), deutsch),
     deutsch,
     persons,
-    hero
+    hero,
+    moreInfo: { vac: E2.vac, battery: E2.battery, error: E2.error }
   };
 }, { [E2.vac]: stateAndAttributes(VAC_ATTRS) });
 var PLAN_FIELDS = ["name", "raeume", "tage", "personen", "raumwerte", "modus", "saugstufe", "wasser", "route", "wiederholungen", "homeoffice", "ho_saug", "ho_wdh", "sp_saug", "sp_wdh", "aktiv", "schnell", "zeit"];
@@ -1402,6 +1404,9 @@ var EVENTS = {
 };
 function emit(target, name, detail) {
   target.dispatchEvent(new CustomEvent(name, { detail, bubbles: true, composed: true }));
+}
+function moreInfo(target, entityId) {
+  emit(target, "hass-more-info", { entityId });
 }
 
 // src/shared/navigate.ts
@@ -1769,7 +1774,7 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.2";
+var VERSION = "2.0.0-alpha.3";
 
 // src/shared/robot-svg.ts
 var robotSvg = w`<svg viewBox="0 0 200 200" class="robotpic" aria-hidden="true">
@@ -1872,6 +1877,250 @@ var DxNav = class extends i4 {
   }
 };
 if (!customElements.get(NAV_ELEMENT)) customElements.define(NAV_ELEMENT, DxNav);
+
+// src/domain/strip.ts
+function runOrder(r4) {
+  const active = r4.activeSegments;
+  const memo = r4.laufReihenfolge.filter((x2) => active.includes(x2));
+  const order = memo.length === active.length ? memo : r4.cleaningSequence.filter((id) => active.includes(id));
+  const idx = r4.currentSegment === null ? -1 : order.indexOf(r4.currentSegment);
+  return { order, idx, rest: idx >= 0 ? order.slice(idx + 1) : order };
+}
+var shortOf = (id) => roomById(id)?.short;
+var FAN_ICON = { Leise: "mdi:fan-speed-1", Standard: "mdi:fan-speed-2", Stark: "mdi:fan-speed-3", Turbo: "mdi:fan" };
+var modusIcons = (modus) => modus === "Saugen" ? ["mdi:broom"] : modus === "Nur Wischen" ? ["mdi:water"] : ["mdi:broom", "mdi:water"];
+function roomValueChips(v2) {
+  const chips = [{ icons: modusIcons(v2.modus), text: v2.modus }, { icons: [FAN_ICON[v2.saug] ?? "mdi:fan"], text: v2.saug }];
+  if (v2.modus !== "Saugen" && v2.wasser) chips.push({ icons: ["mdi:water-percent"], text: v2.wasser });
+  if (v2.modus === "Nur Wischen" && v2.route) chips.push({ icons: ["mdi:routes"], text: v2.route });
+  chips.push({ icons: ["mdi:repeat"], text: `${v2.wdh}\xD7` });
+  return chips;
+}
+function stripModel(r4, roomValues) {
+  if (!["cleaning", "paused"].includes(r4.vac)) return null;
+  const seg = r4.currentSegment;
+  const room = seg === null ? void 0 : roomById(seg);
+  const v2 = room ? roomValues(room.id) : null;
+  if (!room || !v2) return null;
+  const { order, rest } = runOrder(r4);
+  const restTxt = rest.map(shortOf).filter(Boolean).join(" \u2192 ");
+  const first = order.length ? shortOf(order[0]) : void 0;
+  if (r4.vac === "cleaning" && r4.cleanedArea === 0) {
+    return { kind: "startpunkt", roomId: room.id, icon: "mdi:map-marker-path", head: "F\xE4hrt zum Startpunkt", right: first ? `zu ${first}` : "", chips: [] };
+  }
+  if (r4.activeSegments.length && !r4.activeSegments.includes(room.id)) {
+    return { kind: "durchfahrt", roomId: room.id, icon: room.icon, head: `F\xE4hrt durch ${room.short}`, right: restTxt ? `zu ${restTxt}` : "", chips: [] };
+  }
+  return { kind: "jetzt", roomId: room.id, icon: room.icon, head: `Jetzt: ${room.short}`, right: restTxt ? `danach ${restTxt}` : "letzter Raum", chips: roomValueChips(v2) };
+}
+
+// src/styles/controls.ts
+var controls = i`
+  :host { font-family: var(--dx-font); font-size: 14px; line-height: 1.4; color: var(--dx-text); }
+  *, *::before, *::after { box-sizing: border-box; }
+  h2, h3, p { margin: 0; }
+  h2, h3 { font-weight: 600; letter-spacing: -0.01em; }
+  button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  button:focus-visible { outline: 2px solid var(--dx-accent); outline-offset: 2px; }
+  ha-icon { --mdc-icon-size: 18px; width: 18px; height: 18px; display: inline-flex; flex: none; }
+
+  .hd { display: flex; align-items: center; gap: var(--dx-space-2); min-height: 24px; }
+  .hd h2 { font-size: 15px; display: flex; align-items: center; gap: 8px; }
+  .hd .r { margin-left: auto; font-size: 12px; color: var(--dx-text-muted); display: inline-flex; align-items: center; gap: 4px; }
+  .lbl { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dx-text-muted); font-weight: 600; }
+  .hint { font-size: 12px; color: var(--dx-text-muted); line-height: 1.45; }
+
+  /* Status-Punkt */
+  .st { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
+  .st i { width: 8px; height: 8px; border-radius: 50%; background: var(--dx-text-muted); flex: none; }
+  .st.good i { background: var(--dx-positive); } .st.acc i { background: var(--dx-accent); } .st.warn i { background: var(--dx-warning); } .st.bad i { background: var(--dx-danger); }
+  .st.good { color: var(--dx-positive); } .st.warn { color: var(--dx-warning); } .st.bad { color: var(--dx-danger); }
+  .st.pill { padding: 4px 10px; border-radius: 999px; font-size: 12px; background: var(--dx-surface-raised); border: 1px solid var(--dx-border); }
+
+  /* Werte */
+  .kv { display: flex; align-items: baseline; gap: 10px; }
+  .kv .v { font-size: 32px; font-weight: 600; letter-spacing: -0.02em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .kv .u { font-size: 14px; color: var(--dx-text-muted); }
+
+  /* Chips */
+  .chip { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border-radius: 999px; background: var(--dx-surface-raised); border: 1px solid var(--dx-border); font-size: 12px; font-weight: 500; color: var(--dx-text); white-space: nowrap; }
+  .chip ha-icon { --mdc-icon-size: 14px; width: 14px; height: 14px; color: var(--dx-text-muted); }
+  .chip.on { border-color: rgba(57, 217, 138, 0.45); background: var(--dx-positive-soft); } .chip.on ha-icon { color: var(--dx-positive); }
+  .chip.acc { border-color: rgba(88, 183, 246, 0.5); background: var(--dx-accent-soft); } .chip.acc ha-icon { color: var(--dx-accent); }
+  .chip.warn { border-color: rgba(242, 181, 68, 0.5); background: var(--dx-warning-soft); color: var(--dx-warning); } .chip.warn ha-icon { color: var(--dx-warning); }
+  .chip.bad { border-color: rgba(239, 91, 91, 0.5); background: var(--dx-danger-soft); color: var(--dx-danger); } .chip.bad ha-icon { color: var(--dx-danger); }
+  .chip.k { height: 26px; font-size: 11px; padding: 0 8px; }
+  .chip.dim { opacity: 0.55; }
+  button.chip:hover { background: var(--dx-surface-active); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  /* Knöpfe */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: var(--dx-touch); padding: 0 16px; border-radius: var(--dx-radius-md); background: var(--dx-surface-raised); border: 1px solid var(--dx-border); font-weight: 600; font-size: 14px; color: var(--dx-text); transition: background var(--dx-dur), border-color var(--dx-dur), transform 80ms; white-space: nowrap; }
+  .btn:hover { background: var(--dx-surface-active); } .btn:active { transform: scale(0.985); }
+  .btn.primary { background: var(--dx-positive); color: var(--dx-on-positive); border-color: transparent; } .btn.primary:hover { filter: brightness(1.06); }
+  .btn.primary ha-icon { color: var(--dx-on-positive); }
+  .btn.danger { color: var(--dx-danger); border-color: rgba(239, 91, 91, 0.35); }
+  .btn.on { border-color: var(--dx-accent); background: var(--dx-accent-soft); color: var(--dx-text); }
+  .btn.sm { height: 36px; padding: 0 12px; font-size: 13px; }
+  .btn.icon { width: var(--dx-touch); padding: 0; }
+
+  /* Hinweiszeile (Streifen) */
+  .note { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: var(--dx-radius-md); background: var(--dx-surface-raised); border: 1px solid var(--dx-border); font-size: 13px; text-align: left; width: 100%; }
+  .note > ha-icon { color: var(--dx-positive); margin-top: 1px; }
+  .note b { display: block; } .note small { color: var(--dx-text-muted); font-size: 12px; }
+  button.note:hover { background: var(--dx-surface-active); }
+
+  /* Balken und Zeilen */
+  .bar { height: 6px; border-radius: 999px; background: var(--dx-surface-active); overflow: hidden; }
+  .bar i { display: block; height: 100%; border-radius: inherit; background: var(--dx-positive); width: calc(var(--p) * 1%); transition: width 400ms var(--dx-ease); }
+  .bar.warn i { background: var(--dx-warning); } .bar.bad i { background: var(--dx-danger); } .bar.acc i { background: var(--dx-accent); }
+  .meter { display: grid; grid-template-columns: minmax(84px, auto) 1fr 44px; align-items: center; gap: 10px; min-height: 32px; font-size: 13px; }
+  .meter .n { color: var(--dx-text-muted); } .meter .p { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .row { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 6px 0; border-top: 1px solid var(--dx-border); }
+  .row:first-child { border-top: 0; }
+  .row .t { font-size: 14px; font-weight: 500; } .row .s { font-size: 12px; color: var(--dx-text-muted); margin-top: 1px; }
+  .row > div:first-child { flex: 1; min-width: 0; }
+  .tag { font-size: 11px; font-weight: 600; letter-spacing: 0.04em; padding: 3px 8px; border-radius: 6px; background: var(--dx-surface-active); color: var(--dx-text-muted); white-space: nowrap; }
+  .tag.acc { color: var(--dx-accent); background: var(--dx-accent-soft); }
+
+  @media (hover: none) { .btn:hover, button.chip:hover, button.note:hover { background: var(--dx-surface-raised); } }
+`;
+
+// src/components/dx-hero.ts
+var HERO_ELEMENT = "dx-hero";
+var BATT_BAD_PCT = 20;
+var BATT_WARN_PCT = 30;
+var DOT_CLASS = { accent: "acc", warning: "warn", danger: "bad", positive: "good" };
+var DxHero = class extends i4 {
+  static {
+    this.styles = [controls, i`
+    :host { display: flex; flex-direction: column; gap: var(--dx-space-3); min-width: 0; }
+    .robot { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: start; }
+    .name { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+    .st.big { margin-top: 6px; text-align: left; }
+    .sub { margin-top: 2px; }
+    .station { text-align: right; font-size: 13px; }
+    .robotpic { grid-column: 1; width: 100%; height: auto; max-width: 230px; aspect-ratio: 1; justify-self: center; }
+    .batt { grid-column: 2; grid-row: 2; align-self: center; display: grid; gap: 4px; justify-items: start; text-align: left; }
+    .battbar { width: 18px; height: 34px; border: 2px solid var(--dx-text-muted); border-radius: 4px; position: relative; padding: 2px; margin-top: 4px; }
+    .battbar::before { content: ''; position: absolute; top: -5px; left: 5px; width: 6px; height: 3px; border-radius: 1px; background: var(--dx-text-muted); }
+    .battbar i { display: block; position: absolute; left: 2px; right: 2px; bottom: 2px; background: var(--dx-positive); border-radius: 2px; height: calc(var(--p) * 1%); }
+    .battbar.warn i { background: var(--dx-warning); } .battbar.bad i { background: var(--dx-danger); }
+    .params { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .param { background: var(--dx-surface-raised); border: 1px solid var(--dx-border); border-radius: var(--dx-radius-md); padding: 10px; display: grid; gap: 2px; min-height: 44px; text-align: left; }
+    .param:hover { background: var(--dx-surface-active); }
+    .param b { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .param span { font-size: 11px; color: var(--dx-text-muted); }
+    .param ha-icon { --mdc-icon-size: 16px; width: 16px; height: 16px; color: var(--dx-text-muted); margin-bottom: 2px; }
+    .ctl { display: flex; gap: 8px; }
+    .ctl .btn { flex: 1; min-width: 0; padding: 0 10px; } .ctl .btn:first-child { flex: 1.4; }
+    .strip small { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-top: 2px; }
+    .strip .chip { gap: 4px; }
+    .strip > ha-icon:last-child { margin-left: auto; color: var(--dx-text-muted); align-self: center; }
+    @container content (max-width: 640px) { .robotpic { max-width: 170px; } }
+  `];
+  }
+  static {
+    this.properties = { robot: { attribute: false }, rooms: { attribute: false }, api: { attribute: false } };
+  }
+  openRooms() {
+    emit(this, EVENTS.openOverlay, { kind: "rooms", mode: "robot" });
+  }
+  /** Streifen aus Roboterzustand und Raumwerten (reine Funktion, billig). */
+  get strip() {
+    const r4 = this.robot, rooms = this.rooms;
+    return r4 && rooms ? stripModel(r4, (id) => rooms.rooms[id]) : null;
+  }
+  /** Drei Werte: im Lauf die des aktuellen Raums, sonst der gemeinsame Wert aller Räume („–“ bei Abweichung oder unavailable). */
+  params(strip) {
+    const rooms = this.rooms;
+    const cur = strip && rooms ? rooms.rooms[strip.roomId] : null;
+    if (cur) return [cur.modus, cur.saug, cur.modus !== "Saugen" && cur.wasser ? cur.wasser : "\u2013"];
+    const vals = rooms ? Object.values(rooms.rooms).filter((v2) => v2 !== null) : [];
+    const common = (pick) => {
+      if (!vals.length) return "\u2013";
+      const first = pick(vals[0]);
+      return first !== null && vals.every((v2) => pick(v2) === first) ? first : "\u2013";
+    };
+    return [common((v2) => v2.modus), common((v2) => v2.saug), common((v2) => v2.modus !== "Saugen" && v2.wasser ? v2.wasser : null)];
+  }
+  stationText(r4) {
+    if (r4.running) return "unterwegs";
+    if (r4.vac === "docked") return r4.charging ? "angedockt \xB7 l\xE4dt" : "angedockt";
+    return STATUS_DE[r4.vac] ?? r4.vac;
+  }
+  render() {
+    const r4 = this.robot;
+    if (!r4) return b2``;
+    const h3 = r4.hero;
+    const strip = this.strip;
+    const [modus, saug, wasser] = this.params(strip);
+    const battCls = r4.battery <= BATT_BAD_PCT ? "bad" : r4.battery <= BATT_WARN_PCT ? "warn" : "";
+    return b2`
+      <div class="robot">
+        <div>
+          <div class="name">Heidi</div>
+          <button class="st big ${DOT_CLASS[h3.dot]}" title="Status" @click=${() => moreInfo(this, r4.moreInfo.vac)}><i></i><span class="bigtext">${h3.big}</span></button>
+          ${h3.sub ? b2`<div class="hint sub">${h3.sub}</div>` : A}
+        </div>
+        <div class="station"><div class="lbl">Station</div><div>${this.stationText(r4)}</div></div>
+        ${robotSvg}
+        <button class="batt" title="Akku" @click=${() => moreInfo(this, r4.moreInfo.battery)}>
+          <div class="kv"><span class="v">${r4.battery}<span class="u"> %</span></span></div><div class="lbl">Akku</div>
+          <div class="battbar ${battCls}" style="--p:${r4.battery}"><i></i></div>
+        </button>
+      </div>
+      <div class="chips">${r4.persons.filter((p3) => p3.known).map((p3) => b2`<button class="chip ${p3.home ? "on" : ""} ${p3.counts ? "" : "dim"}" title="${p3.home ? "zu Hause" : "abwesend"}${p3.counts ? "" : " \xB7 z\xE4hlt nicht"}" @click=${() => moreInfo(this, p3.id)}><ha-icon icon=${p3.home ? "mdi:account" : "mdi:account-outline"}></ha-icon>${p3.name}</button>`)}${h3.roomChip ? b2`<span class="chip on"><ha-icon icon="mdi:floor-plan"></ha-icon>${h3.roomChip}</span>` : A}${h3.errorChip ? b2`<button class="chip ${h3.errorChip.level === "danger" ? "bad" : "warn"}" @click=${() => moreInfo(this, r4.moreInfo.error)}><ha-icon icon=${h3.errorChip.level === "danger" ? "mdi:alert" : "mdi:information-outline"}></ha-icon>${h3.errorChip.text}</button>` : A}<span class="chip" title="Nicht stören"><ha-icon icon="mdi:sleep"></ha-icon>${h3.dnd}</span></div>
+      <div class="params">
+        <button class="param" title="Reinigungsmodus" @click=${this.openRooms}><ha-icon icon="mdi:broom"></ha-icon><b>${modus}</b><span>Modus</span></button>
+        <button class="param" title="Saugleistung" @click=${this.openRooms}><ha-icon icon="mdi:fan"></ha-icon><b>${saug}</b><span>Saugstufe</span></button>
+        <button class="param" title="Wassermenge" @click=${this.openRooms}><ha-icon icon="mdi:water"></ha-icon><b>${wasser}</b><span>Wasser</span></button>
+      </div>
+      <div class="ctl">${h3.buttons.map((b3) => b2`<button class="btn ${b3.primary ? "primary" : ""}" data-svc=${b3.service} @click=${() => this.api?.vacuum(b3.service)}><ha-icon icon=${b3.icon}></ha-icon>${b3.label}</button>`)}</div>
+      ${strip ? b2`<button class="note strip" title="Räume einstellen" @click=${this.openRooms}><ha-icon icon=${strip.icon}></ha-icon><div><b>${strip.head}</b> <small>${strip.right}${strip.chips.length ? b2` · ` : A}${strip.chips.map((c4) => b2`<span class="chip k">${c4.icons.map((i5) => b2`<ha-icon icon=${i5}></ha-icon>`)}${c4.text}</span>`)}</small></div><ha-icon icon="mdi:chevron-right"></ha-icon></button>` : A}
+    `;
+  }
+};
+if (!customElements.get(HERO_ELEMENT)) customElements.define(HERO_ELEMENT, DxHero);
+
+// src/components/dx-auftrag.ts
+var AUFTRAG_ELEMENT = "dx-auftrag";
+var DOT_CLASS2 = { accent: "acc", warning: "warn", danger: "bad", positive: "good" };
+var DxAuftrag = class extends i4 {
+  static {
+    this.styles = [controls, i`
+    :host { display: flex; flex-direction: column; gap: var(--dx-space-3); min-width: 0; }
+    .route { text-transform: none; letter-spacing: 0; font-size: 13px; }
+    .route b { color: var(--dx-text); }
+    .kv { margin-top: 6px; }
+    .meter.two { grid-template-columns: 1fr auto; margin-bottom: 6px; }
+    .row.next { border-top: 1px solid var(--dx-border); }
+  `];
+  }
+  static {
+    this.properties = { robot: { attribute: false }, rooms: { attribute: false } };
+  }
+  render() {
+    const r4 = this.robot;
+    if (!r4 || !r4.running) return b2``;
+    const { order, idx, rest } = runOrder(r4);
+    const total = order.length;
+    const done = idx >= 0 ? idx : 0;
+    const pct = total ? Math.round(done / total * 100) : 0;
+    const next = rest.length ? roomById(rest[0]) : void 0;
+    const nextVals = next && this.rooms ? this.rooms.rooms[next.id] : null;
+    const short = (id) => roomById(id)?.short ?? String(id);
+    return b2`
+      <div class="hd"><h2>Aktueller Auftrag</h2><span class="st pill ${DOT_CLASS2[r4.hero.dot]}"><i></i>${r4.hero.big}</span></div>
+      <div>
+        <div class="lbl route">${total ? order.map((id, i5) => b2`${i5 ? " \u2192 " : ""}${i5 === idx ? b2`<b>${short(id)}</b>` : short(id)}`) : r4.room !== "\u2013" ? b2`<b>${r4.room}</b>` : "R\xE4ume \u2013"}</div>
+        <div class="kv"><span class="v">${r4.cleaningTime}<span class="u"> min</span></span><span class="u">· ${r4.cleanedArea} m²</span></div>
+      </div>
+      ${total ? b2`<div><div class="meter two"><span class="n">Räume</span><span class="p">${done} / ${total}</span></div><div class="bar" style="--p:${pct}"><i></i></div></div>` : A}
+      ${next ? b2`<div class="row next"><div><div class="s">Nächster Raum</div><div class="t">${next.short}</div></div>${nextVals ? b2`<span class="tag">${nextVals.modus}</span>` : A}</div>` : total ? b2`<div class="row next"><div><div class="s">Letzter Raum</div><div class="t">${idx >= 0 ? short(order[idx]) : "\u2013"}</div></div></div>` : A}
+    `;
+  }
+};
+if (!customElements.get(AUFTRAG_ELEMENT)) customElements.define(AUFTRAG_ELEMENT, DxAuftrag);
 
 // src/dreame-x60-panel.ts
 var ELEMENT = "dreame-x60-panel";
@@ -2013,18 +2262,17 @@ var DreameX60Panel = class extends i4 {
         </div>
       </div>`;
   }
-  /** Bento-Übersicht (Bauplan 4.0): zehn Flächen als Platzhalter mit einer Vorschau der Sichten, bis die Bausteine 4.1–4.10 sie füllen. */
+  /** Bento-Übersicht (Bauplan 4.0): Bausteine, wo sie schon existieren (4.1 dx-hero, dx-auftrag), sonst Platzhalter mit einer Vorschau der Sichten. */
   renderStart(s4, robot) {
     const entities = Object.keys(s4).length;
     const plans = readPlans(s4);
     const prog = readPrognose(s4);
     const hist = readHistory(s4);
     const map = readMap(s4);
+    const rooms = readAllRoomValues(s4);
     const lines = {
-      hero: [entities ? `${entities} Entit\xE4ten verbunden` : "keine Zustandsdaten", `Kopf: ${robot.hero.big}${robot.hero.sub ? " \xB7 " + robot.hero.sub : ""} \xB7 Akku ${robot.battery} %`],
-      map: [`Kartendarstellung: ${map.karte} \xB7 Kalibrierung: ${Array.isArray(map.calibrationPoints) ? map.calibrationPoints.length + " Punkte" : "fehlt"}`],
+      map: [entities ? `${entities} Entit\xE4ten verbunden` : "keine Zustandsdaten", `Kartendarstellung: ${map.karte} \xB7 Kalibrierung: ${Array.isArray(map.calibrationPoints) ? map.calibrationPoints.length + " Punkte" : "fehlt"}`],
       automatik: [`Automatik: ${readAutomatik(s4).status || "\u2013"}`],
-      auftrag: [`Auftrag: ${robot.hero.big} \xB7 Raum: ${robot.room || "\u2013"} \xB7 ${robot.cleanedArea} m\xB2 \xB7 ${robot.cleaningTime} min`],
       heute: [`Heutiger Eintrag: ${plans.heuteName || "\u2013"}${plans.heuteZeit ? " \xB7 " + plans.heuteZeit : ""}`, prog.aktiv ? `Freies Fenster ${prog.freiesFenster} \xB7 R\xFCckkehr ${prog.rueckkehr}` : "Prognose aus"],
       planer: plans.plans.slice(0, 3).map((x2) => `${x2.n} ${x2.name || "\u2013"} \xB7 ${x2.aktiv ? "aktiv" : "inaktiv"} \xB7 ${x2.zeit}`),
       consumables: [readConsumables(s4).map((c4) => `${c4.name} ${c4.pct} %`).join(", ")],
@@ -2039,13 +2287,15 @@ var DreameX60Panel = class extends i4 {
         ${(lines[sl.slot] ?? []).map((l3) => b2`<div class="hint preview">${l3}</div>`)}
         <div class="hint">Platzhalter – entsteht in Aufgabe ${sl.task}.</div>
       </section>`;
-    const right = [robot.running ? "auftrag" : "automatik", "heute"];
     const rest = START_SLOTS.filter((sl) => !["hero", "map", "automatik", "auftrag", "heute"].includes(sl.slot));
     return b2`
       <div class="bento">
-        ${box(startSlot("hero"))}
+        <dx-hero class="b span3" data-slot="hero" .robot=${robot} .rooms=${rooms} .api=${this.api}></dx-hero>
         ${box(startSlot("map"))}
-        <div class="span3 stack rightstack">${right.map((k2) => box(startSlot(k2)))}</div>
+        <div class="span3 stack rightstack">
+          ${robot.running ? b2`<dx-auftrag class="b" data-slot="auftrag" .robot=${robot} .rooms=${rooms}></dx-auftrag>` : box(startSlot("automatik"))}
+          ${box(startSlot("heute"))}
+        </div>
         ${rest.map(box)}
       </div>`;
   }

@@ -6,7 +6,7 @@ import { LitElement, html, nothing } from 'lit';
 import type { TemplateResult } from 'lit';
 import type { HomeAssistant, PanelConfig } from './ha/types';
 import { DxApi } from './ha/api';
-import { readAutomatik, readConsumables, readDiagnostics, readHistory, readLearn, readMap, readPlans, readPrognose, readRobot, readRobotSettings, readSettings, readStation } from './ha/selectors';
+import { readAllRoomValues, readAutomatik, readConsumables, readDiagnostics, readHistory, readLearn, readMap, readPlans, readPrognose, readRobot, readRobotSettings, readSettings, readStation } from './ha/selectors';
 import type { RobotView } from './ha/selectors';
 import { PAGES, PAGE_PARTS, PAGE_TITLE, START_SLOTS, startSlot, toPage } from './pages';
 import type { Page, StartSlot } from './pages';
@@ -19,6 +19,8 @@ import { base } from './styles/base';
 import { shell } from './styles/shell';
 import { VERSION } from './version';
 import './components/dx-nav';
+import './components/dx-hero';
+import './components/dx-auftrag';
 
 export const ELEMENT = 'dreame-x60-panel';
 export { PAGES };
@@ -162,15 +164,13 @@ export class DreameX60Panel extends LitElement {
       </div>`;
   }
 
-  /** Bento-Übersicht (Bauplan 4.0): zehn Flächen als Platzhalter mit einer Vorschau der Sichten, bis die Bausteine 4.1–4.10 sie füllen. */
+  /** Bento-Übersicht (Bauplan 4.0): Bausteine, wo sie schon existieren (4.1 dx-hero, dx-auftrag), sonst Platzhalter mit einer Vorschau der Sichten. */
   private renderStart(s: HomeAssistant['states'], robot: RobotView): TemplateResult {
     const entities = Object.keys(s).length;
-    const plans = readPlans(s); const prog = readPrognose(s); const hist = readHistory(s); const map = readMap(s);
+    const plans = readPlans(s); const prog = readPrognose(s); const hist = readHistory(s); const map = readMap(s); const rooms = readAllRoomValues(s);
     const lines: Record<string, string[]> = {
-      hero: [entities ? `${entities} Entitäten verbunden` : 'keine Zustandsdaten', `Kopf: ${robot.hero.big}${robot.hero.sub ? ' · ' + robot.hero.sub : ''} · Akku ${robot.battery} %`],
-      map: [`Kartendarstellung: ${map.karte} · Kalibrierung: ${Array.isArray(map.calibrationPoints) ? map.calibrationPoints.length + ' Punkte' : 'fehlt'}`],
+      map: [entities ? `${entities} Entitäten verbunden` : 'keine Zustandsdaten', `Kartendarstellung: ${map.karte} · Kalibrierung: ${Array.isArray(map.calibrationPoints) ? map.calibrationPoints.length + ' Punkte' : 'fehlt'}`],
       automatik: [`Automatik: ${readAutomatik(s).status || '–'}`],
-      auftrag: [`Auftrag: ${robot.hero.big} · Raum: ${robot.room || '–'} · ${robot.cleanedArea} m² · ${robot.cleaningTime} min`],
       heute: [`Heutiger Eintrag: ${plans.heuteName || '–'}${plans.heuteZeit ? ' · ' + plans.heuteZeit : ''}`, prog.aktiv ? `Freies Fenster ${prog.freiesFenster} · Rückkehr ${prog.rueckkehr}` : 'Prognose aus'],
       planer: plans.plans.slice(0, 3).map((x) => `${x.n} ${x.name || '–'} · ${x.aktiv ? 'aktiv' : 'inaktiv'} · ${x.zeit}`),
       consumables: [readConsumables(s).map((c) => `${c.name} ${c.pct} %`).join(', ')],
@@ -185,13 +185,15 @@ export class DreameX60Panel extends LitElement {
         ${(lines[sl.slot] ?? []).map((l) => html`<div class="hint preview">${l}</div>`)}
         <div class="hint">Platzhalter – entsteht in Aufgabe ${sl.task}.</div>
       </section>`;
-    const right = [robot.running ? 'auftrag' : 'automatik', 'heute'];
     const rest = START_SLOTS.filter((sl) => !['hero', 'map', 'automatik', 'auftrag', 'heute'].includes(sl.slot));
     return html`
       <div class="bento">
-        ${box(startSlot('hero'))}
+        <dx-hero class="b span3" data-slot="hero" .robot=${robot} .rooms=${rooms} .api=${this.api}></dx-hero>
         ${box(startSlot('map'))}
-        <div class="span3 stack rightstack">${right.map((k) => box(startSlot(k)))}</div>
+        <div class="span3 stack rightstack">
+          ${robot.running ? html`<dx-auftrag class="b" data-slot="auftrag" .robot=${robot} .rooms=${rooms}></dx-auftrag>` : box(startSlot('automatik'))}
+          ${box(startSlot('heute'))}
+        </div>
         ${rest.map(box)}
       </div>`;
   }

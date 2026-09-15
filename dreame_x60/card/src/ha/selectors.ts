@@ -53,6 +53,8 @@ export interface RobotView {
   deutsch: boolean;
   persons: PersonView[];
   hero: HeroModel;
+  /** Entitäten für more-info-Dialoge (Regel 1: IDs nur aus dem Vertrag, hier mitgeführt). */
+  moreInfo: { vac: string; battery: string; error: string };
 }
 
 const VAC_ATTRS = ['has_error', 'current_segment', 'active_segments', 'cleaning_sequence', 'cleaned_area', 'charging', 'mop_pad', 'paused', 'washing', 'drying', 'returning_to_wash', 'mapping', 'cruising'] as const;
@@ -81,6 +83,7 @@ export const readRobot: Selector<RobotView> = memoizeSelector(ROBOT_IDS, (s) => 
     autoLauf: on(s, E.autoLauf), autoLetzterPlan: txt(s, E.autoLetzterPlan),
     laufReihenfolge: txt(s, E.laufReihenfolge).split(',').map((x) => parseInt(x, 10)).filter((x) => !isNaN(x)),
     room: roomName(st(s, E.currentRoom), deutsch), deutsch, persons, hero,
+    moreInfo: { vac: E.vac, battery: E.battery, error: E.error },
   };
 }, { [E.vac]: stateAndAttributes(VAC_ATTRS) });
 

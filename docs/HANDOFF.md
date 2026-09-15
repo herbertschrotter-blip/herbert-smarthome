@@ -252,8 +252,10 @@ Uhr (10:15). Einrichten im Ordner `heidi/tests`: `npm i` und dann `npx playwrigh
   **PD-007, offen** – Herbert liest gegen). 4.0 gebaut: `dx-nav` mit Seitenleiste (> 1180 px), Symbolleiste (761–1180 px),
   Tab-Leiste (≤ 760 px), Kopfzeile mit Tagesgruß/Zurück-Knopf/Uhr/Zuhause/Nicht stören, Bento-Übersicht mit zehn
   Platzhalter-Flächen. Version 2.0.0-alpha.2 eingespielt (Ressource per `ha-ws.js lovelace/resources/update`, kein Neustart).
-- **Nächstes:** Herbert: Karte 4.0 + PD-007 gegenlesen, „Heidi v2“ im Browser ansehen (Strg+F5; Handy: Tab-Leiste unten).
-  Dann 4.1 `dx-hero` + `dx-auftrag`, 4.2 `dx-dialog`, 4.3 Karte. Offene Entscheidungen: Bauplan Abschnitt 10 und ClickUp.
+  Herbert: „passt“, PD-007 freigegeben. 4.1 `dx-hero` (Roboter-Panel) + `dx-auftrag` (rechte Spalte im Lauf) gebaut,
+  Streifen als `domain/strip.ts`, gemeinsame Bedienstile `styles/controls.ts`; hero.js prüft alle 85 v1-Kopf-Zustände und
+  die Render-Ruhe. Version 2.0.0-alpha.3 eingespielt.
+- **Nächstes:** 4.2 `dx-dialog`, dann 4.3 Karte (`dx-map-card` + `dx-quickstart`). Offene Entscheidungen: Bauplan Abschnitt 10 und ClickUp.
 
 ## 4. Offene Punkte (Stand 14.09.2026, Claude-Code-Sitzung)
 Erledigt:
