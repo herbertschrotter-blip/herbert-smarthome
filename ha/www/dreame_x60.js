@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.14 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.15 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -559,6 +559,8 @@ var ENTITIES = {
   map: "camera.heidi_map",
   selectedMap: "select.heidi_selected_map",
   // Kartenwahl (4.3), nur wenn verfügbar
+  mapData: "camera.heidi_map_data",
+  // Datenkarte (4.3b, Heidi-Karte): Valetudo-Kartenpaket im PNG-Chunk
   status: "sensor.heidi_status",
   error: "sensor.heidi_error",
   taskStatus: "sensor.heidi_task_status",
@@ -1381,9 +1383,12 @@ function roomShapes(s4) {
   }
   return out;
 }
-var readMap = memoizeSelector([E2.map, E2.karte, E2.chairs, E2.selectedMap], (s4) => {
+var readMap = memoizeSelector([E2.map, E2.karte, E2.chairs, E2.selectedMap, E2.mapData], (s4) => {
   const sm = ent(s4, E2.selectedMap);
+  const mdEnt = ent(s4, E2.mapData);
+  const mdPic = String(attr(s4, E2.mapData, "entity_picture") ?? "");
   return {
+    mapData: mdEnt && !EMPTY2.includes(mdEnt.state) && mdPic ? { picture: mdPic, version: mdEnt.state } : null,
     entityPicture: String(attr(s4, E2.map, "entity_picture") ?? ""),
     calibrationPoints: attr(s4, E2.map, "calibration_points") ?? null,
     noGoAreas: attr(s4, E2.map, "no_go_areas") ?? null,
@@ -1397,7 +1402,7 @@ var readMap = memoizeSelector([E2.map, E2.karte, E2.chairs, E2.selectedMap], (s4
     roomShapes: roomShapes(s4),
     selectedMap: sm && !EMPTY2.includes(sm.state) ? { id: E2.selectedMap, value: sm.state, options: opts(s4, E2.selectedMap) } : null
   };
-}, { [E2.map]: stateAndAttributes(["entity_picture", "calibration_points", "no_go_areas", "no_mopping_areas", "virtual_walls", "rooms"]) });
+}, { [E2.map]: stateAndAttributes(["entity_picture", "calibration_points", "no_go_areas", "no_mopping_areas", "virtual_walls", "rooms"]), [E2.mapData]: stateAndAttributes(["entity_picture"]) });
 var isRobotId = (id) => /^(vacuum|camera|switch|button|select\.heidi_(room_|carpet|water|drying|auto_empty|self_clean|cleangenius|map_rotation)|number|time)\./.test(id) || /^sensor\.heidi_(status|error|task_status|battery_level|current_room|cleaned_area|cleaning_time|cleaning_history|cleaning_count|total_|first_cleaning|main_brush|side_brush|filter_left|sensor_dirty|wheel_dirty|dust_bag|clean_water|dirty_water|detergent|low_water|auto_empty|self_wash)/.test(id);
 var readDiagnostics = memoizeSelector(allContractIds(), (s4) => {
   const ids = allContractIds();
@@ -1816,7 +1821,7 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.14";
+var VERSION = "2.0.0-alpha.15";
 
 // src/shared/robot-svg.ts
 var robotSvg = w`<svg viewBox="0 0 200 200" class="robotpic" aria-hidden="true">
@@ -2374,6 +2379,7 @@ function modeEntry(mode, rooms) {
   }
 }
 var hasModes = (kind) => kind === "Xiaomi-Karte";
+var isHeidiKarte = (kind) => kind === "Heidi-Karte";
 function buildMapConfig(kind, dark, mode, rooms) {
   if (kind === "Dreame-App") return { type: "custom:dreame-vacuum-map-card", entity: ENTITIES.vac, title: "Heidi", theme: dark ? "dark" : "light", language: "de", default_mode: "room" };
   if (kind === "Xiaomi-Karte") {
@@ -2397,6 +2403,232 @@ function buildMapConfig(kind, dark, mode, rooms) {
 function pictureConfig() {
   return { type: "picture-entity", entity: ENTITIES.map, camera_image: ENTITIES.map, show_name: false, show_state: false };
 }
+
+// src/domain/calibration.ts
+var det3 = (m2) => m2[0][0] * (m2[1][1] * m2[2][2] - m2[1][2] * m2[2][1]) - m2[0][1] * (m2[1][0] * m2[2][2] - m2[1][2] * m2[2][0]) + m2[0][2] * (m2[1][0] * m2[2][1] - m2[1][1] * m2[2][0]);
+function calibration(points) {
+  if (!points || points.length < 3) return null;
+  const [p0, p1, p22] = points;
+  const A2 = [[p0.map.x, p0.map.y, 1], [p1.map.x, p1.map.y, 1], [p22.map.x, p22.map.y, 1]];
+  const d3 = det3(A2);
+  if (!d3) return null;
+  const solve = (b3) => [0, 1, 2].map((i5) => det3(A2.map((row, r4) => row.map((v2, c4) => c4 === i5 ? b3[r4] : v2))) / d3);
+  const vx = solve([p0.vacuum.x, p1.vacuum.x, p22.vacuum.x]);
+  const vy = solve([p0.vacuum.y, p1.vacuum.y, p22.vacuum.y]);
+  const toVac = (mx, my) => [vx[0] * mx + vx[1] * my + vx[2], vy[0] * mx + vy[1] * my + vy[2]];
+  const dd = vx[0] * vy[1] - vx[1] * vy[0];
+  const toMap = (x2, y3) => {
+    const rx = x2 - vx[2], ry = y3 - vy[2];
+    return [(rx * vy[1] - ry * vx[1]) / dd, (ry * vx[0] - rx * vy[0]) / dd];
+  };
+  return { toVac, toMap };
+}
+
+// src/domain/mapdata.ts
+function parseValetudo(text) {
+  const j = JSON.parse(text);
+  if (!j || !j.size || !j.pixelSize || !Array.isArray(j.layers)) throw new Error("kein Valetudo-Kartenpaket");
+  const md = { size: { x: j.size.x, y: j.size.y }, pixelSize: j.pixelSize, rotation: j.metaData?.rotation ?? 0, segments: [], robot: null, charger: null, paths: [] };
+  for (const l3 of j.layers) {
+    if (l3.type !== "segment") continue;
+    const id = parseInt(String(l3.metaData?.segmentId ?? ""), 10);
+    if (isNaN(id)) continue;
+    const runs = [];
+    if (l3.compressedPixels?.length) for (let i5 = 0; i5 + 2 < l3.compressedPixels.length; i5 += 3) runs.push([l3.compressedPixels[i5], l3.compressedPixels[i5 + 1], l3.compressedPixels[i5 + 2]]);
+    else if (l3.pixels?.length) for (let i5 = 0; i5 + 1 < l3.pixels.length; i5 += 2) runs.push([l3.pixels[i5], l3.pixels[i5 + 1], 1]);
+    const count = runs.reduce((n4, r4) => n4 + r4[2], 0);
+    const xs = runs.flatMap((r4) => [r4[0], r4[0] + r4[2] - 1]), ys = runs.map((r4) => r4[1]);
+    const bbox = { x0: Math.min(...xs), y0: Math.min(...ys), x1: Math.max(...xs), y1: Math.max(...ys) };
+    const d3 = l3.dimensions;
+    md.segments.push({ id, name: String(l3.metaData?.name ?? `Raum ${id}`), runs, pixelCount: d3?.pixelCount ?? count, mid: { x: d3?.x.mid ?? (bbox.x0 + bbox.x1) / 2, y: d3?.y.mid ?? (bbox.y0 + bbox.y1) / 2 }, bbox });
+  }
+  const cm = (v2) => v2;
+  for (const e4 of j.entities ?? []) {
+    if (e4.type === "robot_position" && e4.points.length >= 2) md.robot = { ...cmToVac(md, cm(e4.points[0]), cm(e4.points[1])), angle: e4.metaData?.angle };
+    else if (e4.type === "charger_location" && e4.points.length >= 2) md.charger = { ...cmToVac(md, cm(e4.points[0]), cm(e4.points[1])), angle: e4.metaData?.angle };
+    else if (e4.type === "path") {
+      const pts = [];
+      for (let i5 = 0; i5 + 1 < e4.points.length; i5 += 2) {
+        const v2 = cmToVac(md, e4.points[i5], e4.points[i5 + 1]);
+        pts.push([v2.x, v2.y]);
+      }
+      md.paths.push(pts);
+    }
+  }
+  return md;
+}
+function cmToVac(md, cx, cy) {
+  return { x: (cx - md.size.x / 2) * 10, y: (md.size.y / 2 - cy) * 10 };
+}
+function segmentPath(md, seg, toTarget) {
+  const ps = md.pixelSize;
+  const corner = (px, py) => {
+    const v2 = cmToVac(md, px * ps, py * ps);
+    return toTarget(v2.x, v2.y);
+  };
+  const parts = [];
+  for (const [x2, y3, n4] of seg.runs) {
+    const a3 = corner(x2, y3), b3 = corner(x2 + n4, y3), c4 = corner(x2 + n4, y3 + 1), d3 = corner(x2, y3 + 1);
+    parts.push(`M${a3[0].toFixed(1)} ${a3[1].toFixed(1)}L${b3[0].toFixed(1)} ${b3[1].toFixed(1)}L${c4[0].toFixed(1)} ${c4[1].toFixed(1)}L${d3[0].toFixed(1)} ${d3[1].toFixed(1)}Z`);
+  }
+  return parts.join("");
+}
+
+// src/domain/png-text.ts
+var SIGNATURE = [137, 80, 78, 71, 13, 10, 26, 10];
+async function inflate(data) {
+  const ds = new DecompressionStream("deflate");
+  const writer = ds.writable.getWriter();
+  void writer.write(data);
+  void writer.close();
+  const out = new Uint8Array(await new Response(ds.readable).arrayBuffer());
+  return out;
+}
+async function pngText(buf, key) {
+  const b3 = new Uint8Array(buf);
+  if (b3.length < 8 || SIGNATURE.some((v2, i5) => b3[i5] !== v2)) return null;
+  const view = new DataView(buf);
+  const dec = new TextDecoder("latin1");
+  let p3 = 8;
+  while (p3 + 8 <= b3.length) {
+    const len = view.getUint32(p3);
+    const type = dec.decode(b3.subarray(p3 + 4, p3 + 8));
+    const data = b3.subarray(p3 + 8, p3 + 8 + len);
+    if (type === "tEXt" || type === "zTXt" || type === "iTXt") {
+      const nul = data.indexOf(0);
+      if (nul > 0 && dec.decode(data.subarray(0, nul)) === key) {
+        if (type === "tEXt") return dec.decode(data.subarray(nul + 1));
+        if (type === "zTXt") return new TextDecoder("utf-8").decode(await inflate(data.subarray(nul + 2)));
+        const compressed = data[nul + 1] === 1;
+        let q = data.indexOf(0, nul + 3) + 1;
+        q = data.indexOf(0, q) + 1;
+        const body = data.subarray(q);
+        return new TextDecoder("utf-8").decode(compressed ? await inflate(body) : body);
+      }
+    }
+    if (type === "IEND") break;
+    p3 += 12 + len;
+  }
+  return null;
+}
+
+// src/ha/mapdata-loader.ts
+var cache = /* @__PURE__ */ new Map();
+function loadMapData(pictureUrl, version) {
+  const key = `${version}|${pictureUrl.split("?")[0]}`;
+  let p3 = cache.get(key);
+  if (!p3) {
+    p3 = fetch(pictureUrl, { cache: "no-store" }).then(async (r4) => {
+      if (!r4.ok) throw new Error(`HTTP ${r4.status}`);
+      const text = await pngText(await r4.arrayBuffer(), "ValetudoMap");
+      return text ? parseValetudo(text) : null;
+    }).catch((e4) => {
+      console.warn("dreame_x60: Kartenpaket nicht ladbar", e4);
+      cache.delete(key);
+      return null;
+    });
+    cache.set(key, p3);
+    if (cache.size > 4) {
+      const first = cache.keys().next().value;
+      if (first !== void 0 && first !== key) cache.delete(first);
+    }
+  }
+  return p3;
+}
+
+// src/components/dx-heidi-map.ts
+var HEIDI_MAP_ELEMENT = "dx-heidi-map";
+var ROOM_TAP_EVENT = "dx-room-tap";
+var DxHeidiMap = class extends i4 {
+  constructor() {
+    super();
+    this._loadedVersion = "";
+    this._pathCache = null;
+    this.selected = /* @__PURE__ */ new Set();
+    this._md = null;
+    this._size = null;
+  }
+  static {
+    this.styles = i`
+    :host { display: block; }
+    .wrap { position: relative; width: 100%; line-height: 0; }
+    img { display: block; width: 100%; height: auto; }
+    svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+    .room { fill: transparent; stroke: transparent; cursor: pointer; transition: fill var(--dx-dur), stroke var(--dx-dur); }
+    .room:hover { fill: color-mix(in srgb, var(--dx-accent) 14%, transparent); }
+    .room.sel { fill: color-mix(in srgb, var(--dx-accent) 38%, transparent); stroke: var(--dx-accent); stroke-width: 1.5; paint-order: stroke; }
+    .room.cur { stroke: var(--dx-positive); stroke-width: 1.5; stroke-dasharray: 4 3; }
+    .room.cur.sel { stroke: var(--dx-accent); stroke-dasharray: none; }
+    .label { pointer-events: none; }
+    .label rect { fill: rgba(12, 18, 30, 0.72); stroke: rgba(255, 255, 255, 0.18); }
+    .label.sel rect { fill: var(--dx-accent); stroke: transparent; }
+    .label text { fill: var(--dx-text); font: 600 12px var(--dx-font); dominant-baseline: middle; text-anchor: middle; }
+    .label.sel text { fill: var(--dx-on-accent); }
+    .hint { position: absolute; left: 10px; top: 10px; font: 12px var(--dx-font); color: var(--dx-text-muted); background: rgba(12, 18, 30, 0.72); padding: 4px 8px; border-radius: 6px; line-height: 1.3; }
+  `;
+  }
+  static {
+    this.properties = { map: { attribute: false }, robot: { attribute: false }, selected: { attribute: false }, _md: { state: true }, _size: { state: true } };
+  }
+  willUpdate(changed) {
+    if (changed.has("map")) {
+      const src = this.map?.mapData;
+      if (src && src.version !== this._loadedVersion) {
+        this._loadedVersion = src.version;
+        void loadMapData(src.picture, src.version).then((md) => {
+          if (this._loadedVersion === src.version) this._md = md;
+        });
+      }
+    }
+  }
+  onImgLoad(e4) {
+    const img = e4.target;
+    if (img.naturalWidth && img.naturalHeight) this._size = { w: img.naturalWidth, h: img.naturalHeight };
+  }
+  /** Raumflächen in Bildpixeln; neu nur bei neuem Kartenpaket oder neuer Kalibrierung. */
+  paths(md, calib) {
+    const key = `${this._loadedVersion}|${JSON.stringify(this.map?.calibrationPoints ?? null)}`;
+    if (this._pathCache?.key === key) return this._pathCache.paths;
+    const order = this.map?.roomOrder ?? [];
+    const paths = [];
+    for (const r4 of order) {
+      const seg = md.segments.find((s4) => s4.id === r4.id);
+      if (!seg) continue;
+      const c4 = pxCenter(md, seg.mid.x, seg.mid.y);
+      const [cx, cy] = calib.toMap(c4.x, c4.y);
+      paths.push({ id: r4.id, name: seg.name, short: r4.short, d: segmentPath(md, seg, (x2, y3) => calib.toMap(x2, y3)), cx, cy });
+    }
+    this._pathCache = { key, paths };
+    return paths;
+  }
+  tap(id) {
+    emit(this, ROOM_TAP_EVENT, { id });
+  }
+  render() {
+    const m2 = this.map;
+    const calib = calibration(m2?.calibrationPoints ?? null);
+    const md = this._md, size = this._size;
+    const cur = this.robot && (this.robot.vac === "cleaning" || this.robot.vac === "paused") ? this.robot.currentSegment : null;
+    const ready = !!(md && size && calib);
+    return b2`
+      <div class="wrap">
+        <img src=${m2?.entityPicture ?? ""} alt="Karte" @load=${this.onImgLoad}>
+        ${ready ? w`<svg viewBox="0 0 ${size.w} ${size.h}" preserveAspectRatio="none">
+          ${this.paths(md, calib).map((p3) => w`<path class="room ${this.selected.has(p3.id) ? "sel" : ""} ${cur === p3.id ? "cur" : ""}" data-room=${p3.id} d=${p3.d} @click=${() => this.tap(p3.id)}><title>${p3.name}</title></path>`)}
+          ${this.paths(md, calib).map((p3) => {
+      const w2 = p3.short.length * 7.5 + 16;
+      return w`<g class="label ${this.selected.has(p3.id) ? "sel" : ""}" transform="translate(${p3.cx.toFixed(1)} ${p3.cy.toFixed(1)})"><rect x=${-w2 / 2} y="-10" width=${w2} height="20" rx="10"></rect><text>${p3.short}</text></g>`;
+    })}
+        </svg>` : A}
+        ${!m2?.mapData ? b2`<div class="hint">Datenkarte fehlt – <code>camera.heidi_map_data</code> in der Dreame-Integration aktivieren</div>` : !md && this._loadedVersion ? b2`<div class="hint">Kartenpaket wird geladen …</div>` : A}
+        ${m2?.mapData && !calib ? b2`<div class="hint">Keine Kalibrierpunkte – Räume können nicht eingezeichnet werden</div>` : A}
+      </div>`;
+  }
+};
+function pxCenter(md, px, py) {
+  return { x: ((px + 0.5) * md.pixelSize - md.size.x / 2) * 10, y: (md.size.y / 2 - (py + 0.5) * md.pixelSize) * 10 };
+}
+if (!customElements.get(HEIDI_MAP_ELEMENT)) customElements.define(HEIDI_MAP_ELEMENT, DxHeidiMap);
 
 // src/shared/caches.ts
 var mapElements = /* @__PURE__ */ new Map();
@@ -2603,6 +2835,7 @@ var DxMapCard = class extends i4 {
     const m2 = this.map;
     const kind = m2?.karte ?? "";
     const modes = hasModes(kind);
+    const heidi = isHeidiKarte(kind);
     const order = m2?.roomOrder ?? [];
     const sel = this._sel;
     const sm = m2?.selectedMap ?? null;
@@ -2611,7 +2844,9 @@ var DxMapCard = class extends i4 {
         ${sm ? b2`<span class="seg2 maps">${sm.options.map((o5) => b2`<button class=${o5 === sm.value ? "on" : ""} data-map=${o5} @click=${() => void this.api?.selectOption(sm.id, o5)}>${o5}</button>`)}</span>` : b2`<span class="r">${kind}</span>`}
       </div>
       <div class="map">
-        <div class="slot"></div>
+        ${heidi ? b2`<dx-heidi-map .map=${m2} .robot=${this.robot} .selected=${sel} @dx-room-tap=${(e4) => {
+      this._sel = toggleRoom(this._sel, e4.detail.id);
+    }}></dx-heidi-map>` : b2`<div class="slot"></div>`}
         ${modes ? b2`<div class="mtools">
           <button class="btn sm ${this._mode === "goto" ? "on" : ""}" data-act="goto" @click=${() => this.setMode(this._mode === "goto" ? "raeume" : "goto")}><ha-icon icon="mdi:map-marker"></ha-icon>Hinfahren</button>
           <button class="btn sm" data-open="zones" @click=${this.openZones}><ha-icon icon="mdi:cancel"></ha-icon>Sperrzonen</button>
@@ -2620,7 +2855,7 @@ var DxMapCard = class extends i4 {
       ${this._error ? b2`<div class="err">${this._error}</div>` : A}
       <div class="mapmodes">
         ${modes ? b2`<div class="seg2 modes">${["raeume", "zone", "punkt"].map((k2) => b2`<button data-mode=${k2} class=${this._mode === k2 ? "on" : ""} @click=${() => this.setMode(k2)}>${MAP_MODES[k2].label}</button>`)}</div>` : b2`<button class="btn sm" data-open="zones" @click=${this.openZones}><ha-icon icon="mdi:cancel"></ha-icon>Sperrzonen</button>`}
-        <span class="hint">${modes ? MAP_MODES[this._mode].hint : "R\xE4ume antippen, dann \u201Ereinigen\u201C"}</span>
+        <span class="hint">${modes ? MAP_MODES[this._mode].hint : heidi ? "R\xE4ume in der Karte oder \xFCber die Kacheln antippen, dann \u201Ereinigen\u201C" : "R\xE4ume antippen, dann \u201Ereinigen\u201C"}</span>
         <button class="btn primary sm" data-act="all" @click=${this.runAll}><ha-icon icon="mdi:play"></ha-icon>Alles</button>
       </div>
       ${!modes || this._mode === "raeume" ? b2`

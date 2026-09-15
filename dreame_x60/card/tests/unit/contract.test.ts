@@ -13,7 +13,7 @@ const ROOT = path.resolve(HERE, '..', '..', '..', '..');
 
 // Abschnitt 4 als Liste (unabhängig von contract.ts geschrieben, damit ein Tippfehler dort auffällt)
 const SECTION4: string[] = [
-  'vacuum.heidi', 'camera.heidi_map', 'select.heidi_selected_map', // Kartenwahl (4.3, 15.09.)
+  'vacuum.heidi', 'camera.heidi_map', 'select.heidi_selected_map', 'camera.heidi_map_data', // Kartenwahl (4.3), Datenkarte (4.3b, 15.09.)
   ...['status', 'error', 'task_status', 'battery_level', 'current_room', 'cleaned_area', 'cleaning_time', 'cleaning_history', 'cleaning_count', 'total_cleaned_area', 'total_cleaning_time', 'first_cleaning_date'].map((s) => `sensor.heidi_${s}`),
   ...['main_brush_left', 'side_brush_left', 'filter_left', 'sensor_dirty_left', 'wheel_dirty_left'].map((s) => `sensor.heidi_${s}`),
   ...['reset_main_brush', 'reset_side_brush', 'reset_filter', 'reset_sensor', 'reset_wheel'].map((s) => `button.heidi_${s}`),

@@ -13,6 +13,7 @@ export const ENTITIES = {
   vac: 'vacuum.heidi',
   map: 'camera.heidi_map',
   selectedMap: 'select.heidi_selected_map', // Kartenwahl (4.3), nur wenn verfügbar
+  mapData: 'camera.heidi_map_data', // Datenkarte (4.3b, Heidi-Karte): Valetudo-Kartenpaket im PNG-Chunk
   status: 'sensor.heidi_status',
   error: 'sensor.heidi_error',
   taskStatus: 'sensor.heidi_task_status',
@@ -138,7 +139,7 @@ export const HA_OPTIONS = {
   ho: ['Warten', 'Leise starten'],
   saug3: ['Leise', 'Standard', 'Stark'],
   wdh2: ['1', '2'],
-  kartendarstellung: ['Dreame-App', 'Xiaomi-Karte', 'Nur Bild'],
+  kartendarstellung: ['Dreame-App', 'Xiaomi-Karte', 'Nur Bild', 'Heidi-Karte'],
   raumnamen: ['Original', 'Deutsch'],
   beiHeimkehr: ['Zur Station', 'Weiterreinigen', 'Pausieren'],
 } as const;

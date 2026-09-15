@@ -57,7 +57,7 @@ input_select:
   heidi_kartendarstellung:
     name: Heidi Kartendarstellung
     icon: mdi:map
-    options: [Dreame-App, Xiaomi-Karte, Nur Bild]
+    options: [Dreame-App, Xiaomi-Karte, Nur Bild, Heidi-Karte]
   heidi_raumnamen:
     name: Heidi Raumnamen
     icon: mdi:translate

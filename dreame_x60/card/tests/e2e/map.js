@@ -87,6 +87,33 @@ const tick = (page, ms = 80) => page.waitForTimeout(ms);
   await page.close();
 }
 
+// ── Heidi-Karte (4.3b): Bild + eigene Ebene aus dem Kartenpaket, Tipp auf die Raumfläche wählt, kein fremdes Karten-Element ──
+{
+  const states = withKarte('Heidi-Karte', { 'camera.heidi_map_data': { entity_id: 'camera.heidi_map_data', state: '2026-09-15 10:56:10', attributes: { entity_picture: '/api/camera_proxy/camera.heidi_map_data?token=x', map_id: 1 } } });
+  const { page, errs } = await H.mount(b, { page: 'reinigen', states, viewport: { width: 1400, height: 1200 } });
+  const hm = (fn) => page.evaluate(fn);
+  const roomsReady = async () => { for (let i = 0; i < 40; i++) { const n = await hm(() => { const h = document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-map-card').shadowRoot.querySelector('dx-heidi-map'); return h ? h.shadowRoot.querySelectorAll('path.room').length : -1; }); if (n === 7) return true; await page.waitForTimeout(100); } return false; };
+  H.check('Heidi-Karte: sieben Raumflächen aus dem Kartenpaket gezeichnet', await roomsReady());
+  H.check('Heidi-Karte: kein eingebettetes Karten-Element (createCardElement nie gerufen)', (await cards(page)).length === 0);
+  const info = await hm(() => { const h = document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-map-card').shadowRoot.querySelector('dx-heidi-map').shadowRoot; const img = h.querySelector('img'); const svg = h.querySelector('svg'); const bad = h.querySelector('path.room[data-room="1"]'); const bb = bad.getBBox(); const ib = img.getBoundingClientRect(); return { natural: [img.naturalWidth, img.naturalHeight], viewBox: svg.getAttribute('viewBox'), labels: h.querySelectorAll('g.label').length, badBox: [Math.round(bb.x), Math.round(bb.y), Math.round(bb.width), Math.round(bb.height)], imgW: Math.round(ib.width), title: bad.querySelector('title').textContent }; });
+  H.checkEqual('Heidi-Karte: viewBox = Bildgröße (map.png 1040×680)', info.viewBox, `0 0 ${info.natural[0]} ${info.natural[1]}`);
+  H.check('Heidi-Karte: sieben Beschriftungen, Bad heißt „Bad“', info.labels === 7 && info.title === 'Bad', info);
+  H.check('Heidi-Karte: Badfläche liegt links in der unteren Bildhälfte (Kalibrierung 90° gedreht), Bad ≈ 2,95 × 3,1 m', info.badBox[0] < 400 && info.badBox[1] > 300 && info.badBox[2] > 150 && info.badBox[3] > 150, info.badBox);
+  await hm(() => document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-map-card').shadowRoot.querySelector('dx-heidi-map').shadowRoot.querySelector('path.room[data-room="1"]').dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true })));
+  await tick(page);
+  H.check('Tipp auf die Badfläche → Bad gewählt (Fläche und Kachel)', (await q(page, '.rooms [data-room="1"].sel')) && (await hm(() => !!document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-map-card').shadowRoot.querySelector('dx-heidi-map').shadowRoot.querySelector('path.room[data-room="1"].sel'))));
+  H.checkEqual('Leiste „1 Raum reinigen“', await hm(() => document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-map-card').shadowRoot.querySelector('.runbar .btn.primary').textContent.trim()), '1 Raum reinigen');
+  await click(page, '.rooms [data-room="1"]'); await tick(page);
+  H.check('Kachel Bad erneut → abgewählt, auch in der Karte', !(await q(page, '.rooms [data-room="1"].sel')) && !(await hm(() => !!document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-map-card').shadowRoot.querySelector('dx-heidi-map').shadowRoot.querySelector('path.room.sel'))));
+  H.check('Heidi-Karte: kein Modus-Umschalter, kein „Hinfahren“, „Sperrzonen“ und „Alles“ vorhanden', !(await q(page, '.modes')) && !(await q(page, '[data-act="goto"]')) && (await q(page, '[data-open="zones"]')) && (await q(page, '[data-act="all"]')));
+  // Ohne Datenkarte: Hinweis statt Flächen
+  await hm(() => { const el = document.querySelector('dreame-x60-panel'); const s = { ...el.hass.states }; delete s['camera.heidi_map_data']; el.hass = { ...el.hass, states: s }; }); await tick(page);
+  H.check('ohne Datenkarte: Hinweis „Datenkarte fehlt“', await hm(() => /Datenkarte fehlt/.test(document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-map-card').shadowRoot.querySelector('dx-heidi-map').shadowRoot.textContent)));
+  H.check('Heidi-Karte: keine Seiten-/Konsolenfehler', errs.length === 0, errs);
+  await H.screenshot(page, 'map-heidi.png');
+  await page.close();
+}
+
 // ── Seite Reinigen mit Dreame-App-Karte (Fixture-Standard): keine Modi, Raumkacheln bleiben ──
 {
   const { page, errs } = await H.mount(b, { page: 'reinigen', viewport: { width: 1400, height: 1200 } });

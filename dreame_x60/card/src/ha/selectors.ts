@@ -357,6 +357,8 @@ export interface MapView {
   roomShapes: RoomShape[];
   /** Kartenwahl (`select.heidi_selected_map`), null wenn die Entität fehlt oder unavailable ist */
   selectedMap: { id: string; value: string; options: string[] } | null;
+  /** Datenkarte (`camera.heidi_map_data`, 4.3b): Bild-URL mit Token und Version (= Zustand); null wenn fehlend/unavailable */
+  mapData: { picture: string; version: string } | null;
 }
 const coord = (v: unknown): number | null => (typeof v === 'number' && isFinite(v) ? v : null);
 function roomShapes(s: States): RoomShape[] {
@@ -373,16 +375,19 @@ function roomShapes(s: States): RoomShape[] {
   }
   return out;
 }
-export const readMap: Selector<MapView> = memoizeSelector([E.map, E.karte, E.chairs, E.selectedMap], (s) => {
+export const readMap: Selector<MapView> = memoizeSelector([E.map, E.karte, E.chairs, E.selectedMap, E.mapData], (s) => {
   const sm = ent(s, E.selectedMap);
+  const mdEnt = ent(s, E.mapData);
+  const mdPic = String(attr(s, E.mapData, 'entity_picture') ?? '');
   return {
+    mapData: mdEnt && !EMPTY.includes(mdEnt.state) && mdPic ? { picture: mdPic, version: mdEnt.state } : null,
     entityPicture: String(attr(s, E.map, 'entity_picture') ?? ''), calibrationPoints: attr(s, E.map, 'calibration_points') ?? null,
     noGoAreas: attr(s, E.map, 'no_go_areas') ?? null, noMoppingAreas: attr(s, E.map, 'no_mopping_areas') ?? null, virtualWalls: attr(s, E.map, 'virtual_walls') ?? null,
     rooms: attr(s, E.map, 'rooms') ?? null, karte: st(s, E.karte), chairs: on(s, E.chairs), chairsId: E.chairs, roomOrder: ROOMS,
     roomShapes: roomShapes(s),
     selectedMap: sm && !EMPTY.includes(sm.state) ? { id: E.selectedMap, value: sm.state, options: opts(s, E.selectedMap) } : null,
   };
-}, { [E.map]: stateAndAttributes(['entity_picture', 'calibration_points', 'no_go_areas', 'no_mopping_areas', 'virtual_walls', 'rooms']) });
+}, { [E.map]: stateAndAttributes(['entity_picture', 'calibration_points', 'no_go_areas', 'no_mopping_areas', 'virtual_walls', 'rooms']), [E.mapData]: stateAndAttributes(['entity_picture']) });
 
 // ───────── Diagnose ─────────
 export interface DiagnosticsView { total: number; missing: string[]; unavailable: string[]; groups: { name: string; total: number; missing: string[]; unavailable: string[] }[] }

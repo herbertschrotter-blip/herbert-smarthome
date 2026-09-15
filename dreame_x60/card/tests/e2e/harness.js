@@ -57,6 +57,9 @@ export async function mount(browser, opts = {}) {
   page.on('pageerror', (e) => errs.push(e.message));
   page.on('console', (m) => { if (m.type() === 'error') errs.push('console: ' + m.text()); });
   await page.route(`${ORIGIN}/**`, (route) => route.fulfill({ status: 200, contentType: 'text/html; charset=utf-8', body: PAGE_HTML }));
+  // Kamerabilder (4.3b Heidi-Karte): gerendertes Kartenbild und Datenkarte (PNG mit Kartenpaket) aus den Fixtures – zuletzt registriert = zuerst geprüft
+  await page.route(`${ORIGIN}/api/camera_proxy/camera.heidi_map**`, (route) => route.fulfill({ status: 200, contentType: 'image/png', body: fs.readFileSync(path.join(FIXTURES, 'map.png')) }));
+  await page.route(`${ORIGIN}/api/camera_proxy/camera.heidi_map_data**`, (route) => route.fulfill({ status: 200, contentType: 'image/png', body: fs.readFileSync(path.join(FIXTURES, 'map-data.png')) }));
   const pg = opts.config?.page ?? opts.page ?? 'start';
   await page.goto(`${ORIGIN}/dreame-x60/${pg}`);
   const js = fs.readFileSync(BUNDLE, 'utf8');

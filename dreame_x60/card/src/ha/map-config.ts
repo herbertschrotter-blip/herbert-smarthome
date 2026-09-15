@@ -31,6 +31,8 @@ export function modeEntry(mode: MapModeKey, rooms: readonly RoomShape[]): MapCon
 
 /** Ob die Kartendarstellung eigene Modi (Räume/Zone/Punkt/Hinfahren) kennt – nur die Xiaomi-Karte. */
 export const hasModes = (kind: string): boolean => kind === 'Xiaomi-Karte';
+/** Heidi-Karte (4.3b): eigenes Bild + Overlay, kein eingebettetes Karten-Element. */
+export const isHeidiKarte = (kind: string): boolean => kind === 'Heidi-Karte';
 
 /** Konfiguration für die Seite Reinigen nach Kartendarstellung (input_select.heidi_kartendarstellung). */
 export function buildMapConfig(kind: string, dark: boolean, mode: MapModeKey, rooms: readonly RoomShape[]): MapConfig {

@@ -7,7 +7,8 @@ import type { TemplateResult } from 'lit';
 import type { HomeAssistant } from '../ha/types';
 import type { HistoryView, MapView, RobotView } from '../ha/selectors';
 import type { DxApi } from '../ha/api';
-import { MAP_MODES, buildMapConfig, hasModes, pictureConfig } from '../ha/map-config';
+import { MAP_MODES, buildMapConfig, hasModes, isHeidiKarte, pictureConfig } from '../ha/map-config';
+import './dx-heidi-map';
 import type { MapConfig, MapModeKey } from '../ha/map-config';
 import { mapElements } from '../shared/caches';
 import { runOrder } from '../domain/strip';
@@ -195,6 +196,7 @@ export class DxMapCard extends LitElement {
     const m = this.map;
     const kind = m?.karte ?? '';
     const modes = hasModes(kind);
+    const heidi = isHeidiKarte(kind);
     const order = m?.roomOrder ?? [];
     const sel = this._sel;
     const sm = m?.selectedMap ?? null;
@@ -203,7 +205,9 @@ export class DxMapCard extends LitElement {
         ${sm ? html`<span class="seg2 maps">${sm.options.map((o) => html`<button class=${o === sm.value ? 'on' : ''} data-map=${o} @click=${() => void this.api?.selectOption(sm.id, o)}>${o}</button>`)}</span>` : html`<span class="r">${kind}</span>`}
       </div>
       <div class="map">
-        <div class="slot"></div>
+        ${heidi
+          ? html`<dx-heidi-map .map=${m} .robot=${this.robot} .selected=${sel} @dx-room-tap=${(e: CustomEvent<{ id: number }>) => { this._sel = toggleRoom(this._sel, e.detail.id); }}></dx-heidi-map>`
+          : html`<div class="slot"></div>`}
         ${modes ? html`<div class="mtools">
           <button class="btn sm ${this._mode === 'goto' ? 'on' : ''}" data-act="goto" @click=${() => this.setMode(this._mode === 'goto' ? 'raeume' : 'goto')}><ha-icon icon="mdi:map-marker"></ha-icon>Hinfahren</button>
           <button class="btn sm" data-open="zones" @click=${this.openZones}><ha-icon icon="mdi:cancel"></ha-icon>Sperrzonen</button>
@@ -214,7 +218,7 @@ export class DxMapCard extends LitElement {
         ${modes
           ? html`<div class="seg2 modes">${(['raeume', 'zone', 'punkt'] as const).map((k) => html`<button data-mode=${k} class=${this._mode === k ? 'on' : ''} @click=${() => this.setMode(k)}>${MAP_MODES[k].label}</button>`)}</div>`
           : html`<button class="btn sm" data-open="zones" @click=${this.openZones}><ha-icon icon="mdi:cancel"></ha-icon>Sperrzonen</button>` /* Dreame-App/Nur Bild: die Karte hat eine eigene Knopfzeile, unser Knopf steht darunter */}
-        <span class="hint">${modes ? MAP_MODES[this._mode].hint : 'Räume antippen, dann „reinigen“'}</span>
+        <span class="hint">${modes ? MAP_MODES[this._mode].hint : heidi ? 'Räume in der Karte oder über die Kacheln antippen, dann „reinigen“' : 'Räume antippen, dann „reinigen“'}</span>
         <button class="btn primary sm" data-act="all" @click=${this.runAll}><ha-icon icon="mdi:play"></ha-icon>Alles</button>
       </div>
       ${!modes || this._mode === 'raeume' ? html`
