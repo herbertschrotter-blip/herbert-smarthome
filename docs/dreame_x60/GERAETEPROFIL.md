@@ -30,7 +30,11 @@ Gerät“. Die Antwort gibt ein Modul, das Geräteprofil.
 
 Ein Modul `src/ha/profile.ts` baut aus HA ein Profil:
 
-- **Räume** aus `camera.<gerät>_map.rooms` (ID, Name, Sichtbarkeit) statt ROOMS; Kurznamen und Symbole aus einer
+- **Räume** aus `camera.<gerät>_map.rooms` (ID, Name, Typ, Sichtbarkeit) statt ROOMS. Die App kennt 15 Standard-Raumtypen
+  (Attribut `type` 1..15: Wohnzimmer, Schlafzimmer, Nebenzimmer, Arbeitszimmer, Küche, Esszimmer, Bad, Balkon, Flur,
+  Allzweckraum, Garderobe, Salon, Büro, Fitnessbereich, Freizeitbereich) – diese Namen und Symbole kennt die Karte als
+  Wörterbuch (`ROOM_TYPES` in `domain/rooms.ts`), sie erkennt auch die Sprachsteuerung; benutzerdefinierte Räume
+  (`type` 0) heißen wie in der App (custom_name) mit Symbol nach Stichwort. Kurznamen und Symbole sonst aus einer
   Einstellung (Standard: Name gekürzt, Symbol nach Stichwort „Bad“, „Küche“ …; später ein Menü, ClickUp „So wenig wie
   möglich fest verdrahtet“). Raum 8 „Balkon“ verschwindet über die Sichtbarkeit von selbst.
 - **Optionen** aus den `options` der Select-Entitäten (`select.<gerät>_suction_level` usw.) mit deutscher Übersetzung

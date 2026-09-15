@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.18 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.19 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -838,6 +838,23 @@ function memoizeSelector(ids, fn, compare = {}) {
 }
 
 // src/domain/rooms.ts
+var ROOM_TYPES = {
+  1: { name: "Wohnzimmer", en: "Living Room", icon: "mdi:sofa-outline" },
+  2: { name: "Schlafzimmer", en: "Primary Bedroom", icon: "mdi:bed-king-outline" },
+  3: { name: "Arbeitszimmer", en: "Study", icon: "mdi:bookshelf" },
+  4: { name: "K\xFCche", en: "Kitchen", icon: "mdi:chef-hat" },
+  5: { name: "Esszimmer", en: "Dining Hall", icon: "mdi:silverware-fork-knife" },
+  6: { name: "Bad", en: "Bathroom", icon: "mdi:shower" },
+  7: { name: "Balkon", en: "Balcony", icon: "mdi:balcony" },
+  8: { name: "Flur", en: "Corridor", icon: "mdi:foot-print" },
+  9: { name: "Allzweckraum", en: "Utility Room", icon: "mdi:archive-outline" },
+  10: { name: "Garderobe", en: "Closet", icon: "mdi:hanger" },
+  11: { name: "Salon", en: "Meeting Room", icon: "mdi:presentation" },
+  12: { name: "B\xFCro", en: "Office", icon: "mdi:monitor" },
+  13: { name: "Fitnessbereich", en: "Fitness Area", icon: "mdi:dumbbell" },
+  14: { name: "Freizeitbereich", en: "Recreation Area", icon: "mdi:gamepad-variant-outline" },
+  15: { name: "Nebenzimmer", en: "Secondary Bedroom", icon: "mdi:bed-single-outline" }
+};
 var ICON_BY_KEYWORD = [
   [/\b(wc|toilet|gäste-?wc|gaeste-?wc)\b/i, "mdi:toilet"],
   [/bad|bath|dusche|shower/i, "mdi:shower"],
@@ -862,10 +879,12 @@ function roomIcon(name, fallback) {
 }
 function shortName(name) {
   const n4 = name.trim();
+  const num2 = /^(.*\S)\s+(\d+)$/.exec(n4);
+  if (num2) return `${shortName(num2[1])} ${num2[2]}`;
   const m2 = /^(.+?)zimmer$/i.exec(n4);
   if (m2 && m2[1].length <= 7) return `${m2[1]}z.`;
   if (n4.length <= 7) return n4;
-  return `${n4.slice(0, 6)}.`;
+  return `${n4.slice(0, 6).trimEnd()}.`;
 }
 function roomsFromMap(rooms, deutsch = false, namesDe = {}) {
   if (!rooms || typeof rooms !== "object") return [];
@@ -875,9 +894,18 @@ function roomsFromMap(rooms, deutsch = false, namesDe = {}) {
     const id = typeof r4.room_id === "number" ? r4.room_id : parseInt(key, 10);
     if (!Number.isInteger(id) || id <= 0) continue;
     if (String(r4.visibility ?? "").toLowerCase() === "hidden") continue;
-    const raw = String(r4.custom_name ?? r4.name ?? "").trim() || `Raum ${id}`;
-    const name = deutsch ? namesDe[raw] ?? raw : raw;
-    out.push({ id, name, short: shortName(name), icon: roomIcon(name, r4.icon), order: typeof r4.order === "number" ? r4.order : id });
+    const typed = typeof r4.type === "number" && r4.type > 0 ? ROOM_TYPES[r4.type] : void 0;
+    let name, icon;
+    if (typed) {
+      const suffix = /\s(\d+)$/.exec(String(r4.name ?? ""))?.[1];
+      name = (deutsch ? typed.name : typed.en) + (suffix ? ` ${suffix}` : "");
+      icon = typed.icon;
+    } else {
+      const raw = String(r4.custom_name ?? r4.name ?? "").trim() || `Raum ${id}`;
+      name = deutsch ? namesDe[raw] ?? raw : raw;
+      icon = roomIcon(name, r4.icon);
+    }
+    out.push({ id, name, short: shortName(name), icon, order: typeof r4.order === "number" ? r4.order : id });
   }
   return out.sort((a3, b3) => a3.order - b3.order || a3.id - b3.id);
 }
@@ -2027,7 +2055,7 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.18";
+var VERSION = "2.0.0-alpha.19";
 
 // src/shared/robot-svg.ts
 var robotSvg = w`<svg viewBox="0 0 200 200" class="robotpic" aria-hidden="true">

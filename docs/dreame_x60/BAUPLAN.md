@@ -185,7 +185,10 @@ Selektoren nennen ihre ID-Listen als Funktionen (`memoizeSelector(() => [...])`)
 neu. Anzeigename (`deviceName()`: Geräte-Register, sonst `friendly_name` ohne die Verdopplung „Heidi  Heidi“)
 statt „Heidi“ in Kopf, Seitenleiste, Karte, Schnellstart. **Räume nicht fest verdrahtet (PD-013, 15.09.):** die
 Raumliste kommt aus `camera.<gerät>_map.rooms` (`domain/rooms.ts`, `ha/profile.ts`: sichtbare Räume in App-Reihenfolge
-`order`, Name = custom_name, Kurzname und Symbol nach Standardregel), ohne Karte aus den Raum-Selects; Optionen aus den
+`order`; Standardtypen der App `type` 1..15 → Name und Symbol aus dem Wörterbuch `ROOM_TYPES` (Wohnzimmer, Schlafzimmer,
+Nebenzimmer, Arbeitszimmer, Küche, Esszimmer, Bad, Balkon, Flur, Allzweckraum, Garderobe, Salon, Büro, Fitnessbereich,
+Freizeitbereich; auch für die Sprachsteuerung), benutzerdefinierte Räume `type` 0 → custom_name, Symbol nach Stichwort;
+Kurzname nach Standardregel), ohne Karte aus den Raum-Selects; Optionen aus den
 `options` der Selects (`select.<gerät>_cleaning_mode|suction_level|mop_pad_humidity|cleaning_route`, neu im Vertrag),
 Fähigkeiten = Entität vorhanden (`profile.has('selfClean')`). Raum-IDs sind beliebige positive Zahlen (2 … 20 Räume).
 **Paket-Helfer** (heidi.yaml: `sensor.heidi_phase`,

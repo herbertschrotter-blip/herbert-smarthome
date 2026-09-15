@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { roomIcon, roomsFromMap, shortName } from '../../src/domain/rooms';
+import { ROOM_TYPES, roomIcon, roomsFromMap, shortName } from '../../src/domain/rooms';
 import { optionLabel, readProfile } from '../../src/ha/profile';
 import { readAllRoomValues, readDiagnostics, readMap } from '../../src/ha/selectors';
 import { discoverFromStates } from '../../src/ha/device';
@@ -43,6 +43,16 @@ test('Kurzname und Symbol nach Standardregel', () => {
   assert.equal(roomIcon('Living Room'), 'mdi:sofa-outline'); assert.equal(roomIcon('Kinderzimmer'), 'mdi:teddy-bear'); assert.equal(roomIcon('Balkon'), 'mdi:balcony');
   assert.equal(roomIcon('Raum 12'), 'mdi:floor-plan', 'unbekannt → Grundriss'); assert.equal(roomIcon('Raum 12', 'mdi:home-outline'), 'mdi:floor-plan', 'Standardsymbol der Integration zählt nicht');
   assert.equal(roomIcon('Raum 12', 'mdi:star'), 'mdi:star', 'eigenes Symbol der Integration bleibt');
+});
+
+test('Standardtypen der App (type 1..15): Name wie in der App, Symbol je Typ, Zählsuffix; Original = Name der Integration', () => {
+  const rooms = { 1: { name: 'Living Room', type: 1, order: 1 }, 2: { name: 'Bathroom', type: 6, order: 2 }, 3: { name: 'Primary Bedroom 2', type: 2, order: 3 }, 4: { name: 'Meine Kammer', custom_name: 'Meine Kammer', type: 0, order: 4 }, 5: { name: 'Office', type: 12, order: 5 } } as unknown as Record<string, never>;
+  assert.deepEqual(roomsFromMap(rooms, true).map((r) => [r.id, r.name, r.short, r.icon]), [
+    [1, 'Wohnzimmer', 'Wohnz.', 'mdi:sofa-outline'], [2, 'Bad', 'Bad', 'mdi:shower'], [3, 'Schlafzimmer 2', 'Schlafz. 2', 'mdi:bed-king-outline'],
+    [4, 'Meine Kammer', 'Meine.', 'mdi:wardrobe-outline'], [5, 'Büro', 'Büro', 'mdi:monitor'],
+  ]);
+  assert.deepEqual(roomsFromMap(rooms, false).map((r) => r.name), ['Living Room', 'Bathroom', 'Primary Bedroom 2', 'Meine Kammer', 'Office'], 'Original: Namen der Integration');
+  assert.equal(Object.keys(ROOM_TYPES).length, 15, 'alle 15 Typen der App');
 });
 
 test('Heidi-Abzug: sieben Räume in App-Reihenfolge, Kurznamen wie v1, Raum 8 (versteckt) fehlt', () => {
