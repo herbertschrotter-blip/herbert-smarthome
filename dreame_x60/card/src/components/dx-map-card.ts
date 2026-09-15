@@ -207,11 +207,13 @@ export class DxMapCard extends LitElement {
         ${modes ? html`<div class="mtools">
           <button class="btn sm ${this._mode === 'goto' ? 'on' : ''}" data-act="goto" @click=${() => this.setMode(this._mode === 'goto' ? 'raeume' : 'goto')}><ha-icon icon="mdi:map-marker"></ha-icon>Hinfahren</button>
           <button class="btn sm" data-open="zones" @click=${this.openZones}><ha-icon icon="mdi:cancel"></ha-icon>Sperrzonen</button>
-        </div>` : html`<div class="mtools"><button class="btn sm" data-open="zones" @click=${this.openZones}><ha-icon icon="mdi:cancel"></ha-icon>Sperrzonen</button></div>`}
+        </div>` : nothing}
       </div>
       ${this._error ? html`<div class="err">${this._error}</div>` : nothing}
       <div class="mapmodes">
-        ${modes ? html`<div class="seg2 modes">${(['raeume', 'zone', 'punkt'] as const).map((k) => html`<button data-mode=${k} class=${this._mode === k ? 'on' : ''} @click=${() => this.setMode(k)}>${MAP_MODES[k].label}</button>`)}</div>` : nothing}
+        ${modes
+          ? html`<div class="seg2 modes">${(['raeume', 'zone', 'punkt'] as const).map((k) => html`<button data-mode=${k} class=${this._mode === k ? 'on' : ''} @click=${() => this.setMode(k)}>${MAP_MODES[k].label}</button>`)}</div>`
+          : html`<button class="btn sm" data-open="zones" @click=${this.openZones}><ha-icon icon="mdi:cancel"></ha-icon>Sperrzonen</button>` /* Dreame-App/Nur Bild: die Karte hat eine eigene Knopfzeile, unser Knopf steht darunter */}
         <span class="hint">${modes ? MAP_MODES[this._mode].hint : 'Räume antippen, dann „reinigen“'}</span>
         <button class="btn primary sm" data-act="all" @click=${this.runAll}><ha-icon icon="mdi:play"></ha-icon>Alles</button>
       </div>

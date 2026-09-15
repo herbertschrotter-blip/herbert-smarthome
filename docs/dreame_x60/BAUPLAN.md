@@ -53,7 +53,7 @@ Claude Code im Web bereitet diese Aufgaben vor, führt sie aber nicht aus.
 | 4.0 | Navigation `dx-nav` (Seitenleiste / Symbolleiste / Tab-Leiste) + Bento-Übersicht mit Platzhaltern | fertig (4788c68; nav.js 28, render.js 42 grün; Version 2.0.0-alpha.2 eingespielt; Herbert 15.09.: „passt“, PD-007 freigegeben) |
 | 4.1 | `dx-hero` + `dx-auftrag` | fertig (15.09.; hero.js 16 grün inkl. 85 v1-Kopf-Zustände und Render-Ruhe, strip.test.ts grün; Version 2.0.0-alpha.9 eingespielt; Startpunkt-Fall, Knopfbreite, Stationszeile, Lade-Blitz, „Mopp“ und PD-009 am echten Lauf nachgebessert); Sichtprüfung durch Herbert offen |
 | 4.2 | `dx-dialog` (modal/sheet/confirm) | fertig (15.09.; dialog.js 30 grün: Ereignisse, Escape, Fokus, Tab-Falle, Sheet < 640 px, wide, Shell-Bestätigung; Version 2.0.0-alpha.11 eingespielt); Sichtprüfung durch Herbert offen |
-| 4.3 | `dx-map-card` (Seite Reinigen) + `dx-quickstart` | fertig (15.09.; map.js 39 grün: Cache über 20 Ticks, ein Modus je Karte, Umrisse aus der Fixture, Hinfahren, Kartenwahl, Räume/Alles/Szene/Stühle mit Bestätigung, compact, Schnellstart; Version 2.0.0-alpha.13 eingespielt); **Sichtprüfung mit der echten Xiaomi-Karte in HA durch Herbert offen** (Playwright kennt nur den Karten-Stub) |
+| 4.3 | `dx-map-card` (Seite Reinigen) + `dx-quickstart` | fertig (15.09.; map.js 39 grün: Cache über 20 Ticks, ein Modus je Karte, Umrisse aus der Fixture, Hinfahren, Kartenwahl, Räume/Alles/Szene/Stühle mit Bestätigung, compact, Schnellstart; Version 2.0.0-alpha.14 eingespielt); **Sichtprüfung mit der echten Xiaomi-Karte in HA durch Herbert offen** (Playwright kennt nur den Karten-Stub) |
 | 4.4 | `dx-planer` (Seite Planer) | offen |
 | 4.5 | `dx-planer-editor` + `dx-clock-picker` | offen |
 | 4.6 | `dx-rooms-dialog` | offen |

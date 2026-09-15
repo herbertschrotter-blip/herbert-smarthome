@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.13 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.14 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -1816,7 +1816,7 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.13";
+var VERSION = "2.0.0-alpha.14";
 
 // src/shared/robot-svg.ts
 var robotSvg = w`<svg viewBox="0 0 200 200" class="robotpic" aria-hidden="true">
@@ -2615,11 +2615,11 @@ var DxMapCard = class extends i4 {
         ${modes ? b2`<div class="mtools">
           <button class="btn sm ${this._mode === "goto" ? "on" : ""}" data-act="goto" @click=${() => this.setMode(this._mode === "goto" ? "raeume" : "goto")}><ha-icon icon="mdi:map-marker"></ha-icon>Hinfahren</button>
           <button class="btn sm" data-open="zones" @click=${this.openZones}><ha-icon icon="mdi:cancel"></ha-icon>Sperrzonen</button>
-        </div>` : b2`<div class="mtools"><button class="btn sm" data-open="zones" @click=${this.openZones}><ha-icon icon="mdi:cancel"></ha-icon>Sperrzonen</button></div>`}
+        </div>` : A}
       </div>
       ${this._error ? b2`<div class="err">${this._error}</div>` : A}
       <div class="mapmodes">
-        ${modes ? b2`<div class="seg2 modes">${["raeume", "zone", "punkt"].map((k2) => b2`<button data-mode=${k2} class=${this._mode === k2 ? "on" : ""} @click=${() => this.setMode(k2)}>${MAP_MODES[k2].label}</button>`)}</div>` : A}
+        ${modes ? b2`<div class="seg2 modes">${["raeume", "zone", "punkt"].map((k2) => b2`<button data-mode=${k2} class=${this._mode === k2 ? "on" : ""} @click=${() => this.setMode(k2)}>${MAP_MODES[k2].label}</button>`)}</div>` : b2`<button class="btn sm" data-open="zones" @click=${this.openZones}><ha-icon icon="mdi:cancel"></ha-icon>Sperrzonen</button>`}
         <span class="hint">${modes ? MAP_MODES[this._mode].hint : "R\xE4ume antippen, dann \u201Ereinigen\u201C"}</span>
         <button class="btn primary sm" data-act="all" @click=${this.runAll}><ha-icon icon="mdi:play"></ha-icon>Alles</button>
       </div>
