@@ -3,7 +3,7 @@
  * Robotereinstellungen, Einstellungs-Panel, Prognose) als HTML/CSS/JS.
  * Alle Daten kommen live aus Home Assistant (hass.states), alle Aktionen laufen über hass.callService.
  */
-const HP_VERSION = "1.6.1";
+const HP_VERSION = "1.6.2";
 
 const E = {
   vac: "vacuum.heidi",
@@ -411,7 +411,7 @@ class HeidiPanel extends HTMLElement {
 
   _signature() {
     const ids = [E.vac, E.autoStatus, E.heutePlan, E.prognose, E.prognoseAktiv, E.planerBereich, E.dark, E.karte, E.raumnamen, E.rotation, E.jemand, E.chairs, E.automatik,
-      "sensor.heidi_status", E.phase, "sensor.heidi_battery_level", "sensor.heidi_current_room", "sensor.heidi_error", "sensor.heidi_cleaning_history", "sensor.heidi_cleaned_area", "sensor.heidi_cleaning_time",
+      "sensor.heidi_status", "sensor.heidi_task_status", E.phase, "sensor.heidi_battery_level", "sensor.heidi_current_room", "sensor.heidi_error", "sensor.heidi_cleaning_history", "sensor.heidi_cleaned_area", "sensor.heidi_cleaning_time",
       "sensor.heidi_main_brush_left", "sensor.heidi_side_brush_left", "sensor.heidi_filter_left", "sensor.heidi_sensor_dirty_left", "sensor.heidi_wheel_dirty_left",
       "sensor.heidi_dust_bag_status", "sensor.heidi_clean_water_tank_status", "sensor.heidi_dirty_water_tank_status", "sensor.heidi_detergent_status", "sensor.heidi_low_water_warning", "sensor.heidi_auto_empty_status", "sensor.heidi_self_wash_base_status",
       "sensor.heidi_cleaning_count", "sensor.heidi_total_cleaned_area", "sensor.heidi_total_cleaning_time", "sensor.heidi_first_cleaning_date",
