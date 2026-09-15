@@ -37,6 +37,8 @@ export class DxHero extends LitElement {
     .battbar::before { content: ''; position: absolute; top: -5px; left: 5px; width: 6px; height: 3px; border-radius: 1px; background: var(--dx-text-muted); }
     .battbar i { display: block; position: absolute; left: 2px; right: 2px; bottom: 2px; background: var(--dx-positive); border-radius: 2px; height: calc(var(--p) * 1%); }
     .battbar.warn i { background: var(--dx-warning); } .battbar.bad i { background: var(--dx-danger); }
+    .battrow { display: flex; align-items: center; gap: 6px; }
+    .battrow .bolt { --mdc-icon-size: 16px; width: 16px; height: 16px; color: var(--dx-positive); margin-top: 4px; }
     .params { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
     .param { background: var(--dx-surface-raised); border: 1px solid var(--dx-border); border-radius: var(--dx-radius-md); padding: 10px; display: grid; gap: 2px; min-height: 44px; text-align: left; }
     .param:hover { background: var(--dx-surface-active); }
@@ -80,7 +82,7 @@ export class DxHero extends LitElement {
 
   /** Stationszeile aus den Attributen docked/washing/drying/charging – nicht aus dem Hauptzustand (der bleibt bei der Mopp-Wäsche „cleaning“). */
   private stationText(r: RobotView): string {
-    if (r.docked) return [r.washing ? 'wäscht Mopps' : r.drying ? 'trocknet' : 'angedockt', r.charging ? 'lädt' : null].filter(Boolean).join(' · ');
+    if (r.docked) return [r.washing ? 'Mopp-Wäsche' : r.drying ? 'trocknet' : 'angedockt', r.charging ? 'lädt' : null].filter(Boolean).join(' · ');
     if (r.running) return 'unterwegs';
     return STATUS_DE[r.vac] ?? r.vac;
   }
@@ -103,7 +105,7 @@ export class DxHero extends LitElement {
         ${robotSvg}
         <button class="batt" title="Akku" @click=${() => moreInfo(this, r.moreInfo.battery)}>
           <div class="kv"><span class="v">${r.battery}<span class="u"> %</span></span></div><div class="lbl">Akku</div>
-          <div class="battbar ${battCls}" style="--p:${r.battery}"><i></i></div>
+          <div class="battrow"><div class="battbar ${battCls}" style="--p:${r.battery}"><i></i></div>${r.charging ? html`<ha-icon class="bolt" icon="mdi:flash" title="lädt"></ha-icon>` : nothing}</div>
         </button>
       </div>
       <div class="chips">${r.persons.filter((p) => p.known).map((p) => html`<button class="chip ${p.home ? 'on' : ''} ${p.counts ? '' : 'dim'}" title="${p.home ? 'zu Hause' : 'abwesend'}${p.counts ? '' : ' · zählt nicht'}" @click=${() => moreInfo(this, p.id)}><ha-icon icon=${p.home ? 'mdi:account' : 'mdi:account-outline'}></ha-icon>${p.name}</button>`)}${h.roomChip ? html`<span class="chip on"><ha-icon icon="mdi:floor-plan"></ha-icon>${h.roomChip}</span>` : nothing}${h.errorChip ? html`<button class="chip ${h.errorChip.level === 'danger' ? 'bad' : 'warn'}" @click=${() => moreInfo(this, r.moreInfo.error)}><ha-icon icon=${h.errorChip.level === 'danger' ? 'mdi:alert' : 'mdi:information-outline'}></ha-icon>${h.errorChip.text}</button>` : nothing}<span class="chip" title="Nicht stören"><ha-icon icon="mdi:sleep"></ha-icon>${h.dnd}</span></div>

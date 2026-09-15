@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.6 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.7 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -1777,7 +1777,7 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.6";
+var VERSION = "2.0.0-alpha.7";
 
 // src/shared/robot-svg.ts
 var robotSvg = w`<svg viewBox="0 0 200 200" class="robotpic" aria-hidden="true">
@@ -2009,6 +2009,8 @@ var DxHero = class extends i4 {
     .battbar::before { content: ''; position: absolute; top: -5px; left: 5px; width: 6px; height: 3px; border-radius: 1px; background: var(--dx-text-muted); }
     .battbar i { display: block; position: absolute; left: 2px; right: 2px; bottom: 2px; background: var(--dx-positive); border-radius: 2px; height: calc(var(--p) * 1%); }
     .battbar.warn i { background: var(--dx-warning); } .battbar.bad i { background: var(--dx-danger); }
+    .battrow { display: flex; align-items: center; gap: 6px; }
+    .battrow .bolt { --mdc-icon-size: 16px; width: 16px; height: 16px; color: var(--dx-positive); margin-top: 4px; }
     .params { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
     .param { background: var(--dx-surface-raised); border: 1px solid var(--dx-border); border-radius: var(--dx-radius-md); padding: 10px; display: grid; gap: 2px; min-height: 44px; text-align: left; }
     .param:hover { background: var(--dx-surface-active); }
@@ -2048,7 +2050,7 @@ var DxHero = class extends i4 {
   }
   /** Stationszeile aus den Attributen docked/washing/drying/charging – nicht aus dem Hauptzustand (der bleibt bei der Mopp-Wäsche „cleaning“). */
   stationText(r4) {
-    if (r4.docked) return [r4.washing ? "w\xE4scht Mopps" : r4.drying ? "trocknet" : "angedockt", r4.charging ? "l\xE4dt" : null].filter(Boolean).join(" \xB7 ");
+    if (r4.docked) return [r4.washing ? "Mopp-W\xE4sche" : r4.drying ? "trocknet" : "angedockt", r4.charging ? "l\xE4dt" : null].filter(Boolean).join(" \xB7 ");
     if (r4.running) return "unterwegs";
     return STATUS_DE[r4.vac] ?? r4.vac;
   }
@@ -2070,7 +2072,7 @@ var DxHero = class extends i4 {
         ${robotSvg}
         <button class="batt" title="Akku" @click=${() => moreInfo(this, r4.moreInfo.battery)}>
           <div class="kv"><span class="v">${r4.battery}<span class="u"> %</span></span></div><div class="lbl">Akku</div>
-          <div class="battbar ${battCls}" style="--p:${r4.battery}"><i></i></div>
+          <div class="battrow"><div class="battbar ${battCls}" style="--p:${r4.battery}"><i></i></div>${r4.charging ? b2`<ha-icon class="bolt" icon="mdi:flash" title="lädt"></ha-icon>` : A}</div>
         </button>
       </div>
       <div class="chips">${r4.persons.filter((p3) => p3.known).map((p3) => b2`<button class="chip ${p3.home ? "on" : ""} ${p3.counts ? "" : "dim"}" title="${p3.home ? "zu Hause" : "abwesend"}${p3.counts ? "" : " \xB7 z\xE4hlt nicht"}" @click=${() => moreInfo(this, p3.id)}><ha-icon icon=${p3.home ? "mdi:account" : "mdi:account-outline"}></ha-icon>${p3.name}</button>`)}${h3.roomChip ? b2`<span class="chip on"><ha-icon icon="mdi:floor-plan"></ha-icon>${h3.roomChip}</span>` : A}${h3.errorChip ? b2`<button class="chip ${h3.errorChip.level === "danger" ? "bad" : "warn"}" @click=${() => moreInfo(this, r4.moreInfo.error)}><ha-icon icon=${h3.errorChip.level === "danger" ? "mdi:alert" : "mdi:information-outline"}></ha-icon>${h3.errorChip.text}</button>` : A}<span class="chip" title="Nicht stören"><ha-icon icon="mdi:sleep"></ha-icon>${h3.dnd}</span></div>
