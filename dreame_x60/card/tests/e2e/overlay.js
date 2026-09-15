@@ -29,12 +29,15 @@ H.check('dx-back ohne back → zu', !(await has('.overlay')));
 
 // Bestätigung: OK ruft onOk, Abbrechen nicht
 await sr(() => { window._ok = 0; const el = document.querySelector('dreame-x60-panel'); el.openOverlay({ kind: 'confirm', text: 'Wirklich?', onOk: () => { window._ok++; } }); }); await tick();
-const txt = await H.shadowText(page, '.alert .m');
+// seit 4.2 liegt die Bestätigung im Shadow DOM von dx-dialog
+const dlgText = (sel) => sr((s) => { const d = document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-dialog'); const e = d && d.shadowRoot.querySelector(s); return e ? e.textContent.replace(/\s+/g, ' ').trim() : null; }, sel);
+const dlgClick = (sel, i) => sr(({ s, i }) => { document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-dialog').shadowRoot.querySelectorAll(s)[i].click(); }, { s: sel, i });
+const txt = await dlgText('.alert .m');
 H.check('Bestätigungstext sichtbar', txt === 'Wirklich?', txt);
-await sr(() => { const bs = document.querySelector('dreame-x60-panel').shadowRoot.querySelectorAll('.alert .b button'); bs[0].click(); }); await tick();
+await dlgClick('.alert .b button', 0); await tick();
 H.check('Abbrechen: onOk nicht gerufen, Overlay zu', (await sr(() => window._ok)) === 0 && !(await has('.overlay')));
 await sr(() => { const el = document.querySelector('dreame-x60-panel'); el.openOverlay({ kind: 'confirm', text: 'Wirklich?', onOk: () => { window._ok++; } }); }); await tick();
-await sr(() => { const bs = document.querySelector('dreame-x60-panel').shadowRoot.querySelectorAll('.alert .b button'); bs[1].click(); }); await tick();
+await dlgClick('.alert .b button', 1); await tick();
 H.check('OK: onOk gerufen, Overlay zu', (await sr(() => window._ok)) === 1 && !(await has('.overlay')));
 
 // Toast

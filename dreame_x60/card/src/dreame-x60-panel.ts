@@ -21,6 +21,7 @@ import { VERSION } from './version';
 import './components/dx-nav';
 import './components/dx-hero';
 import './components/dx-auftrag';
+import './components/dx-dialog';
 
 export const ELEMENT = 'dreame-x60-panel';
 export { PAGES };
@@ -221,19 +222,19 @@ export class DreameX60Panel extends LitElement {
       </div>`;
   }
 
-  /** Overlay: bis 4.2 (dx-dialog) ein Platzhalter-Rahmen; confirm ist schon bedienbar. */
+  /** Overlay im dx-dialog-Rahmen (4.2): confirm fertig; die Inhalte der übrigen Dialoge kommen mit ihren Bausteinen (4.5, 4.6, 4.8, 4.11, 4.12). */
   private renderOverlay(): TemplateResult | typeof nothing {
     const o = this._overlay;
     if (!o) return nothing;
     if (o.kind === 'confirm') {
-      return html`<div class="overlay" data-kind="confirm"><div class="scrim" @click=${() => this.closeOverlay()}></div>
-        <div class="alert" role="alertdialog" aria-modal="true"><div class="m">${o.text}${o.sub ? html`<small>${o.sub}</small>` : nothing}</div>
-          <div class="b"><button @click=${() => this.closeOverlay()}>Abbrechen</button><button class=${o.danger ? 'danger' : ''} @click=${() => this.confirmOverlay()}>${o.okLabel ?? 'OK'}</button></div></div></div>`;
+      return html`<dx-dialog class="overlay" data-kind="confirm" variant="confirm" .text=${o.text} .subText=${o.sub ?? ''} .okLabel=${o.okLabel ?? 'OK'} ?danger=${!!o.danger}></dx-dialog>`;
     }
-    return html`<div class="overlay" data-kind=${o.kind}><div class="scrim" @click=${() => this.closeOverlay()}></div>
-      <div class="dlg" role="dialog" aria-modal="true"><h2>Overlay „${o.kind}“ <button class="iconbtn" aria-label="Schließen" @click=${() => this.closeOverlay()}>✕</button></h2>
-        <div class="hint">Platzhalter – der Dialog entsteht in Phase 4 (dx-dialog 4.2).</div>
-        <div class="foot">${'back' in o && o.back ? html`<button class="btn" @click=${() => this.backOverlay()}>Zurück</button>` : nothing}<button class="btn primary" @click=${() => this.closeOverlay()}>Schließen</button></div></div></div>`;
+    const hasBack = 'back' in o && !!o.back;
+    return html`<dx-dialog class="overlay" data-kind=${o.kind} heading=${'Overlay „' + o.kind + '“'} ?back=${hasBack}>
+        <div class="hint">Platzhalter – der Inhalt dieses Dialogs entsteht mit seinem Baustein in Phase 4.</div>
+        ${hasBack ? html`<button slot="foot" class="btn" @click=${() => this.backOverlay()}>Zurück</button>` : nothing}
+        <button slot="foot" class="btn primary" @click=${() => this.closeOverlay()}>Schließen</button>
+      </dx-dialog>`;
   }
 }
 

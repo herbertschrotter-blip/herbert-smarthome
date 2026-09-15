@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.9 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.10 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -1734,35 +1734,12 @@ var shell = i`
   :host { position: relative; }
   .list { margin: 0; padding-left: 18px; }
   .preview li { color: var(--dx-text); }
-  .overlay { position: fixed; inset: 0; z-index: 30; }
-  .scrim { position: absolute; inset: 0; background: rgba(3, 6, 9, 0.62); animation: fade var(--dx-dur) both; }
-  .dlg {
-    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
-    width: min(640px, calc(100% - 32px)); max-height: calc(100% - 32px); overflow: auto;
-    background: var(--dx-bg-elevated); border: 1px solid var(--dx-border-strong); border-radius: var(--dx-radius-xl);
-    padding: 18px 20px 20px; box-shadow: var(--dx-shadow-float); display: grid; gap: 14px; align-content: start; animation: fade var(--dx-dur) var(--dx-ease) both;
-  }
-  .dlg > h2 { font-size: 18px; display: flex; align-items: center; gap: 8px; }
-  .dlg > h2 .iconbtn { margin-left: auto; }
-  .dlg .foot { display: flex; justify-content: flex-end; gap: 8px; }
-  .iconbtn { width: 40px; height: 40px; border-radius: var(--dx-radius-md); display: inline-flex; align-items: center; justify-content: center; color: var(--dx-text-muted); }
-  .iconbtn:hover { background: var(--dx-surface-raised); color: var(--dx-text); }
   .btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: var(--dx-touch); padding: 0 16px;
     border-radius: var(--dx-radius-md); background: var(--dx-surface-raised); border: 1px solid var(--dx-border); font-weight: 600; font-size: 14px; color: var(--dx-text);
   }
   .btn:hover { background: var(--dx-surface-active); }
   .btn.primary { background: var(--dx-positive); color: var(--dx-on-positive); border-color: transparent; }
-  .alert {
-    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(360px, calc(100% - 48px));
-    background: var(--dx-bg-elevated); border: 1px solid var(--dx-border-strong); border-radius: var(--dx-radius-lg); box-shadow: var(--dx-shadow-float); overflow: hidden; animation: fade var(--dx-dur) var(--dx-ease) both;
-  }
-  .alert .m { padding: 20px 18px 16px; font-weight: 600; font-size: 15px; text-align: center; }
-  .alert .m small { display: block; font-weight: 400; color: var(--dx-text-muted); font-size: 13px; margin-top: 6px; }
-  .alert .b { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--dx-border); }
-  .alert .b button { height: 48px; font-weight: 600; color: var(--dx-text-muted); }
-  .alert .b button + button { border-left: 1px solid var(--dx-border); color: var(--dx-accent); }
-  .alert .b button.danger { color: var(--dx-danger); }
   .toast {
     position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); z-index: 60;
     background: var(--dx-surface-active); border: 1px solid var(--dx-border-strong); color: var(--dx-text);
@@ -1770,14 +1747,10 @@ var shell = i`
     max-width: min(90vw, 520px); text-align: center; pointer-events: none; animation: fade var(--dx-dur) var(--dx-ease) both;
   }
   @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
-  @container content (max-width: 640px) {
-    .dlg { top: auto; bottom: 0; left: 0; transform: none; width: 100%; max-height: 92%; border-radius: var(--dx-radius-xl) var(--dx-radius-xl) 0 0; padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
-    .alert { top: auto; bottom: 16px; left: 16px; right: 16px; transform: none; width: auto; }
-  }
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.9";
+var VERSION = "2.0.0-alpha.10";
 
 // src/shared/robot-svg.ts
 var robotSvg = w`<svg viewBox="0 0 200 200" class="robotpic" aria-hidden="true">
@@ -2131,6 +2104,167 @@ var DxAuftrag = class extends i4 {
 };
 if (!customElements.get(AUFTRAG_ELEMENT)) customElements.define(AUFTRAG_ELEMENT, DxAuftrag);
 
+// src/components/dx-dialog.ts
+var DIALOG_ELEMENT = "dx-dialog";
+var FOCUSABLE = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+function deepActive() {
+  let a3 = document.activeElement;
+  while (a3?.shadowRoot?.activeElement) a3 = a3.shadowRoot.activeElement;
+  return a3;
+}
+var DxDialog = class extends i4 {
+  constructor() {
+    super();
+    this._prevFocus = null;
+    this._onKey = (e4) => {
+      if (e4.key === "Escape") {
+        e4.stopPropagation();
+        this.close();
+        return;
+      }
+      if (e4.key === "Tab") this.trapTab(e4);
+    };
+    this.variant = "modal";
+    this.heading = "";
+    this.sub = "";
+    this.text = "";
+    this.subText = "";
+    this.okLabel = "OK";
+    this.cancelLabel = "Abbrechen";
+    this.danger = false;
+    this.wide = false;
+    this.back = false;
+    this._hasFoot = false;
+  }
+  static {
+    this.styles = [controls, i`
+    :host { position: fixed; inset: 0; z-index: 30; display: block; container-type: inline-size; container-name: dialog; }
+    .scrim { position: absolute; inset: 0; background: rgba(3, 6, 9, 0.62); animation: fade var(--dx-dur) both; }
+    .dlg {
+      position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+      width: min(640px, calc(100% - 32px)); max-height: calc(100% - 32px); overflow: auto;
+      background: var(--dx-bg-elevated); border: 1px solid var(--dx-border-strong); border-radius: var(--dx-radius-xl);
+      padding: 18px 20px 20px; box-shadow: var(--dx-shadow-float); display: grid; gap: 14px; align-content: start; animation: fade var(--dx-dur) var(--dx-ease) both;
+      outline: none;
+    }
+    .dlg.wide { width: min(900px, calc(100% - 32px)); }
+    .dlg > h2 { font-size: 18px; display: flex; align-items: center; gap: 8px; position: sticky; top: -18px; background: var(--dx-bg-elevated); padding: 4px 0; z-index: 1; margin: 0; }
+    .dlg > h2 .m { color: var(--dx-text-muted); font-weight: 500; font-size: 14px; }
+    .dlg > h2 .close { margin-left: auto; }
+    .iconbtn { width: 40px; height: 40px; border-radius: var(--dx-radius-md); display: inline-flex; align-items: center; justify-content: center; color: var(--dx-text-muted); border: 1px solid transparent; flex: none; }
+    .iconbtn:hover { background: var(--dx-surface-raised); color: var(--dx-text); }
+    .body { display: grid; gap: 14px; min-width: 0; }
+    .foot { display: flex; justify-content: flex-end; gap: 8px; padding-top: 4px; }
+    .foot.empty { display: none; }
+    .alert {
+      position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(360px, calc(100% - 48px));
+      background: var(--dx-bg-elevated); border: 1px solid var(--dx-border-strong); border-radius: var(--dx-radius-lg); box-shadow: var(--dx-shadow-float); overflow: hidden; animation: fade var(--dx-dur) var(--dx-ease) both;
+      outline: none;
+    }
+    .alert .m { padding: 20px 18px 16px; font-weight: 600; font-size: 15px; text-align: center; }
+    .alert .m small { display: block; font-weight: 400; color: var(--dx-text-muted); font-size: 13px; margin-top: 6px; }
+    .alert .b { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--dx-border); }
+    .alert .b button { height: 48px; font-weight: 600; color: var(--dx-text-muted); border-radius: 0; }
+    .alert .b button:hover { background: var(--dx-surface-raised); }
+    .alert .b button + button { border-left: 1px solid var(--dx-border); color: var(--dx-accent); }
+    .alert .b button.danger { color: var(--dx-danger); }
+    /* Sheet: erzwungen (variant="sheet") oder automatisch unter 640 px */
+    .dlg.sheet, .alert.sheet { top: auto; bottom: 0; left: 0; transform: none; width: 100%; max-height: 92%; border-radius: var(--dx-radius-xl) var(--dx-radius-xl) 0 0; padding-bottom: calc(20px + env(safe-area-inset-bottom)); animation: up 220ms var(--dx-ease) both; }
+    .dlg.sheet::before { content: ''; width: 38px; height: 4px; border-radius: 2px; background: var(--dx-border-strong); margin: -6px auto 0; }
+    .alert.sheet { bottom: 16px; left: 16px; right: 16px; width: auto; border-radius: var(--dx-radius-lg); padding-bottom: 0; }
+    @container dialog (max-width: 640px) {
+      .dlg { top: auto; bottom: 0; left: 0; transform: none; width: 100%; max-height: 92%; border-radius: var(--dx-radius-xl) var(--dx-radius-xl) 0 0; padding-bottom: calc(20px + env(safe-area-inset-bottom)); animation: up 220ms var(--dx-ease) both; }
+      .dlg::before { content: ''; width: 38px; height: 4px; border-radius: 2px; background: var(--dx-border-strong); margin: -6px auto 0; }
+      .alert { top: auto; bottom: 16px; left: 16px; right: 16px; transform: none; width: auto; }
+    }
+    @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes up { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+  `];
+  }
+  static {
+    this.properties = {
+      variant: { type: String },
+      heading: { type: String },
+      sub: { type: String },
+      text: { type: String },
+      subText: { type: String, attribute: "sub-text" },
+      okLabel: { type: String, attribute: "ok-label" },
+      cancelLabel: { type: String, attribute: "cancel-label" },
+      danger: { type: Boolean },
+      wide: { type: Boolean },
+      back: { type: Boolean },
+      _hasFoot: { state: true }
+    };
+  }
+  connectedCallback() {
+    super.connectedCallback();
+    this._prevFocus = deepActive();
+    this.addEventListener("keydown", this._onKey);
+  }
+  disconnectedCallback() {
+    this.removeEventListener("keydown", this._onKey);
+    const p3 = this._prevFocus;
+    if (p3 && typeof p3.focus === "function" && p3.isConnected) p3.focus();
+    super.disconnectedCallback();
+  }
+  firstUpdated() {
+    const first = this.focusables().find((el) => !el.classList.contains("close") && !el.classList.contains("backbtn")) ?? this.focusables()[0];
+    (first ?? this.renderRoot.querySelector("[role]"))?.focus();
+  }
+  /** Bedienbare Elemente in Dokumentreihenfolge: Kopfzeile (Shadow), eingeschobener Inhalt (Light DOM), Bestätigungsknöpfe. */
+  focusables() {
+    const root = this.renderRoot;
+    const head = [...root.querySelectorAll("h2 " + FOCUSABLE.replace(/, /g, ", h2 "))];
+    const body = [...this.querySelectorAll(FOCUSABLE)];
+    const alert = [...root.querySelectorAll(".alert " + FOCUSABLE.replace(/, /g, ", .alert "))];
+    return [...head, ...body, ...alert].filter((el) => el.offsetParent !== null || el.getClientRects().length > 0);
+  }
+  trapTab(e4) {
+    const els = this.focusables();
+    if (!els.length) {
+      e4.preventDefault();
+      return;
+    }
+    const cur = deepActive();
+    const idx = els.findIndex((el) => el === cur);
+    let next = e4.shiftKey ? idx - 1 : idx + 1;
+    if (idx === -1) next = e4.shiftKey ? els.length - 1 : 0;
+    if (next < 0) next = els.length - 1;
+    if (next >= els.length) next = 0;
+    e4.preventDefault();
+    els[next].focus();
+  }
+  close() {
+    emit(this, EVENTS.close);
+  }
+  confirm() {
+    emit(this, EVENTS.confirm);
+  }
+  goBack() {
+    emit(this, EVENTS.back);
+  }
+  onFootSlot(e4) {
+    this._hasFoot = e4.target.assignedElements().length > 0;
+  }
+  render() {
+    const sheet = this.variant === "sheet" ? "sheet" : "";
+    if (this.variant === "confirm") {
+      return b2`<div class="scrim" @click=${this.close}></div>
+        <div class="alert ${sheet}" role="alertdialog" aria-modal="true" aria-label=${this.text} tabindex="-1">
+          <div class="m">${this.text}${this.subText ? b2`<small>${this.subText}</small>` : A}</div>
+          <div class="b"><button class="cancel" @click=${this.close}>${this.cancelLabel}</button><button class="ok ${this.danger ? "danger" : ""}" @click=${this.confirm}>${this.okLabel}</button></div>
+        </div>`;
+    }
+    return b2`<div class="scrim" @click=${this.close}></div>
+      <div class="dlg ${this.wide ? "wide" : ""} ${sheet}" role="dialog" aria-modal="true" aria-labelledby="h" tabindex="-1">
+        <h2 id="h">${this.back ? b2`<button class="iconbtn backbtn" aria-label="Zurück" @click=${this.goBack}><ha-icon icon="mdi:chevron-left"></ha-icon></button>` : A}<span class="t">${this.heading}</span>${this.sub ? b2`<span class="m">${this.sub}</span>` : A}<button class="iconbtn close" aria-label="Schließen" @click=${this.close}><ha-icon icon="mdi:close"></ha-icon></button></h2>
+        <div class="body"><slot></slot></div>
+        <div class="foot ${this._hasFoot ? "" : "empty"}"><slot name="foot" @slotchange=${this.onFootSlot}></slot></div>
+      </div>`;
+  }
+};
+if (!customElements.get(DIALOG_ELEMENT)) customElements.define(DIALOG_ELEMENT, DxDialog);
+
 // src/dreame-x60-panel.ts
 var ELEMENT = "dreame-x60-panel";
 var TOAST_MS = 1900;
@@ -2347,19 +2481,19 @@ var DreameX60Panel = class extends i4 {
         </section>
       </div>`;
   }
-  /** Overlay: bis 4.2 (dx-dialog) ein Platzhalter-Rahmen; confirm ist schon bedienbar. */
+  /** Overlay im dx-dialog-Rahmen (4.2): confirm fertig; die Inhalte der übrigen Dialoge kommen mit ihren Bausteinen (4.5, 4.6, 4.8, 4.11, 4.12). */
   renderOverlay() {
     const o5 = this._overlay;
     if (!o5) return A;
     if (o5.kind === "confirm") {
-      return b2`<div class="overlay" data-kind="confirm"><div class="scrim" @click=${() => this.closeOverlay()}></div>
-        <div class="alert" role="alertdialog" aria-modal="true"><div class="m">${o5.text}${o5.sub ? b2`<small>${o5.sub}</small>` : A}</div>
-          <div class="b"><button @click=${() => this.closeOverlay()}>Abbrechen</button><button class=${o5.danger ? "danger" : ""} @click=${() => this.confirmOverlay()}>${o5.okLabel ?? "OK"}</button></div></div></div>`;
+      return b2`<dx-dialog class="overlay" data-kind="confirm" variant="confirm" .text=${o5.text} .subText=${o5.sub ?? ""} .okLabel=${o5.okLabel ?? "OK"} ?danger=${!!o5.danger}></dx-dialog>`;
     }
-    return b2`<div class="overlay" data-kind=${o5.kind}><div class="scrim" @click=${() => this.closeOverlay()}></div>
-      <div class="dlg" role="dialog" aria-modal="true"><h2>Overlay „${o5.kind}“ <button class="iconbtn" aria-label="Schließen" @click=${() => this.closeOverlay()}>✕</button></h2>
-        <div class="hint">Platzhalter – der Dialog entsteht in Phase 4 (dx-dialog 4.2).</div>
-        <div class="foot">${"back" in o5 && o5.back ? b2`<button class="btn" @click=${() => this.backOverlay()}>Zurück</button>` : A}<button class="btn primary" @click=${() => this.closeOverlay()}>Schließen</button></div></div></div>`;
+    const hasBack = "back" in o5 && !!o5.back;
+    return b2`<dx-dialog class="overlay" data-kind=${o5.kind} heading=${"Overlay \u201E" + o5.kind + "\u201C"} ?back=${hasBack}>
+        <div class="hint">Platzhalter – der Inhalt dieses Dialogs entsteht mit seinem Baustein in Phase 4.</div>
+        ${hasBack ? b2`<button slot="foot" class="btn" @click=${() => this.backOverlay()}>Zurück</button>` : A}
+        <button slot="foot" class="btn primary" @click=${() => this.closeOverlay()}>Schließen</button>
+      </dx-dialog>`;
   }
 };
 if (!customElements.get(ELEMENT)) customElements.define(ELEMENT, DreameX60Panel);
