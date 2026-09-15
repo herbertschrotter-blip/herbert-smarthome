@@ -103,6 +103,7 @@ const rect = (page, sel) => page.evaluate((s) => { const e = document.querySelec
   H.check('Shell: OK → onOk, Overlay zu', (await page.evaluate(() => window._ok)) === 1 && !(await page.evaluate(() => !!document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-dialog'))));
   await page.evaluate(() => { document.querySelector('dreame-x60-panel').openOverlay({ kind: 'rooms', mode: 'plan', n: 2, back: { kind: 'editor', n: 2 } }); });
   await page.waitForTimeout(80);
+  H.checkEqual('Shell: Fokus auf dem Fuß-Knopf „Zurück“ (nicht auf ✕)', await active(page), 'btn');
   await page.evaluate(() => document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-dialog').shadowRoot.querySelector('h2 .backbtn').click()); await page.waitForTimeout(60);
   H.check('Shell: Zurück-Pfeil im Räume-Dialog → Eintrag', await page.evaluate(() => !!document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-dialog[data-kind="editor"]')));
   await page.keyboard.press('Escape'); await page.waitForTimeout(60);

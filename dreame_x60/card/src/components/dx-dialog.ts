@@ -115,6 +115,8 @@ export class DxDialog extends LitElement {
   override connectedCallback(): void {
     super.connectedCallback();
     this._prevFocus = deepActive();
+    // Fuß schon vor dem ersten Rendern kennen, sonst ist er beim Setzen des Fokus noch ausgeblendet (slotchange kommt später)
+    this._hasFoot = !!this.querySelector('[slot="foot"]');
     this.addEventListener('keydown', this._onKey);
   }
 

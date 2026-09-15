@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.10 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.11 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -1750,7 +1750,7 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.10";
+var VERSION = "2.0.0-alpha.11";
 
 // src/shared/robot-svg.ts
 var robotSvg = w`<svg viewBox="0 0 200 200" class="robotpic" aria-hidden="true">
@@ -2199,6 +2199,7 @@ var DxDialog = class extends i4 {
   connectedCallback() {
     super.connectedCallback();
     this._prevFocus = deepActive();
+    this._hasFoot = !!this.querySelector('[slot="foot"]');
     this.addEventListener("keydown", this._onKey);
   }
   disconnectedCallback() {
