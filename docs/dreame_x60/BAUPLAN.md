@@ -2,7 +2,7 @@
 
 Projektname seit 15.09.2026: **dreame_x60** (Branch `dreame_x60`, Ordner `dreame_x60/`, Element `dreame-x60-panel`, Bundle `ha/www/dreame_x60.js`, Dashboard `dreame_x60.yaml`). Der Roboter heißt in der Oberfläche weiterhin **Heidi**; Entitäten `heidi_*` bleiben (Abschnitt 4).
 
-Stand: nach ChatGPT-Review Runde 2 (2026-09-14, `docs/chatgpt-reviews/CGR-2026-09-14-dreame_x60/`).
+Stand: nach ChatGPT-Review Runde 2 (2026-09-14, `docs/chatgpt-reviews/CGR-2026-09-14-heidi-v2/`).
 
 Arbeitsanweisung für den Neubau der Heidi-Karte, geschrieben für Claude Code (und für Herbert
 lesbar). Eine Sitzung beginnt mit dem Startprompt (Abschnitt 0), nimmt die nächste offene Aufgabe
