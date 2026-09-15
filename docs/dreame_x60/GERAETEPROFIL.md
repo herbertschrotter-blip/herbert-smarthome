@@ -4,6 +4,51 @@ Ziel: Die Karte v2 läuft ohne Codeänderung mit jedem Dreame-Roboter der Integr
 überschaubarem Aufwand auch mit anderen Marken. Dafür fragt kein Bauteil mehr „was hat Heidi“, sondern „was hat dieses
 Gerät“. Die Antwort gibt ein Modul, das Geräteprofil.
 
+## So funktioniert es heute (Stand 16.09.2026, Version 2.0.0-alpha.19)
+
+Kurzfassung für Herbert: Die Karte kennt weder den Namen des Roboters noch seine Räume oder Optionen aus dem Code. Beim
+Start liest sie alles aus Home Assistant.
+
+### 1. Roboter erkennen (`src/ha/device.ts`, PD-012)
+
+| Schritt | Quelle | Ergebnis |
+|---|---|---|
+| 1 | Kartenkonfiguration `robot: vacuum.xyz` (nur bei mehreren Robotern nötig) | genau dieser Roboter |
+| 2 | Entitäts-Register des Frontends: erste `vacuum.*`-Entität der Plattform `dreame_vacuum` | Roboter + Anzeigename aus dem Geräte-Register (vom Benutzer vergebener Name zuerst) |
+| 3 | Zustände: erste `vacuum.*` mit den Dreame-Attributen `segment_cleaning`/`cleaning_sequence` (Tests, alte HA) | Roboter + Anzeigename aus `friendly_name` („Heidi  Heidi“ → „Heidi“) |
+
+Aus `vacuum.heidi` wird das Präfix `heidi`. Der Vertrag (`src/ha/contract.ts`) kennt nur noch Domäne + Merkmal
+(`ROBOT_FEATURES`, z. B. `map: ['camera', 'map']`) und bildet daraus zur Laufzeit `camera.heidi_map`. Umbenennen des
+Geräts in HA (mit ID-Änderung) zerlegt die Karte nicht mehr; der Anzeigename in Kopf, Seitenleiste und Karte folgt HA.
+
+### 2. Räume, Optionen, Fähigkeiten (`src/ha/profile.ts`, `src/domain/rooms.ts`, PD-013)
+
+| Was | Quelle | Regel |
+|---|---|---|
+| Räume | `camera.<gerät>_map`, Attribut `rooms` | sichtbare Räume, Reihenfolge = App-`order`; ohne Karte Rückfall auf `select.<gerät>_room_N_cleaning_mode` |
+| Name | Standardtyp `type` 1..15 → Wörterbuch `ROOM_TYPES` (deutsch wie in der App); `type` 0 → `custom_name` | Zählsuffix bleibt („Schlafzimmer 2“) |
+| Kurzname | Regel: „…zimmer“ → „…z.“, ≤ 7 Zeichen unverändert, sonst 6 Zeichen + „.“ | ergibt für Heidi die alten Kurznamen (Wohnz., Schlafz.) |
+| Symbol | Standardtyp → Symbol des Typs; sonst Stichwort im Namen (Bad, Küche, Kinder, Balkon …); sonst Grundriss | |
+| Optionen | `options` der Selects (`select.<gerät>_cleaning_mode` usw., sonst erster Raum) | deutsche Beschriftung per Wörterliste, unbekannte Werte lesbar |
+| Fähigkeiten | Entität vorhanden? (`profile.has('selfClean')`) | fehlende Station → keine Kacheln, kein Fehler |
+
+Alle Bauteile bekommen das Profil als Sicht vom Panel (`map.roomOrder`, Raumwerte je ID), keine Liste im Code. Die
+Selektoren leiten ihre Entitäts-IDs aus dem Profil ab (`memoizeSelector` mit ID-Funktion der Zustände).
+
+### 3. Was bewusst fest bleibt
+
+- **Paket-Helfer** `heidi_*` (Planer, Prognose, Automatik, Phase): gehören zu unserem Paket, nicht zur Integration.
+  Ein zweiter Roboter bekäme ein zweites Paket (Stufe 4).
+- **Raum-Stammdaten** (Name, Reihenfolge, Sichtbarkeit, Boden) sind für die Karte nur lesen; gepflegt wird in der App.
+- **Dienste** der Dreame-Integration (`vacuum_clean_segment` …) – Adapter je Marke kommt in Stufe 3.
+- **Kurzformat der Raumwerte** im Planer (3 Modi-Codes) und `HA_OPTIONS` der Paket-Helfer – Ausbau mit 4.5 Editor.
+
+### 4. Wo es geprüft wird
+
+`device.test.ts`/`device.js` (Erkennung, Umbenennung heidi → berta, zwei Roboter, ohne Roboter), `profile.test.ts`/
+`profile.js` (3 und 20 Räume, versteckte Räume, Standardtypen, Optionen, ohne Station). Register aller Entitäten der
+Integration: `docs/dreame_x60/ENTITAETEN.md`.
+
 ## Was heute schon dynamisch ist (Stufe 1, erledigt 15.09., PD-012)
 
 - Gerätename und alle Roboter-Entitäts-IDs kommen aus HA (`src/ha/device.ts`, `discoverDevice`), der Vertrag kennt nur
