@@ -28,7 +28,7 @@ Claude Code im Web bereitet diese Aufgaben vor, führt sie aber nicht aus.
 
 | Nr. | Aufgabe | Status |
 |---|---|---|
-| 0.1 | v1-Tests: Exit-Code bei Abweichung, `test-timeline` in `npm test`, ein Harness | offen |
+| 0.1 | v1-Tests: Exit-Code bei Abweichung, `test-timeline` in `npm test`, ein Harness | blockiert (Abschnitt 10: 16 oder 18 Calls) |
 | 0.2 | **[PC]** Fixtures `states-docked.json`, `states-cleaning.json` erneuern | offen |
 | 0.3 | v1: `sensor.heidi_task_status` in `_signature()`, Version 1.6.1 | offen |
 | 0.4 | Backend: `rest_min`/`rest_quelle` als Attribute, Automation liest sie | offen |
@@ -47,7 +47,7 @@ Claude Code im Web bereitet diese Aufgaben vor, führt sie aber nicht aus.
 | 3.1 | `ha/types.ts`, `ha/memo-selector.ts`, `ha/selectors.ts` + Tests | offen |
 | 3.2 | `ha/api.ts` (`HeidiApi`) + Tests inkl. Teilfehler | offen |
 | 3.3 | Shell: `page`-Config, Views, Overlay, Toast, Escape, more-info, Modul-Caches | offen |
-| 3.4 | **[PC-Abnahme]** Mockup Seitenstruktur `heidi/mockups/heidi-v2-seiten.html` | offen |
+| 3.4 | **[PC-Abnahme]** Mockup Seitenstruktur `heidi/mockups/heidi-v2-seiten.html` | fertig (15de525; Design-Referenz `heidi-v2-bento.html`, abgenommen 15.09.) |
 | 4.0 | Startseite: `heidi-nav-tiles` + Seitenaufbau nach Mockup | offen |
 | 4.1 | `heidi-hero` | offen |
 | 4.2 | `heidi-dialog` (modal/sheet/confirm) | offen |
@@ -301,7 +301,7 @@ heidi/card/
 | `prognose` | `heidi-prognose-view` |
 | `einstellungen` | `heidi-settings-panel` als Seite (statt Seitenleiste), `heidi-robot-settings`, Diagnose, Version |
 
-**Design-Referenz (14.09., Herberts Designvorgabe „Automotive Dark Bento“):** `heidi/mockups/heidi-v2-bento.html` zeigt alle sechs Seiten und Dialoge im neuen Look (dunkles Graphit, Bento-Flächen, Seitenleiste auf Desktop, Symbolleiste auf Tablet, Tab-Leiste und Bottom-Sheets auf Smartphone, Design-Tokens `--heidi-*`). Es löst die Glas-Optik der Mockups `heidi-v2-start.html`/`heidi-v2-seiten.html` ab; die Seitenschnitte und Funktionen bleiben. Abnahme durch Herbert offen (Teil von 3.4). Regel 14 gilt: System-Schriftstapel, keine externen Ressourcen.
+**Design-Referenz (14.09., Herberts Designvorgabe „Automotive Dark Bento“):** `heidi/mockups/heidi-v2-bento.html` zeigt alle sechs Seiten und Dialoge im neuen Look (dunkles Graphit, Bento-Flächen, Seitenleiste auf Desktop, Symbolleiste auf Tablet, Tab-Leiste und Bottom-Sheets auf Smartphone, Design-Tokens `--heidi-*`). Es löst die Glas-Optik der Mockups `heidi-v2-start.html`/`heidi-v2-seiten.html` ab; die Seitenschnitte und Funktionen bleiben. Von Herbert abgenommen am 15.09. (Chat Teil 2); die Optik aller Komponenten in Phase 4 folgt diesem Mockup. Regel 14 gilt: System-Schriftstapel, keine externen Ressourcen.
 
 Jede Komponente: `hass`, ihre Sicht (memoisiert), `api` als Properties; Ereignisse nach oben
 (`heidi-open-overlay`, `heidi-toast`, `heidi-navigate`, `heidi-close`, `heidi-back`). Keine
@@ -703,6 +703,7 @@ Format: `- [Datum] [Aufgabe] Art (Widerspruch | Messung | Befund | Wunsch) · Sc
 
 Für 2.0 müssen `Blocker` und `Functional` = 0 sein. `Cosmetic` und `Post-2.0` dürfen offen bleiben.
 
+- [2026-09-15] [0.1] Widerspruch · Functional: Der Bauplan nennt für das Speichern eines Planer-Eintrags **16** Service-Calls (0.1, 3.2, 4.5, Abschnitt 6 `_saveEditor`). v1 setzt tatsächlich **18** ab: 5 `input_text.set_value` (name, raeume, tage, personen, raumwerte), 10 `input_select.select_option` (modus, saugstufe, wasser, route, wiederholungen, homeoffice, ho_saug, ho_wdh, sp_saug, sp_wdh), 2 `input_boolean.turn_on/off` (aktiv, schnell), 1 `input_datetime.set_datetime` (zeit). Festgeschrieben in `heidi/tests/expected/editor-calls.json` (Characterization aus v1). Vermutlich Zählfehler im Bauplan; die Klickfolge blieb unverändert. Entscheidung Herbert: … (danach 16 → 18 in 0.1, 3.2, 4.5, Abschnitt 6 ersetzen und 0.1 auf `fertig`).
 - [2026-09-14] [4.3] Befund · Functional (v1): In der Xiaomi-Konfiguration von v1 (`_mountMap`, Modi „Sperrzonen setzen“ und „Wisch-Sperrzonen setzen“) steht `selection_type: manual_rectangle` in Kleinschreibung. Die Karte erwartet `MANUAL_RECTANGLE` (wie ihre eingebauten Vorlagen) und blendet sonst „+“ und Zeichenwerkzeuge aus. In v2 richtig schreiben; v1 bleibt unverändert (Regel 3). Entscheidung Herbert: zur Kenntnis genommen (Chat 14.09.).
 - [2026-09-14] [4.3] Befund · Cosmetic: Das Kartenbild der Integration enthält englische Raumnamen, Heidi zeigt deutsche Marker. In den Optionen der Dreame-Integration Raumnamen im Bild ausblenden (Herbert, beim Umschalten).
 - [2026-09-14] [4.3] Wunsch · Post-2.0: Pixelgenaue Raumauswahl wie in der App über `camera.heidi_map_data` (Valetudo-Format, Segment-Masken) in einer eigenen Kartenansicht; die Xiaomi-Karte kann nur Polygone (`outline`) und trifft an Raumrändern ungenau.
@@ -717,11 +718,12 @@ ist eine Abweichung ein Fehler.
 
 | id | bereich | v1 | v2 | grund | spec_test | Status |
 |---|---|---|---|---|---|---|
-| PD-000 | Navigation | eine Seite, Tabs Übersicht/Prognose, Einstellungen als Seitenleiste | Startseite + fünf Unteransichten (HA `subview`), Einstellungen als Seite | Herberts Wunsch; Layout, keine Fachlogik; Seitenschnitt laut Mockup 3.4 | `nav.js` | freigegeben (Herbert, 2026-09-14) |
+| PD-000 | Navigation | eine Seite, Tabs Übersicht/Prognose, Einstellungen als Seitenleiste | Startseite + fünf Unteransichten (HA `subview`), Einstellungen als Seite | Herberts Wunsch; Layout, keine Fachlogik; Seitenschnitt laut Mockup 3.4: Übersicht mit Seitenleiste (Desktop) bzw. Tab-Leiste (schmal), Unterseiten Karte, Planer, Verlauf, Prognose, Einstellungen; Räume-Dialog aus der Navigation | `nav.js` | freigegeben (Herbert, 2026-09-14/15) |
 | PD-004 | Karte | Karte + Raum-Chips + Knöpfe „Sperrzonen“/„Stühle am Boden“ auf der Karte | Segment Räume/Zone/Punkt + „Alles“, Knöpfe „Hinfahren“/„Sperrzonen“ unten links auf der Karte, Räume auch per Tipp in die Fläche wählbar, Stühle-Schalter als Zeile | Herberts Wunsch (Chat 14.09.); Bedienung, keine Fachlogik; dieselben Dienste | `map.js` | freigegeben (Herbert, 2026-09-14) |
 | PD-005 | Startseite | Karte nur in der Übersicht mit allen Werkzeugen | Startseite zeigt die Karte immer als `compact` (links unter dem Kopf), Werkzeuge auf der Seite Reinigen; Automatik und Station rechts | Herberts Abnahme (Chat 14.09.); Layout, keine Fachlogik | `render.js`, `nav.js` | freigegeben (Herbert, 2026-09-14) |
 | PD-001 | Editor | Live-Daten eingefroren bei offenem Editor | Kopf/Streifen aktualisieren sich, Draft bleibt | Folge des Render-Modells, nicht gewollt | `live-update.js` | freigegeben (Herbert, 2026-09-14) |
 | PD-002 | Speichern | Fehler beim Speichern → Toast, Editor schließt | Teilfehler benannt, Editor bleibt offen | Regel 20 | `api.test.ts` Fehlerinjektion | freigegeben (Herbert, 2026-09-14) |
+| PD-006 | Übersicht | keine Statistik-Kachel | Kachel „Statistik“: Balken der letzten 7 Tage aus `sensor.heidi_cleaning_history`, Summen aus `cleaning_count`/`total_cleaned_area`/`total_cleaning_time` | Designvorgabe Abschnitt 14; nur Anzeige vorhandener Sensoren, keine neue Fachlogik | `render.js` | offen (im Mockup 15.09. mit abgenommen; Herbert bestätigt ausdrücklich) |
 | PD-003 | Bestätigungen | `window.confirm` | `heidi-dialog confirm` | Regel 13 | `dialog.js` | freigegeben (Herbert, 2026-09-14) |
 
 ---

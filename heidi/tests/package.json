@@ -2,7 +2,11 @@
   "name": "heidi-tests",
   "private": true,
   "scripts": {
-    "test": "node test-real.js && node test-editor.js && node test-zones.js"
+    "test": "node run.js",
+    "test:real": "node test-real.js",
+    "test:editor": "node test-editor.js",
+    "test:zones": "node test-zones.js",
+    "test:timeline": "node test-timeline.js"
   },
   "devDependencies": {
     "playwright": "^1.63.0"

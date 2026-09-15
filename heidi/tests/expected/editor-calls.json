@@ -1,0 +1,144 @@
+[
+ [
+  "input_text",
+  "set_value",
+  {
+   "entity_id": "input_text.heidi_plan2_name",
+   "value": "Saugen + Wischen"
+  }
+ ],
+ [
+  "input_text",
+  "set_value",
+  {
+   "entity_id": "input_text.heidi_plan2_raeume",
+   "value": "7,6,4,3,2,1"
+  }
+ ],
+ [
+  "input_text",
+  "set_value",
+  {
+   "entity_id": "input_text.heidi_plan2_tage",
+   "value": "1001100"
+  }
+ ],
+ [
+  "input_text",
+  "set_value",
+  {
+   "entity_id": "input_text.heidi_plan2_personen",
+   "value": "nicole,herbert"
+  }
+ ],
+ [
+  "input_text",
+  "set_value",
+  {
+   "entity_id": "input_text.heidi_plan2_raumwerte",
+   "value": ""
+  }
+ ],
+ [
+  "input_select",
+  "select_option",
+  {
+   "entity_id": "input_select.heidi_plan2_modus",
+   "option": "Saugen + Wischen"
+  }
+ ],
+ [
+  "input_select",
+  "select_option",
+  {
+   "entity_id": "input_select.heidi_plan2_saugstufe",
+   "option": "Turbo"
+  }
+ ],
+ [
+  "input_select",
+  "select_option",
+  {
+   "entity_id": "input_select.heidi_plan2_wasser",
+   "option": "Mittel"
+  }
+ ],
+ [
+  "input_select",
+  "select_option",
+  {
+   "entity_id": "input_select.heidi_plan2_route",
+   "option": "Standard"
+  }
+ ],
+ [
+  "input_select",
+  "select_option",
+  {
+   "entity_id": "input_select.heidi_plan2_wiederholungen",
+   "option": "1"
+  }
+ ],
+ [
+  "input_select",
+  "select_option",
+  {
+   "entity_id": "input_select.heidi_plan2_homeoffice",
+   "option": "Leise starten"
+  }
+ ],
+ [
+  "input_select",
+  "select_option",
+  {
+   "entity_id": "input_select.heidi_plan2_ho_saug",
+   "option": "Leise"
+  }
+ ],
+ [
+  "input_select",
+  "select_option",
+  {
+   "entity_id": "input_select.heidi_plan2_ho_wdh",
+   "option": "1"
+  }
+ ],
+ [
+  "input_select",
+  "select_option",
+  {
+   "entity_id": "input_select.heidi_plan2_sp_saug",
+   "option": "Standard"
+  }
+ ],
+ [
+  "input_select",
+  "select_option",
+  {
+   "entity_id": "input_select.heidi_plan2_sp_wdh",
+   "option": "1"
+  }
+ ],
+ [
+  "input_boolean",
+  "turn_on",
+  {
+   "entity_id": "input_boolean.heidi_plan2_aktiv"
+  }
+ ],
+ [
+  "input_boolean",
+  "turn_on",
+  {
+   "entity_id": "input_boolean.heidi_plan2_schnell"
+  }
+ ],
+ [
+  "input_datetime",
+  "set_datetime",
+  {
+   "entity_id": "input_datetime.heidi_plan2_zeit",
+   "time": "10:15:00"
+  }
+ ]
+]
