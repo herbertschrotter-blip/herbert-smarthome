@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.24 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.25 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -1289,6 +1289,8 @@ var AREAS_HEADER_TAG = "ha-more-info-view-vacuum-clean-areas-header-action";
 function deepFind(root, selector, limit = 4e3) {
   if (!root) return null;
   const queue = [root];
+  const own = root.shadowRoot;
+  if (own) queue.push(own);
   let seen = 0;
   while (queue.length && seen < limit) {
     const node = queue.shift();
@@ -1328,11 +1330,17 @@ async function openVacuumSegmentMapping(target, entityId) {
   const areasBtn = await waitFor(() => deepFind(dialog.shadowRoot, "more-info-vacuum") ? deepFind(dialog.shadowRoot, "button.clean-areas-button") : null, 3e3);
   if (!areasBtn) return "fallback";
   areasBtn.click();
-  const header = await waitFor(() => customElements.get(AREAS_TAG) ? deepFind(dialog.shadowRoot, AREAS_HEADER_TAG) : null, 4e3);
-  if (!header) return "fallback";
-  const gear = await waitFor(() => deepFind(header, "ha-icon-button, button"), 2e3);
-  if (!gear) return "fallback";
-  gear.click();
+  const view = await waitFor(() => customElements.get(AREAS_TAG) ? deepFind(dialog.shadowRoot, AREAS_TAG) : null, 4e3);
+  if (!view) return "fallback";
+  await sleep(150);
+  const open = view._openSegmentMapping;
+  if (typeof open === "function") open.call(view);
+  else {
+    const header = deepFind(dialog.shadowRoot, AREAS_HEADER_TAG);
+    const gear = header ? deepFind(header, "ha-icon-button, button") : null;
+    if (!gear) return "fallback";
+    gear.click();
+  }
   const ok2 = await waitFor(() => customElements.get(MAPPING_TAG) && deepFind(dialog.shadowRoot, MAPPING_TAG) ? true : null, 4e3);
   return ok2 ? "clicked" : "fallback";
 }
@@ -2189,7 +2197,7 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.24";
+var VERSION = "2.0.0-alpha.25";
 
 // src/shared/robot-svg.ts
 var robotSvg = w`<svg viewBox="0 0 200 200" class="robotpic" aria-hidden="true">

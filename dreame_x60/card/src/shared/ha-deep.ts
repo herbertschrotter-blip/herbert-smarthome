@@ -14,6 +14,8 @@ const AREAS_HEADER_TAG = 'ha-more-info-view-vacuum-clean-areas-header-action';
 export function deepFind(root: ParentNode | null | undefined, selector: string, limit = 4000): Element | null {
   if (!root) return null;
   const queue: ParentNode[] = [root];
+  const own = (root as Element).shadowRoot; // Element mit eigenem Schatten-DOM: auch darin suchen
+  if (own) queue.push(own);
   let seen = 0;
   while (queue.length && seen < limit) {
     const node = queue.shift()!;
@@ -59,11 +61,19 @@ export async function openVacuumSegmentMapping(target: EventTarget, entityId: st
   const areasBtn = await waitFor(() => deepFind(dialog.shadowRoot, 'more-info-vacuum') ? deepFind(dialog.shadowRoot, 'button.clean-areas-button') as HTMLElement | null : null, 3000);
   if (!areasBtn) return 'fallback';
   areasBtn.click();
-  const header = await waitFor(() => (customElements.get(AREAS_TAG) ? deepFind(dialog.shadowRoot, AREAS_HEADER_TAG) : null), 4000);
-  if (!header) return 'fallback';
-  const gear = await waitFor(() => deepFind(header, 'ha-icon-button, button') as HTMLElement | null, 2000);
-  if (!gear) return 'fallback';
-  gear.click();
+  // Ansicht „Bereiche reinigen“ abwarten; sie öffnet die Zuordnung über ihre eigene Methode (Zahnrad) – die rufen wir auf,
+  // sonst drücken wir das Zahnrad in der Kopfzeile der Ansicht
+  const view = await waitFor(() => (customElements.get(AREAS_TAG) ? deepFind(dialog.shadowRoot, AREAS_TAG) : null), 4000);
+  if (!view) return 'fallback';
+  await sleep(150);
+  const open = (view as unknown as { _openSegmentMapping?: () => void })._openSegmentMapping;
+  if (typeof open === 'function') open.call(view);
+  else {
+    const header = deepFind(dialog.shadowRoot, AREAS_HEADER_TAG);
+    const gear = header ? (deepFind(header, 'ha-icon-button, button') as HTMLElement | null) : null;
+    if (!gear) return 'fallback';
+    gear.click();
+  }
   const ok = await waitFor(() => (customElements.get(MAPPING_TAG) && deepFind(dialog.shadowRoot, MAPPING_TAG) ? true : null), 4000);
   return ok ? 'clicked' : 'fallback';
 }
