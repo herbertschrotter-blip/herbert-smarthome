@@ -1,9 +1,9 @@
-// Seiten der Karte (config.page). Anzeige-Texte gehören nach hier, keine Fachlogik.
+// Seiten der Karte (config.page). Anzeige-Texte gehören nach hier, keine Fachlogik. Leerer Titel = Name des Roboters (deviceName(), PD-012).
 export const PAGES = ['start', 'reinigen', 'planer', 'protokoll', 'prognose', 'einstellungen'] as const;
 export type Page = (typeof PAGES)[number];
 
 export const PAGE_TITLE: Record<Page, { title: string; sub: string }> = {
-  start: { title: 'Heidi', sub: 'Übersicht' },
+  start: { title: '', sub: 'Übersicht' },
   reinigen: { title: 'Karte', sub: 'Räume, Zone oder Punkt reinigen · Hinfahren · Sperrzonen' },
   planer: { title: 'Planer', sub: 'Vier Einträge · Automatik entscheidet voll, schnell oder warten' },
   protokoll: { title: 'Verlauf', sub: 'Reinigungsprotokoll der App · Zeitleiste je Lauf · Lernwerte' },
@@ -23,7 +23,7 @@ export const PAGE_PARTS: Record<Exclude<Page, 'start'>, string[]> = {
 /** Flächen der Bento-Übersicht (Bauplan 4.0) in Dokumentreihenfolge; `span` = Spalten im 12er-Raster (leer = in der rechten Spalte). */
 export interface StartSlot { slot: string; title: string; span: string; part: string; task: string }
 export const START_SLOTS: readonly StartSlot[] = [
-  { slot: 'hero', title: 'Heidi', span: 'span3', part: 'dx-hero', task: '4.1' },
+  { slot: 'hero', title: '', span: 'span3', part: 'dx-hero', task: '4.1' },
   { slot: 'map', title: 'Live-Karte', span: 'span6', part: 'dx-map-card compact', task: '4.3' },
   { slot: 'automatik', title: 'Automatik', span: '', part: 'dx-automatik', task: '4.9' },
   { slot: 'auftrag', title: 'Aktueller Auftrag', span: '', part: 'dx-auftrag', task: '4.1' },

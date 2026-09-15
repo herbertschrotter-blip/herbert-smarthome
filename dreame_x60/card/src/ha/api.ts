@@ -165,7 +165,7 @@ export class DxApi {
   }
 
   // ───────── Lesen über die REST-API ─────────
-  /** Historie von sensor.heidi_phase und vacuum.heidi im Fenster (Sekunden). */
+  /** Historie der Phase (Paket) und des Roboters im Fenster (Sekunden). */
   history(startSec: number, endSec: number): Promise<HistoryResponse> {
     const h = this.hass();
     if (!h.callApi) return Promise.resolve([]);

@@ -1,10 +1,14 @@
 // Memoisierte Selektoren (Bauplan 3.1, Regel 10): Ein Selektor nennt seine Entitäts-IDs und liefert dasselbe
 // View-Objekt (gleiche Referenz), solange sich für keine dieser IDs `state` oder `last_updated` geändert hat.
 // Ein Selektor darf einen eigenen Vergleich mitbringen (z. B. nur bestimmte Attribute). Kein Store, keine Observables.
+// IDs dürfen als Funktion kommen (Geräteerkennung, device.ts): dann werden sie bei jedem Aufruf neu gebildet, und eine
+// geänderte Liste (anderer Roboter) erzwingt eine Neuberechnung.
 import type { HassEntity, States } from './types';
 
 /** true = für diese ID unverändert (Standard: state + last_updated; fehlend ↔ fehlend gilt als gleich). */
 export type EntityCompare = (prev: HassEntity | undefined, next: HassEntity | undefined) => boolean;
+export type IdList = readonly string[] | (() => readonly string[]);
+export type CompareMap = Record<string, EntityCompare> | (() => Record<string, EntityCompare>);
 
 export interface Selector<T> {
   (states: States): T;
@@ -20,7 +24,7 @@ export const sameStateAndUpdated: EntityCompare = (a, b) => {
   return a.state === b.state && a.last_updated === b.last_updated;
 };
 
-/** Vergleich über `state` und ausgewählte Attribute – für Entitäten wie vacuum.heidi, deren last_updated ständig tickt. */
+/** Vergleich über `state` und ausgewählte Attribute – für Entitäten wie den Roboter, deren last_updated ständig tickt. */
 export function stateAndAttributes(attrs: readonly string[]): EntityCompare {
   return (a, b) => {
     if (a === b) return true;
@@ -44,27 +48,34 @@ export function sameValue(x: unknown, y: unknown): boolean {
 
 /**
  * Baut einen memoisierten Selektor.
- * @param ids Entitäts-IDs, von denen die Sicht abhängt
+ * @param ids Entitäts-IDs, von denen die Sicht abhängt (Liste oder Funktion)
  * @param fn reine Funktion states → Sicht
  * @param compare je ID ein eigener Vergleich (Schlüssel = ID), sonst `sameStateAndUpdated`
  */
-export function memoizeSelector<T>(ids: readonly string[], fn: (states: States) => T, compare: Record<string, EntityCompare> = {}): Selector<T> {
+export function memoizeSelector<T>(ids: IdList, fn: (states: States) => T, compare: CompareMap = {}): Selector<T> {
+  const list = (): readonly string[] => (typeof ids === 'function' ? ids() : ids);
+  const cmpMap = (): Record<string, EntityCompare> => (typeof compare === 'function' ? compare() : compare);
   let prev: States | null = null;
+  let prevKey = '';
   let result: T;
   const sel = ((states: States): T => {
-    if (prev !== null) {
+    const cur = list();
+    const key = cur.join('|');
+    if (prev !== null && key === prevKey) {
+      const cm = cmpMap();
       let same = true;
-      for (const id of ids) {
-        const cmp = compare[id] ?? sameStateAndUpdated;
+      for (const id of cur) {
+        const cmp = cm[id] ?? sameStateAndUpdated;
         if (!cmp(prev[id], states[id])) { same = false; break; }
       }
       if (same) return result;
     }
     result = fn(states);
     prev = states;
+    prevKey = key;
     return result;
   }) as Selector<T>;
-  Object.defineProperty(sel, 'ids', { value: ids, writable: false });
-  sel.reset = () => { prev = null; };
+  Object.defineProperty(sel, 'ids', { get: list });
+  sel.reset = () => { prev = null; prevKey = ''; };
   return sel;
 }

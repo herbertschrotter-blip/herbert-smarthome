@@ -1,65 +1,83 @@
 // Entitäts-Vertrag (Bauplan Abschnitt 4, eingefroren). Einzige Stelle, die Entitäts-IDs kennt oder bildet (Regel 1).
 // Werte 1:1 aus v1 (ha/www/heidi-panel.js: E, RV, RV_HA, RV_ENT, OPT, Personen) und ha/packages/heidi.yaml.
 // Anzeige-Dinge (Kurznamen, Icons, Reihenfolge der Chips) gehören nach config.ts, nicht hierher.
+// Roboter-IDs sind nicht fest verdrahtet (PD-012, Herbert 15.09.): Domäne + Merkmal stehen hier, der Gerätename kommt
+// aus der Erkennung in device.ts. Paket-Helfer (heidi.yaml) behalten ihr festes Präfix.
+import { devicePrefix } from './device';
 
 export const ROOM_IDS = [1, 2, 3, 4, 5, 6, 7] as const;
 export type RoomId = (typeof ROOM_IDS)[number];
 export const PLAN_NUMBERS = [1, 2, 3, 4] as const;
 export type PlanNumber = (typeof PLAN_NUMBERS)[number];
 
-/** Feste IDs. */
-export const ENTITIES = {
-  // Roboter (Dreame-Integration)
-  vac: 'vacuum.heidi',
-  map: 'camera.heidi_map',
-  selectedMap: 'select.heidi_selected_map', // Kartenwahl (4.3), nur wenn verfügbar
-  mapData: 'camera.heidi_map_data', // Datenkarte (4.3b, Heidi-Karte): Valetudo-Kartenpaket im PNG-Chunk
-  status: 'sensor.heidi_status',
-  error: 'sensor.heidi_error',
-  taskStatus: 'sensor.heidi_task_status',
-  battery: 'sensor.heidi_battery_level',
-  currentRoom: 'sensor.heidi_current_room',
-  cleanedArea: 'sensor.heidi_cleaned_area',
-  cleaningTime: 'sensor.heidi_cleaning_time',
-  cleaningHistory: 'sensor.heidi_cleaning_history',
-  cleaningCount: 'sensor.heidi_cleaning_count',
-  totalCleanedArea: 'sensor.heidi_total_cleaned_area',
-  totalCleaningTime: 'sensor.heidi_total_cleaning_time',
-  firstCleaningDate: 'sensor.heidi_first_cleaning_date',
-  mainBrushLeft: 'sensor.heidi_main_brush_left',
-  sideBrushLeft: 'sensor.heidi_side_brush_left',
-  filterLeft: 'sensor.heidi_filter_left',
-  sensorDirtyLeft: 'sensor.heidi_sensor_dirty_left',
-  wheelDirtyLeft: 'sensor.heidi_wheel_dirty_left',
-  dustBagStatus: 'sensor.heidi_dust_bag_status',
-  cleanWaterTankStatus: 'sensor.heidi_clean_water_tank_status',
-  dirtyWaterTankStatus: 'sensor.heidi_dirty_water_tank_status',
-  detergentStatus: 'sensor.heidi_detergent_status',
-  lowWaterWarning: 'sensor.heidi_low_water_warning',
-  autoEmptyStatus: 'sensor.heidi_auto_empty_status',
-  selfWashBaseStatus: 'sensor.heidi_self_wash_base_status',
-  resetMainBrush: 'button.heidi_reset_main_brush',
-  resetSideBrush: 'button.heidi_reset_side_brush',
-  resetFilter: 'button.heidi_reset_filter',
-  resetSensor: 'button.heidi_reset_sensor',
-  resetWheel: 'button.heidi_reset_wheel',
-  startAutoEmpty: 'button.heidi_start_auto_empty',
-  selfClean: 'button.heidi_self_clean',
-  manualDrying: 'button.heidi_manual_drying',
-  baseStationCleaning: 'button.heidi_base_station_cleaning',
-  customizedCleaning: 'switch.heidi_customized_cleaning',
-  carpetCleaning: 'select.heidi_carpet_cleaning',
-  waterTemperature: 'select.heidi_water_temperature',
-  dryingTime: 'select.heidi_drying_time',
-  autoEmptyMode: 'select.heidi_auto_empty_mode',
-  selfCleanFrequency: 'select.heidi_self_clean_frequency',
-  cleangenius: 'select.heidi_cleangenius',
-  mapRotation: 'select.heidi_map_rotation',
-  selfCleanArea: 'number.heidi_self_clean_area',
-  volume: 'number.heidi_volume',
-  dndStart: 'time.heidi_dnd_start',
-  dndEnd: 'time.heidi_dnd_end',
-  // Paket (ha/packages/heidi.yaml)
+/** Paket-Präfix (ha/packages/heidi.yaml): eigene Helfer, unabhängig vom Gerätenamen der Integration. */
+export const PACKAGE_PREFIX = 'heidi';
+
+/**
+ * Roboter-Entitäten der Dreame-Integration als [Domäne, Merkmal]; die ID entsteht zur Laufzeit aus dem erkannten Gerät
+ * (device.ts): `<domäne>.<gerät>_<merkmal>`, der Roboter selbst `vacuum.<gerät>`.
+ */
+export const ROBOT_FEATURES = {
+  vac: ['vacuum', ''],
+  map: ['camera', 'map'],
+  selectedMap: ['select', 'selected_map'], // Kartenwahl (4.3), nur wenn verfügbar
+  mapData: ['camera', 'map_data'], // Datenkarte (4.3b, Heidi-Karte): Valetudo-Kartenpaket im PNG-Chunk
+  status: ['sensor', 'status'],
+  error: ['sensor', 'error'],
+  taskStatus: ['sensor', 'task_status'],
+  battery: ['sensor', 'battery_level'],
+  currentRoom: ['sensor', 'current_room'],
+  cleanedArea: ['sensor', 'cleaned_area'],
+  cleaningTime: ['sensor', 'cleaning_time'],
+  cleaningHistory: ['sensor', 'cleaning_history'],
+  cleaningCount: ['sensor', 'cleaning_count'],
+  totalCleanedArea: ['sensor', 'total_cleaned_area'],
+  totalCleaningTime: ['sensor', 'total_cleaning_time'],
+  firstCleaningDate: ['sensor', 'first_cleaning_date'],
+  mainBrushLeft: ['sensor', 'main_brush_left'],
+  sideBrushLeft: ['sensor', 'side_brush_left'],
+  filterLeft: ['sensor', 'filter_left'],
+  sensorDirtyLeft: ['sensor', 'sensor_dirty_left'],
+  wheelDirtyLeft: ['sensor', 'wheel_dirty_left'],
+  dustBagStatus: ['sensor', 'dust_bag_status'],
+  cleanWaterTankStatus: ['sensor', 'clean_water_tank_status'],
+  dirtyWaterTankStatus: ['sensor', 'dirty_water_tank_status'],
+  detergentStatus: ['sensor', 'detergent_status'],
+  lowWaterWarning: ['sensor', 'low_water_warning'],
+  autoEmptyStatus: ['sensor', 'auto_empty_status'],
+  selfWashBaseStatus: ['sensor', 'self_wash_base_status'],
+  resetMainBrush: ['button', 'reset_main_brush'],
+  resetSideBrush: ['button', 'reset_side_brush'],
+  resetFilter: ['button', 'reset_filter'],
+  resetSensor: ['button', 'reset_sensor'],
+  resetWheel: ['button', 'reset_wheel'],
+  startAutoEmpty: ['button', 'start_auto_empty'],
+  selfClean: ['button', 'self_clean'],
+  manualDrying: ['button', 'manual_drying'],
+  baseStationCleaning: ['button', 'base_station_cleaning'],
+  customizedCleaning: ['switch', 'customized_cleaning'],
+  carpetCleaning: ['select', 'carpet_cleaning'],
+  waterTemperature: ['select', 'water_temperature'],
+  dryingTime: ['select', 'drying_time'],
+  autoEmptyMode: ['select', 'auto_empty_mode'],
+  selfCleanFrequency: ['select', 'self_clean_frequency'],
+  cleangenius: ['select', 'cleangenius'],
+  mapRotation: ['select', 'map_rotation'],
+  selfCleanArea: ['number', 'self_clean_area'],
+  volume: ['number', 'volume'],
+  dndStart: ['time', 'dnd_start'],
+  dndEnd: ['time', 'dnd_end'],
+} as const;
+export type RobotKey = keyof typeof ROBOT_FEATURES;
+
+/** Roboter-ID aus Domäne und Merkmal mit dem erkannten Gerätepräfix. */
+export function robotEntity(domain: string, feature: string): string {
+  const p = devicePrefix();
+  return `${domain}.${p}${feature ? '_' + feature : ''}`;
+}
+
+/** Paket-Entitäten (fest, aus heidi.yaml). */
+export const PACKAGE_ENTITIES = {
   heutePlan: 'sensor.heidi_heutiger_plan',
   autoStatus: 'sensor.heidi_automatik_status',
   phase: 'sensor.heidi_phase',
@@ -78,7 +96,6 @@ export const ENTITIES = {
   progNicole: 'input_boolean.heidi_prog_nicole',
   progNina: 'input_boolean.heidi_prog_nina',
   autoLauf: 'input_boolean.heidi_auto_lauf',
-  chairs: 'input_boolean.stuehle_am_boden',
   autoLetzterPlan: 'input_text.heidi_auto_letzter_plan',
   raumSnapshot: 'input_text.heidi_raum_snapshot',
   laufReihenfolge: 'input_text.heidi_lauf_reihenfolge',
@@ -96,8 +113,15 @@ export const ENTITIES = {
   prognoseWochen: 'input_number.heidi_prognose_wochen',
   prognoseHalbwert: 'input_number.heidi_prognose_halbwert',
   prognoseMindesttage: 'input_number.heidi_prognose_mindesttage',
+  chairs: 'input_boolean.stuehle_am_boden', // Stühle am Boden (eigener Helfer ohne Präfix)
 } as const;
-export type EntityId = (typeof ENTITIES)[keyof typeof ENTITIES] | string;
+
+/** Alle IDs: Roboter-IDs als Getter (folgen dem erkannten Gerät), Paket-IDs fest. */
+export const ENTITIES: { readonly [K in RobotKey]: string } & typeof PACKAGE_ENTITIES = Object.defineProperties(
+  { ...PACKAGE_ENTITIES },
+  Object.fromEntries((Object.keys(ROBOT_FEATURES) as RobotKey[]).map((k) => [k, { get: () => robotEntity(ROBOT_FEATURES[k][0], ROBOT_FEATURES[k][1]), enumerable: true }])),
+) as { readonly [K in RobotKey]: string } & typeof PACKAGE_ENTITIES;
+export type EntityId = string;
 
 /** Personen (Reihenfolge wie v1; `optional` = Helfer, der die Person aus der Anwesenheit nimmt). */
 export const PERSONS = [
@@ -118,7 +142,7 @@ export function planEntity(n: PlanNumber, feld: PlanField): string {
   const domain = (PLAN_TEXT_FIELDS as readonly string[]).includes(feld) ? 'input_text'
     : (PLAN_SELECT_FIELDS as readonly string[]).includes(feld) ? 'input_select'
     : (PLAN_BOOL_FIELDS as readonly string[]).includes(feld) ? 'input_boolean' : 'input_datetime';
-  return `${domain}.heidi_plan${n}_${feld}`;
+  return `${domain}.${PACKAGE_PREFIX}_plan${n}_${feld}`;
 }
 
 /** Raum-Selects des Roboters je Raum-ID (1..7). */
@@ -126,7 +150,7 @@ export const ROOM_SELECT_FIELDS = ['cleaning_mode', 'suction_level', 'cleaning_t
 export type RoomSelectField = (typeof ROOM_SELECT_FIELDS)[number];
 
 export function roomEntity(id: RoomId, feld: RoomSelectField): string {
-  return `select.heidi_room_${id}_${feld}`;
+  return robotEntity('select', `room_${id}_${feld}`);
 }
 
 /** Zulässige Optionsstrings: deutsch für die Helfer (heidi.yaml), HA-Werte für die Dreame-Selects. */
@@ -185,6 +209,13 @@ export const SERVICES = {
 /** History-Pfad wie v1 (_loadTimeline). */
 export function historyPath(startIso: string, endIso: string): string {
   return `history/period/${startIso}?filter_entity_id=${ENTITIES.phase},${ENTITIES.vac}&end_time=${encodeURIComponent(endIso)}&minimal_response&no_attributes`;
+}
+
+/** IDs des Roboters (Dreame-Integration): feste Merkmale plus Raum-Selects. */
+export function robotIds(): string[] {
+  const ids = (Object.keys(ROBOT_FEATURES) as RobotKey[]).map((k) => ENTITIES[k]);
+  for (const r of ROOM_IDS) for (const f of ROOM_SELECT_FIELDS) ids.push(roomEntity(r, f));
+  return ids;
 }
 
 /** Alle Vertrags-IDs (für Diagnose-Selektor und check-fixture). */

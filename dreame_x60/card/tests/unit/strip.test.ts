@@ -9,6 +9,8 @@ import { runOrder, stripModel, stripText } from '../../src/domain/strip';
 import type { RunInput } from '../../src/domain/strip';
 import { readAllRoomValues, readRobot } from '../../src/ha/selectors';
 import type { States } from '../../src/ha/types';
+import { setDevice } from '../../src/ha/device';
+setDevice('heidi', 'Heidi'); // Vektoren und Erwartungen sind für das Gerät „heidi“ geschrieben
 import type { RoomId } from '../../src/ha/contract';
 import type { RoomValues } from '../../src/domain/raumwerte';
 

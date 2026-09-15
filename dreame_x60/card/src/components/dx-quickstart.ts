@@ -7,6 +7,7 @@ import type { DxApi } from '../ha/api';
 import { askConfirm, emit, EVENTS } from '../shared/overlay';
 import { confirmText, segmentsOf, selectionLabel, toggleAll, toggleRoom } from '../shared/rooms';
 import { controls } from '../styles/controls';
+import { deviceName } from '../ha/device';
 
 export const QUICKSTART_ELEMENT = 'dx-quickstart';
 
@@ -53,7 +54,7 @@ export class DxQuickstart extends LitElement {
       </div>
       ${sel.size
         ? html`<div class="runbar"><button class="btn primary" @click=${this.run}><ha-icon icon="mdi:play"></ha-icon>${selectionLabel(sel, order)} reinigen</button><button class="btn icon" aria-label="Auswahl aufheben" title="Auswahl aufheben" @click=${() => { this._sel = new Set(); }}><ha-icon icon="mdi:close"></ha-icon></button></div>`
-        : html`<div class="hint">Räume antippen, dann „reinigen“ – Heidi fährt mit den Roboter-Werten je Raum.</div>`}
+        : html`<div class="hint">Räume antippen, dann „reinigen“ – ${deviceName() || 'der Roboter'} fährt mit den Roboter-Werten je Raum.</div>`}
     `;
   }
 }

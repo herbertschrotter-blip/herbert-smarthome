@@ -7,6 +7,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { load as loadYaml } from 'js-yaml';
 import { ENTITIES, HA_OPTIONS, PERSONS, PLAN_NUMBERS, ROOM_IDS, ROOM_VALUE_CODES, allContractIds, historyPath, planEntity, roomEntity } from '../../src/ha/contract';
+import { setDevice } from '../../src/ha/device';
+setDevice('heidi', 'Heidi'); // Abschnitt 4 ist für das Gerät „heidi“ geschrieben
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '..', '..', '..', '..');

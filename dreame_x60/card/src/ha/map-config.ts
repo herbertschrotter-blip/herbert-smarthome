@@ -3,6 +3,7 @@
 // Liegt in der HA-Schicht, weil hier Entitäts-IDs aus dem Vertrag eingesetzt werden (Regel 1).
 import { ENTITIES } from './contract';
 import type { RoomShape } from './selectors';
+import { deviceName } from './device';
 
 export type MapModeKey = 'raeume' | 'zone' | 'punkt' | 'goto';
 export type MapConfig = Record<string, unknown>;
@@ -12,7 +13,7 @@ export const MAP_MODES: Record<MapModeKey, { label: string; hint: string }> = {
   raeume: { label: 'Räume', hint: 'Auswahl per Kachel oder Tipp in die Raumfläche' },
   zone: { label: 'Zone', hint: 'Rechteck auf der Karte aufziehen (bis zu 5), dann ▶ in der Karte' },
   punkt: { label: 'Punkt', hint: 'Punkt auf der Karte antippen, dann ▶ in der Karte' },
-  goto: { label: 'Hinfahren', hint: 'Punkt auf der Karte antippen → Heidi fährt hin und wartet' },
+  goto: { label: 'Hinfahren', hint: 'Punkt auf der Karte antippen → der Roboter fährt hin und wartet' },
 };
 
 /** Genau ein map_modes-Eintrag je Modus; Räume mit Umriss, Beschriftung und Symbol aus den Kartendaten. */
@@ -36,7 +37,7 @@ export const isHeidiKarte = (kind: string): boolean => kind === 'Heidi-Karte';
 
 /** Konfiguration für die Seite Reinigen nach Kartendarstellung (input_select.heidi_kartendarstellung). */
 export function buildMapConfig(kind: string, dark: boolean, mode: MapModeKey, rooms: readonly RoomShape[]): MapConfig {
-  if (kind === 'Dreame-App') return { type: 'custom:dreame-vacuum-map-card', entity: ENTITIES.vac, title: 'Heidi', theme: dark ? 'dark' : 'light', language: 'de', default_mode: 'room' };
+  if (kind === 'Dreame-App') return { type: 'custom:dreame-vacuum-map-card', entity: ENTITIES.vac, title: deviceName(), theme: dark ? 'dark' : 'light', language: 'de', default_mode: 'room' };
   if (kind === 'Xiaomi-Karte') {
     return {
       type: 'custom:xiaomi-vacuum-map-card', entity: ENTITIES.vac, vacuum_platform: 'Tasshack/dreame-vacuum', language: 'de',

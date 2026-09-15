@@ -18,6 +18,7 @@ import { askConfirm, emit, EVENTS } from '../shared/overlay';
 import type { Overlay } from '../shared/overlay';
 import { confirmText, segmentsOf, selectionLabel, toggleRoom } from '../shared/rooms';
 import { controls } from '../styles/controls';
+import { deviceName } from '../ha/device';
 
 export const MAP_ELEMENT = 'dx-map-card';
 export type MapVariant = 'full' | 'compact';
@@ -172,7 +173,7 @@ export class DxMapCard extends LitElement {
       return html`<b>Live-Karte</b> · ${r.room !== '–' ? r.room : 'unterwegs'} · ${r.cleanedArea} m²${rest ? html` · noch ${rest}` : nothing}`;
     }
     const last = this.history?.entries[0];
-    return html`<b>Karte</b> · Heidi in der Station${last ? html` · letzter Lauf ${fmtDate(last.ts * 1000)}` : nothing}`;
+    return html`<b>Karte</b> · ${deviceName() || 'Roboter'} in der Station${last ? html` · letzter Lauf ${fmtDate(last.ts * 1000)}` : nothing}`;
   }
 
   private renderCompact(): TemplateResult {

@@ -16,6 +16,7 @@ import { EVENTS, emit, moreInfo } from '../shared/overlay';
 import type { Overlay } from '../shared/overlay';
 import { robotSvg } from '../shared/robot-svg';
 import { controls } from '../styles/controls';
+import { deviceName } from '../ha/device';
 
 export const HERO_ELEMENT = 'dx-hero';
 
@@ -98,7 +99,7 @@ export class DxHero extends LitElement {
     return html`
       <div class="robot">
         <div>
-          <div class="name">Heidi</div>
+          <div class="name">${deviceName() || 'Roboter'}</div>
           <button class="st big ${DOT_CLASS[h.dot]}" title="Status" @click=${() => moreInfo(this, r.moreInfo.vac)}><i></i><span class="bigtext">${h.big}</span></button>
           ${h.sub ? html`<div class="hint sub">${h.sub}</div>` : nothing}
         </div>

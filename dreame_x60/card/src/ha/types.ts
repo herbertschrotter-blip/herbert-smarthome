@@ -17,10 +17,16 @@ export interface HomeAssistant {
   themes?: { darkMode?: boolean };
   /** Angemeldeter Benutzer (für den Tagesgruß der Übersicht, Bauplan 4.0). */
   user?: { name?: string };
+  /** Entitäts-Register des Frontends (Geräteerkennung, device.ts): Plattform und Gerät je Entität. */
+  entities?: Record<string, { entity_id: string; platform?: string; device_id?: string; name?: string } | undefined>;
+  /** Geräte-Register des Frontends: Anzeigename des Roboters. */
+  devices?: Record<string, { name?: string; name_by_user?: string | null } | undefined>;
 }
 
 /** Konfiguration der Karte im Dashboard-YAML. */
 export interface PanelConfig {
   type?: string;
   page?: string;
+  /** Roboter-Entität (vacuum.*), wenn es mehrere Dreame-Roboter gibt; sonst automatische Erkennung (device.ts). */
+  robot?: string;
 }

@@ -13,6 +13,7 @@ import { segmentOutline, pxToVac } from '../domain/mapdata';
 import type { MapData } from '../domain/mapdata';
 import { loadMapData } from '../ha/mapdata-loader';
 import { emit } from '../shared/overlay';
+import { ENTITIES } from '../ha/contract';
 
 export const HEIDI_MAP_ELEMENT = 'dx-heidi-map';
 /** Ereignis beim Tipp auf einen Raum: detail { id } */
@@ -99,7 +100,7 @@ export class DxHeidiMap extends LitElement {
           ${paths.map((p) => svg`<path class="room ${this.selected.has(p.id) ? 'sel' : ''} ${cur === p.id ? 'cur' : ''}" data-room=${p.id} d=${p.d} @click=${() => this.tap(p.id)}><title>${p.name}</title></path>`)}
         </svg>` : nothing}
         ${paths.filter((p) => this.selected.has(p.id)).map((p) => html`<span class="badge" data-room=${p.id} style="left:${((p.cx / size!.w) * 100).toFixed(2)}%;top:${((p.cy / size!.h) * 100).toFixed(2)}%">${order.indexOf(p.id) + 1}</span>`)}
-        ${!m?.mapData ? html`<div class="hint">Datenkarte fehlt – <code>camera.heidi_map_data</code> in der Dreame-Integration aktivieren</div>` : (!md && this._loadedVersion ? html`<div class="hint">Kartenpaket wird geladen …</div>` : nothing)}
+        ${!m?.mapData ? html`<div class="hint">Datenkarte fehlt – <code>${ENTITIES.mapData}</code> in der Dreame-Integration aktivieren</div>` : (!md && this._loadedVersion ? html`<div class="hint">Kartenpaket wird geladen …</div>` : nothing)}
         ${m?.mapData && !calib ? html`<div class="hint">Keine Kalibrierpunkte – Räume können nicht eingezeichnet werden</div>` : nothing}
       </div>`;
   }

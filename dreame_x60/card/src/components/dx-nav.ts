@@ -9,6 +9,7 @@ import type { Page } from '../pages';
 import { EVENTS, emit } from '../shared/overlay';
 import type { Overlay } from '../shared/overlay';
 import { robotSvg } from '../shared/robot-svg';
+import { deviceName } from '../ha/device';
 
 export const NAV_ELEMENT = 'dx-nav';
 /** Höchstens so viele Einträge in der Tab-Leiste (Mockup). */
@@ -96,7 +97,7 @@ export class DxNav extends LitElement {
     return html`
       <nav class="side" aria-label="Seitenleiste">
         <div class="inner">
-          <div class="brand"><span class="logo"></span><div><div class="t">Heidi</div><div class="s">Dein Saugroboter</div></div></div>
+          <div class="brand"><span class="logo"></span><div><div class="t">${deviceName() || 'Roboter'}</div><div class="s">Dein Saugroboter</div></div></div>
           <div class="navlist">${es.map((e) => this.item(e))}</div>
           <div class="foot">${robotSvg}<div class="m">Dreame X60 Ultra</div><div class="version">dreame_x60 v${this.version}</div></div>
         </div>

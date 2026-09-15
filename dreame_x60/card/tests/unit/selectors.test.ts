@@ -7,9 +7,11 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ALL_SELECTORS, readAllRoomValues, readAutomatik, readConsumables, readDiagnostics, readHistory, readLearn, readMap, readPlan, readPlans, readPrognose, readRobot, readRobotSettings, readRoomValues, readSettings, readStation, resetHistoryCache } from '../../src/ha/selectors';
 import type { States } from '../../src/ha/types';
+import { discoverFromStates } from '../../src/ha/device';
 
 const FIX = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'fixtures');
 const docked = JSON.parse(fs.readFileSync(path.join(FIX, 'states-docked.json'), 'utf8')) as States;
+discoverFromStates(docked);
 const clone = (s: States): States => JSON.parse(JSON.stringify(s)) as States;
 const withState = (s: States, id: string, state: string, attributes?: Record<string, unknown>): States => {
   const c = clone(s); const cur = c[id] ?? { entity_id: id, state: 'unknown', attributes: {} };

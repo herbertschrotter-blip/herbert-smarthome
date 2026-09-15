@@ -1,7 +1,8 @@
 // Selektoren (Bauplan 3.1): aus hass.states typisierte Sichten, memoisiert je Sicht. Fehlende Entitäten und
 // unknown/unavailable ergeben typisierte Leerwerte (Regel 9); nie eine Exception, nie undefined ins Template.
 // Nur contract.ts kennt IDs; hier werden sie nur benutzt. Sichten dürfen IDs für Bedienelemente mitführen.
-import { ENTITIES, PERSONS, PLAN_NUMBERS, ROOM_IDS, ROOM_SELECT_FIELDS, ROOM_VALUE_CODES, allContractIds, planEntity, roomEntity } from './contract';
+import { ENTITIES, PERSONS, PLAN_NUMBERS, ROOM_IDS, ROOM_SELECT_FIELDS, ROOM_VALUE_CODES, allContractIds, planEntity, roomEntity, robotIds } from './contract';
+import { deviceName } from './device';
 import type { PlanNumber, RoomId, PersonKey } from './contract';
 import { memoizeSelector, sameValue, stateAndAttributes } from './memo-selector';
 import type { Selector } from './memo-selector';
@@ -62,7 +63,7 @@ export interface RobotView {
 }
 
 const VAC_ATTRS = ['has_error', 'current_segment', 'active_segments', 'cleaning_sequence', 'cleaned_area', 'charging', 'docked', 'mop_pad', 'paused', 'washing', 'drying', 'returning_to_wash', 'mapping', 'cruising'] as const;
-const ROBOT_IDS = [E.vac, E.status, E.error, E.taskStatus, E.battery, E.currentRoom, E.cleanedArea, E.cleaningTime, E.phase, E.autoLauf, E.autoLetzterPlan, E.laufReihenfolge, E.dndStart, E.dndEnd, E.raumnamen, E.ninaZaehlt, ...PERSONS.map((p) => p.id)];
+const ROBOT_IDS = (): string[] => [E.vac, E.status, E.error, E.taskStatus, E.battery, E.currentRoom, E.cleanedArea, E.cleaningTime, E.phase, E.autoLauf, E.autoLetzterPlan, E.laufReihenfolge, E.dndStart, E.dndEnd, E.raumnamen, E.ninaZaehlt, ...PERSONS.map((p) => p.id)];
 
 const intList = (v: unknown): number[] => (Array.isArray(v) ? v.map((x) => parseInt(String(x), 10)).filter((x) => !isNaN(x)) : []);
 
@@ -90,7 +91,7 @@ export const readRobot: Selector<RobotView> = memoizeSelector(ROBOT_IDS, (s) => 
     room: roomName(st(s, E.currentRoom), deutsch), deutsch, persons, hero,
     moreInfo: { vac: E.vac, battery: E.battery, error: E.error },
   };
-}, { [E.vac]: stateAndAttributes(VAC_ATTRS) });
+}, () => ({ [E.vac]: stateAndAttributes(VAC_ATTRS) }));
 
 // ───────── Planer ─────────
 export interface PlanView {
@@ -104,7 +105,7 @@ const planIds = (n: PlanNumber): string[] => PLAN_FIELDS.map((f) => planEntity(n
 
 function makeReadPlan(n: PlanNumber): Selector<PlanView> {
   const id = (f: (typeof PLAN_FIELDS)[number]) => planEntity(n, f);
-  return memoizeSelector(planIds(n), (s) => {
+  return memoizeSelector(() => planIds(n), (s) => {
     const sel = (f: (typeof PLAN_FIELDS)[number]) => st(s, id(f));
     const tx = (f: (typeof PLAN_FIELDS)[number]) => txt(s, id(f));
     const mask = tx('tage').padEnd(7, '0').slice(0, 7);
@@ -124,7 +125,7 @@ const PLAN_SELECTORS: Record<PlanNumber, Selector<PlanView>> = { 1: makeReadPlan
 export const readPlan = (n: PlanNumber): Selector<PlanView> => PLAN_SELECTORS[n];
 
 export interface PlansView { plans: PlanView[]; heute: PlanNumber | null; heuteName: string; heuteZeit: string; heuteErledigt: boolean; stoerer: string[]; planerBereich: boolean }
-export const readPlans: Selector<PlansView> = memoizeSelector([...PLAN_NUMBERS.flatMap(planIds), E.heutePlan, E.planerBereich], (s) => {
+export const readPlans: Selector<PlansView> = memoizeSelector(() => [...PLAN_NUMBERS.flatMap(planIds), E.heutePlan, E.planerBereich], (s) => {
   const slot = parseInt(st(s, E.heutePlan), 10);
   const heute = (PLAN_NUMBERS as readonly number[]).includes(slot) ? (slot as PlanNumber) : null;
   const stoerer = attr<unknown>(s, E.heutePlan, 'stoerer');
@@ -183,7 +184,7 @@ export function roomValuesOf(s: States, id: RoomId): RoomValues | null {
     wdh: (g('wdh') ?? '1x').replace('x', '') as RoomValues['wdh'],
   };
 }
-const ROOM_SELECTORS = Object.fromEntries(ROOM_IDS.map((id) => [id, memoizeSelector([...roomIds(id), E.map], (s) => roomValuesOf(s, id), { [E.map]: mapRoomsOnly })])) as Record<RoomId, Selector<RoomValues | null>>;
+const ROOM_SELECTORS = Object.fromEntries(ROOM_IDS.map((id) => [id, memoizeSelector(() => [...roomIds(id), E.map], (s) => roomValuesOf(s, id), () => ({ [E.map]: mapRoomsOnly }))])) as Record<RoomId, Selector<RoomValues | null>>;
 export const readRoomValues = (id: RoomId): Selector<RoomValues | null> => ROOM_SELECTORS[id];
 
 export interface AllRoomValuesView {
@@ -194,14 +195,14 @@ export interface AllRoomValuesView {
   /** Räume, deren Werte aus den Kartendaten kommen (Selects unavailable, PD-010) – dort ist Schreiben nicht möglich */
   vonKarte: RoomId[];
 }
-export const readAllRoomValues: Selector<AllRoomValuesView> = memoizeSelector([...ROOM_IDS.flatMap(roomIds), E.customizedCleaning, E.map], (s) => {
+export const readAllRoomValues: Selector<AllRoomValuesView> = memoizeSelector(() => [...ROOM_IDS.flatMap(roomIds), E.customizedCleaning, E.map], (s) => {
   const rooms = Object.fromEntries(ROOM_IDS.map((id) => [id, ROOM_SELECTORS[id](s)])) as Record<RoomId, RoomValues | null>;
   const vonKarte = ROOM_IDS.filter((id) => rooms[id] !== null && EMPTY.includes(st(s, roomEntity(id, RV_ENT.modus))));
   return { rooms, customized: on(s, E.customizedCleaning), anyUnavailable: ROOM_IDS.some((id) => rooms[id] === null), vonKarte };
-}, { [E.map]: mapRoomsOnly });
+}, () => ({ [E.map]: mapRoomsOnly }));
 
 // ───────── Lernwerte ─────────
-export const readLearn: Selector<Lernwerte | null> = memoizeSelector([E.lern], (s) => {
+export const readLearn: Selector<Lernwerte | null> = memoizeSelector(() => [E.lern], (s) => {
   const e = ent(s, E.lern);
   return e && !EMPTY.includes(e.state) && e.attributes?.raten ? (e.attributes as unknown as Lernwerte) : null;
 });
@@ -211,7 +212,7 @@ export interface HistoryEntry { key: string; ts: number; area: number; min: numb
 export interface HistoryView { entries: HistoryEntry[]; count: number; totalArea: number; totalTime: number; stale: boolean }
 let histCache: Record<string, unknown> = {};
 const histOk = (e: HassEntity | undefined): boolean => !!e && !EMPTY.includes(e.state) && Object.values(e.attributes ?? {}).some((v) => v && typeof v === 'object' && 'timestamp' in (v as object));
-export const readHistory: Selector<HistoryView> = memoizeSelector([E.cleaningHistory, E.cleaningCount, E.totalCleanedArea, E.totalCleaningTime], (s) => {
+export const readHistory: Selector<HistoryView> = memoizeSelector(() => [E.cleaningHistory, E.cleaningCount, E.totalCleanedArea, E.totalCleaningTime], (s) => {
   const live = ent(s, E.cleaningHistory);
   const ok = histOk(live);
   if (ok && live) histCache = live.attributes;
@@ -233,7 +234,7 @@ export interface PrognoseView {
   homeoffice: string; empfehlung: string; aktualisiert: string; aufloesung: string; wochen: number; mindesttage: number;
   schalter: { id: string; label: string; sub: string; on: boolean }[];
 }
-export const readPrognose: Selector<PrognoseView> = memoizeSelector([E.prognose, E.prognoseAktiv, E.abweichungHeute, E.progHerbert, E.progNicole, E.progNina, E.prognoseWochen, E.prognoseMindesttage], (s) => {
+export const readPrognose: Selector<PrognoseView> = memoizeSelector(() => [E.prognose, E.prognoseAktiv, E.abweichungHeute, E.progHerbert, E.progNicole, E.progNina, E.prognoseWochen, E.prognoseMindesttage], (s) => {
   const p = ent(s, E.prognose); const a = (p?.attributes ?? {}) as Record<string, unknown>;
   const str = (k: string, d = '') => (a[k] === undefined || a[k] === null ? d : String(a[k]));
   return {
@@ -255,7 +256,7 @@ export interface AutomatikView {
   on: boolean; status: string; detail: string; restMin: number | null; restQuelle: string; arbeitszeitStart: string; arbeitszeitEnde: string; rueckkehr: string;
   schnellMinuten: number; minAkku: number; beiHeimkehr: string; beiHeimkehrOptions: string[]; letzterPlan: string; letzteAutoReinigung: string;
 }
-export const readAutomatik: Selector<AutomatikView> = memoizeSelector([E.automatik, E.autoStatus, E.arbeitszeitStart, E.arbeitszeitEnde, E.rueckkehr, E.schnellMinuten, E.minAkku, E.beiHeimkehr, E.autoLetzterPlan, E.letzteAutoReinigung], (s) => {
+export const readAutomatik: Selector<AutomatikView> = memoizeSelector(() => [E.automatik, E.autoStatus, E.arbeitszeitStart, E.arbeitszeitEnde, E.rueckkehr, E.schnellMinuten, E.minAkku, E.beiHeimkehr, E.autoLetzterPlan, E.letzteAutoReinigung], (s) => {
   const rest = attr<unknown>(s, E.autoStatus, 'rest_min');
   const letzte = st(s, E.letzteAutoReinigung);
   return {
@@ -270,19 +271,19 @@ export const readAutomatik: Selector<AutomatikView> = memoizeSelector([E.automat
 
 // ───────── Verschleiß und Station ─────────
 export interface ConsumableView { name: string; pct: number; level: 'danger' | 'warning' | 'ok'; resetEntity: string; known: boolean }
-const CONSUMABLES = [
+const CONSUMABLES = (): readonly (readonly [string, string, string])[] => [
   ['Hauptbürste', E.mainBrushLeft, E.resetMainBrush], ['Seitenbürste', E.sideBrushLeft, E.resetSideBrush], ['Filter', E.filterLeft, E.resetFilter],
   ['Sensoren', E.sensorDirtyLeft, E.resetSensor], ['Räder', E.wheelDirtyLeft, E.resetWheel],
-] as const;
-export const readConsumables: Selector<ConsumableView[]> = memoizeSelector(CONSUMABLES.flatMap(([, s, b]) => [s, b]), (s) =>
-  CONSUMABLES.map(([name, sensor, reset]) => { const pct = num(s, sensor, 0); return { name, pct, level: pct <= 10 ? 'danger' as const : pct <= 25 ? 'warning' as const : 'ok' as const, resetEntity: reset, known: available(s, sensor) }; }));
+];
+export const readConsumables: Selector<ConsumableView[]> = memoizeSelector(() => CONSUMABLES().flatMap(([, s, b]) => [s, b]), (s) =>
+  CONSUMABLES().map(([name, sensor, reset]) => { const pct = num(s, sensor, 0); return { name, pct, level: pct <= 10 ? 'danger' as const : pct <= 25 ? 'warning' as const : 'ok' as const, resetEntity: reset, known: available(s, sensor) }; }));
 
 export interface StationView {
   tiles: { key: string; label: string; value: string; warn: boolean }[];
   buttons: { entity: string; label: string; confirm: string | null }[];
   ok: boolean;
 }
-export const readStation: Selector<StationView> = memoizeSelector([E.dustBagStatus, E.cleanWaterTankStatus, E.dirtyWaterTankStatus, E.detergentStatus, E.lowWaterWarning, E.startAutoEmpty, E.selfClean, E.manualDrying, E.baseStationCleaning], (s) => {
+export const readStation: Selector<StationView> = memoizeSelector(() => [E.dustBagStatus, E.cleanWaterTankStatus, E.dirtyWaterTankStatus, E.detergentStatus, E.lowWaterWarning, E.startAutoEmpty, E.selfClean, E.manualDrying, E.baseStationCleaning], (s) => {
   const inst = (id: string) => st(s, id) === 'installed';
   const lowWater = st(s, E.lowWaterWarning) !== 'no_warning';
   const tiles = [
@@ -313,7 +314,7 @@ const rng = (s: States, id: string, label: string, unit: string, sub: string, dM
   return { id, label, sub, unit, value: num(s, id, n(a.min, dMin)), min: n(a.min, dMin), max: n(a.max, dMax), step: n(a.step, dStep) };
 };
 const ROT_DEFAULT = ['0', '90', '180', '270'];
-export const readSettings: Selector<SettingsView> = memoizeSelector([E.dark, E.karte, E.mapRotation, E.raumnamen, E.automatik, E.planerBereich, E.prognoseAktiv, E.ninaZaehlt, E.prognoseIntervall, E.prognoseAufloesung, E.prognoseWochen, E.prognoseHalbwert, E.prognoseMindesttage], (s) => {
+export const readSettings: Selector<SettingsView> = memoizeSelector(() => [E.dark, E.karte, E.mapRotation, E.raumnamen, E.automatik, E.planerBereich, E.prognoseAktiv, E.ninaZaehlt, E.prognoseIntervall, E.prognoseAufloesung, E.prognoseWochen, E.prognoseHalbwert, E.prognoseMindesttage], (s) => {
   const rotOpts = opts(s, E.mapRotation, ROT_DEFAULT);
   return {
     dark: st(s, E.dark) !== 'off', darkId: E.dark,
@@ -338,7 +339,7 @@ export const readSettings: Selector<SettingsView> = memoizeSelector([E.dark, E.k
 });
 
 export interface RobotSettingsView { selects: { id: string; label: string; value: string; options: string[] }[]; numbers: RangeView[]; dndStart: string; dndEnd: string; dndStartId: string; dndEndId: string }
-export const readRobotSettings: Selector<RobotSettingsView> = memoizeSelector([E.carpetCleaning, E.waterTemperature, E.dryingTime, E.autoEmptyMode, E.selfCleanFrequency, E.cleangenius, E.selfCleanArea, E.volume, E.dndStart, E.dndEnd], (s) => {
+export const readRobotSettings: Selector<RobotSettingsView> = memoizeSelector(() => [E.carpetCleaning, E.waterTemperature, E.dryingTime, E.autoEmptyMode, E.selfCleanFrequency, E.cleangenius, E.selfCleanArea, E.volume, E.dndStart, E.dndEnd], (s) => {
   const sel = (id: string, label: string) => ({ id, label, value: st(s, id), options: opts(s, id) });
   return {
     selects: [sel(E.carpetCleaning, 'Teppich'), sel(E.waterTemperature, 'Wassertemperatur'), sel(E.dryingTime, 'Trocknung'), sel(E.autoEmptyMode, 'Absaugen'), sel(E.selfCleanFrequency, 'Mopp-Wäsche'), sel(E.cleangenius, 'CleanGenius')],
@@ -375,7 +376,7 @@ function roomShapes(s: States): RoomShape[] {
   }
   return out;
 }
-export const readMap: Selector<MapView> = memoizeSelector([E.map, E.karte, E.chairs, E.selectedMap, E.mapData], (s) => {
+export const readMap: Selector<MapView> = memoizeSelector(() => [E.map, E.karte, E.chairs, E.selectedMap, E.mapData], (s) => {
   const sm = ent(s, E.selectedMap);
   const mdEnt = ent(s, E.mapData);
   const mdPic = String(attr(s, E.mapData, 'entity_picture') ?? '');
@@ -387,16 +388,16 @@ export const readMap: Selector<MapView> = memoizeSelector([E.map, E.karte, E.cha
     roomShapes: roomShapes(s),
     selectedMap: sm && !EMPTY.includes(sm.state) ? { id: E.selectedMap, value: sm.state, options: opts(s, E.selectedMap) } : null,
   };
-}, { [E.map]: stateAndAttributes(['entity_picture', 'calibration_points', 'no_go_areas', 'no_mopping_areas', 'virtual_walls', 'rooms']), [E.mapData]: stateAndAttributes(['entity_picture', 'saved_map_id', 'map_id']) });
+}, () => ({ [E.map]: stateAndAttributes(['entity_picture', 'calibration_points', 'no_go_areas', 'no_mopping_areas', 'virtual_walls', 'rooms']), [E.mapData]: stateAndAttributes(['entity_picture', 'saved_map_id', 'map_id']) }));
 
 // ───────── Diagnose ─────────
 export interface DiagnosticsView { total: number; missing: string[]; unavailable: string[]; groups: { name: string; total: number; missing: string[]; unavailable: string[] }[] }
-const isRobotId = (id: string): boolean => /^(vacuum|camera|switch|button|select\.heidi_(room_|carpet|water|drying|auto_empty|self_clean|cleangenius|map_rotation)|number|time)\./.test(id) || /^sensor\.heidi_(status|error|task_status|battery_level|current_room|cleaned_area|cleaning_time|cleaning_history|cleaning_count|total_|first_cleaning|main_brush|side_brush|filter_left|sensor_dirty|wheel_dirty|dust_bag|clean_water|dirty_water|detergent|low_water|auto_empty|self_wash)/.test(id);
-export const readDiagnostics: Selector<DiagnosticsView> = memoizeSelector(allContractIds(), (s) => {
+export const readDiagnostics: Selector<DiagnosticsView> = memoizeSelector(() => allContractIds(), (s) => {
   const ids = allContractIds();
   const group = (name: string, list: string[]) => ({ name, total: list.length, missing: list.filter((id) => !s[id]), unavailable: list.filter((id) => s[id] && EMPTY.includes(s[id]!.state)) });
-  const robot = group('Roboter (Dreame)', ids.filter(isRobotId));
-  const paket = group('Paket (Helfer, Sensoren)', ids.filter((id) => !isRobotId(id)));
+  const robotSet = new Set(robotIds());
+  const robot = group(`Roboter (${deviceName() || 'nicht erkannt'})`, ids.filter((id) => robotSet.has(id)));
+  const paket = group('Paket (Helfer, Sensoren)', ids.filter((id) => !robotSet.has(id)));
   return { total: ids.length, missing: [...robot.missing, ...paket.missing], unavailable: [...robot.unavailable, ...paket.unavailable], groups: [robot, paket] };
 });
 

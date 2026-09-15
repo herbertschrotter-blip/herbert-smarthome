@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.16 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.17 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -550,63 +550,119 @@ var o4 = s3.litElementPolyfillSupport;
 o4?.({ LitElement: i4 });
 (s3.litElementVersions ??= []).push("4.2.2");
 
+// src/ha/device.ts
+var DREAME_PLATFORM = "dreame_vacuum";
+var DREAME_ATTRS = ["segment_cleaning", "cleaning_sequence"];
+var current = null;
+var generation = 0;
+var devicePrefix = () => current?.prefix ?? "";
+var deviceName = () => current?.name ?? "";
+function apply(next) {
+  if ((current?.vac ?? null) !== (next?.vac ?? null) || current?.name !== next?.name) generation++;
+  current = next;
+  return next;
+}
+var isVacuumId = (id) => id.startsWith("vacuum.") && id.split(".").length === 2;
+function cleanName(raw) {
+  const words = String(raw ?? "").trim().split(/\s+/).filter(Boolean);
+  const out = [];
+  for (const w2 of words) if (out[out.length - 1] !== w2) out.push(w2);
+  return out.join(" ");
+}
+function fromStates(states, vacId) {
+  const e4 = states[vacId];
+  if (!e4 || !isVacuumId(vacId)) return null;
+  const prefix = vacId.slice("vacuum.".length);
+  const name = cleanName(e4.attributes.friendly_name) || prefix;
+  return { prefix, vac: vacId, name };
+}
+function discoverFromStates(states, override) {
+  if (override && states[override]) return apply(fromStates(states, override));
+  for (const id of Object.keys(states).sort()) {
+    const e4 = states[id];
+    if (e4 && isVacuumId(id) && DREAME_ATTRS.some((a3) => a3 in e4.attributes)) return apply(fromStates(states, id));
+  }
+  return apply(null);
+}
+function discoverDevice(hass, override) {
+  const states = hass.states ?? {};
+  let info = null;
+  if (override && states[override]) info = fromStates(states, override);
+  if (!info && hass.entities) {
+    const reg = Object.values(hass.entities).find((e4) => e4 && e4.platform === DREAME_PLATFORM && isVacuumId(e4.entity_id));
+    if (reg) {
+      info = fromStates(states, reg.entity_id) ?? { prefix: reg.entity_id.slice("vacuum.".length), vac: reg.entity_id, name: reg.entity_id.slice("vacuum.".length) };
+      const dev = reg.device_id ? hass.devices?.[reg.device_id] : void 0;
+      const devName = (dev?.name_by_user ?? dev?.name ?? "").trim();
+      if (devName) info = { ...info, name: devName };
+    }
+  }
+  if (!info) return discoverFromStates(states);
+  return apply(info);
+}
+
 // src/ha/contract.ts
 var ROOM_IDS = [1, 2, 3, 4, 5, 6, 7];
 var PLAN_NUMBERS = [1, 2, 3, 4];
-var ENTITIES = {
-  // Roboter (Dreame-Integration)
-  vac: "vacuum.heidi",
-  map: "camera.heidi_map",
-  selectedMap: "select.heidi_selected_map",
+var PACKAGE_PREFIX = "heidi";
+var ROBOT_FEATURES = {
+  vac: ["vacuum", ""],
+  map: ["camera", "map"],
+  selectedMap: ["select", "selected_map"],
   // Kartenwahl (4.3), nur wenn verfügbar
-  mapData: "camera.heidi_map_data",
+  mapData: ["camera", "map_data"],
   // Datenkarte (4.3b, Heidi-Karte): Valetudo-Kartenpaket im PNG-Chunk
-  status: "sensor.heidi_status",
-  error: "sensor.heidi_error",
-  taskStatus: "sensor.heidi_task_status",
-  battery: "sensor.heidi_battery_level",
-  currentRoom: "sensor.heidi_current_room",
-  cleanedArea: "sensor.heidi_cleaned_area",
-  cleaningTime: "sensor.heidi_cleaning_time",
-  cleaningHistory: "sensor.heidi_cleaning_history",
-  cleaningCount: "sensor.heidi_cleaning_count",
-  totalCleanedArea: "sensor.heidi_total_cleaned_area",
-  totalCleaningTime: "sensor.heidi_total_cleaning_time",
-  firstCleaningDate: "sensor.heidi_first_cleaning_date",
-  mainBrushLeft: "sensor.heidi_main_brush_left",
-  sideBrushLeft: "sensor.heidi_side_brush_left",
-  filterLeft: "sensor.heidi_filter_left",
-  sensorDirtyLeft: "sensor.heidi_sensor_dirty_left",
-  wheelDirtyLeft: "sensor.heidi_wheel_dirty_left",
-  dustBagStatus: "sensor.heidi_dust_bag_status",
-  cleanWaterTankStatus: "sensor.heidi_clean_water_tank_status",
-  dirtyWaterTankStatus: "sensor.heidi_dirty_water_tank_status",
-  detergentStatus: "sensor.heidi_detergent_status",
-  lowWaterWarning: "sensor.heidi_low_water_warning",
-  autoEmptyStatus: "sensor.heidi_auto_empty_status",
-  selfWashBaseStatus: "sensor.heidi_self_wash_base_status",
-  resetMainBrush: "button.heidi_reset_main_brush",
-  resetSideBrush: "button.heidi_reset_side_brush",
-  resetFilter: "button.heidi_reset_filter",
-  resetSensor: "button.heidi_reset_sensor",
-  resetWheel: "button.heidi_reset_wheel",
-  startAutoEmpty: "button.heidi_start_auto_empty",
-  selfClean: "button.heidi_self_clean",
-  manualDrying: "button.heidi_manual_drying",
-  baseStationCleaning: "button.heidi_base_station_cleaning",
-  customizedCleaning: "switch.heidi_customized_cleaning",
-  carpetCleaning: "select.heidi_carpet_cleaning",
-  waterTemperature: "select.heidi_water_temperature",
-  dryingTime: "select.heidi_drying_time",
-  autoEmptyMode: "select.heidi_auto_empty_mode",
-  selfCleanFrequency: "select.heidi_self_clean_frequency",
-  cleangenius: "select.heidi_cleangenius",
-  mapRotation: "select.heidi_map_rotation",
-  selfCleanArea: "number.heidi_self_clean_area",
-  volume: "number.heidi_volume",
-  dndStart: "time.heidi_dnd_start",
-  dndEnd: "time.heidi_dnd_end",
-  // Paket (ha/packages/heidi.yaml)
+  status: ["sensor", "status"],
+  error: ["sensor", "error"],
+  taskStatus: ["sensor", "task_status"],
+  battery: ["sensor", "battery_level"],
+  currentRoom: ["sensor", "current_room"],
+  cleanedArea: ["sensor", "cleaned_area"],
+  cleaningTime: ["sensor", "cleaning_time"],
+  cleaningHistory: ["sensor", "cleaning_history"],
+  cleaningCount: ["sensor", "cleaning_count"],
+  totalCleanedArea: ["sensor", "total_cleaned_area"],
+  totalCleaningTime: ["sensor", "total_cleaning_time"],
+  firstCleaningDate: ["sensor", "first_cleaning_date"],
+  mainBrushLeft: ["sensor", "main_brush_left"],
+  sideBrushLeft: ["sensor", "side_brush_left"],
+  filterLeft: ["sensor", "filter_left"],
+  sensorDirtyLeft: ["sensor", "sensor_dirty_left"],
+  wheelDirtyLeft: ["sensor", "wheel_dirty_left"],
+  dustBagStatus: ["sensor", "dust_bag_status"],
+  cleanWaterTankStatus: ["sensor", "clean_water_tank_status"],
+  dirtyWaterTankStatus: ["sensor", "dirty_water_tank_status"],
+  detergentStatus: ["sensor", "detergent_status"],
+  lowWaterWarning: ["sensor", "low_water_warning"],
+  autoEmptyStatus: ["sensor", "auto_empty_status"],
+  selfWashBaseStatus: ["sensor", "self_wash_base_status"],
+  resetMainBrush: ["button", "reset_main_brush"],
+  resetSideBrush: ["button", "reset_side_brush"],
+  resetFilter: ["button", "reset_filter"],
+  resetSensor: ["button", "reset_sensor"],
+  resetWheel: ["button", "reset_wheel"],
+  startAutoEmpty: ["button", "start_auto_empty"],
+  selfClean: ["button", "self_clean"],
+  manualDrying: ["button", "manual_drying"],
+  baseStationCleaning: ["button", "base_station_cleaning"],
+  customizedCleaning: ["switch", "customized_cleaning"],
+  carpetCleaning: ["select", "carpet_cleaning"],
+  waterTemperature: ["select", "water_temperature"],
+  dryingTime: ["select", "drying_time"],
+  autoEmptyMode: ["select", "auto_empty_mode"],
+  selfCleanFrequency: ["select", "self_clean_frequency"],
+  cleangenius: ["select", "cleangenius"],
+  mapRotation: ["select", "map_rotation"],
+  selfCleanArea: ["number", "self_clean_area"],
+  volume: ["number", "volume"],
+  dndStart: ["time", "dnd_start"],
+  dndEnd: ["time", "dnd_end"]
+};
+function robotEntity(domain, feature) {
+  const p3 = devicePrefix();
+  return `${domain}.${p3}${feature ? "_" + feature : ""}`;
+}
+var PACKAGE_ENTITIES = {
   heutePlan: "sensor.heidi_heutiger_plan",
   autoStatus: "sensor.heidi_automatik_status",
   phase: "sensor.heidi_phase",
@@ -626,7 +682,6 @@ var ENTITIES = {
   progNicole: "input_boolean.heidi_prog_nicole",
   progNina: "input_boolean.heidi_prog_nina",
   autoLauf: "input_boolean.heidi_auto_lauf",
-  chairs: "input_boolean.stuehle_am_boden",
   autoLetzterPlan: "input_text.heidi_auto_letzter_plan",
   raumSnapshot: "input_text.heidi_raum_snapshot",
   laufReihenfolge: "input_text.heidi_lauf_reihenfolge",
@@ -643,8 +698,14 @@ var ENTITIES = {
   prognoseAufloesung: "input_number.heidi_prognose_aufloesung",
   prognoseWochen: "input_number.heidi_prognose_wochen",
   prognoseHalbwert: "input_number.heidi_prognose_halbwert",
-  prognoseMindesttage: "input_number.heidi_prognose_mindesttage"
+  prognoseMindesttage: "input_number.heidi_prognose_mindesttage",
+  chairs: "input_boolean.stuehle_am_boden"
+  // Stühle am Boden (eigener Helfer ohne Präfix)
 };
+var ENTITIES = Object.defineProperties(
+  { ...PACKAGE_ENTITIES },
+  Object.fromEntries(Object.keys(ROBOT_FEATURES).map((k2) => [k2, { get: () => robotEntity(ROBOT_FEATURES[k2][0], ROBOT_FEATURES[k2][1]), enumerable: true }]))
+);
 var PERSONS = [
   { id: "person.herbert_schrotter", key: "herbert", name: "Herbert", letter: "H" },
   { id: "person.nicole_2", key: "nicole", name: "Nicole", letter: "N" },
@@ -656,11 +717,11 @@ var PLAN_BOOL_FIELDS = ["aktiv", "schnell"];
 var PLAN_TIME_FIELDS = ["zeit"];
 function planEntity(n4, feld) {
   const domain = PLAN_TEXT_FIELDS.includes(feld) ? "input_text" : PLAN_SELECT_FIELDS.includes(feld) ? "input_select" : PLAN_BOOL_FIELDS.includes(feld) ? "input_boolean" : "input_datetime";
-  return `${domain}.heidi_plan${n4}_${feld}`;
+  return `${domain}.${PACKAGE_PREFIX}_plan${n4}_${feld}`;
 }
 var ROOM_SELECT_FIELDS = ["cleaning_mode", "suction_level", "cleaning_times", "mop_pad_humidity", "cleaning_route"];
 function roomEntity(id, feld) {
-  return `select.heidi_room_${id}_${feld}`;
+  return robotEntity("select", `room_${id}_${feld}`);
 }
 var ROOM_VALUE_CODES = {
   RV: {
@@ -701,6 +762,11 @@ var SERVICES = {
 };
 function historyPath(startIso, endIso) {
   return `history/period/${startIso}?filter_entity_id=${ENTITIES.phase},${ENTITIES.vac}&end_time=${encodeURIComponent(endIso)}&minimal_response&no_attributes`;
+}
+function robotIds() {
+  const ids = Object.keys(ROBOT_FEATURES).map((k2) => ENTITIES[k2]);
+  for (const r4 of ROOM_IDS) for (const f3 of ROOM_SELECT_FIELDS) ids.push(roomEntity(r4, f3));
+  return ids;
 }
 function allContractIds() {
   const ids = [...Object.values(ENTITIES), ...PERSONS.map((p3) => p3.id)];
@@ -882,7 +948,7 @@ var DxApi = class {
     return this.call(SERVICES.prognoseReset.domain, SERVICES.prognoseReset.service, {});
   }
   // ───────── Lesen über die REST-API ─────────
-  /** Historie von sensor.heidi_phase und vacuum.heidi im Fenster (Sekunden). */
+  /** Historie der Phase (Paket) und des Roboters im Fenster (Sekunden). */
   history(startSec, endSec) {
     const h3 = this.hass();
     if (!h3.callApi) return Promise.resolve([]);
@@ -915,13 +981,19 @@ function sameValue(x2, y3) {
   return false;
 }
 function memoizeSelector(ids, fn, compare = {}) {
+  const list = () => typeof ids === "function" ? ids() : ids;
+  const cmpMap = () => typeof compare === "function" ? compare() : compare;
   let prev = null;
+  let prevKey = "";
   let result;
   const sel = (states) => {
-    if (prev !== null) {
+    const cur = list();
+    const key = cur.join("|");
+    if (prev !== null && key === prevKey) {
+      const cm = cmpMap();
       let same = true;
-      for (const id of ids) {
-        const cmp = compare[id] ?? sameStateAndUpdated;
+      for (const id of cur) {
+        const cmp = cm[id] ?? sameStateAndUpdated;
         if (!cmp(prev[id], states[id])) {
           same = false;
           break;
@@ -931,11 +1003,13 @@ function memoizeSelector(ids, fn, compare = {}) {
     }
     result = fn(states);
     prev = states;
+    prevKey = key;
     return result;
   };
-  Object.defineProperty(sel, "ids", { value: ids, writable: false });
+  Object.defineProperty(sel, "ids", { get: list });
   sel.reset = () => {
     prev = null;
+    prevKey = "";
   };
   return sel;
 }
@@ -1093,7 +1167,7 @@ var available = (s4, id) => {
   return !!e4 && !EMPTY2.includes(e4.state);
 };
 var VAC_ATTRS = ["has_error", "current_segment", "active_segments", "cleaning_sequence", "cleaned_area", "charging", "docked", "mop_pad", "paused", "washing", "drying", "returning_to_wash", "mapping", "cruising"];
-var ROBOT_IDS = [E2.vac, E2.status, E2.error, E2.taskStatus, E2.battery, E2.currentRoom, E2.cleanedArea, E2.cleaningTime, E2.phase, E2.autoLauf, E2.autoLetzterPlan, E2.laufReihenfolge, E2.dndStart, E2.dndEnd, E2.raumnamen, E2.ninaZaehlt, ...PERSONS.map((p3) => p3.id)];
+var ROBOT_IDS = () => [E2.vac, E2.status, E2.error, E2.taskStatus, E2.battery, E2.currentRoom, E2.cleanedArea, E2.cleaningTime, E2.phase, E2.autoLauf, E2.autoLetzterPlan, E2.laufReihenfolge, E2.dndStart, E2.dndEnd, E2.raumnamen, E2.ninaZaehlt, ...PERSONS.map((p3) => p3.id)];
 var intList = (v2) => Array.isArray(v2) ? v2.map((x2) => parseInt(String(x2), 10)).filter((x2) => !isNaN(x2)) : [];
 var readRobot = memoizeSelector(ROBOT_IDS, (s4) => {
   const vac = st(s4, E2.vac);
@@ -1143,12 +1217,12 @@ var readRobot = memoizeSelector(ROBOT_IDS, (s4) => {
     hero,
     moreInfo: { vac: E2.vac, battery: E2.battery, error: E2.error }
   };
-}, { [E2.vac]: stateAndAttributes(VAC_ATTRS) });
+}, () => ({ [E2.vac]: stateAndAttributes(VAC_ATTRS) }));
 var PLAN_FIELDS = ["name", "raeume", "tage", "personen", "raumwerte", "modus", "saugstufe", "wasser", "route", "wiederholungen", "homeoffice", "ho_saug", "ho_wdh", "sp_saug", "sp_wdh", "aktiv", "schnell", "zeit"];
 var planIds = (n4) => PLAN_FIELDS.map((f3) => planEntity(n4, f3));
 function makeReadPlan(n4) {
   const id = (f3) => planEntity(n4, f3);
-  return memoizeSelector(planIds(n4), (s4) => {
+  return memoizeSelector(() => planIds(n4), (s4) => {
     const sel = (f3) => st(s4, id(f3));
     const tx = (f3) => txt(s4, id(f3));
     const mask = tx("tage").padEnd(7, "0").slice(0, 7);
@@ -1177,7 +1251,7 @@ function makeReadPlan(n4) {
   });
 }
 var PLAN_SELECTORS = { 1: makeReadPlan(1), 2: makeReadPlan(2), 3: makeReadPlan(3), 4: makeReadPlan(4) };
-var readPlans = memoizeSelector([...PLAN_NUMBERS.flatMap(planIds), E2.heutePlan, E2.planerBereich], (s4) => {
+var readPlans = memoizeSelector(() => [...PLAN_NUMBERS.flatMap(planIds), E2.heutePlan, E2.planerBereich], (s4) => {
   const slot = parseInt(st(s4, E2.heutePlan), 10);
   const heute = PLAN_NUMBERS.includes(slot) ? slot : null;
   const stoerer = attr(s4, E2.heutePlan, "stoerer");
@@ -1236,19 +1310,19 @@ function roomValuesOf(s4, id) {
     wdh: (g2("wdh") ?? "1x").replace("x", "")
   };
 }
-var ROOM_SELECTORS = Object.fromEntries(ROOM_IDS.map((id) => [id, memoizeSelector([...roomIds(id), E2.map], (s4) => roomValuesOf(s4, id), { [E2.map]: mapRoomsOnly })]));
-var readAllRoomValues = memoizeSelector([...ROOM_IDS.flatMap(roomIds), E2.customizedCleaning, E2.map], (s4) => {
+var ROOM_SELECTORS = Object.fromEntries(ROOM_IDS.map((id) => [id, memoizeSelector(() => [...roomIds(id), E2.map], (s4) => roomValuesOf(s4, id), () => ({ [E2.map]: mapRoomsOnly }))]));
+var readAllRoomValues = memoizeSelector(() => [...ROOM_IDS.flatMap(roomIds), E2.customizedCleaning, E2.map], (s4) => {
   const rooms = Object.fromEntries(ROOM_IDS.map((id) => [id, ROOM_SELECTORS[id](s4)]));
   const vonKarte = ROOM_IDS.filter((id) => rooms[id] !== null && EMPTY2.includes(st(s4, roomEntity(id, RV_ENT.modus))));
   return { rooms, customized: on(s4, E2.customizedCleaning), anyUnavailable: ROOM_IDS.some((id) => rooms[id] === null), vonKarte };
-}, { [E2.map]: mapRoomsOnly });
-var readLearn = memoizeSelector([E2.lern], (s4) => {
+}, () => ({ [E2.map]: mapRoomsOnly }));
+var readLearn = memoizeSelector(() => [E2.lern], (s4) => {
   const e4 = ent(s4, E2.lern);
   return e4 && !EMPTY2.includes(e4.state) && e4.attributes?.raten ? e4.attributes : null;
 });
 var histCache = {};
 var histOk = (e4) => !!e4 && !EMPTY2.includes(e4.state) && Object.values(e4.attributes ?? {}).some((v2) => v2 && typeof v2 === "object" && "timestamp" in v2);
-var readHistory = memoizeSelector([E2.cleaningHistory, E2.cleaningCount, E2.totalCleanedArea, E2.totalCleaningTime], (s4) => {
+var readHistory = memoizeSelector(() => [E2.cleaningHistory, E2.cleaningCount, E2.totalCleanedArea, E2.totalCleaningTime], (s4) => {
   const live = ent(s4, E2.cleaningHistory);
   const ok = histOk(live);
   if (ok && live) histCache = live.attributes;
@@ -1256,7 +1330,7 @@ var readHistory = memoizeSelector([E2.cleaningHistory, E2.cleaningCount, E2.tota
   const entries = Object.entries(a3).filter(([, v2]) => v2 && typeof v2 === "object" && "timestamp" in v2).map(([, v2]) => v2).sort((x2, y3) => Number(y3.timestamp) - Number(x2.timestamp)).slice(0, 30).map((v2) => ({ key: String(Math.floor(Number(v2.timestamp))), ts: Math.floor(Number(v2.timestamp)), area: parseInt(String(v2.cleaned_area ?? "").replace(/[^0-9]/g, ""), 10) || 0, min: parseInt(String(v2.cleaning_time ?? "").replace(/[^0-9]/g, ""), 10) || 0, raw: v2 }));
   return { entries, count: num(s4, E2.cleaningCount, 0), totalArea: num(s4, E2.totalCleanedArea, 0), totalTime: num(s4, E2.totalCleaningTime, 0), stale: !ok };
 });
-var readPrognose = memoizeSelector([E2.prognose, E2.prognoseAktiv, E2.abweichungHeute, E2.progHerbert, E2.progNicole, E2.progNina, E2.prognoseWochen, E2.prognoseMindesttage], (s4) => {
+var readPrognose = memoizeSelector(() => [E2.prognose, E2.prognoseAktiv, E2.abweichungHeute, E2.progHerbert, E2.progNicole, E2.progNina, E2.prognoseWochen, E2.prognoseMindesttage], (s4) => {
   const p3 = ent(s4, E2.prognose);
   const a3 = p3?.attributes ?? {};
   const str = (k2, d3 = "") => a3[k2] === void 0 || a3[k2] === null ? d3 : String(a3[k2]);
@@ -1284,7 +1358,7 @@ var readPrognose = memoizeSelector([E2.prognose, E2.prognoseAktiv, E2.abweichung
     ]
   };
 });
-var readAutomatik = memoizeSelector([E2.automatik, E2.autoStatus, E2.arbeitszeitStart, E2.arbeitszeitEnde, E2.rueckkehr, E2.schnellMinuten, E2.minAkku, E2.beiHeimkehr, E2.autoLetzterPlan, E2.letzteAutoReinigung], (s4) => {
+var readAutomatik = memoizeSelector(() => [E2.automatik, E2.autoStatus, E2.arbeitszeitStart, E2.arbeitszeitEnde, E2.rueckkehr, E2.schnellMinuten, E2.minAkku, E2.beiHeimkehr, E2.autoLetzterPlan, E2.letzteAutoReinigung], (s4) => {
   const rest = attr(s4, E2.autoStatus, "rest_min");
   const letzte = st(s4, E2.letzteAutoReinigung);
   return {
@@ -1304,18 +1378,18 @@ var readAutomatik = memoizeSelector([E2.automatik, E2.autoStatus, E2.arbeitszeit
     letzteAutoReinigung: !letzte || EMPTY2.includes(letzte) || letzte.startsWith("2000") ? "noch nie" : letzte
   };
 });
-var CONSUMABLES = [
+var CONSUMABLES = () => [
   ["Hauptb\xFCrste", E2.mainBrushLeft, E2.resetMainBrush],
   ["Seitenb\xFCrste", E2.sideBrushLeft, E2.resetSideBrush],
   ["Filter", E2.filterLeft, E2.resetFilter],
   ["Sensoren", E2.sensorDirtyLeft, E2.resetSensor],
   ["R\xE4der", E2.wheelDirtyLeft, E2.resetWheel]
 ];
-var readConsumables = memoizeSelector(CONSUMABLES.flatMap(([, s4, b3]) => [s4, b3]), (s4) => CONSUMABLES.map(([name, sensor, reset]) => {
+var readConsumables = memoizeSelector(() => CONSUMABLES().flatMap(([, s4, b3]) => [s4, b3]), (s4) => CONSUMABLES().map(([name, sensor, reset]) => {
   const pct = num(s4, sensor, 0);
   return { name, pct, level: pct <= 10 ? "danger" : pct <= 25 ? "warning" : "ok", resetEntity: reset, known: available(s4, sensor) };
 }));
-var readStation = memoizeSelector([E2.dustBagStatus, E2.cleanWaterTankStatus, E2.dirtyWaterTankStatus, E2.detergentStatus, E2.lowWaterWarning, E2.startAutoEmpty, E2.selfClean, E2.manualDrying, E2.baseStationCleaning], (s4) => {
+var readStation = memoizeSelector(() => [E2.dustBagStatus, E2.cleanWaterTankStatus, E2.dirtyWaterTankStatus, E2.detergentStatus, E2.lowWaterWarning, E2.startAutoEmpty, E2.selfClean, E2.manualDrying, E2.baseStationCleaning], (s4) => {
   const inst = (id) => st(s4, id) === "installed";
   const lowWater = st(s4, E2.lowWaterWarning) !== "no_warning";
   const tiles = [
@@ -1341,7 +1415,7 @@ var rng = (s4, id, label, unit, sub, dMin, dMax, dStep) => {
   return { id, label, sub, unit, value: num(s4, id, n4(a3.min, dMin)), min: n4(a3.min, dMin), max: n4(a3.max, dMax), step: n4(a3.step, dStep) };
 };
 var ROT_DEFAULT = ["0", "90", "180", "270"];
-var readSettings = memoizeSelector([E2.dark, E2.karte, E2.mapRotation, E2.raumnamen, E2.automatik, E2.planerBereich, E2.prognoseAktiv, E2.ninaZaehlt, E2.prognoseIntervall, E2.prognoseAufloesung, E2.prognoseWochen, E2.prognoseHalbwert, E2.prognoseMindesttage], (s4) => {
+var readSettings = memoizeSelector(() => [E2.dark, E2.karte, E2.mapRotation, E2.raumnamen, E2.automatik, E2.planerBereich, E2.prognoseAktiv, E2.ninaZaehlt, E2.prognoseIntervall, E2.prognoseAufloesung, E2.prognoseWochen, E2.prognoseHalbwert, E2.prognoseMindesttage], (s4) => {
   const rotOpts = opts(s4, E2.mapRotation, ROT_DEFAULT);
   return {
     dark: st(s4, E2.dark) !== "off",
@@ -1365,7 +1439,7 @@ var readSettings = memoizeSelector([E2.dark, E2.karte, E2.mapRotation, E2.raumna
     version: ""
   };
 });
-var readRobotSettings = memoizeSelector([E2.carpetCleaning, E2.waterTemperature, E2.dryingTime, E2.autoEmptyMode, E2.selfCleanFrequency, E2.cleangenius, E2.selfCleanArea, E2.volume, E2.dndStart, E2.dndEnd], (s4) => {
+var readRobotSettings = memoizeSelector(() => [E2.carpetCleaning, E2.waterTemperature, E2.dryingTime, E2.autoEmptyMode, E2.selfCleanFrequency, E2.cleangenius, E2.selfCleanArea, E2.volume, E2.dndStart, E2.dndEnd], (s4) => {
   const sel = (id, label) => ({ id, label, value: st(s4, id), options: opts(s4, id) });
   return {
     selects: [sel(E2.carpetCleaning, "Teppich"), sel(E2.waterTemperature, "Wassertemperatur"), sel(E2.dryingTime, "Trocknung"), sel(E2.autoEmptyMode, "Absaugen"), sel(E2.selfCleanFrequency, "Mopp-W\xE4sche"), sel(E2.cleangenius, "CleanGenius")],
@@ -1391,7 +1465,7 @@ function roomShapes(s4) {
   }
   return out;
 }
-var readMap = memoizeSelector([E2.map, E2.karte, E2.chairs, E2.selectedMap, E2.mapData], (s4) => {
+var readMap = memoizeSelector(() => [E2.map, E2.karte, E2.chairs, E2.selectedMap, E2.mapData], (s4) => {
   const sm = ent(s4, E2.selectedMap);
   const mdEnt = ent(s4, E2.mapData);
   const mdPic = String(attr(s4, E2.mapData, "entity_picture") ?? "");
@@ -1410,13 +1484,13 @@ var readMap = memoizeSelector([E2.map, E2.karte, E2.chairs, E2.selectedMap, E2.m
     roomShapes: roomShapes(s4),
     selectedMap: sm && !EMPTY2.includes(sm.state) ? { id: E2.selectedMap, value: sm.state, options: opts(s4, E2.selectedMap) } : null
   };
-}, { [E2.map]: stateAndAttributes(["entity_picture", "calibration_points", "no_go_areas", "no_mopping_areas", "virtual_walls", "rooms"]), [E2.mapData]: stateAndAttributes(["entity_picture", "saved_map_id", "map_id"]) });
-var isRobotId = (id) => /^(vacuum|camera|switch|button|select\.heidi_(room_|carpet|water|drying|auto_empty|self_clean|cleangenius|map_rotation)|number|time)\./.test(id) || /^sensor\.heidi_(status|error|task_status|battery_level|current_room|cleaned_area|cleaning_time|cleaning_history|cleaning_count|total_|first_cleaning|main_brush|side_brush|filter_left|sensor_dirty|wheel_dirty|dust_bag|clean_water|dirty_water|detergent|low_water|auto_empty|self_wash)/.test(id);
-var readDiagnostics = memoizeSelector(allContractIds(), (s4) => {
+}, () => ({ [E2.map]: stateAndAttributes(["entity_picture", "calibration_points", "no_go_areas", "no_mopping_areas", "virtual_walls", "rooms"]), [E2.mapData]: stateAndAttributes(["entity_picture", "saved_map_id", "map_id"]) }));
+var readDiagnostics = memoizeSelector(() => allContractIds(), (s4) => {
   const ids = allContractIds();
   const group = (name, list) => ({ name, total: list.length, missing: list.filter((id) => !s4[id]), unavailable: list.filter((id) => s4[id] && EMPTY2.includes(s4[id].state)) });
-  const robot = group("Roboter (Dreame)", ids.filter(isRobotId));
-  const paket = group("Paket (Helfer, Sensoren)", ids.filter((id) => !isRobotId(id)));
+  const robotSet = new Set(robotIds());
+  const robot = group(`Roboter (${deviceName() || "nicht erkannt"})`, ids.filter((id) => robotSet.has(id)));
+  const paket = group("Paket (Helfer, Sensoren)", ids.filter((id) => !robotSet.has(id)));
   return { total: ids.length, missing: [...robot.missing, ...paket.missing], unavailable: [...robot.unavailable, ...paket.unavailable], groups: [robot, paket] };
 });
 var ALL_SELECTORS = {
@@ -1440,7 +1514,7 @@ var ALL_SELECTORS = {
 // src/pages.ts
 var PAGES = ["start", "reinigen", "planer", "protokoll", "prognose", "einstellungen"];
 var PAGE_TITLE = {
-  start: { title: "Heidi", sub: "\xDCbersicht" },
+  start: { title: "", sub: "\xDCbersicht" },
   reinigen: { title: "Karte", sub: "R\xE4ume, Zone oder Punkt reinigen \xB7 Hinfahren \xB7 Sperrzonen" },
   planer: { title: "Planer", sub: "Vier Eintr\xE4ge \xB7 Automatik entscheidet voll, schnell oder warten" },
   protokoll: { title: "Verlauf", sub: "Reinigungsprotokoll der App \xB7 Zeitleiste je Lauf \xB7 Lernwerte" },
@@ -1455,7 +1529,7 @@ var PAGE_PARTS = {
   einstellungen: ["dx-settings-panel (4.11)", "dx-robot-settings (4.7)", "Diagnose", "Version"]
 };
 var START_SLOTS = [
-  { slot: "hero", title: "Heidi", span: "span3", part: "dx-hero", task: "4.1" },
+  { slot: "hero", title: "", span: "span3", part: "dx-hero", task: "4.1" },
   { slot: "map", title: "Live-Karte", span: "span6", part: "dx-map-card compact", task: "4.3" },
   { slot: "automatik", title: "Automatik", span: "", part: "dx-automatik", task: "4.9" },
   { slot: "auftrag", title: "Aktueller Auftrag", span: "", part: "dx-auftrag", task: "4.1" },
@@ -1829,7 +1903,7 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.16";
+var VERSION = "2.0.0-alpha.17";
 
 // src/shared/robot-svg.ts
 var robotSvg = w`<svg viewBox="0 0 200 200" class="robotpic" aria-hidden="true">
@@ -1923,7 +1997,7 @@ var DxNav = class extends i4 {
     return b2`
       <nav class="side" aria-label="Seitenleiste">
         <div class="inner">
-          <div class="brand"><span class="logo"></span><div><div class="t">Heidi</div><div class="s">Dein Saugroboter</div></div></div>
+          <div class="brand"><span class="logo"></span><div><div class="t">${deviceName() || "Roboter"}</div><div class="s">Dein Saugroboter</div></div></div>
           <div class="navlist">${es.map((e4) => this.item(e4))}</div>
           <div class="foot">${robotSvg}<div class="m">Dreame X60 Ultra</div><div class="version">dreame_x60 v${this.version}</div></div>
         </div>
@@ -2133,7 +2207,7 @@ var DxHero = class extends i4 {
     return b2`
       <div class="robot">
         <div>
-          <div class="name">Heidi</div>
+          <div class="name">${deviceName() || "Roboter"}</div>
           <button class="st big ${DOT_CLASS[h3.dot]}" title="Status" @click=${() => moreInfo(this, r4.moreInfo.vac)}><i></i><span class="bigtext">${h3.big}</span></button>
           ${h3.sub ? b2`<div class="hint sub">${h3.sub}</div>` : A}
         </div>
@@ -2367,7 +2441,7 @@ var MAP_MODES = {
   raeume: { label: "R\xE4ume", hint: "Auswahl per Kachel oder Tipp in die Raumfl\xE4che" },
   zone: { label: "Zone", hint: "Rechteck auf der Karte aufziehen (bis zu 5), dann \u25B6 in der Karte" },
   punkt: { label: "Punkt", hint: "Punkt auf der Karte antippen, dann \u25B6 in der Karte" },
-  goto: { label: "Hinfahren", hint: "Punkt auf der Karte antippen \u2192 Heidi f\xE4hrt hin und wartet" }
+  goto: { label: "Hinfahren", hint: "Punkt auf der Karte antippen \u2192 der Roboter f\xE4hrt hin und wartet" }
 };
 function modeEntry(mode, rooms) {
   switch (mode) {
@@ -2389,7 +2463,7 @@ function modeEntry(mode, rooms) {
 var hasModes = (kind) => kind === "Xiaomi-Karte";
 var isHeidiKarte = (kind) => kind === "Heidi-Karte";
 function buildMapConfig(kind, dark, mode, rooms) {
-  if (kind === "Dreame-App") return { type: "custom:dreame-vacuum-map-card", entity: ENTITIES.vac, title: "Heidi", theme: dark ? "dark" : "light", language: "de", default_mode: "room" };
+  if (kind === "Dreame-App") return { type: "custom:dreame-vacuum-map-card", entity: ENTITIES.vac, title: deviceName(), theme: dark ? "dark" : "light", language: "de", default_mode: "room" };
   if (kind === "Xiaomi-Karte") {
     return {
       type: "custom:xiaomi-vacuum-map-card",
@@ -2721,7 +2795,7 @@ var DxHeidiMap = class extends i4 {
           ${paths.map((p3) => w`<path class="room ${this.selected.has(p3.id) ? "sel" : ""} ${cur === p3.id ? "cur" : ""}" data-room=${p3.id} d=${p3.d} @click=${() => this.tap(p3.id)}><title>${p3.name}</title></path>`)}
         </svg>` : A}
         ${paths.filter((p3) => this.selected.has(p3.id)).map((p3) => b2`<span class="badge" data-room=${p3.id} style="left:${(p3.cx / size.w * 100).toFixed(2)}%;top:${(p3.cy / size.h * 100).toFixed(2)}%">${order.indexOf(p3.id) + 1}</span>`)}
-        ${!m2?.mapData ? b2`<div class="hint">Datenkarte fehlt – <code>camera.heidi_map_data</code> in der Dreame-Integration aktivieren</div>` : !md && this._loadedVersion ? b2`<div class="hint">Kartenpaket wird geladen …</div>` : A}
+        ${!m2?.mapData ? b2`<div class="hint">Datenkarte fehlt – <code>${ENTITIES.mapData}</code> in der Dreame-Integration aktivieren</div>` : !md && this._loadedVersion ? b2`<div class="hint">Kartenpaket wird geladen …</div>` : A}
         ${m2?.mapData && !calib ? b2`<div class="hint">Keine Kalibrierpunkte – Räume können nicht eingezeichnet werden</div>` : A}
       </div>`;
   }
@@ -2916,7 +2990,7 @@ var DxMapCard = class extends i4 {
       return b2`<b>Live-Karte</b> · ${r4.room !== "\u2013" ? r4.room : "unterwegs"} · ${r4.cleanedArea} m²${rest ? b2` · noch ${rest}` : A}`;
     }
     const last = this.history?.entries[0];
-    return b2`<b>Karte</b> · Heidi in der Station${last ? b2` · letzter Lauf ${fmtDate(last.ts * 1e3)}` : A}`;
+    return b2`<b>Karte</b> · ${deviceName() || "Roboter"} in der Station${last ? b2` · letzter Lauf ${fmtDate(last.ts * 1e3)}` : A}`;
   }
   renderCompact() {
     return b2`
@@ -3026,7 +3100,7 @@ var DxQuickstart = class extends i4 {
       </div>
       ${sel.size ? b2`<div class="runbar"><button class="btn primary" @click=${this.run}><ha-icon icon="mdi:play"></ha-icon>${selectionLabel(sel, order)} reinigen</button><button class="btn icon" aria-label="Auswahl aufheben" title="Auswahl aufheben" @click=${() => {
       this._sel = /* @__PURE__ */ new Set();
-    }}><ha-icon icon="mdi:close"></ha-icon></button></div>` : b2`<div class="hint">Räume antippen, dann „reinigen“ – Heidi fährt mit den Roboter-Werten je Raum.</div>`}
+    }}><ha-icon icon="mdi:close"></ha-icon></button></div>` : b2`<div class="hint">Räume antippen, dann „reinigen“ – ${deviceName() || "der Roboter"} fährt mit den Roboter-Werten je Raum.</div>`}
     `;
   }
 };
@@ -3068,6 +3142,10 @@ var DreameX60Panel = class extends i4 {
       _toast: { state: true },
       _now: { state: true }
     };
+  }
+  /** Geräteerkennung vor jedem Render: Roboter-IDs und Anzeigename folgen HA (PD-012). */
+  willUpdate(changed) {
+    if ((changed.has("hass") || changed.has("_config")) && this.hass) discoverDevice(this.hass, this._config.robot);
   }
   connectedCallback() {
     super.connectedCallback();
@@ -3156,10 +3234,12 @@ var DreameX60Panel = class extends i4 {
     let title, sub;
     if (page === "start") {
       const name = (this.hass?.user?.name ?? "").trim();
-      title = robot.running && !robot.docked ? "Heidi ist unterwegs" : robot.running ? "Heidi ist in der Station" : `${GREETING(now.getHours())}${name ? ", " + name : ""}!`;
+      const robotName = deviceName() || "Roboter";
+      title = robot.running && !robot.docked ? `${robotName} ist unterwegs` : robot.running ? `${robotName} ist in der Station` : `${GREETING(now.getHours())}${name ? ", " + name : ""}!`;
       sub = robot.hero.sub ? `${robot.hero.big} \xB7 ${robot.hero.sub}` : robot.hero.big;
     } else {
       ({ title, sub } = PAGE_TITLE[page]);
+      title ||= deviceName() || "Roboter";
     }
     const home = robot.persons.filter((p3) => p3.known && p3.home).map((p3) => p3.name);
     return b2`
@@ -3194,7 +3274,7 @@ var DreameX60Panel = class extends i4 {
     };
     const box = (sl) => b2`
       <section class="b ${sl.span}" data-slot=${sl.slot}>
-        <div class="hd"><h2>${sl.title}</h2><span class="r">${sl.part}</span></div>
+        <div class="hd"><h2>${sl.title || deviceName() || "Roboter"}</h2><span class="r">${sl.part}</span></div>
         ${(lines[sl.slot] ?? []).map((l3) => b2`<div class="hint preview">${l3}</div>`)}
         <div class="hint">Platzhalter – entsteht in Aufgabe ${sl.task}.</div>
       </section>`;

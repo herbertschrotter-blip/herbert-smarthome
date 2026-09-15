@@ -8,6 +8,8 @@ import { fileURLToPath } from 'node:url';
 import { DxApi, roundInterval } from '../../src/ha/api';
 import type { PlanDraft } from '../../src/ha/api';
 import type { HomeAssistant, States } from '../../src/ha/types';
+import { setDevice } from '../../src/ha/device';
+setDevice('heidi', 'Heidi'); // Erwartungen (editor-calls.json) sind für das Gerät „heidi“ geschrieben
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 type Call = [string, string, Record<string, unknown>];

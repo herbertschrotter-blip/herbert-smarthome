@@ -3,9 +3,10 @@
 // hält Overlay und Toast, hört auf dx-*-Ereignisse.
 // Kein shouldUpdate in der Shell (Regel 10) – Ruhe entsteht durch gleiche View-Referenzen in den Kindern.
 import { LitElement, html, nothing } from 'lit';
-import type { TemplateResult } from 'lit';
+import type { PropertyValues, TemplateResult } from 'lit';
 import type { HomeAssistant, PanelConfig } from './ha/types';
 import { DxApi } from './ha/api';
+import { deviceName, discoverDevice } from './ha/device';
 import { readAllRoomValues, readAutomatik, readConsumables, readDiagnostics, readHistory, readLearn, readMap, readPlans, readPrognose, readRobot, readRobotSettings, readSettings, readStation } from './ha/selectors';
 import type { RobotView } from './ha/selectors';
 import { PAGES, PAGE_PARTS, PAGE_TITLE, START_SLOTS, startSlot, toPage } from './pages';
@@ -60,6 +61,11 @@ export class DreameX60Panel extends LitElement {
   private _toastTimer: ReturnType<typeof setTimeout> | null = null;
   private _clockTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly _onKey = (e: KeyboardEvent): void => { if (e.key === 'Escape' && this._overlay) this.closeOverlay(); };
+
+  /** Geräteerkennung vor jedem Render: Roboter-IDs und Anzeigename folgen HA (PD-012). */
+  override willUpdate(changed: PropertyValues): void {
+    if ((changed.has('hass') || changed.has('_config')) && this.hass) discoverDevice(this.hass, this._config.robot);
+  }
 
   constructor() {
     super();
@@ -154,10 +160,12 @@ export class DreameX60Panel extends LitElement {
     if (page === 'start') {
       const name = (this.hass?.user?.name ?? '').trim();
       // In der Station (Mopp-Wäsche/Trocknen nach dem Lauf) ist der Hauptzustand noch „cleaning“ – dann nicht „unterwegs“
-      title = robot.running && !robot.docked ? 'Heidi ist unterwegs' : robot.running ? 'Heidi ist in der Station' : `${GREETING(now.getHours())}${name ? ', ' + name : ''}!`;
+      const robotName = deviceName() || 'Roboter';
+      title = robot.running && !robot.docked ? `${robotName} ist unterwegs` : robot.running ? `${robotName} ist in der Station` : `${GREETING(now.getHours())}${name ? ', ' + name : ''}!`;
       sub = robot.hero.sub ? `${robot.hero.big} · ${robot.hero.sub}` : robot.hero.big;
     } else {
       ({ title, sub } = PAGE_TITLE[page]);
+      title ||= deviceName() || 'Roboter';
     }
     const home = robot.persons.filter((p) => p.known && p.home).map((p) => p.name);
     return html`
@@ -189,7 +197,7 @@ export class DreameX60Panel extends LitElement {
     };
     const box = (sl: StartSlot): TemplateResult => html`
       <section class="b ${sl.span}" data-slot=${sl.slot}>
-        <div class="hd"><h2>${sl.title}</h2><span class="r">${sl.part}</span></div>
+        <div class="hd"><h2>${sl.title || deviceName() || 'Roboter'}</h2><span class="r">${sl.part}</span></div>
         ${(lines[sl.slot] ?? []).map((l) => html`<div class="hint preview">${l}</div>`)}
         <div class="hint">Platzhalter – entsteht in Aufgabe ${sl.task}.</div>
       </section>`;
