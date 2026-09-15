@@ -299,5 +299,6 @@ Offen:
 - Cowork-Projektdoku (claude.ai, Projekt „Mein SmartHome"): `claude/heidi-setup.md`.
 - Architektur-Review der Karte (Zielarchitektur, Refactoring-Plan, Teststrategie): `docs/dreame_x60/ARCHITEKTUR-REVIEW.md`.
 - Bauplan für den Neubau der Karte (v2, Phasen, Statusliste, Entitäts-Vertrag): `docs/dreame_x60/BAUPLAN.md`.
+- Backend-Plan Planer: Nachholen innerhalb Arbeitszeit, Ausgehen-Prüfung, Räume nach manuellem Lauf ausnehmen: `docs/dreame_x60/PLANER-NACHHOLEN.md`.
 - UX-Anforderung für nach v2 (App-artige Übergänge Bento ↔ Detail, Bewegungssprache, Leitplanken für den Bau): `docs/dreame_x60/UX-TRANSITIONS.md`.
 - ChatGPT-Review-Archiv (Zweitmeinung zu Review + Bauplan): `docs/chatgpt-reviews/INDEX.md`.
