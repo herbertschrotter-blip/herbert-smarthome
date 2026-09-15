@@ -309,3 +309,31 @@
     - action: shell_command.heidi_prognose_config
     - action: homeassistant.update_entity
       target: { entity_id: sensor.heidi_prognose }
+
+- id: heidi_angepasste_reinigung_an
+  alias: "Heidi: Angepasste Reinigung wieder einschalten"
+  description: >-
+    Ein Start in der Dreame-App schaltet „Angepasste Reinigung“ (Raum-Werte, switch.heidi_customized_cleaning)
+    aus; während des Laufs ist der Schalter „unavailable“. Sobald Heidi wieder angedockt ist und der Schalter
+    5 Minuten lang aus bleibt, schaltet HA ihn wieder ein, damit der nächste geplante Lauf die Raum-Werte benutzt
+    (das Planer-Skript heidi_reinigung setzt sie voraus). Herbert, 15.09.2026.
+  mode: single
+  triggers:
+    - trigger: state
+      entity_id: switch.heidi_customized_cleaning
+      to: "off"
+      for: "00:05:00"
+    - trigger: state
+      entity_id: vacuum.heidi
+      to: docked
+      for: "00:05:00"
+  conditions:
+    - condition: state
+      entity_id: switch.heidi_customized_cleaning
+      state: "off"
+    - condition: template
+      value_template: "{{ states('vacuum.heidi') not in ['cleaning', 'paused', 'returning'] }}"
+  actions:
+    - action: switch.turn_on
+      target:
+        entity_id: switch.heidi_customized_cleaning
