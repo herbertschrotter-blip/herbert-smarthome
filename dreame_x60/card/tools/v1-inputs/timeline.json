@@ -1,5 +1,11 @@
 [
-  { "name": "laufender Auftrag wie test-timeline.js", "phaseNow": "Wischt Küche", "phaseNowMin": 3, "vacState": "cleaning",
+  { "name": "laufender Auftrag wie test-timeline.js (cur)", "key": "cur", "phaseNow": "Wischt Küche", "phaseNowMin": 3, "vacState": "cleaning",
     "phase": [[90, "Saugt Bad"], [62, "Fährt zur Station"], [60, "Saugt Staub ab"], [58, "Trocknet Mopps"], [41, "Wäscht Mopps vor dem Start"], [36, "Saugt und wischt Wohnzimmer"], [30, "Saugt und wischt Küche"], [29.66, "Saugt und wischt Wohnzimmer"], [19, "Fährt zum Mopp-Waschen"], [17, "Wäscht Mopps zwischendurch"], [12, "Saugt und wischt Wohnzimmer"], [3, "Wischt Küche"]],
-    "vac": [[90, "cleaning"], [62, "returning"], [60, "docked"], [41, "cleaning"], [40.9, "docked"], [40.8, "idle"], [40.5, "cleaning"]] }
+    "vac": [[90, "cleaning"], [62, "returning"], [60, "docked"], [41, "cleaning"], [40.9, "docked"], [40.8, "idle"], [40.5, "cleaning"]] },
+  { "name": "Protokoll-Eintrag: der frühere Lauf (Start vor 90 min, Fenster bis zum nächsten Start vor 41 min)", "key": "1789440000", "startMin": 90, "endMin": 41, "phaseNow": "Wischt Küche", "vacState": "cleaning",
+    "phase": [[120, "Schläft"], [90, "Saugt Bad"], [75, "Saugt WC"], [62, "Fährt zur Station"], [60, "Saugt Staub ab"], [58, "Trocknet Mopps"], [41, "Wäscht Mopps vor dem Start"], [36, "Saugt und wischt Wohnzimmer"]],
+    "vac": [[120, "docked"], [90, "cleaning"], [62, "returning"], [60, "docked"], [41, "cleaning"]] },
+  { "name": "abgeschlossener Lauf, Roboter angedockt (cur ohne laufenden Abschnitt → Zeilen des letzten Laufs mit Ende)", "key": "cur", "phaseNow": "Schläft", "vacState": "docked",
+    "phase": [[50, "Saugt Küche"], [30, "Saugt Flur"], [10, "Fährt zur Station"], [7, "Saugt Staub ab"], [5, "Schläft"]],
+    "vac": [[50, "cleaning"], [10, "returning"], [7, "docked"]] }
 ]

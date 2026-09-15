@@ -33,6 +33,7 @@ async function mountV1(browser, states, hooks = {}) {
     window.loadCardHelpers = async () => ({ createCardElement: (cfg) => { const d=document.createElement('div'); d.style.cssText='height:200px'; d.textContent='[Karte: '+cfg.type+']'; return d; } });
   </script><heidi-panel></heidi-panel></body></html>`);
   await page.addScriptTag({ content: fs.readFileSync(V1, 'utf8') });
+  if (hooks.beforeHass) await page.evaluate(hooks.beforeHass);
   await page.evaluate(({ states, apiResponse }) => {
     window._api = []; window._calls = [];
     const el = document.querySelector('heidi-panel'); el.setConfig({});
@@ -80,27 +81,27 @@ const HANDLERS = {
     await page.close();
     return { out, errs };
   },
-  // Historie relativ zu „jetzt“ (Minuten) → _loadTimeline über callApi → _tl[key].rows
+  // Historie relativ zu „jetzt“ (Minuten) → _loadTimeline(key, start, end) über callApi → _tl[key].
+  // Date.now wird auf den Wert des Werkzeugs festgenagelt, damit Dauern exakt reproduzierbar sind.
   async timeline(browser, input) {
     const now = Date.now(), m = (min) => new Date(now - min * 60000).toISOString();
     const hist = [
       input.phase.map(([min, state], i) => (i === 0 ? { entity_id: 'sensor.heidi_phase', state, last_changed: m(min) } : { state, last_changed: m(min) })),
       input.vac.map(([min, state], i) => (i === 0 ? { entity_id: 'vacuum.heidi', state, last_changed: m(min) } : { state, last_changed: m(min) })),
     ];
-    const overrides = {
-      'sensor.heidi_phase': { state: input.phaseNow, attributes: {} },
-      'vacuum.heidi': { state: input.vacState || 'cleaning' },
-    };
-    const states = withOverrides(baseStates, overrides);
-    states['sensor.heidi_phase'].last_changed = m(input.phaseNowMin ?? 3);
-    const { page, errs } = await mountV1(browser, states, { apiResponse: hist, wait: 600 });
-    const out = await page.evaluate(() => {
-      const el = document.querySelector('heidi-panel');
-      const tl = el._tl.cur;
-      return { rows: tl?.rows ?? null, end: tl?.end ?? null, error: tl?.error ?? null, api: window._api };
+    const states = withOverrides(baseStates, {
+      'sensor.heidi_phase': { state: input.phaseNow || 'Schläft', attributes: {} },
+      'vacuum.heidi': { state: input.vacState || 'docked' },
     });
+    states['sensor.heidi_phase'].last_changed = m(input.phaseNowMin ?? 3);
+    const { page, errs } = await mountV1(browser, states, { apiResponse: hist, wait: 100, beforeHass: `Date.now = () => ${now};` });
+    const key = input.key || 'cur';
+    const startSec = Math.floor((now - (input.startMin ?? 8 * 60) * 60000) / 1000), endSec = Math.floor((now - (input.endMin ?? 0) * 60000) / 1000);
+    await page.evaluate(({ key, startSec, endSec }) => { const el = document.querySelector('heidi-panel'); delete el._tl[key]; return el._loadTimeline(key, startSec, endSec); }, { key, startSec, endSec });
+    await page.waitForTimeout(300);
+    const out = await page.evaluate((key) => { const tl = document.querySelector('heidi-panel')._tl[key]; return { rows: tl?.rows ?? null, end: tl?.end ?? null, error: tl?.error ?? null, api: window._api }; }, key);
     await page.close();
-    return { out: { now, ...out }, errs };
+    return { out: { now, startSec, endSec, ...out }, errs };
   },
   // _calib() mit Punkten (aus Fixture oder Eingabe) → Hin- und Rücktransformation von Beispielpunkten; _rectsFromAttr
   async calibration(browser, input) {

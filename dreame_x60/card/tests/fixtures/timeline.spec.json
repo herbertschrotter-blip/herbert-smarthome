@@ -1,0 +1,537 @@
+{
+  "zweck": "Handgeschriebene Grenzfälle der Zeitleiste (Bauplan 2.3, Abschnitt 6). Zeiten in Sekunden vor „jetzt“ (nowSec = 100000 s). Unabhängig von v1.",
+  "runs": [
+    {
+      "name": "Halt 44 s unterbricht den Lauf nicht",
+      "vac": [
+        [
+          600,
+          "cleaning"
+        ],
+        [
+          300,
+          "docked"
+        ],
+        [
+          256,
+          "cleaning"
+        ],
+        [
+          100,
+          "docked"
+        ]
+      ],
+      "erwartet": [
+        {
+          "s": 600,
+          "e": 100
+        }
+      ]
+    },
+    {
+      "name": "Halt 45 s beendet den Lauf, danach neuer Lauf",
+      "vac": [
+        [
+          600,
+          "cleaning"
+        ],
+        [
+          300,
+          "docked"
+        ],
+        [
+          255,
+          "cleaning"
+        ],
+        [
+          100,
+          "docked"
+        ]
+      ],
+      "erwartet": [
+        {
+          "s": 600,
+          "e": 300
+        },
+        {
+          "s": 255,
+          "e": 100
+        }
+      ]
+    },
+    {
+      "name": "Lauf ohne Ende",
+      "vac": [
+        [
+          600,
+          "cleaning"
+        ],
+        [
+          200,
+          "paused"
+        ],
+        [
+          150,
+          "cleaning"
+        ]
+      ],
+      "erwartet": [
+        {
+          "s": 600,
+          "e": null
+        }
+      ]
+    },
+    {
+      "name": "Halt jünger als 45 s gilt noch nicht als Ende",
+      "vac": [
+        [
+          600,
+          "cleaning"
+        ],
+        [
+          44,
+          "docked"
+        ]
+      ],
+      "erwartet": [
+        {
+          "s": 600,
+          "e": null
+        }
+      ]
+    },
+    {
+      "name": "Halt genau 45 s alt gilt als Ende",
+      "vac": [
+        [
+          600,
+          "cleaning"
+        ],
+        [
+          45,
+          "docked"
+        ]
+      ],
+      "erwartet": [
+        {
+          "s": 600,
+          "e": 45
+        }
+      ]
+    },
+    {
+      "name": "leere Historie",
+      "vac": [],
+      "erwartet": []
+    },
+    {
+      "name": "nur Halte, kein Lauf",
+      "vac": [
+        [
+          600,
+          "docked"
+        ],
+        [
+          300,
+          "idle"
+        ]
+      ],
+      "erwartet": []
+    }
+  ],
+  "rows": [
+    {
+      "name": "A-B-A mit B 44 s wird geglättet",
+      "key": "cur",
+      "vac": [
+        [
+          600,
+          "cleaning"
+        ]
+      ],
+      "phase": [
+        [
+          600,
+          "Saugt Küche"
+        ],
+        [
+          400,
+          "Saugt Flur"
+        ],
+        [
+          356,
+          "Saugt Küche"
+        ],
+        [
+          100,
+          "Saugt Bad"
+        ]
+      ],
+      "erwartet": {
+        "states": [
+          "Saugt Küche",
+          "Saugt Bad"
+        ],
+        "durs": [
+          500,
+          100
+        ],
+        "end": null
+      }
+    },
+    {
+      "name": "A-B-A mit B 45 s bleibt",
+      "key": "cur",
+      "vac": [
+        [
+          600,
+          "cleaning"
+        ]
+      ],
+      "phase": [
+        [
+          600,
+          "Saugt Küche"
+        ],
+        [
+          400,
+          "Saugt Flur"
+        ],
+        [
+          355,
+          "Saugt Küche"
+        ],
+        [
+          100,
+          "Saugt Bad"
+        ]
+      ],
+      "erwartet": {
+        "states": [
+          "Saugt Küche",
+          "Saugt Flur",
+          "Saugt Küche",
+          "Saugt Bad"
+        ],
+        "durs": [
+          200,
+          45,
+          255,
+          100
+        ],
+        "end": null
+      }
+    },
+    {
+      "name": "erste Zeile fällt weg, wenn die zweite 29 s danach kommt",
+      "key": "cur",
+      "vac": [
+        [
+          600,
+          "cleaning"
+        ]
+      ],
+      "phase": [
+        [
+          600,
+          "Saugt Bad"
+        ],
+        [
+          571,
+          "Saugt Küche"
+        ],
+        [
+          100,
+          "Saugt Flur"
+        ]
+      ],
+      "erwartet": {
+        "states": [
+          "Saugt Küche",
+          "Saugt Flur"
+        ],
+        "durs": [
+          471,
+          100
+        ],
+        "end": null
+      }
+    },
+    {
+      "name": "erste Zeile bleibt, wenn die zweite 30 s danach kommt",
+      "key": "cur",
+      "vac": [
+        [
+          600,
+          "cleaning"
+        ]
+      ],
+      "phase": [
+        [
+          600,
+          "Saugt Bad"
+        ],
+        [
+          570,
+          "Saugt Küche"
+        ],
+        [
+          100,
+          "Saugt Flur"
+        ]
+      ],
+      "erwartet": {
+        "states": [
+          "Saugt Bad",
+          "Saugt Küche",
+          "Saugt Flur"
+        ],
+        "durs": [
+          30,
+          470,
+          100
+        ],
+        "end": null
+      }
+    },
+    {
+      "name": "Ruhephasen und Doppelte fallen weg; Zeilen vor Start − 5 s auch",
+      "key": "cur",
+      "vac": [
+        [
+          600,
+          "cleaning"
+        ],
+        [
+          100,
+          "docked"
+        ]
+      ],
+      "phase": [
+        [
+          700,
+          "Schläft"
+        ],
+        [
+          606,
+          "Saugt Bad"
+        ],
+        [
+          500,
+          "Saugt Bad"
+        ],
+        [
+          400,
+          "Lädt"
+        ],
+        [
+          300,
+          "Saugt Flur"
+        ],
+        [
+          50,
+          "Trocknet Mopps"
+        ]
+      ],
+      "erwartet": {
+        "states": [
+          "Saugt Bad",
+          "Saugt Flur"
+        ],
+        "durs": [
+          200,
+          200
+        ],
+        "end": 100,
+        "hinweis": "606 liegt vor start−5 s (605) → weg; der Doppelte bei 500 bleibt dadurch als erste Zeile; Lädt ist Ruhephase; Trocknet Mopps liegt nach dem Ende"
+      }
+    },
+    {
+      "name": "zwei Läufe im Fenster: cur nimmt den letzten",
+      "key": "cur",
+      "vac": [
+        [
+          900,
+          "cleaning"
+        ],
+        [
+          700,
+          "docked"
+        ],
+        [
+          400,
+          "cleaning"
+        ],
+        [
+          100,
+          "docked"
+        ]
+      ],
+      "phase": [
+        [
+          900,
+          "Saugt Bad"
+        ],
+        [
+          400,
+          "Saugt Küche"
+        ]
+      ],
+      "erwartet": {
+        "states": [
+          "Saugt Küche"
+        ],
+        "durs": [
+          300
+        ],
+        "end": 100
+      }
+    },
+    {
+      "name": "Eintrag: Lauf endete 59 s vor Fensterstart → zählt noch zum Eintrag",
+      "key": "entry",
+      "startSec": 641,
+      "endSec": 100,
+      "vac": [
+        [
+          900,
+          "cleaning"
+        ],
+        [
+          700,
+          "docked"
+        ]
+      ],
+      "phase": [
+        [
+          900,
+          "Saugt Bad"
+        ]
+      ],
+      "erwartet": {
+        "states": [
+          "Saugt Bad"
+        ],
+        "durs": [
+          200
+        ],
+        "end": 700
+      }
+    },
+    {
+      "name": "Eintrag: Lauf endete 60 s vor Fensterstart → kein Abschnitt, keine Zeilen",
+      "key": "entry",
+      "startSec": 640,
+      "endSec": 100,
+      "vac": [
+        [
+          900,
+          "cleaning"
+        ],
+        [
+          700,
+          "docked"
+        ]
+      ],
+      "phase": [
+        [
+          900,
+          "Saugt Bad"
+        ]
+      ],
+      "erwartet": {
+        "states": [],
+        "durs": [],
+        "end": null
+      }
+    },
+    {
+      "name": "Eintrag: laufender Abschnitt endet am Fensterende",
+      "key": "entry",
+      "startSec": 600,
+      "endSec": 200,
+      "vac": [
+        [
+          600,
+          "cleaning"
+        ]
+      ],
+      "phase": [
+        [
+          600,
+          "Saugt Bad"
+        ]
+      ],
+      "erwartet": {
+        "states": [
+          "Saugt Bad"
+        ],
+        "durs": [
+          400
+        ],
+        "end": null
+      }
+    },
+    {
+      "name": "leere Historie",
+      "key": "cur",
+      "vac": [],
+      "phase": [],
+      "erwartet": {
+        "states": [],
+        "durs": [],
+        "end": null
+      }
+    }
+  ],
+  "windows": [
+    {
+      "name": "cur: 8 h",
+      "cur": 100000,
+      "erwartet": {
+        "startSec": 71200,
+        "endSec": 100000
+      }
+    },
+    {
+      "name": "Eintrag: Start + Dauer + 90 min, wenn früher als nächster Lauf und jetzt",
+      "entry": [
+        10000,
+        42,
+        20000,
+        100000
+      ],
+      "erwartet": {
+        "startSec": 10000,
+        "endSec": 17920
+      }
+    },
+    {
+      "name": "Eintrag: nächster Lauf kappt",
+      "entry": [
+        10000,
+        42,
+        12000,
+        100000
+      ],
+      "erwartet": {
+        "startSec": 10000,
+        "endSec": 12000
+      }
+    },
+    {
+      "name": "Eintrag: jetzt kappt, kein nächster",
+      "entry": [
+        10000,
+        42,
+        null,
+        11000
+      ],
+      "erwartet": {
+        "startSec": 10000,
+        "endSec": 11000
+      }
+    }
+  ]
+}
