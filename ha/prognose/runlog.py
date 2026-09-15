@@ -257,9 +257,8 @@ def parse_raumwerte(s):
 
 def schaetzung(lw, a):
     """Wie _estimate() in der Karte: Raum für Raum in Roboter-Reihenfolge, Mopp-Wäschen, Ladestopps."""
-    rooms = [int(x) for x in a.get("rooms", [])]
-    seq = [int(x) for x in a.get("sequence", [])]
-    order = [i for i in seq if i in rooms] + [i for i in rooms if i not in seq]
+    # Heidi fährt in der Reihenfolge der Raumliste des Eintrags (nicht in der Roboter-Reihenfolge)
+    order = [int(x) for x in a.get("rooms", [])]
     var = a.get("variante", "normal")
     if var == "schnell":
         std = {"modus": "Saugen", "saug": a.get("sp_saug", "Standard"), "wdh": a.get("sp_wdh", "1")}

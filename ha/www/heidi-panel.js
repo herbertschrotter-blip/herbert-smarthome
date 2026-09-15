@@ -174,6 +174,7 @@ ha-icon { --mdc-icon-size: 18px; }
 .seg.dis button { pointer-events: none; }
 .rr.all { background: color-mix(in srgb, var(--accent) 8%, var(--surface-2)); border-color: color-mix(in srgb, var(--accent) 35%, var(--line)); }
 .ed .rooms .chip { position: relative; } .dotm { position: absolute; top: 5px; right: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+.ed .rooms .chip .pos { position: absolute; top: 4px; left: 6px; font-style: normal; font-size: 10px; font-weight: 700; color: var(--accent); }
 .ed .btnrow { display: flex; gap: 8px; flex-wrap: wrap; } .ed .btnrow .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 14px; font-size: 13px; }
 .hint { font-size: 12px; color: var(--muted); }
 /* Dauer & Akku */
@@ -518,7 +519,9 @@ class HeidiPanel extends HTMLElement {
     const seg = parseInt(this.attr(E.vac, "current_segment")), room = ROOMS.find((r) => r.id === seg);
     const v = room ? this._roomVals(seg) : null; if (!v) return "";
     const active = this.attr(E.vac, "active_segments") || [];
-    const order = (this.attr(E.vac, "cleaning_sequence") || []).filter((id) => active.includes(id));
+    // Reihenfolge des laufenden Auftrags: vom Skript/der Karte beim Start gemerkt, sonst Roboter-Reihenfolge
+    const memo = (this.st("input_text.heidi_lauf_reihenfolge") || "").split(",").map((x) => parseInt(x)).filter((x) => active.includes(x));
+    const order = memo.length === active.length ? memo : (this.attr(E.vac, "cleaning_sequence") || []).filter((id) => active.includes(id));
     const idx = order.indexOf(seg), rest = idx >= 0 ? order.slice(idx + 1) : order;
     const restTxt = rest.map((id) => ROOMS.find((r) => r.id === id)?.short).filter(Boolean).join(" → ");
     // Noch nichts gereinigt (Fläche 0) → auf dem Weg zum Startpunkt; erster Raum der Reihenfolge ist das Ziel
@@ -862,7 +865,8 @@ class HeidiPanel extends HTMLElement {
         <div class="rc ${mopOnly ? "" : "dim"}"><span>Route</span>${seg(id, "route", OPT.route, v.route, dis || !mopOnly)}</div>
         <div class="rc"><span>Wdh.</span>${seg(id, "wdh", OPT.wdh, v.wdh, dis)}</div>`}</div>`;
     };
-    const ids = plan ? this._seqRooms().filter((x) => e.raeume.has(x.id)) : this._seqRooms();
+    // Eintrag: Reihenfolge des Eintrags (so fährt Heidi). Roboter: eigene Reihenfolge der Karte (gilt bei App-Starts)
+    const ids = plan ? [...e.raeume].map((id) => ROOMS.find((r) => r.id === id)).filter(Boolean) : this._seqRooms();
     const rows = ids.map((rm) => {
       if (plan) { const own = !!e.raum[rm.id]; return block(rm.id, rm.short, rm.icon, own ? e.raum[rm.id] : std(), own, true); }
       const v = this._roomVals(rm.id); return block(rm.id, rm.short, rm.icon, v || { modus: "–", saug: "–", wasser: null, route: null, wdh: "–" }, true, !!v);
@@ -910,14 +914,16 @@ class HeidiPanel extends HTMLElement {
     if (tage.every((v, i) => v === (i < 5))) return "Mo–Fr"; if (tage.every((v, i) => v === (i >= 5))) return "Sa + So";
     return DAYS.filter((d, i) => tage[i]).join(n > 3 ? " " : " + "); // viele Tage: kompakt ohne Pluszeichen
   }
-  _roomLabel(set) { if (set.size === 7) return "Alle"; if (!set.size) return "keine Räume"; return this._seqRooms().filter((r) => set.has(r.id)).map((r) => r.short).join(", "); }
-  // Räume in der Reihenfolge, in der der Roboter sie abfährt (cleaning_sequence der Karte)
+  _roomLabel(set) { if (set.size === 7) return "Alle"; if (!set.size) return "keine Räume"; return [...set].map((id) => ROOMS.find((r) => r.id === id)?.short).filter(Boolean).join(", "); }
+  // Eigene Reihenfolge des Roboters (cleaning_sequence der Karte) – gilt nur für Starts aus der App;
+  // Planer-Einträge fahren in der Reihenfolge ihrer Raumliste (Reihenfolge des Antippens im Editor)
   _seqRooms() { const seq = this.attr(E.vac, "cleaning_sequence") || []; return ROOMS.slice().sort((a, b) => { const ia = seq.indexOf(a.id), ib = seq.indexOf(b.id); return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib); }); }
 
   _editorHtml(n) {
     const e = this._ed || (this._ed = this._planRead(n));
     const seg = (key, opts, cls = "") => `<div class="seg ${cls}">${opts.map((o) => `<button data-ed="set" data-key="${key}" data-val="${esc(o)}" class="${e[key] === o ? "on" : ""}">${esc(o)}</button>`).join("")}</div>`;
-    const rooms = this._seqRooms().map((r) => `<button class="chip ${e.raeume.has(r.id) ? "on" : ""}" data-ed="room" data-val="${r.id}" title="${e.raum[r.id] ? "eigene Werte" : ""}">${ic(r.icon)}${r.short}${e.raum[r.id] ? '<i class="dotm"></i>' : ""}</button>`).join("");
+    const orderOf = [...e.raeume];
+    const rooms = ROOMS.map((r) => { const pos = orderOf.indexOf(r.id); return `<button class="chip ${pos >= 0 ? "on" : ""}" data-ed="room" data-val="${r.id}" title="${pos >= 0 ? `${pos + 1}. Raum` : ""}${e.raum[r.id] ? " · eigene Werte" : ""}">${pos >= 0 ? `<i class="pos">${pos + 1}</i>` : ""}${ic(r.icon)}${r.short}${e.raum[r.id] ? '<i class="dotm"></i>' : ""}</button>`; }).join("");
     const ownCount = Object.keys(e.raum).filter((id) => e.raeume.has(parseInt(id))).length;
     const days = DAYS.map((d, i) => `<button class="chip ${e.tage[i] ? "on" : ""}" data-ed="day" data-val="${i}">${d}</button>`).join("");
     const presets = [["Mo–Fr", "1111100"], ["Wochenende", "0000011"], ["Täglich", "1111111"], ["Nur manuell (Szene)", "0000000"]].map(([t, m]) => `<button class="chip" data-ed="preset" data-val="${m}">${t}</button>`).join("");
@@ -932,7 +938,7 @@ class HeidiPanel extends HTMLElement {
       <h2>Eintrag ${n}&nbsp;<span style="font-weight:400;color:var(--muted)">bearbeiten</span><button class="iconbtn" data-act="close" aria-label="Schließen" style="margin-left:auto">${ic("mdi:close")}</button></h2>
       <div class="sec"><div class="lab">Name <span class="r" style="color:${e.aktiv ? "var(--accent)" : "var(--muted)"}">${e.aktiv ? "Aktiv" : "Inaktiv"} <span class="sw ${e.aktiv ? "on" : ""}" data-ed="bool" data-key="aktiv" role="switch" aria-checked="${e.aktiv}" tabindex="0"></span></span></div>
         <input type="text" data-ed="name" maxlength="40" value="${esc(e.name)}"></div>
-      <div class="sec"><div class="lab">Räume <span class="r">${esc(this._roomLabel(e.raeume))}${ownCount ? ` · ${ownCount} mit eigenen Werten` : ""}</span></div><div class="rooms">${rooms}</div><div class="hint">Reihenfolge wie der Roboter fährt (in der Dreame-App änderbar)</div></div>
+      <div class="sec"><div class="lab">Räume <span class="r">${esc(this._roomLabel(e.raeume))}${ownCount ? ` · ${ownCount} mit eigenen Werten` : ""}</span></div><div class="rooms">${rooms}</div><div class="hint">Antippen in der Reihenfolge, in der Heidi fahren soll – die Nummer zeigt die Reihenfolge.</div></div>
       <div class="sec"><div class="lab">Standard für alle gewählten Räume</div>${seg("modus", OPT.modus)}</div>
       <div class="two">
         <div class="sec"><div class="lab">Saugstufe</div>${seg("saug", OPT.saug)}</div>
@@ -990,7 +996,7 @@ class HeidiPanel extends HTMLElement {
     const c = [], sel = (k, v) => c.push(this.call("input_select", "select_option", { entity_id: `input_select.heidi_plan${n}_${k}`, option: v }));
     const txt = (k, v) => c.push(this.call("input_text", "set_value", { entity_id: `input_text.heidi_plan${n}_${k}`, value: v }));
     const bool = (k, v) => c.push(this.call("input_boolean", v ? "turn_on" : "turn_off", { entity_id: `input_boolean.heidi_plan${n}_${k}` }));
-    txt("name", e.name); txt("raeume", ROOMS.filter((r) => e.raeume.has(r.id)).map((r) => r.id).join(",")); txt("tage", e.tage.map((b) => (b ? "1" : "0")).join("")); txt("personen", [...e.personen].join(","));
+    txt("name", e.name); txt("raeume", [...e.raeume].join(",")); txt("tage", e.tage.map((b) => (b ? "1" : "0")).join("")); txt("personen", [...e.personen].join(","));
     const raum = {}; Object.keys(e.raum).forEach((id) => { if (e.raeume.has(parseInt(id))) raum[id] = e.raum[id]; }); txt("raumwerte", encodeRaum(raum));
     sel("modus", e.modus); sel("saugstufe", e.saug); sel("wasser", e.wasser); sel("route", e.route); sel("wiederholungen", e.wdh);
     sel("homeoffice", e.ho); sel("ho_saug", e.hoSaug); sel("ho_wdh", e.hoWdh);
@@ -1027,8 +1033,7 @@ class HeidiPanel extends HTMLElement {
   _estimate(p, variante = "normal", uniform = null, batt0 = null) {
     const lern = this._lern(); if (!lern) return null;
     batt0 = batt0 ?? this.num("sensor.heidi_battery_level", 100);
-    const seq = this.attr(E.vac, "cleaning_sequence") || [], ids = [...p.raeume];
-    const order = seq.filter((i) => ids.includes(i)).concat(ids.filter((i) => !seq.includes(i)));
+    const order = [...p.raeume]; // Heidi fährt in der Reihenfolge der Raumliste des Eintrags
     const std = variante === "schnell" ? { modus: "Saugen", saug: p.spSaug, wdh: p.spWdh } : variante === "leise" ? { modus: "Saugen", saug: p.hoSaug, wdh: p.hoWdh } : { modus: p.modus, saug: p.saug, wdh: p.wdh };
     const L = lern.laden || { schnell_pct_min: 1.1, langsam_pct_min: 0.5, rueckkehr_pct: 15, weiter_pct: 80 };
     const W = lern.waesche || { vor_start_min: 4, zwischen_min: 5, nach_m2: this.num("number.heidi_self_clean_area", 25) };

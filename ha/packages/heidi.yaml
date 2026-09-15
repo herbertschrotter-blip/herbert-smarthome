@@ -154,6 +154,8 @@ input_text:
   heidi_plan2_raumwerte: { name: Plan 2 Raumwerte, max: 255 }
   heidi_plan3_raumwerte: { name: Plan 3 Raumwerte, max: 255 }
   heidi_plan4_raumwerte: { name: Plan 4 Raumwerte, max: 255 }
+  # Raumreihenfolge des laufenden Auftrags (Raum-IDs mit Komma), gesetzt beim Start durch Skript/Karte
+  heidi_lauf_reihenfolge: { name: Heidi Reihenfolge des Laufs, max: 40 }
   # Sicherung der Roboter-Raumwerte vor einem Planer-Lauf (gleiches Format); leer = nichts gesichert
   heidi_raum_snapshot: { name: Heidi Raumwerte-Sicherung, max: 255 }
 

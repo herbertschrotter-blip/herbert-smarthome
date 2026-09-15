@@ -152,7 +152,12 @@ heidi_reinigung:
                 target: { entity_id: "select.heidi_room_{{ repeat.item[0] }}_cleaning_route" }
                 data: { option: "{{ ROUTE[repeat.item[4]] }}" }
     - delay: { seconds: 2 }
-    # 4) Raumreinigung starten (Raumwerte gelten; Saugstufe/Wdh zusätzlich mitgeben)
+    # 4) Reihenfolge merken (für die Karte) und Raumreinigung starten – Heidi fährt die Räume in der
+    #    Reihenfolge der Liste (Raumwerte gelten; Saugstufe/Wdh zusätzlich mitgeben)
+    - action: input_text.set_value
+      continue_on_error: true
+      target: { entity_id: input_text.heidi_lauf_reihenfolge }
+      data: { value: "{{ ids | join(',') }}" }
     - action: dreame_vacuum.vacuum_clean_segment
       target:
         entity_id: vacuum.heidi

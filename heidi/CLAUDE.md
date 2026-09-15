@@ -68,7 +68,8 @@ Je Eintrag N = 1–4:
 - input_boolean `_aktiv`, `_schnell`; input_datetime `_zeit`.
 - Skripte: `heidi_plan_starten` (plan, variante normal|schnell|leise) → `heidi_reinigung`
   (raeume, modus, saugstufe, wasser, route, wiederholungen; setzt Raum-/Global-Selects, dann
-  vacuum_clean_segment; Route „Schnell“ = global quick, pro Raum standard).
+  vacuum_clean_segment; Route „Schnell“ = global quick, pro Raum standard; merkt die Raumreihenfolge in
+  `input_text.heidi_lauf_reihenfolge`, die Karte zeigt den Lauf in dieser Reihenfolge – seit v1 1.6.2).
 - Automatik (`heidi_planer`): heutiger Eintrag = `sensor.heidi_heutiger_plan` (Attribute name,
   zeit, erledigt, stoerer). Startet ab Uhrzeit, wenn kein „stört“ zu Hause; bei Homeoffice
   (`binary_sensor.heidi_arbeitszeit` Mo–Fr + störende Person da) je nach Eintrag warten oder
