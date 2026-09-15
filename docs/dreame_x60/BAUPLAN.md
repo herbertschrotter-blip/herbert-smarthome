@@ -1,19 +1,21 @@
-# Bauplan Heidi-Karte v2 (Neubau der Oberfläche auf dem bestehenden Backend)
+# Bauplan dreame_x60 – Neubau der Heidi-Karte (v2) auf dem bestehenden Backend
 
-Stand: nach ChatGPT-Review Runde 2 (2026-09-14, `docs/chatgpt-reviews/CGR-2026-09-14-heidi-v2/`).
+Projektname seit 15.09.2026: **dreame_x60** (Branch `dreame_x60`, Ordner `dreame_x60/`, Element `dreame-x60-panel`, Bundle `ha/www/dreame_x60.js`, Dashboard `dreame_x60.yaml`). Der Roboter heißt in der Oberfläche weiterhin **Heidi**; Entitäten `heidi_*` bleiben (Abschnitt 4).
+
+Stand: nach ChatGPT-Review Runde 2 (2026-09-14, `docs/chatgpt-reviews/CGR-2026-09-14-dreame_x60/`).
 
 Arbeitsanweisung für den Neubau der Heidi-Karte, geschrieben für Claude Code (und für Herbert
 lesbar). Eine Sitzung beginnt mit dem Startprompt (Abschnitt 0), nimmt die nächste offene Aufgabe
 aus der Statusliste (Abschnitt 1), liest nur deren Karte in Abschnitt 8 und arbeitet genau diese
 Aufgabe ab.
 
-Begründungen: `docs/ARCHITEKTUR-REVIEW.md`. Fachliches: `heidi/CLAUDE.md`, `docs/HANDOFF.md`.
+Begründungen: `docs/dreame_x60/ARCHITEKTUR-REVIEW.md`. Fachliches: `heidi/CLAUDE.md`, `docs/HANDOFF.md`.
 
 ---
 
 ## 0. Startprompt für jede Sitzung
 
-> Lies `CLAUDE.md`, `docs/HANDOFF.md` und `docs/BAUPLAN-V2.md`. Nimm die nächste offene Aufgabe
+> Lies `CLAUDE.md`, `docs/HANDOFF.md` und `docs/dreame_x60/BAUPLAN.md`. Nimm die nächste offene Aufgabe
 > aus der Statusliste (Abschnitt 1), prüfe ihre Voraussetzungen, lies ihre Karte in Abschnitt 8
 > und arbeite nur diese Aufgabe ab. Halte dich an die Regeln in Abschnitt 2. Wenn Code und
 > Bauplan sich widersprechen: nicht entscheiden, Befund in Abschnitt 10 eintragen, Aufgabe auf
@@ -32,9 +34,9 @@ Claude Code im Web bereitet diese Aufgaben vor, führt sie aber nicht aus.
 | 0.2 | **[PC]** Fixtures `states-docked.json`, `states-cleaning.json` erneuern | offen |
 | 0.3 | v1: `sensor.heidi_task_status` in `_signature()`, Version 1.6.2 (1.6.1 war auf H: schon vergeben) | fertig im Repo; [PC] Deploy + Sichtprüfung offen |
 | 0.4 | Backend: `rest_min`/`rest_quelle` als Attribute, Automation liest sie | offen |
-| 1.1 | Toolchain `heidi/card/` | offen |
-| 1.2 | Leere Lit-Shell `heidi-panel-v2`, Build nach `ha/www/heidi-panel-v2.js` | offen |
-| 1.3 | Dashboard `heidi-v2.yaml` mit sechs Views, `configuration.yaml`, `deploy.ps1` | offen |
+| 1.1 | Toolchain `dreame_x60/card/` | offen |
+| 1.2 | Leere Lit-Shell `dreame-x60-panel`, Build nach `ha/www/dreame_x60.js` | offen |
+| 1.3 | Dashboard `dreame_x60.yaml` mit sechs Views, `configuration.yaml`, `deploy.ps1` | offen |
 | 1.4 | **[PC]** Ressource anlegen, HA-Neustart, „Heidi v2“ sichtbar | offen |
 | 2.0 | `src/ha/contract.ts` + Vektor-Werkzeug `tools/v1-vectors.js` | offen |
 | 2.1 | `domain/raumwerte.ts` + Vektoren | offen |
@@ -47,7 +49,7 @@ Claude Code im Web bereitet diese Aufgaben vor, führt sie aber nicht aus.
 | 3.1 | `ha/types.ts`, `ha/memo-selector.ts`, `ha/selectors.ts` + Tests | offen |
 | 3.2 | `ha/api.ts` (`HeidiApi`) + Tests inkl. Teilfehler | offen |
 | 3.3 | Shell: `page`-Config, Views, Overlay, Toast, Escape, more-info, Modul-Caches | offen |
-| 3.4 | **[PC-Abnahme]** Mockup Seitenstruktur `heidi/mockups/heidi-v2-seiten.html` | fertig (15de525; Design-Referenz `heidi-v2-bento.html`, abgenommen 15.09.) |
+| 3.4 | **[PC-Abnahme]** Mockup Seitenstruktur `dreame_x60/mockups/seiten.html` | fertig (15de525; Design-Referenz `dreame_x60/mockups/bento.html`, abgenommen 15.09.) |
 | 4.0 | Startseite: `heidi-nav-tiles` + Seitenaufbau nach Mockup | offen |
 | 4.1 | `heidi-hero` | offen |
 | 4.2 | `heidi-dialog` (modal/sheet/confirm) | offen |
@@ -95,7 +97,7 @@ freigegeben).
    Kein stilles „Verbessern“.
 5. **Widerspruch zwischen Code und Bauplan:** nicht entscheiden. Eintrag in Abschnitt 10
    (Art `Widerspruch`), Aufgabe `blockiert`, Sitzung beenden.
-6. **Jede Aufgabe endet mit** grünen Tests (`npm test` in `heidi/card`), `npm run check`, Build,
+6. **Jede Aufgabe endet mit** grünen Tests (`npm test` in `dreame_x60/card`), `npm run check`, Build,
    **einem Commit** mit Aufgabennummer im Text („2.1 raumwerte“). Vorher: Voraussetzungen der
    Karte sind `fertig`.
 7. **Keine Tests, die nicht fehlschlagen können.** Jeder Test hat eine Erwartung; E2E-Skripte
@@ -129,7 +131,7 @@ freigegeben).
     `Post-2.0`-Wunsch.
 15. **Deutsch** in Bezeichnern der Domäne (`raeume`, `saug`, `wdh`), Englisch für Technik.
 16. **Verhaltenszahlen** als benannte Konstanten in `domain/constants.ts` mit Kommentar.
-17. **Version** aus `heidi/card/package.json`, beim Build als `HP_VERSION` eingesetzt, von
+17. **Version** aus `dreame_x60/card/package.json`, beim Build als `HP_VERSION` eingesetzt, von
     `deploy.ps1` in `?v=` übernommen. Vor Umschalten `2.0.0-alpha.N`, beim Umschalten `2.0.0`.
 18. **Wiederverwendung für ein späteres allgemeines Dashboard ist kein Designziel.**
     Komponentenschnitt nach Zustands- und Verantwortungsgrenzen.
@@ -143,23 +145,23 @@ freigegeben).
 
 ## 3. Technische Festlegungen
 
-`heidi/card/` ist ein eigenständiges Frontend-Paket im gemeinsamen Repo. Keine Workspaces, kein
+`dreame_x60/card/` ist ein eigenständiges Frontend-Paket im gemeinsamen Repo. Keine Workspaces, kein
 zweites Repo.
 
 | Thema | Festlegung |
 |---|---|
 | Sprache | TypeScript, `strict: true`, `target: es2022`; `any` nur an der HA-Grenze |
 | UI | Lit 3; Elemente nach Verantwortungsbereich (Abschnitt 7 = Orientierung); `static styles`; Shadow DOM |
-| Build | esbuild `--bundle --format=esm --target=es2022 --outfile=../../ha/www/heidi-panel-v2.js --define:HP_VERSION`; kein Sourcemap im Deploy |
-| Element/Typ | `heidi-panel-v2` / `custom:heidi-panel-v2` (v1 belegt `heidi-panel`) |
-| Seiten | Karte bekommt `page: start \| reinigen \| planer \| protokoll \| prognose \| einstellungen` (Standard `start`). Ein YAML-Dashboard mit sechs Views: `start` normal, die anderen `subview: true`, `back_path: /heidi-v2/start`, alle `type: panel` mit dieser Karte. Navigation über `navigate`-Event von HA |
+| Build | esbuild `--bundle --format=esm --target=es2022 --outfile=../../ha/www/dreame_x60.js --define:HP_VERSION`; kein Sourcemap im Deploy |
+| Element/Typ | `dreame-x60-panel` / `custom:dreame-x60-panel` (v1 belegt `heidi-panel`) |
+| Seiten | Karte bekommt `page: start \| reinigen \| planer \| protokoll \| prognose \| einstellungen` (Standard `start`). Ein YAML-Dashboard mit sechs Views: `start` normal, die anderen `subview: true`, `back_path: /dreame-x60/start`, alle `type: panel` mit dieser Karte. Navigation über `navigate`-Event von HA |
 | Caches | Karten-Element, Zeitleisten-Cache, History-Cache auf Modulebene (überleben Seitenwechsel) |
 | Unit-Tests | `node --test` über `tsx`, `tests/unit/*.test.ts` |
 | E2E | Playwright, `tests/e2e/*.js`, Harness `tests/e2e/harness.js` (ha-icon-Stub, `loadCardHelpers`-Stub, hass-Mock mit Call-Log und Fehlerinjektion, `callApi`-Mock, Render-Zähler), Chromium über `executablePath` mit Fallback |
 | Prüfung | `npm run check` = `tsc --noEmit`; `npm run lint` = ESLint flat, `@typescript-eslint` recommended, `eslint-plugin-lit` optional |
 | HA-Typen | `src/ha/types.ts` minimal (`HomeAssistant`, `HassEntity`, `States`), keine externe Typabhängigkeit |
 | Overlay | `overlay: Overlay \| null`, diskriminierte Union `settings \| editor \| rooms \| estimate \| zones \| confirm`, `back` als Feld |
-| Deploy | `tools/deploy.ps1` kopiert zusätzlich `www/heidi-panel-v2.js`, `dashboards/heidi-v2.yaml`, setzt `heidi-panel-v2.js?v=`; v1 unverändert |
+| Deploy | `tools/deploy.ps1` kopiert zusätzlich `www/dreame_x60.js`, `dashboards/dreame_x60.yaml`, setzt `dreame_x60.js?v=`; v1 unverändert |
 
 ---
 
@@ -216,10 +218,10 @@ Vollständige Liste: `heidi/CLAUDE.md`, `ha/packages/heidi.yaml`. Gruppen (L = l
 ## 5. Zielstruktur
 
 ```
-heidi/card/
+dreame_x60/card/
 ├─ package.json, tsconfig.json, eslint.config.js, build.mjs, README.md
 ├─ src/
-│  ├─ heidi-panel-v2.ts         Shell: page-Config, Seitenlayout, Overlay, Views aus Selektoren, define, customCards
+│  ├─ dreame-x60-panel.ts         Shell: page-Config, Seitenlayout, Overlay, Views aus Selektoren, define, customCards
 │  ├─ config.ts                 nur Anzeige: ROOMS (Kurzname, Icon), ROOMS_DE, STATUS_DE, ERR_DE, APP_SCENES, DAYS, NAV_TILES
 │  ├─ version.ts
 │  ├─ domain/
@@ -247,7 +249,7 @@ heidi/card/
    └─ check-fixture.js          prüft Fixture gegen Abschnitt 4
 ```
 
-`heidi/tests/` (v1) bleibt bis zum Umschalten. `heidi/mockups/heidi-v2-seiten.html` entsteht in 3.4.
+`heidi/tests/` (v1) bleibt bis zum Umschalten. Mockups liegen in `dreame_x60/mockups/` (3.4).
 
 ---
 
@@ -294,14 +296,14 @@ heidi/card/
 
 | Seite | Inhalt |
 |---|---|
-| `start` | **Links:** `heidi-hero` (Akku, Status, Personen, Knöpfe, Streifen im Lauf) und darunter `heidi-map-card` in der Variante `compact` (immer sichtbar: im Lauf Live-Karte mit Roboterposition und fertigen Räumen, sonst Übersicht; keine Werkzeuge, Antippen navigiert zu `reinigen`). **Rechts:** `heidi-automatik` (Einzeiler + Schalter), `heidi-consumables`, `heidi-nav-tiles` (Reinigen, Planer, Protokoll, Prognose mit drei Tageswerten nur bei aktiv, Räume, Einstellungen), `heidi-station`. Linke Spalte wächst auf die Höhe der rechten, die Karte füllt den Rest; auf schmalen Containern eine Spalte in dieser Reihenfolge. Abgenommen von Herbert am 14.09. (Mockup `heidi-v2-seiten.html`, Commit 76631e4) |
-| `reinigen` | `heidi-map-card` (Kartenwahl in der Kopfzeile, Karte mit Knöpfen „Hinfahren“ und „Sperrzonen“ unten links, Segment Räume / Zone / Punkt mit „Alles“, Raum-Chips im Modus Räume), App-Szenen, Schalter „Stühle am Boden“ als Zeile, Knopf „Räume (Roboter-Werte)“. Referenz: `heidi/mockups/heidi-v2-karte.html` (echte Xiaomi-Karte im Glas-Design) und Seite Reinigen in `heidi-v2-seiten.html` |
+| `start` | **Links:** `heidi-hero` (Akku, Status, Personen, Knöpfe, Streifen im Lauf) und darunter `heidi-map-card` in der Variante `compact` (immer sichtbar: im Lauf Live-Karte mit Roboterposition und fertigen Räumen, sonst Übersicht; keine Werkzeuge, Antippen navigiert zu `reinigen`). **Rechts:** `heidi-automatik` (Einzeiler + Schalter), `heidi-consumables`, `heidi-nav-tiles` (Reinigen, Planer, Protokoll, Prognose mit drei Tageswerten nur bei aktiv, Räume, Einstellungen), `heidi-station`. Linke Spalte wächst auf die Höhe der rechten, die Karte füllt den Rest; auf schmalen Containern eine Spalte in dieser Reihenfolge. Abgenommen von Herbert am 14.09. (Mockup `dreame_x60/mockups/seiten.html`, Commit 76631e4) |
+| `reinigen` | `heidi-map-card` (Kartenwahl in der Kopfzeile, Karte mit Knöpfen „Hinfahren“ und „Sperrzonen“ unten links, Segment Räume / Zone / Punkt mit „Alles“, Raum-Chips im Modus Räume), App-Szenen, Schalter „Stühle am Boden“ als Zeile, Knopf „Räume (Roboter-Werte)“. Referenz: `dreame_x60/mockups/karte.html` (echte Xiaomi-Karte im Glas-Design) und Seite Reinigen in `dreame_x60/mockups/seiten.html` |
 | `planer` | `heidi-planer` (Liste, Dauer-Kurzzeile), Automatik-Regeln, Editor/Räume/Dauer-Dialoge |
 | `protokoll` | `heidi-history` (Letzter Lauf, Protokoll, Zeitleiste), Lernwerte-Tabelle |
 | `prognose` | `heidi-prognose-view` |
 | `einstellungen` | `heidi-settings-panel` als Seite (statt Seitenleiste), `heidi-robot-settings`, Diagnose, Version |
 
-**Design-Referenz (14.09., Herberts Designvorgabe „Automotive Dark Bento“):** `heidi/mockups/heidi-v2-bento.html` zeigt alle sechs Seiten und Dialoge im neuen Look (dunkles Graphit, Bento-Flächen, Seitenleiste auf Desktop, Symbolleiste auf Tablet, Tab-Leiste und Bottom-Sheets auf Smartphone, Design-Tokens `--heidi-*`). Es löst die Glas-Optik der Mockups `heidi-v2-start.html`/`heidi-v2-seiten.html` ab; die Seitenschnitte und Funktionen bleiben. Von Herbert abgenommen am 15.09. (Chat Teil 2); die Optik aller Komponenten in Phase 4 folgt diesem Mockup. Regel 14 gilt: System-Schriftstapel, keine externen Ressourcen.
+**Design-Referenz (14.09., Herberts Designvorgabe „Automotive Dark Bento“):** `dreame_x60/mockups/bento.html` zeigt alle sechs Seiten und Dialoge im neuen Look (dunkles Graphit, Bento-Flächen, Seitenleiste auf Desktop, Symbolleiste auf Tablet, Tab-Leiste und Bottom-Sheets auf Smartphone, Design-Tokens `--heidi-*`). Es löst die Glas-Optik der Mockups `dreame_x60/mockups/start.html`/`dreame_x60/mockups/seiten.html` ab; die Seitenschnitte und Funktionen bleiben. Von Herbert abgenommen am 15.09. (Chat Teil 2); die Optik aller Komponenten in Phase 4 folgt diesem Mockup. Regel 14 gilt: System-Schriftstapel, keine externen Ressourcen.
 
 Jede Komponente: `hass`, ihre Sicht (memoisiert), `api` als Properties; Ereignisse nach oben
 (`heidi-open-overlay`, `heidi-toast`, `heidi-navigate`, `heidi-close`, `heidi-back`). Keine
@@ -310,8 +312,8 @@ trägt eines zwei unabhängige Zustände, werden es zwei.
 
 | Element | Bekommt | Sendet | Abnahme |
 |---|---|---|---|
-| `heidi-panel-v2` | hass, config.page | – | Rendert jede Seite mit `states-docked.json` ohne Konsolenfehler |
-| `heidi-nav-tiles` | prognoseView | `heidi-navigate {page}` | Klick löst `location-changed` mit `/heidi-v2/<page>` aus (E2E `nav.js`) |
+| `dreame-x60-panel` | hass, config.page | – | Rendert jede Seite mit `states-docked.json` ohne Konsolenfehler |
+| `heidi-nav-tiles` | prognoseView | `heidi-navigate {page}` | Klick löst `location-changed` mit `/dreame-x60/<page>` aus (E2E `nav.js`) |
 | `heidi-hero` | robotView, api | `heidi-open-overlay {rooms}` | Kopf-Tabelle aus 0.1; Streifen-Fälle |
 | `heidi-dialog` | title, variant | `heidi-close`, `heidi-confirm` | Escape; Sheet < 600 px Container |
 | `heidi-map-card` | hass, mapView, api, kind, dark, variant (`full` \| `compact`) | `heidi-open-overlay {zones}`, `heidi-navigate {reinigen}` (compact) | Element über 20 Ticks identisch; `vacuum_clean_segment` nach Bestätigung; Moduswechsel gibt der Karte genau einen `map_modes`-Eintrag; `compact` ohne Segment, Knöpfe und Chips, mit Bildunterschrift |
@@ -348,8 +350,8 @@ Sechs Felder je Karte: **Voraussetzung** (Aufgaben, die `fertig` sein müssen), 
 - Ziel: `states-docked.json` (angedockt) und `states-cleaning.json` (mitten im Lauf, `current_segment` gesetzt) per `tools/dump-states.ps1`; `tools/check-fixture.js` prüft gegen Abschnitt 4.
 - Nicht ändern: Inhalt der Abzüge von Hand (Ausnahme: Geheimnisse entfernen, in Abschnitt 10 notieren); `heidi/tests/real_states.json`.
 - Akzeptanz: `check-fixture.js` meldet für beide Dateien keine fehlende ID; `states-cleaning.json` hat `vacuum.heidi` = `cleaning`.
-- Tests: `node heidi/card/tools/check-fixture.js heidi/card/tests/fixtures/states-docked.json` (und cleaning)
-- Dateien: `heidi/card/tests/fixtures/states-*.json`, `heidi/card/tools/check-fixture.js`
+- Tests: `node dreame_x60/card/tools/check-fixture.js dreame_x60/card/tests/fixtures/states-docked.json` (und cleaning)
+- Dateien: `dreame_x60/card/tests/fixtures/states-*.json`, `dreame_x60/card/tools/check-fixture.js`
 
 **0.3 v1: `task_status` in die Signatur**
 - Voraussetzung: 0.1
@@ -372,30 +374,30 @@ Sechs Felder je Karte: **Voraussetzung** (Aufgaben, die `fertig` sein müssen), 
 **1.1 Toolchain**
 - Voraussetzung: –
 - Ziel: `package.json` (lit, esbuild, typescript, tsx, eslint, typescript-eslint, optional eslint-plugin-lit, playwright), `tsconfig.json`, `eslint.config.js`, `build.mjs` (Version → `HP_VERSION`), Scripts `build|watch|check|lint|test:unit|test:e2e|test`, `README.md` (10 Zeilen).
-- Nicht ändern: nichts außerhalb `heidi/card/`.
-- Akzeptanz: `npm ci && npm run build` erzeugt `ha/www/heidi-panel-v2.js` aus einem Platzhalter; `check` und `lint` laufen.
+- Nicht ändern: nichts außerhalb `dreame_x60/card/`.
+- Akzeptanz: `npm ci && npm run build` erzeugt `ha/www/dreame_x60.js` aus einem Platzhalter; `check` und `lint` laufen.
 - Tests: `npm run build && npm run check && npm run lint`
-- Dateien: `heidi/card/{package.json,tsconfig.json,eslint.config.js,build.mjs,README.md}`, `.gitignore` (node_modules, tests/e2e/out)
+- Dateien: `dreame_x60/card/{package.json,tsconfig.json,eslint.config.js,build.mjs,README.md}`, `.gitignore` (node_modules, tests/e2e/out)
 
 **1.2 Leere Shell**
 - Voraussetzung: 1.1
-- Ziel: `LitElement` mit Kopfzeile „Heidi“, `config.page` (Standard `start`), Platzhalter je Seite, Versionszeile, `styles/tokens.ts` + `base.ts` aus v1-CSS, `setConfig`/`getCardSize`/`getStubConfig`, `define("heidi-panel-v2")`, `customCards`-Eintrag mit Prüfung.
+- Ziel: `LitElement` mit Kopfzeile „Heidi“, `config.page` (Standard `start`), Platzhalter je Seite, Versionszeile, `styles/tokens.ts` + `base.ts` aus v1-CSS, `setConfig`/`getCardSize`/`getStubConfig`, `define("dreame-x60-panel")`, `customCards`-Eintrag mit Prüfung.
 - Nicht ändern: v1.
 - Akzeptanz: E2E `render.js` lädt das Bundle mit `states-docked.json` für jede der sechs `page`-Werte ohne Konsolenfehler und findet die Versionszeile.
 - Tests: `npm run build && npm run test:e2e -- render`
-- Dateien: `src/heidi-panel-v2.ts`, `src/version.ts`, `src/styles/*.ts`, `tests/e2e/harness.js`, `tests/e2e/render.js`
+- Dateien: `src/dreame-x60-panel.ts`, `src/version.ts`, `src/styles/*.ts`, `tests/e2e/harness.js`, `tests/e2e/render.js`
 
 **1.3 Dashboard und Deploy**
 - Voraussetzung: 1.2
-- Ziel: `ha/dashboards/heidi-v2.yaml` mit Views `start` (normal) und `reinigen|planer|protokoll|prognose|einstellungen` (`subview: true`, `back_path: /heidi-v2/start`), alle `type: panel`, Karte `custom:heidi-panel-v2` mit `page`; `configuration.yaml` Dashboard `heidi-v2` (Titel „Heidi v2“, Icon `mdi:robot-vacuum-variant`); `deploy.ps1` kopiert v2-Datei + Dashboard und setzt `heidi-panel-v2.js?v=`.
+- Ziel: `ha/dashboards/dreame_x60.yaml` mit Views `start` (normal) und `reinigen|planer|protokoll|prognose|einstellungen` (`subview: true`, `back_path: /dreame-x60/start`), alle `type: panel`, Karte `custom:dreame-x60-panel` mit `page`; `configuration.yaml` Dashboard `dreame-x60` (Titel „Heidi v2“, Icon `mdi:robot-vacuum-variant`); `deploy.ps1` kopiert v2-Datei + Dashboard und setzt `dreame_x60.js?v=`.
 - Nicht ändern: `heidi.yaml`, v1-Ressource.
 - Akzeptanz: YAML valide (Prüfung mit `js-yaml` oder Python); `deploy.ps1` enthält beide neuen Pfade.
 - Tests: [PC] `.\tools\deploy.ps1`; `ha.ps1 post config/core/check_config`
-- Dateien: `ha/dashboards/heidi-v2.yaml`, `ha/configuration.yaml`, `tools/deploy.ps1`
+- Dateien: `ha/dashboards/dreame_x60.yaml`, `ha/configuration.yaml`, `tools/deploy.ps1`
 
 **1.4 [PC] Ressource und Sichtbarkeit**
 - Voraussetzung: 1.3
-- Ziel: Ressource `/local/heidi-panel-v2.js?v=2.0.0-alpha.1` (module) per `node tools/ha-ws.js lovelace/resources/create '{"res_type":"module","url":"/local/heidi-panel-v2.js?v=2.0.0-alpha.1"}'` (Git Bash); HA-Neustart; Strg+F5.
+- Ziel: Ressource `/local/dreame_x60.js?v=2.0.0-alpha.1` (module) per `node tools/ha-ws.js lovelace/resources/create '{"res_type":"module","url":"/local/dreame_x60.js?v=2.0.0-alpha.1"}'` (Git Bash); HA-Neustart; Strg+F5.
 - Nicht ändern: v1-Ressource.
 - Akzeptanz: „Heidi v2“ in der Sidebar zeigt die Shell; Unteransichten per URL erreichbar, Zurück-Pfeil führt zu `start`; v1 unverändert.
 - Tests: Sichtprüfung, Browser-Konsole leer.
@@ -491,15 +493,15 @@ Sechs Felder je Karte: **Voraussetzung** (Aufgaben, die `fertig` sein müssen), 
 - Nicht ändern: kein `shouldUpdate` in der Shell.
 - Akzeptanz: `render.js` grün für alle Seiten; Overlay öffnen/schließen mit Platzhalter; `nav.js`: `heidi-navigate` löst `location-changed` mit richtigem Pfad aus.
 - Tests: `npm test`
-- Dateien: `src/heidi-panel-v2.ts`, `src/shared/{overlay,toast,navigate}.ts`, `tests/e2e/nav.js`
+- Dateien: `src/dreame-x60-panel.ts`, `src/shared/{overlay,toast,navigate}.ts`, `tests/e2e/nav.js`
 
 **3.4 [PC-Abnahme] Mockup Seitenstruktur**
 - Voraussetzung: –
-- Ziel: Statisches HTML `heidi/mockups/heidi-v2-seiten.html` mit allen sechs Seiten (Glas-Optik aus v1, Beispielwerte), Navigations-Kacheln auf Start, Zurück-Pfeil oben auf Unterseiten, jeweils Desktop- und 390-px-Ansicht; Vorschlag aus Abschnitt 7 als Ausgangspunkt.
+- Ziel: Statisches HTML `dreame_x60/mockups/seiten.html` mit allen sechs Seiten (Glas-Optik aus v1, Beispielwerte), Navigations-Kacheln auf Start, Zurück-Pfeil oben auf Unterseiten, jeweils Desktop- und 390-px-Ansicht; Vorschlag aus Abschnitt 7 als Ausgangspunkt.
 - Nicht ändern: v1-Mockups.
 - Akzeptanz: Herbert nimmt ab; Abweichungen vom Vorschlag werden in Abschnitt 7 nachgezogen; Eintrag PD-000 wird um „Seitenschnitt laut Mockup“ ergänzt.
 - Tests: Sichtprüfung.
-- Dateien: `heidi/mockups/heidi-v2-seiten.html`, `docs/BAUPLAN-V2.md` (Abschnitt 7, 10a)
+- Dateien: `dreame_x60/mockups/seiten.html`, `docs/dreame_x60/BAUPLAN.md` (Abschnitt 7, 10a)
 
 ### Phase 4 – Komponenten (Desktop-Layout; schmal in Phase 5)
 
@@ -511,7 +513,7 @@ Nach jedem Build v2 neben v1 ansehen; Unterschiede → Abschnitt 10/10a.
 - Nicht ändern: `navigate.ts`.
 - Akzeptanz: `nav.js` prüft jede Kachel; Prognose-Kachel fehlt bei `prognose_aktiv` aus.
 - Tests: `npm test`
-- Dateien: `src/components/heidi-nav-tiles.ts`, `src/heidi-panel-v2.ts`, `src/config.ts` (NAV_TILES)
+- Dateien: `src/components/heidi-nav-tiles.ts`, `src/dreame-x60-panel.ts`, `src/config.ts` (NAV_TILES)
 
 **4.1 `heidi-hero`**
 - Voraussetzung: 4.0
@@ -531,7 +533,7 @@ Nach jedem Build v2 neben v1 ansehen; Unterschiede → Abschnitt 10/10a.
 
 **4.3 `heidi-map-card` (Seite Reinigen)**
 - Voraussetzung: 4.2, 2.4
-- Ziel: Zwei Varianten: `compact` für die Startseite (nur Karte + Bildunterschrift „Live-Karte · <Raum> · <m²> · noch <Räume>“ bzw. „Karte · Heidi in der Station · letzter Lauf <Zeit>“, Antippen navigiert zu `reinigen`, Karten-Element aus demselben Modul-Cache) und `full` für die Seite Reinigen. Für `full`: Kartenslot mit Modul-Cache. Kopfzeile mit Kartenwahl (nur wenn `select.heidi_selected_map` existiert; schreibt `select_option`). Auf der Karte unten links zwei Knöpfe: „Hinfahren“ (schaltet die Karte in den Modus `vacuum_goto`) und „Sperrzonen“ (öffnet Dialog). Darunter Segment Räume / Zone / Punkt und Knopf „Alles“ (`vacuum.start` nach Bestätigung); das Segment gibt der eingebetteten Karte genau **einen** `map_modes`-Eintrag (`vacuum_clean_segment` mit `predefined_selections` inkl. `outline` je Raum, `vacuum_clean_zone`, `vacuum_clean_point`), sodass die Karte kein eigenes Modus-Menü zeigt. Im Modus Räume: Raum-Chips (Reihenfolge 7..1) und Leiste „N Räume reinigen“ mit Bestätigung; in den anderen Modi eine Hinweiszeile. Raum-Marker und Umrisse werden aus `camera.heidi_map` (Attribut `rooms`, Koordinaten) berechnet, nicht von Hand gesetzt. Glas-Optik über die CSS-Variablen aus `heidi/mockups/heidi-v2-karte.html` (Abschnitt „Was hier gesetzt ist“), `tiles: []`, `icons: []`, kein Titel. Sperrzonen-Dialog (`heidi-zones-editor`, 4.12) mit drei Reitern Sperrzonen / Wisch-Sperrzonen / Virtuelle Wände: bestehende Einträge aus `camera.heidi_map` als Heidi-Overlay (verschieben, löschen), neue über die Karte im Modus `MANUAL_RECTANGLE` bzw. `MANUAL_PATH` (Großschreibung, siehe Abschnitt 10). Schalter „Stühle am Boden“ als Zeile in einer eigenen Kachel, nicht auf der Karte. App-Szenen und Knopf „Räume (Roboter-Werte)“ wie bisher.
+- Ziel: Zwei Varianten: `compact` für die Startseite (nur Karte + Bildunterschrift „Live-Karte · <Raum> · <m²> · noch <Räume>“ bzw. „Karte · Heidi in der Station · letzter Lauf <Zeit>“, Antippen navigiert zu `reinigen`, Karten-Element aus demselben Modul-Cache) und `full` für die Seite Reinigen. Für `full`: Kartenslot mit Modul-Cache. Kopfzeile mit Kartenwahl (nur wenn `select.heidi_selected_map` existiert; schreibt `select_option`). Auf der Karte unten links zwei Knöpfe: „Hinfahren“ (schaltet die Karte in den Modus `vacuum_goto`) und „Sperrzonen“ (öffnet Dialog). Darunter Segment Räume / Zone / Punkt und Knopf „Alles“ (`vacuum.start` nach Bestätigung); das Segment gibt der eingebetteten Karte genau **einen** `map_modes`-Eintrag (`vacuum_clean_segment` mit `predefined_selections` inkl. `outline` je Raum, `vacuum_clean_zone`, `vacuum_clean_point`), sodass die Karte kein eigenes Modus-Menü zeigt. Im Modus Räume: Raum-Chips (Reihenfolge 7..1) und Leiste „N Räume reinigen“ mit Bestätigung; in den anderen Modi eine Hinweiszeile. Raum-Marker und Umrisse werden aus `camera.heidi_map` (Attribut `rooms`, Koordinaten) berechnet, nicht von Hand gesetzt. Glas-Optik über die CSS-Variablen aus `dreame_x60/mockups/karte.html` (Abschnitt „Was hier gesetzt ist“), `tiles: []`, `icons: []`, kein Titel. Sperrzonen-Dialog (`heidi-zones-editor`, 4.12) mit drei Reitern Sperrzonen / Wisch-Sperrzonen / Virtuelle Wände: bestehende Einträge aus `camera.heidi_map` als Heidi-Overlay (verschieben, löschen), neue über die Karte im Modus `MANUAL_RECTANGLE` bzw. `MANUAL_PATH` (Großschreibung, siehe Abschnitt 10). Schalter „Stühle am Boden“ als Zeile in einer eigenen Kachel, nicht auf der Karte. App-Szenen und Knopf „Räume (Roboter-Werte)“ wie bisher.
 - Nicht ändern: Dreame-App- und Nur-Bild-Konfiguration; Dienste und Payloads (Abschnitt 4); die Zeile der Karte mit Wiederholungen und ▶ bleibt (sie führt Zeichnungen aus und lässt sich per YAML nicht abschalten).
 - Akzeptanz: Karten-Element über 20 Ticks identisch und 0 Neuerzeugungen; Raumauswahl per Chip oder per Tipp in die Raumfläche → `vacuum_clean_segment` mit richtigen `segments`; Segmentwechsel setzt genau einen Modus; „Hinfahren“ setzt `vacuum_goto`; Kartenwahl fehlt ohne `select.heidi_selected_map`; App-Szene → `heidi_app_szene` nach Bestätigung; Umrisse stimmen mit `rooms` aus der Fixture überein.
 - Tests: `npm test`
@@ -625,7 +627,7 @@ Nach jedem Build v2 neben v1 ansehen; Unterschiede → Abschnitt 10/10a.
 - Nicht ändern: Komponentenschnitt.
 - Akzeptanz: Sichtprüfung 390/820/1200; Sheet bei 390.
 - Tests: `npm test`
-- Dateien: `src/components/*.ts`, `src/styles/base.ts`, `src/heidi-panel-v2.ts`
+- Dateien: `src/components/*.ts`, `src/styles/base.ts`, `src/dreame-x60-panel.ts`
 
 **5.2 Breiten-E2E**
 - Voraussetzung: 5.1
@@ -651,7 +653,7 @@ Nach jedem Build v2 neben v1 ansehen; Unterschiede → Abschnitt 10/10a.
 - Nicht ändern: –
 - Akzeptanz: keine offene Zeile; jede Abweichung in 10a mit Status `freigegeben`.
 - Tests: manuell.
-- Dateien: `docs/BAUPLAN-V2.md`
+- Dateien: `docs/dreame_x60/BAUPLAN.md`
 
 **6.3 [PC] Geräte-Sichtung**
 - Voraussetzung: 6.2
@@ -666,7 +668,7 @@ Nach jedem Build v2 neben v1 ansehen; Unterschiede → Abschnitt 10/10a.
 
 **6.5 [PC] Umschalten**
 - Voraussetzung: 6.4, Abschnitt 11 erfüllt
-- Ziel: `ha/dashboards/heidi.yaml` bekommt die sechs Views von `heidi-v2.yaml` (Pfad `/heidi/...`, `back_path` anpassen); `heidi-v2.yaml` und Dashboard-Eintrag entfernen; `ha/www/heidi-panel.js` → `heidi-panel-v1.js` (Ressource entfernen); Build-Ziel wird `ha/www/heidi-panel.js`; `heidi/tests` → `heidi/tests-v1`; `HANDOFF.md`, `heidi/CLAUDE.md`, `CLAUDE.md` auf v2; Version `2.0.0`.
+- Ziel: `ha/dashboards/heidi.yaml` bekommt die sechs Views von `dreame_x60.yaml` (Pfad `/heidi/...`, `back_path` anpassen); `dreame_x60.yaml` und Dashboard-Eintrag entfernen; `ha/www/heidi-panel.js` → `heidi-panel-v1.js` (Ressource entfernen); Build-Ziel wird `ha/www/heidi-panel.js`; `heidi/tests` → `heidi/tests-v1`; `HANDOFF.md`, `heidi/CLAUDE.md`, `CLAUDE.md` auf v2; Version `2.0.0`.
 - Akzeptanz: Abschnitt 11 vollständig.
 
 ---

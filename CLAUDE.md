@@ -24,7 +24,10 @@ Cowork-Sitzungen (was gebaut wurde, warum, bekannte Stolpersteine, offene Punkte
 
 ## Repo-Aufbau
 - `ha/` – Spiegel der relevanten HA-Dateien (Quelle der Wahrheit; `H:\` ist das Ziel).
-- `heidi/` – Saugroboter Heidi: eigene `CLAUDE.md` mit Details, Tests, Mockups.
+- `heidi/` – Saugroboter Heidi (v1-Karte, Backend, v1-Tests, v1-Mockups): eigene `CLAUDE.md`.
+- `dreame_x60/` – Projekt **dreame_x60**: Neubau der Heidi-Karte (v2) mit `card/`, `tests/`, `mockups/`. Bauplan
+  `docs/dreame_x60/BAUPLAN.md` (Statusliste = Wahrheit), Begründungen `docs/dreame_x60/ARCHITEKTUR-REVIEW.md`.
+  Arbeit nur auf Branch `dreame_x60`; `main` bleibt das, was auf `H:` läuft.
 - `tools/ha.ps1` (API), `tools/deploy.ps1` (Kopieren nach H:\ + Kartenversion hochzählen),
   `tools/ha-ws.js` (WebSocket-API für Personen/Entitäts-Register; JSON-Argumente über Git Bash).
 - Entitäts-IDs mit Umlaut im Namen: HA macht ö→o, ü→u (`heidi_nicht_storen`, nicht `_stoeren`).

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Heidi v2 – Automotive Dark Bento (Mockup, alle Seiten)</title>
+<title>dreame_x60 – Heidi v2: Automotive Dark Bento (Mockup, alle Seiten)</title>
 <style>
 /* ───────── Design Tokens (Abschnitt 27 der Designvorgabe) ───────── */
 :root {
@@ -667,7 +667,7 @@ function pageEinstellungen() {
       <div class="row"><div class="t">Lautstärke</div><div class="v"><input type="range" min="0" max="100" step="5" value="60"><b style="min-width:52px;text-align:right;color:var(--text)">60 %</b></div></div>
       <div class="row"><div class="t">Nicht stören</div><div style="display:flex;gap:6px"><input type="time" value="20:00"><input type="time" value="07:00"></div></div>
       <div class="row link" data-open="rooms-robot"><div><div class="t">Raum-Einstellungen</div><div class="s">Modus, Saugstufe, Wasser, Route, Wdh. je Raum</div></div><span class="v">Räume … ${I.chev}</span></div></div>`);
-  const diag = box('', 'Diagnose', null, { html: 'Entitäts-Vertrag' }, `<div class="list"><div class="row"><div class="t">Roboter (Dreame)</div><span class="st good"><i></i>82 / 82</span></div><div class="row"><div class="t">Paket (Helfer, Sensoren)</div><span class="st good"><i></i>117 / 117</span></div><div class="row"><div><div class="t">Vorübergehend nicht verfügbar</div><div class="s">select.heidi_room_3_cleaning_route (Roboter im Lauf)</div></div><span class="st warn"><i></i>1</span></div><div class="row"><div class="t">Fehlend (Vertrag gebrochen)</div><span class="st good"><i></i>0</span></div></div><div class="hint">Heidi Panel v2.0.0-alpha.1 · Ressource /local/heidi-panel-v2.js · Home Assistant 2026.7</div>`);
+  const diag = box('', 'Diagnose', null, { html: 'Entitäts-Vertrag' }, `<div class="list"><div class="row"><div class="t">Roboter (Dreame)</div><span class="st good"><i></i>82 / 82</span></div><div class="row"><div class="t">Paket (Helfer, Sensoren)</div><span class="st good"><i></i>117 / 117</span></div><div class="row"><div><div class="t">Vorübergehend nicht verfügbar</div><div class="s">select.heidi_room_3_cleaning_route (Roboter im Lauf)</div></div><span class="st warn"><i></i>1</span></div><div class="row"><div class="t">Fehlend (Vertrag gebrochen)</div><span class="st good"><i></i>0</span></div></div><div class="hint">Heidi Panel v2.0.0-alpha.1 · Ressource /local/dreame_x60.js · Home Assistant 2026.7</div>`);
   return topbar('Einstellungen', 'Darstellung, Funktionen, Prognose, Roboter, Diagnose', true) + `<div class="bento"><div class="span6 stack">${look}${fn}${prog}</div><div class="span6 stack">${robot}${diag}</div></div>`;
 }
 

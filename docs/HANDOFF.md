@@ -262,6 +262,6 @@ Offen:
   `sensor.heidi_cleaning_history`.
 - Personen: `person.herbert_schrotter`, `person.nicole_2`, `person.nina_2`.
 - Cowork-Projektdoku (claude.ai, Projekt „Mein SmartHome"): `claude/heidi-setup.md`.
-- Architektur-Review der Karte (Zielarchitektur, Refactoring-Plan, Teststrategie): `docs/ARCHITEKTUR-REVIEW.md`.
-- Bauplan für den Neubau der Karte (v2, Phasen, Statusliste, Entitäts-Vertrag): `docs/BAUPLAN-V2.md`.
+- Architektur-Review der Karte (Zielarchitektur, Refactoring-Plan, Teststrategie): `docs/dreame_x60/ARCHITEKTUR-REVIEW.md`.
+- Bauplan für den Neubau der Karte (v2, Phasen, Statusliste, Entitäts-Vertrag): `docs/dreame_x60/BAUPLAN.md`.
 - ChatGPT-Review-Archiv (Zweitmeinung zu Review + Bauplan): `docs/chatgpt-reviews/INDEX.md`.
