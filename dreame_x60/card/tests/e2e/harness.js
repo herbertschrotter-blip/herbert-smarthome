@@ -67,14 +67,14 @@ export async function mount(browser, opts = {}) {
   await page.addScriptTag({ content: js, type: 'module' });
   await page.waitForFunction(() => !!customElements.get('dreame-x60-panel'));
   await page.evaluate(({ states, config, failCalls, apiResponse, wsResponses }) => {
-    window._calls = []; window._api = []; window._ws = [];
+    window._calls = []; window._api = []; window._ws = []; window._wsResponses = wsResponses || null;
     const el = document.createElement('dreame-x60-panel');
     el.setConfig(config);
     el.hass = {
       states,
       callService: async (d, s, x) => { window._calls.push([d, s, x]); if ((failCalls || []).includes(d + '.' + s)) throw new Error('injiziert: ' + d + '.' + s); },
       callApi: async (m, p) => { window._api.push(p); return apiResponse ?? []; },
-      callWS: async (msg) => { window._ws.push(msg); const r = (wsResponses || {})[msg.type]; if (r === undefined) throw new Error('kein WS-Stub für ' + msg.type); return r; },
+      callWS: async (msg) => { window._ws.push(msg); const r = (window._wsResponses || {})[msg.type]; if (r === undefined) throw new Error('kein WS-Stub für ' + msg.type); return r; },
     };
     document.body.appendChild(el);
   }, { states, config: opts.config || { page: pg }, failCalls: opts.failCalls || [], apiResponse: opts.apiResponse ?? null, wsResponses: opts.wsResponses || null });

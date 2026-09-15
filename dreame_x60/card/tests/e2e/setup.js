@@ -47,6 +47,18 @@ const tick = (page, ms = 250) => page.waitForTimeout(ms);
   await page.close();
 }
 
+// ── Zuordnung nachgeholt: neues hass.entities (Register geändert) → Symbol verschwindet ohne Neuladen ──
+{
+  const { page, errs } = await H.mount(b, { page: 'start', states: withSwitch(docked, true), wsResponses: { 'config/entity_registry/get': partialMapping, 'vacuum/get_segments': segments, 'repairs/list_issues': { issues: [] } }, viewport: { width: 1400, height: 1400 } });
+  await tick(page);
+  H.checkEqual('vorher: rotes Bereiche-Symbol', (await icons(page)).map((i) => i.key), ['areas']);
+  await page.evaluate((full) => { window._wsResponses['config/entity_registry/get'] = full; const el = document.querySelector('dreame-x60-panel'); el.hass = { ...el.hass, entities: { 'vacuum.heidi': { entity_id: 'vacuum.heidi' } } }; }, fullMapping);
+  await tick(page, 400);
+  H.checkEqual('nachher: kein Symbol (Register-Wechsel löst Neuladen aus)', (await icons(page)).map((i) => i.key), []);
+  H.check('keine Konsolenfehler', errs.length === 0, errs);
+  await page.close();
+}
+
 // ── ohne WS (alte HA, Tests): Bereichs- und Reparaturprüfung entfallen; Datenkarte fehlt → ein gelbes Symbol ──
 {
   const states = withSwitch(docked, true);

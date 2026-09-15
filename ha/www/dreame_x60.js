@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.25 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.26 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -2197,7 +2197,7 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.25";
+var VERSION = "2.0.0-alpha.26";
 
 // src/shared/robot-svg.ts
 var robotSvg = w`<svg viewBox="0 0 200 200" class="robotpic" aria-hidden="true">
@@ -3405,10 +3405,12 @@ if (!customElements.get(QUICKSTART_ELEMENT)) customElements.define(QUICKSTART_EL
 var ELEMENT = "dreame-x60-panel";
 var TOAST_MS = 1900;
 var GREETING = (h3) => h3 < 11 ? "Guten Morgen" : h3 < 18 ? "Guten Tag" : "Guten Abend";
+var UNSET = Symbol("unset");
 var DreameX60Panel = class extends i4 {
   constructor() {
     super();
     this._setupVac = "";
+    this._setupEntities = UNSET;
     /** Schreibzugriffe – eine Instanz je Shell, liest hass zur Laufzeit. */
     this.api = new DxApi(() => this.hass);
     this._toastTimer = null;
@@ -3449,6 +3451,12 @@ var DreameX60Panel = class extends i4 {
       if (vac && vac !== this._setupVac) {
         this._setupVac = vac;
         this.refreshSetup(false);
+      }
+      const ents = this.hass.entities;
+      if (ents !== this._setupEntities) {
+        const first = this._setupEntities === UNSET;
+        this._setupEntities = ents;
+        if (!first) this.refreshSetup(true);
       }
     }
   }
@@ -3495,7 +3503,7 @@ var DreameX60Panel = class extends i4 {
   /** Nächster Tick zur vollen Minute (+50 ms), damit die Uhr nie eine Minute hinterherhinkt. */
   tickClock() {
     this._now = Date.now();
-    this.refreshSetup(false);
+    this.refreshSetup(true);
     this._clockTimer = setTimeout(() => this.tickClock(), 6e4 - Date.now() % 6e4 + 50);
   }
   // ───────── HA-Schnittstelle der Karte ─────────

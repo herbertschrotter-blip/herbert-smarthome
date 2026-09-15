@@ -45,6 +45,9 @@ const TOAST_MS = 1900;
 /** Tagesgruß der Übersicht: bis 11 Uhr Morgen, bis 18 Uhr Tag, danach Abend. */
 const GREETING = (h: number): string => (h < 11 ? 'Guten Morgen' : h < 18 ? 'Guten Tag' : 'Guten Abend');
 
+/** Marke „noch nie gesehen“ für den Vergleich von hass.entities (auch `undefined` ist ein gültiger erster Wert). */
+const UNSET: unknown = Symbol('unset');
+
 export class DreameX60Panel extends LitElement {
   static override styles = [tokens, base, controls, shell];
 
@@ -66,6 +69,7 @@ export class DreameX60Panel extends LitElement {
   /** Einrichtungsprüfung (PD-014): nachgeladene Bereichszuordnung und Reparaturen, je Roboter */
   declare private _setupData: SetupData | null;
   private _setupVac = '';
+  private _setupEntities: unknown = UNSET;
 
   /** Schreibzugriffe – eine Instanz je Shell, liest hass zur Laufzeit. */
   readonly api = new DxApi(() => this.hass);
@@ -79,6 +83,9 @@ export class DreameX60Panel extends LitElement {
       discoverDevice(this.hass, this._config.robot);
       const vac = device()?.vac ?? '';
       if (vac && vac !== this._setupVac) { this._setupVac = vac; this.refreshSetup(false); }
+      // Entitäts-Register geändert (z. B. Bereichszuordnung gespeichert): HA tauscht hass.entities aus → sofort neu laden
+      const ents = this.hass.entities;
+      if (ents !== this._setupEntities) { const first = this._setupEntities === UNSET; this._setupEntities = ents; if (!first) this.refreshSetup(true); }
     }
   }
 
@@ -137,7 +144,7 @@ export class DreameX60Panel extends LitElement {
   /** Nächster Tick zur vollen Minute (+50 ms), damit die Uhr nie eine Minute hinterherhinkt. */
   private tickClock(): void {
     this._now = Date.now();
-    this.refreshSetup(false); // alle fünf Minuten neu (Cache im Lader)
+    this.refreshSetup(true); // jede Minute neu (drei leichte WS-Abfragen), damit Befunde ohne F5 verschwinden
     this._clockTimer = setTimeout(() => this.tickClock(), 60_000 - (Date.now() % 60_000) + 50);
   }
 
