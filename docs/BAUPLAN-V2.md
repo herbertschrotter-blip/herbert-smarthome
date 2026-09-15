@@ -28,9 +28,9 @@ Claude Code im Web bereitet diese Aufgaben vor, führt sie aber nicht aus.
 
 | Nr. | Aufgabe | Status |
 |---|---|---|
-| 0.1 | v1-Tests: Exit-Code bei Abweichung, `test-timeline` in `npm test`, ein Harness | blockiert (Abschnitt 10: 16 oder 18 Calls) |
+| 0.1 | v1-Tests: Exit-Code bei Abweichung, `test-timeline` in `npm test`, ein Harness | fertig (d6f6778) |
 | 0.2 | **[PC]** Fixtures `states-docked.json`, `states-cleaning.json` erneuern | offen |
-| 0.3 | v1: `sensor.heidi_task_status` in `_signature()`, Version 1.6.1 | offen |
+| 0.3 | v1: `sensor.heidi_task_status` in `_signature()`, Version 1.6.1 | in Arbeit (2026-09-15) |
 | 0.4 | Backend: `rest_min`/`rest_quelle` als Attribute, Automation liest sie | offen |
 | 1.1 | Toolchain `heidi/card/` | offen |
 | 1.2 | Leere Lit-Shell `heidi-panel-v2`, Build nach `ha/www/heidi-panel-v2.js` | offen |
@@ -267,7 +267,7 @@ heidi/card/
 | `_histAttrs` | `selectors.readHistory` | Bei `unknown/unavailable` oder ohne `timestamp`-Attribute letzten Stand behalten (Modul-Cache) |
 | `_lern` | `selectors.readLearn` | `null` ohne `raten` oder bei unavailable |
 | `_signature` | `memo-selector.ts` | Kein globaler Vergleich; je Selektor |
-| `_saveEditor` | `HeidiApi.savePlan` | Name nicht leer, ≥ 1 Raum; Raumwerte nur gewählter Räume; 16 Calls wie v1; Zeit `HH:MM:00`; Ergebnis `{ok, fehlgeschlagen[]}` |
+| `_saveEditor` | `HeidiApi.savePlan` | Name nicht leer, ≥ 1 Raum; Raumwerte nur gewählter Räume; 18 Calls wie v1 (5 input_text, 10 input_select, 2 input_boolean, 1 input_datetime); Zeit `HH:MM:00`; Ergebnis `{ok, fehlgeschlagen[]}` |
 | `_rvClick` (Roboter) | `HeidiApi.setRoomValue` | Option über `RV_HA`-Inverse, Wdh + `x`; „Alle“ = 7 parallel |
 | `_zonesAction("save")` | `HeidiApi.setZones` | Beide Listen senden |
 | `_onClick` svc/press/reset/run/app/shell/toggle/option | `HeidiApi.vacuum/press/runPlan/runScene/shell/toggle/selectOption/setNumber/setTime` | `runPlan` verweigert bei inaktiv; `setTime` unterscheidet `time.` und `input_datetime`; Intervall auf 5/10/15/20/30/60 runden; Dark-Mode `turn_on/off` |
@@ -316,7 +316,7 @@ trägt eines zwei unabhängige Zustände, werden es zwei.
 | `heidi-dialog` | title, variant | `heidi-close`, `heidi-confirm` | Escape; Sheet < 600 px Container |
 | `heidi-map-card` | hass, mapView, api, kind, dark, variant (`full` \| `compact`) | `heidi-open-overlay {zones}`, `heidi-navigate {reinigen}` (compact) | Element über 20 Ticks identisch; `vacuum_clean_segment` nach Bestätigung; Moduswechsel gibt der Karte genau einen `map_modes`-Eintrag; `compact` ohne Segment, Knöpfe und Chips, mit Bildunterschrift |
 | `heidi-planer` | plans[], today, lern, restMin, api | `{editor n}`, `{estimate n}` | 4 Zeilen, heutiger markiert, ▶ verweigert bei inaktiv |
-| `heidi-planer-editor` | api, n, draft | `heidi-close` | 16 Calls; Draft überlebt hass-Update; Teilfehler sichtbar; Hinweis „außerhalb geändert“ |
+| `heidi-planer-editor` | api, n, draft | `heidi-close` | 18 Calls; Draft überlebt hass-Update; Teilfehler sichtbar; Hinweis „außerhalb geändert“ |
 | `heidi-clock-picker` | value | `change` | 10 → Minuten → 15 → OK = „10:15“ |
 | `heidi-rooms-dialog` | roomValues, api, mode, draft? | `heidi-close`, `heidi-back` | Roboter: sofort `select_option`; Plan: nur Draft |
 | `heidi-history` | historyView, api | – | 7 Zeilen aus 0.1; bleibt bei unavailable; ein `callApi` je Klick |
@@ -337,7 +337,7 @@ Sechs Felder je Karte: **Voraussetzung** (Aufgaben, die `fertig` sein müssen), 
 
 **0.1 v1-Tests scharf stellen**
 - Voraussetzung: –
-- Ziel: Ein `harness.js` für alle vier v1-Tests; `assert`-Erwartungen; `process.exitCode = 1` bei Abweichung; `npm test` führt alle vier aus. Festgeschriebene Erwartungen: 16 Calls für Plan 2 (Klickfolge aus `test-editor.js`), Kopf-Tabelle und 7 Zeitleisten-Zeilen aus `test-timeline.js`, Zonen `[[-4200,-4775,-1150,-2075],[-1550,-188,-643,937]]` aus `test-zones.js`, `test-real.js` ohne Konsolenfehler.
+- Ziel: Ein `harness.js` für alle vier v1-Tests; `assert`-Erwartungen; `process.exitCode = 1` bei Abweichung; `npm test` führt alle vier aus. Festgeschriebene Erwartungen: 18 Calls für Plan 2 (Klickfolge aus `test-editor.js`), Kopf-Tabelle und 7 Zeitleisten-Zeilen aus `test-timeline.js`, Zonen `[[-4200,-4775,-1150,-2075],[-1550,-188,-643,937]]` aus `test-zones.js`, `test-real.js` ohne Konsolenfehler.
 - Nicht ändern: `ha/www/heidi-panel.js`, `real_states.json`, die Klickfolgen.
 - Akzeptanz: `npm test` grün; eine absichtlich falsche Erwartung macht ihn rot (probieren, zurücknehmen).
 - Tests: `cd heidi/tests && npm test`
@@ -479,9 +479,9 @@ Sechs Felder je Karte: **Voraussetzung** (Aufgaben, die `fertig` sein müssen), 
 
 **3.2 API mit Teilfehlern**
 - Voraussetzung: 2.0
-- Ziel: `HeidiApi` (Methoden aus Abschnitt 6). `savePlan` führt die 16 Calls aus, sammelt Fehler (`Promise.allSettled`) und liefert `{ok, fehlgeschlagen: string[]}`; `setZones` analog.
+- Ziel: `HeidiApi` (Methoden aus Abschnitt 6). `savePlan` führt die 18 Calls aus, sammelt Fehler (`Promise.allSettled`) und liefert `{ok, fehlgeschlagen: string[]}`; `setZones` analog.
 - Nicht ändern: Dienst-Namen und Payloads.
-- Akzeptanz: Call-Log-Tests: 16 Calls exakt; `setRoomValue` mappt Optionen; `setTime` unterscheidet Domänen; `runPlan` bei inaktiv ohne Call; Fehlerinjektion „Call 5 wirft“ → Ergebnis nennt genau diese Entität, übrige Calls wurden trotzdem abgesetzt.
+- Akzeptanz: Call-Log-Tests: 18 Calls exakt; `setRoomValue` mappt Optionen; `setTime` unterscheidet Domänen; `runPlan` bei inaktiv ohne Call; Fehlerinjektion „Call 5 wirft“ → Ergebnis nennt genau diese Entität, übrige Calls wurden trotzdem abgesetzt.
 - Tests: `npm run test:unit -- api`
 - Dateien: `src/ha/api.ts`, `tests/unit/api.test.ts`
 
@@ -548,8 +548,8 @@ Nach jedem Build v2 neben v1 ansehen; Unterschiede → Abschnitt 10/10a.
 **4.5 `heidi-planer-editor`, `heidi-clock-picker`**
 - Voraussetzung: 4.2, 4.4, 3.2
 - Ziel: Editor mit `PlanDraft` (Snapshot beim Öffnen), Uhr, Speichern über `savePlan`, Teilfehler-Meldung „Speichern unvollständig: <Felder>“ und Editor bleibt offen, Hinweis „Eintrag wurde außerhalb geändert“ (Vergleich `last_updated` der Plan-Helfer beim Öffnen vs. jetzt).
-- Nicht ändern: die 16 Calls.
-- Akzeptanz: `editor.js` (Klickfolge aus 0.1) → dieselben 16 Calls; `live-update.js`: bei offenem Editor neuen Akkuwert setzen → Kopf aktualisiert, Draft unverändert, Fokus bleibt; Fehlerinjektion Call 5 → Meldung sichtbar, Dialog offen; Änderung eines Plan-Helfers → Hinweis sichtbar.
+- Nicht ändern: die 18 Calls.
+- Akzeptanz: `editor.js` (Klickfolge aus 0.1) → dieselben 18 Calls; `live-update.js`: bei offenem Editor neuen Akkuwert setzen → Kopf aktualisiert, Draft unverändert, Fokus bleibt; Fehlerinjektion Call 5 → Meldung sichtbar, Dialog offen; Änderung eines Plan-Helfers → Hinweis sichtbar.
 - Tests: `npm test`
 - Dateien: `src/components/heidi-planer-editor.ts`, `src/components/heidi-clock-picker.ts`, `tests/e2e/{editor,live-update}.js`
 
@@ -681,7 +681,7 @@ Nach jedem Build v2 neben v1 ansehen; Unterschiede → Abschnitt 10/10a.
 - [ ] Verschleiß: 5 Ringe, Farben, Reset mit Bestätigung
 - [ ] Automatik: Schalter + Statuszeile (Start), Regeln mit 6 Zeilen (Planer), alle Eingaben schreiben
 - [ ] Planer: 4 Zeilen (Name, Räume, Modus, Störer, Einzelwerte, Dauer-Kurzzeile, Tag/Zeit, ▶, ✎); App-Szenen mit Bestätigung
-- [ ] Editor: alle Felder, Uhr, Bedingungen, Räume einzeln/Roboter-Werte/Dauer & Akku, Speichern → 16 Calls, Abbrechen verwirft, Teilfehler sichtbar, Hinweis „außerhalb geändert“
+- [ ] Editor: alle Felder, Uhr, Bedingungen, Räume einzeln/Roboter-Werte/Dauer & Akku, Speichern → 18 Calls, Abbrechen verwirft, Teilfehler sichtbar, Hinweis „außerhalb geändert“
 - [ ] Räume-Dialog: beide Modi, Umschalter, „Alle Räume“, gedimmt, Zurück
 - [ ] Dauer & Akku: Kurzzeile, Dialog, Schnellprogramm-Zeile, Schritte, Diagramm, Vergleich
 - [ ] Prognose: Kachel (3 Werte), Seite mit Heute/Lernstatus/Schaltern/Reset/Heatmaps
@@ -703,7 +703,7 @@ Format: `- [Datum] [Aufgabe] Art (Widerspruch | Messung | Befund | Wunsch) · Sc
 
 Für 2.0 müssen `Blocker` und `Functional` = 0 sein. `Cosmetic` und `Post-2.0` dürfen offen bleiben.
 
-- [2026-09-15] [0.1] Widerspruch · Functional: Der Bauplan nennt für das Speichern eines Planer-Eintrags **16** Service-Calls (0.1, 3.2, 4.5, Abschnitt 6 `_saveEditor`). v1 setzt tatsächlich **18** ab: 5 `input_text.set_value` (name, raeume, tage, personen, raumwerte), 10 `input_select.select_option` (modus, saugstufe, wasser, route, wiederholungen, homeoffice, ho_saug, ho_wdh, sp_saug, sp_wdh), 2 `input_boolean.turn_on/off` (aktiv, schnell), 1 `input_datetime.set_datetime` (zeit). Festgeschrieben in `heidi/tests/expected/editor-calls.json` (Characterization aus v1). Vermutlich Zählfehler im Bauplan; die Klickfolge blieb unverändert. Entscheidung Herbert: … (danach 16 → 18 in 0.1, 3.2, 4.5, Abschnitt 6 ersetzen und 0.1 auf `fertig`).
+- [2026-09-15] [0.1] Widerspruch · Functional: Der Bauplan nennt für das Speichern eines Planer-Eintrags **16** Service-Calls (0.1, 3.2, 4.5, Abschnitt 6 `_saveEditor`). v1 setzt tatsächlich **18** ab: 5 `input_text.set_value` (name, raeume, tage, personen, raumwerte), 10 `input_select.select_option` (modus, saugstufe, wasser, route, wiederholungen, homeoffice, ho_saug, ho_wdh, sp_saug, sp_wdh), 2 `input_boolean.turn_on/off` (aktiv, schnell), 1 `input_datetime.set_datetime` (zeit). Festgeschrieben in `heidi/tests/expected/editor-calls.json` (Characterization aus v1). Vermutlich Zählfehler im Bauplan; die Klickfolge blieb unverändert. Entscheidung Herbert (15.09.): 18 ist richtig; Bauplan in 0.1, 3.2, 4.5 und Abschnitt 6 auf 18 korrigiert.
 - [2026-09-14] [4.3] Befund · Functional (v1): In der Xiaomi-Konfiguration von v1 (`_mountMap`, Modi „Sperrzonen setzen“ und „Wisch-Sperrzonen setzen“) steht `selection_type: manual_rectangle` in Kleinschreibung. Die Karte erwartet `MANUAL_RECTANGLE` (wie ihre eingebauten Vorlagen) und blendet sonst „+“ und Zeichenwerkzeuge aus. In v2 richtig schreiben; v1 bleibt unverändert (Regel 3). Entscheidung Herbert: zur Kenntnis genommen (Chat 14.09.).
 - [2026-09-14] [4.3] Befund · Cosmetic: Das Kartenbild der Integration enthält englische Raumnamen, Heidi zeigt deutsche Marker. In den Optionen der Dreame-Integration Raumnamen im Bild ausblenden (Herbert, beim Umschalten).
 - [2026-09-14] [4.3] Wunsch · Post-2.0: Pixelgenaue Raumauswahl wie in der App über `camera.heidi_map_data` (Valetudo-Format, Segment-Masken) in einer eigenen Kartenansicht; die Xiaomi-Karte kann nur Polygone (`outline`) und trifft an Raumrändern ungenau.
@@ -723,7 +723,7 @@ ist eine Abweichung ein Fehler.
 | PD-005 | Startseite | Karte nur in der Übersicht mit allen Werkzeugen | Startseite zeigt die Karte immer als `compact` (links unter dem Kopf), Werkzeuge auf der Seite Reinigen; Automatik und Station rechts | Herberts Abnahme (Chat 14.09.); Layout, keine Fachlogik | `render.js`, `nav.js` | freigegeben (Herbert, 2026-09-14) |
 | PD-001 | Editor | Live-Daten eingefroren bei offenem Editor | Kopf/Streifen aktualisieren sich, Draft bleibt | Folge des Render-Modells, nicht gewollt | `live-update.js` | freigegeben (Herbert, 2026-09-14) |
 | PD-002 | Speichern | Fehler beim Speichern → Toast, Editor schließt | Teilfehler benannt, Editor bleibt offen | Regel 20 | `api.test.ts` Fehlerinjektion | freigegeben (Herbert, 2026-09-14) |
-| PD-006 | Übersicht | keine Statistik-Kachel | Kachel „Statistik“: Balken der letzten 7 Tage aus `sensor.heidi_cleaning_history`, Summen aus `cleaning_count`/`total_cleaned_area`/`total_cleaning_time` | Designvorgabe Abschnitt 14; nur Anzeige vorhandener Sensoren, keine neue Fachlogik | `render.js` | offen (im Mockup 15.09. mit abgenommen; Herbert bestätigt ausdrücklich) |
+| PD-006 | Übersicht | keine Statistik-Kachel | Kachel „Statistik“: Balken der letzten 7 Tage aus `sensor.heidi_cleaning_history`, Summen aus `cleaning_count`/`total_cleaned_area`/`total_cleaning_time` | Designvorgabe Abschnitt 14; nur Anzeige vorhandener Sensoren, keine neue Fachlogik | `render.js` | freigegeben (Herbert, 2026-09-15) |
 | PD-003 | Bestätigungen | `window.confirm` | `heidi-dialog confirm` | Regel 13 | `dialog.js` | freigegeben (Herbert, 2026-09-14) |
 
 ---
