@@ -1,0 +1,28 @@
+{
+  "name": "dreame-x60-panel",
+  "version": "2.0.0-alpha.1",
+  "private": true,
+  "description": "dreame_x60 – Neubau der Heidi-Karte (Custom Lovelace Card, Lit 3, TypeScript). Bundle: ha/www/dreame_x60.js",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "watch": "node build.mjs --watch",
+    "check": "tsc --noEmit",
+    "lint": "eslint .",
+    "test:unit": "node --import tsx --test tests/unit/*.test.ts",
+    "test:e2e": "node tests/e2e/run.js",
+    "test": "npm run check && npm run test:unit && npm run build && npm run test:e2e"
+  },
+  "dependencies": {
+    "lit": "^3.2.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "esbuild": "^0.24.2",
+    "eslint": "^9.17.0",
+    "playwright": "^1.63.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.19.0"
+  }
+}
