@@ -121,19 +121,18 @@ export const base = css`
   .meta .mi:first-child {
     border-left: 0;
   }
-  /* Einrichtungsprüfung (PD-014): Knopf in der Kopfzeile, nur bei Befund; öffnet den Dialog „Einrichtung“ */
-  .meta .mi.setup {
-    border-radius: var(--dx-radius-md);
-    cursor: pointer;
-    border-left: 0;
-    margin-left: 4px;
-    background: color-mix(in srgb, var(--dx-danger) 16%, transparent);
-    color: var(--dx-text);
+  /* Einrichtungsprüfung (PD-014): nur die Symbole mit Befund zwischen Titel und Uhr; rot pulsiert; Klick springt zur Stelle */
+  .topbar .setupicons { display: flex; align-items: center; gap: 8px; margin-left: 16px; }
+  .topbar .si { width: 36px; height: 36px; border-radius: 50%; display: inline-grid; place-items: center; border: 1px solid transparent; cursor: pointer; padding: 0; }
+  .topbar .si ha-icon { --mdc-icon-size: 20px; width: 20px; height: 20px; }
+  .topbar .si.warn { background: color-mix(in srgb, var(--dx-warning) 22%, transparent); color: var(--dx-warning); border-color: var(--dx-warning); }
+  .topbar .si.error { background: color-mix(in srgb, var(--dx-danger) 24%, transparent); color: var(--dx-danger); border-color: var(--dx-danger); animation: dx-setup-pulse 1.6s ease-in-out infinite; }
+  .topbar .si:hover { filter: brightness(1.2); }
+  @keyframes dx-setup-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--dx-danger) 55%, transparent); }
+    50% { box-shadow: 0 0 0 7px color-mix(in srgb, var(--dx-danger) 0%, transparent); }
   }
-  .meta .mi.setup ha-icon { color: var(--dx-danger); }
-  .meta .mi.setup.warn { background: color-mix(in srgb, var(--dx-warning) 18%, transparent); }
-  .meta .mi.setup.warn ha-icon { color: var(--dx-warning); }
-  .meta .mi.setup:hover { filter: brightness(1.15); }
+  @media (prefers-reduced-motion: reduce) { .topbar .si.error { animation: none; } }
   .meta .mi ha-icon {
     color: var(--dx-text-muted);
   }

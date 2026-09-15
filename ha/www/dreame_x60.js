@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.21 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.22 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -1249,6 +1249,39 @@ function setupChecks(i5) {
 }
 var setupProblems = (checks) => checks.filter((c4) => c4.level !== "ok");
 
+// src/shared/navigate.ts
+var DASHBOARD_PATH = "/dreame-x60";
+var pagePath = (page) => `${DASHBOARD_PATH}/${page}`;
+function navigate(page, replace = false) {
+  const path = pagePath(page);
+  if (replace) history.replaceState(null, "", path);
+  else history.pushState(null, "", path);
+  window.dispatchEvent(new CustomEvent("location-changed", { detail: { replace } }));
+}
+function navigateHa(path) {
+  history.pushState(null, "", path);
+  window.dispatchEvent(new CustomEvent("location-changed", { detail: { replace: false } }));
+}
+
+// src/shared/overlay.ts
+var EVENTS = {
+  openOverlay: "dx-open-overlay",
+  close: "dx-close",
+  back: "dx-back",
+  confirm: "dx-confirm",
+  toast: "dx-toast",
+  navigate: "dx-navigate"
+};
+function emit(target, name, detail) {
+  target.dispatchEvent(new CustomEvent(name, { detail, bubbles: true, composed: true }));
+}
+function askConfirm(target, text, onOk, opts2 = {}) {
+  emit(target, EVENTS.openOverlay, { kind: "confirm", text, onOk, ...opts2 });
+}
+function moreInfo(target, entityId) {
+  emit(target, "hass-more-info", { entityId });
+}
+
 // src/ha/setup-loader.ts
 var TTL_MS = 5 * 60 * 1e3;
 var cache = /* @__PURE__ */ new Map();
@@ -1761,39 +1794,6 @@ function toPage(value) {
   return PAGES.includes(String(value)) ? value : "start";
 }
 
-// src/shared/overlay.ts
-var EVENTS = {
-  openOverlay: "dx-open-overlay",
-  close: "dx-close",
-  back: "dx-back",
-  confirm: "dx-confirm",
-  toast: "dx-toast",
-  navigate: "dx-navigate"
-};
-function emit(target, name, detail) {
-  target.dispatchEvent(new CustomEvent(name, { detail, bubbles: true, composed: true }));
-}
-function askConfirm(target, text, onOk, opts2 = {}) {
-  emit(target, EVENTS.openOverlay, { kind: "confirm", text, onOk, ...opts2 });
-}
-function moreInfo(target, entityId) {
-  emit(target, "hass-more-info", { entityId });
-}
-
-// src/shared/navigate.ts
-var DASHBOARD_PATH = "/dreame-x60";
-var pagePath = (page) => `${DASHBOARD_PATH}/${page}`;
-function navigate(page, replace = false) {
-  const path = pagePath(page);
-  if (replace) history.replaceState(null, "", path);
-  else history.pushState(null, "", path);
-  window.dispatchEvent(new CustomEvent("location-changed", { detail: { replace } }));
-}
-function navigateHa(path) {
-  history.pushState(null, "", path);
-  window.dispatchEvent(new CustomEvent("location-changed", { detail: { replace: false } }));
-}
-
 // src/styles/tokens.ts
 var tokens = i`
   :host {
@@ -1988,19 +1988,18 @@ var base = i`
   .meta .mi:first-child {
     border-left: 0;
   }
-  /* Einrichtungsprüfung (PD-014): Knopf in der Kopfzeile, nur bei Befund; öffnet den Dialog „Einrichtung“ */
-  .meta .mi.setup {
-    border-radius: var(--dx-radius-md);
-    cursor: pointer;
-    border-left: 0;
-    margin-left: 4px;
-    background: color-mix(in srgb, var(--dx-danger) 16%, transparent);
-    color: var(--dx-text);
+  /* Einrichtungsprüfung (PD-014): nur die Symbole mit Befund zwischen Titel und Uhr; rot pulsiert; Klick springt zur Stelle */
+  .topbar .setupicons { display: flex; align-items: center; gap: 8px; margin-left: 16px; }
+  .topbar .si { width: 36px; height: 36px; border-radius: 50%; display: inline-grid; place-items: center; border: 1px solid transparent; cursor: pointer; padding: 0; }
+  .topbar .si ha-icon { --mdc-icon-size: 20px; width: 20px; height: 20px; }
+  .topbar .si.warn { background: color-mix(in srgb, var(--dx-warning) 22%, transparent); color: var(--dx-warning); border-color: var(--dx-warning); }
+  .topbar .si.error { background: color-mix(in srgb, var(--dx-danger) 24%, transparent); color: var(--dx-danger); border-color: var(--dx-danger); animation: dx-setup-pulse 1.6s ease-in-out infinite; }
+  .topbar .si:hover { filter: brightness(1.2); }
+  @keyframes dx-setup-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--dx-danger) 55%, transparent); }
+    50% { box-shadow: 0 0 0 7px color-mix(in srgb, var(--dx-danger) 0%, transparent); }
   }
-  .meta .mi.setup ha-icon { color: var(--dx-danger); }
-  .meta .mi.setup.warn { background: color-mix(in srgb, var(--dx-warning) 18%, transparent); }
-  .meta .mi.setup.warn ha-icon { color: var(--dx-warning); }
-  .meta .mi.setup:hover { filter: brightness(1.15); }
+  @media (prefers-reduced-motion: reduce) { .topbar .si.error { animation: none; } }
   .meta .mi ha-icon {
     color: var(--dx-text-muted);
   }
@@ -2135,7 +2134,7 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.21";
+var VERSION = "2.0.0-alpha.22";
 
 // src/shared/robot-svg.ts
 var robotSvg = w`<svg viewBox="0 0 200 200" class="robotpic" aria-hidden="true">
@@ -3339,69 +3338,6 @@ var DxQuickstart = class extends i4 {
 };
 if (!customElements.get(QUICKSTART_ELEMENT)) customElements.define(QUICKSTART_ELEMENT, DxQuickstart);
 
-// src/components/dx-setup.ts
-var SETUP_ELEMENT = "dx-setup";
-var DxSetup = class extends i4 {
-  static {
-    this.styles = [controls, i`
-    :host { display: block; }
-    :host([hidden]) { display: none; }
-    .bar { display: flex; flex-direction: column; gap: 10px; padding: 12px 16px; border: 1px solid var(--dx-border); border-left: 4px solid var(--dx-danger); border-radius: var(--dx-radius-md); background: var(--dx-surface); }
-    .bar.warn { border-left-color: var(--dx-warning, #f0b35a); }
-    .icons { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .icons .t { font-size: 13px; color: var(--dx-text-muted); margin-right: 4px; }
-    .icons .sum { margin-left: auto; font-size: 13px; color: var(--dx-text-muted); }
-    .ic { width: 32px; height: 32px; border-radius: 50%; display: inline-grid; place-items: center; border: 1px solid var(--dx-border); background: var(--dx-surface-raised); color: var(--dx-text-muted); }
-    .ic ha-icon { --mdc-icon-size: 18px; width: 18px; height: 18px; }
-    .ic.error { background: color-mix(in srgb, var(--dx-danger) 22%, transparent); color: var(--dx-danger); border-color: var(--dx-danger); cursor: pointer; }
-    .ic.warn { background: color-mix(in srgb, var(--dx-warning, #f0b35a) 22%, transparent); color: var(--dx-warning, #f0b35a); border-color: var(--dx-warning, #f0b35a); cursor: pointer; }
-    .ic.ok { opacity: 0.55; }
-    .rows { display: flex; flex-direction: column; gap: 8px; }
-    .row { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; }
-    .row .tx { font-size: 13px; line-height: 1.4; }
-    .row .tx b { display: block; font-weight: 600; }
-    .row .hint { font-size: 12px; color: var(--dx-text-muted); }
-    @container content (max-width: 640px) { .row { grid-template-columns: auto 1fr; } .row .btn { grid-column: 2; justify-self: start; } }
-  `];
-  }
-  static {
-    this.properties = { checks: { attribute: false } };
-  }
-  constructor() {
-    super();
-    this.checks = [];
-  }
-  go(a3) {
-    if (!a3) return;
-    if (a3.kind === "more-info") moreInfo(this, a3.entity);
-    else if (a3.kind === "page") emit(this, EVENTS.navigate, { page: a3.page });
-    else navigateHa(a3.path);
-  }
-  render() {
-    const problems = setupProblems(this.checks);
-    if (!problems.length) return b2``;
-    const errors = problems.filter((p3) => p3.level === "error").length, warns = problems.length - errors;
-    const sum = [errors ? `${errors} ${errors === 1 ? "Problem" : "Probleme"}` : "", warns ? `${warns} ${warns === 1 ? "Hinweis" : "Hinweise"}` : ""].filter(Boolean).join(", ");
-    return b2`
-      <div class="bar ${errors ? "error" : "warn"}" role="status">
-        <div class="icons">
-          <span class="t">Einrichtung</span>
-          ${this.checks.map((c4) => b2`<button class="ic ${c4.level}" data-check=${c4.key} title=${c4.text} aria-label=${c4.text} @click=${() => this.go(c4.action)}><ha-icon icon=${c4.icon}></ha-icon></button>`)}
-          <span class="sum">${sum}</span>
-        </div>
-        <div class="rows">
-          ${problems.map((p3) => b2`
-            <div class="row" data-problem=${p3.key}>
-              <span class="ic ${p3.level}"><ha-icon icon=${p3.icon}></ha-icon></span>
-              <div class="tx"><b>${p3.label}</b>${p3.text}${p3.action?.kind === "more-info" && p3.action.hint ? b2`<div class="hint">Dort: ${p3.action.hint}</div>` : A}</div>
-              ${p3.action ? b2`<button class="btn sm" data-go=${p3.key} @click=${() => this.go(p3.action)}><ha-icon icon="mdi:arrow-right"></ha-icon>Öffnen</button>` : A}
-            </div>`)}
-        </div>
-      </div>`;
-  }
-};
-if (!customElements.get(SETUP_ELEMENT)) customElements.define(SETUP_ELEMENT, DxSetup);
-
 // src/dreame-x60-panel.ts
 var ELEMENT = "dreame-x60-panel";
 var TOAST_MS = 1900;
@@ -3580,21 +3516,25 @@ var DreameX60Panel = class extends i4 {
       <div class="topbar">
         ${page !== "start" ? b2`<button class="back" @click=${() => navigate("start")}><ha-icon icon="mdi:chevron-left"></ha-icon>Übersicht</button>` : A}
         <div><h1>${title}</h1><div class="sub">${sub}</div></div>
+        ${this.renderSetupIcons(robot)}
         <div class="meta">
           <div class="mi time"><ha-icon icon="mdi:clock-outline"></ha-icon><div><b>${now.toLocaleTimeString("de-AT", { hour: "2-digit", minute: "2-digit" })}</b><small>${now.toLocaleDateString("de-AT", { weekday: "long", day: "numeric", month: "short", year: "numeric" })}</small></div></div>
           <div class="mi home"><ha-icon icon="mdi:home-outline"></ha-icon><div><b>${home.length ? "Zu Hause" : "Niemand zu Hause"}<span class="dot ${home.length ? "on" : ""}"></span></b><small>${home.length ? home.join(" \xB7 ") + " anwesend" : "alle unterwegs"}</small></div></div>
           <div class="mi dnd"><ha-icon icon="mdi:weather-night"></ha-icon><div><b>${robot.hero.dnd}</b><small>Nicht stören</small></div></div>
-          ${this.renderSetupItem(robot)}
         </div>
       </div>`;
   }
-  /** Einrichtungsprüfung (PD-014): Knopf in der Kopfzeile, nur wenn etwas nicht stimmt; Klick öffnet den Dialog. */
-  renderSetupItem(robot) {
+  /** Einrichtungsprüfung (PD-014): zwischen Titel und Uhr nur die Symbole mit Befund (rot pulsiert, gelb = Hinweis); Klick springt direkt zur Stelle. */
+  renderSetupIcons(robot) {
     const problems = setupProblems(this.setupChecks(this.hass?.states ?? {}, robot));
     if (!problems.length) return A;
-    const errors = problems.filter((p3) => p3.level === "error").length, warns = problems.length - errors;
-    const sum = [errors ? `${errors} ${errors === 1 ? "Problem" : "Probleme"}` : "", warns ? `${warns} ${warns === 1 ? "Hinweis" : "Hinweise"}` : ""].filter(Boolean).join(", ");
-    return b2`<button class="mi setup ${errors ? "error" : "warn"}" title="Einrichtung prüfen" @click=${() => this.openOverlay({ kind: "setup" })}><ha-icon icon=${errors ? "mdi:alert-circle-outline" : "mdi:alert-outline"}></ha-icon><div><b>${sum}</b><small>Einrichtung</small></div></button>`;
+    return b2`<div class="setupicons" role="status">${problems.map((p3) => b2`<button class="si ${p3.level}" data-check=${p3.key} title=${p3.text} aria-label=${p3.text} @click=${() => this.runSetupAction(p3.action)}><ha-icon icon=${p3.icon}></ha-icon></button>`)}</div>`;
+  }
+  runSetupAction(a3) {
+    if (!a3) return;
+    if (a3.kind === "more-info") moreInfo(this, a3.entity);
+    else if (a3.kind === "page") navigate(a3.page);
+    else navigateHa(a3.path);
   }
   /** Bento-Übersicht (Bauplan 4.0): Bausteine, wo sie schon existieren (4.1 dx-hero, dx-auftrag), sonst Platzhalter mit einer Vorschau der Sichten. */
   renderStart(s4, robot) {
@@ -3708,13 +3648,6 @@ var DreameX60Panel = class extends i4 {
     if (!o5) return A;
     if (o5.kind === "confirm") {
       return b2`<dx-dialog class="overlay" data-kind="confirm" variant="confirm" .text=${o5.text} .subText=${o5.sub ?? ""} .okLabel=${o5.okLabel ?? "OK"} ?danger=${!!o5.danger}></dx-dialog>`;
-    }
-    if (o5.kind === "setup") {
-      const s4 = this.hass?.states ?? {};
-      return b2`<dx-dialog class="overlay" data-kind="setup" heading="Einrichtung" sub="Was der Karte noch fehlt – antippen führt zur Stelle">
-        <dx-setup .checks=${this.setupChecks(s4, readRobot(s4))}></dx-setup>
-        <button slot="foot" class="btn primary" @click=${() => this.closeOverlay()}>Schließen</button>
-      </dx-dialog>`;
     }
     const hasBack = "back" in o5 && !!o5.back;
     return b2`<dx-dialog class="overlay" data-kind=${o5.kind} heading=${"Overlay \u201E" + o5.kind + "\u201C"} ?back=${hasBack}>

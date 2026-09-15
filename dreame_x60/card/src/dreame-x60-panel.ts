@@ -10,7 +10,9 @@ import { device, deviceName, discoverDevice } from './ha/device';
 import { ENTITIES, robotEntity } from './ha/contract';
 import { readProfile } from './ha/profile';
 import { setupChecks, setupProblems } from './domain/setup';
-import type { SetupCheck } from './domain/setup';
+import type { SetupAction, SetupCheck } from './domain/setup';
+import { navigate, navigateHa } from './shared/navigate';
+import { moreInfo } from './shared/overlay';
 import { loadSetupData } from './ha/setup-loader';
 import type { SetupData } from './ha/setup-loader';
 import { readAllRoomValues, readAutomatik, readConsumables, readDiagnostics, readHistory, readLearn, readMap, readPlans, readPrognose, readRobot, readRobotSettings, readSettings, readStation } from './ha/selectors';
@@ -19,7 +21,6 @@ import { PAGES, PAGE_PARTS, PAGE_TITLE, START_SLOTS, startSlot, toPage } from '.
 import type { Page, StartSlot } from './pages';
 import { EVENTS } from './shared/overlay';
 import type { Overlay } from './shared/overlay';
-import { navigate } from './shared/navigate';
 import { tokens } from './styles/tokens';
 import { base } from './styles/base';
 import { shell } from './styles/shell';
@@ -30,7 +31,6 @@ import './components/dx-auftrag';
 import './components/dx-dialog';
 import './components/dx-map-card';
 import './components/dx-quickstart';
-import './components/dx-setup';
 import { APP_SCENES } from './config';
 import { askConfirm } from './shared/overlay';
 import { controls } from './styles/controls';
@@ -213,22 +213,27 @@ export class DreameX60Panel extends LitElement {
       <div class="topbar">
         ${page !== 'start' ? html`<button class="back" @click=${() => navigate('start')}><ha-icon icon="mdi:chevron-left"></ha-icon>Übersicht</button>` : nothing}
         <div><h1>${title}</h1><div class="sub">${sub}</div></div>
+        ${this.renderSetupIcons(robot)}
         <div class="meta">
           <div class="mi time"><ha-icon icon="mdi:clock-outline"></ha-icon><div><b>${now.toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' })}</b><small>${now.toLocaleDateString('de-AT', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' })}</small></div></div>
           <div class="mi home"><ha-icon icon="mdi:home-outline"></ha-icon><div><b>${home.length ? 'Zu Hause' : 'Niemand zu Hause'}<span class="dot ${home.length ? 'on' : ''}"></span></b><small>${home.length ? home.join(' · ') + ' anwesend' : 'alle unterwegs'}</small></div></div>
           <div class="mi dnd"><ha-icon icon="mdi:weather-night"></ha-icon><div><b>${robot.hero.dnd}</b><small>Nicht stören</small></div></div>
-          ${this.renderSetupItem(robot)}
         </div>
       </div>`;
   }
 
-  /** Einrichtungsprüfung (PD-014): Knopf in der Kopfzeile, nur wenn etwas nicht stimmt; Klick öffnet den Dialog. */
-  private renderSetupItem(robot: RobotView): TemplateResult | typeof nothing {
+  /** Einrichtungsprüfung (PD-014): zwischen Titel und Uhr nur die Symbole mit Befund (rot pulsiert, gelb = Hinweis); Klick springt direkt zur Stelle. */
+  private renderSetupIcons(robot: RobotView): TemplateResult | typeof nothing {
     const problems = setupProblems(this.setupChecks(this.hass?.states ?? {}, robot));
     if (!problems.length) return nothing;
-    const errors = problems.filter((p) => p.level === 'error').length, warns = problems.length - errors;
-    const sum = [errors ? `${errors} ${errors === 1 ? 'Problem' : 'Probleme'}` : '', warns ? `${warns} ${warns === 1 ? 'Hinweis' : 'Hinweise'}` : ''].filter(Boolean).join(', ');
-    return html`<button class="mi setup ${errors ? 'error' : 'warn'}" title="Einrichtung prüfen" @click=${() => this.openOverlay({ kind: 'setup' })}><ha-icon icon=${errors ? 'mdi:alert-circle-outline' : 'mdi:alert-outline'}></ha-icon><div><b>${sum}</b><small>Einrichtung</small></div></button>`;
+    return html`<div class="setupicons" role="status">${problems.map((p) => html`<button class="si ${p.level}" data-check=${p.key} title=${p.text} aria-label=${p.text} @click=${() => this.runSetupAction(p.action)}><ha-icon icon=${p.icon}></ha-icon></button>`)}</div>`;
+  }
+
+  private runSetupAction(a: SetupAction | undefined): void {
+    if (!a) return;
+    if (a.kind === 'more-info') moreInfo(this, a.entity);
+    else if (a.kind === 'page') navigate(a.page);
+    else navigateHa(a.path);
   }
 
   /** Bento-Übersicht (Bauplan 4.0): Bausteine, wo sie schon existieren (4.1 dx-hero, dx-auftrag), sonst Platzhalter mit einer Vorschau der Sichten. */
@@ -319,13 +324,6 @@ export class DreameX60Panel extends LitElement {
     if (!o) return nothing;
     if (o.kind === 'confirm') {
       return html`<dx-dialog class="overlay" data-kind="confirm" variant="confirm" .text=${o.text} .subText=${o.sub ?? ''} .okLabel=${o.okLabel ?? 'OK'} ?danger=${!!o.danger}></dx-dialog>`;
-    }
-    if (o.kind === 'setup') {
-      const s = this.hass?.states ?? {};
-      return html`<dx-dialog class="overlay" data-kind="setup" heading="Einrichtung" sub="Was der Karte noch fehlt – antippen führt zur Stelle">
-        <dx-setup .checks=${this.setupChecks(s, readRobot(s))}></dx-setup>
-        <button slot="foot" class="btn primary" @click=${() => this.closeOverlay()}>Schließen</button>
-      </dx-dialog>`;
     }
     const hasBack = 'back' in o && !!o.back;
     return html`<dx-dialog class="overlay" data-kind=${o.kind} heading=${'Overlay „' + o.kind + '“'} ?back=${hasBack}>
