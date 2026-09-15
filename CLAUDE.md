@@ -53,3 +53,12 @@ Commit-Format in allen Projekten: `[vX.Y.Z] Modul, Typ: Kurztitel` (Skill git-co
 - Bump-Regel: Vorabversion – jede eingespielte Änderung der Karte zählt die alpha-Nummer hoch, unabhängig vom Typ; reine Doku-Commits behalten die aktuelle Version
 - Doku-Checkliste: Bauschritt fertig → docs/dreame_x60/BAUPLAN.md Statusliste; Befund oder Entscheidung → BAUPLAN.md Abschnitt 10 (Abweichung → 10a als PD-Eintrag); Stand geändert → docs/HANDOFF.md Abschnitt 3e; neue Entität oder Dienst → BAUPLAN.md Abschnitt 4 + contract.ts; Backend geändert → deployen und im Bauplan vermerken
 - Tests vor jedem Commit: `npm test` in dreame_x60/card muss grün sein (Exit-Code 0), sonst kein Commit
+
+## Tracker-Profil
+Für den Skill tracker (projektneutral): Projektkennung statt Memory-Eintrag.
+- Projekt: heidi
+- Skill-Repo (OneDrive-relativ): Dokumente\02 Arbeit\05 Vorlagen - Scripte\00_claude-skills-bpm
+- Projekt-Config: projects/heidi/ (Liste, Status-Werte, Nummernschema, keine Custom Fields, keine Chat-Anker)
+- ClickUp: Space Smart Home 1200660000001609, Liste dreame_x60 – Bauplan 1200660000004100
+- Status-Übergänge: tracker start → in development; tracker done → testing (Abnahme auf shipped macht Herbert)
+- Nummernschema: Bauplan-Nummer am Anfang des Titels (z. B. 4.3e), Post-2.0-Wünsche mit Präfix „Post-2.0:“
