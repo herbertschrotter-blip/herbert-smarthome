@@ -47,7 +47,7 @@ function withOverrides(states, overrides = {}) {
   const s = JSON.parse(JSON.stringify(states));
   for (const [id, o] of Object.entries(overrides)) {
     const cur = s[id] || { entity_id: id, state: 'unknown', attributes: {} };
-    s[id] = { ...cur, state: o.state ?? cur.state, attributes: { ...cur.attributes, ...(o.attributes || {}) }, last_updated: 'override' };
+    s[id] = { ...cur, state: o.state ?? cur.state, attributes: o.replaceAttributes ? (o.attributes || {}) : { ...cur.attributes, ...(o.attributes || {}) }, last_updated: 'override' };
   }
   return s;
 }

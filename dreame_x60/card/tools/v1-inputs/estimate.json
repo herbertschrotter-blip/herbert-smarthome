@@ -1,3 +1,1107 @@
 [
-  { "name": "Plan 2 normal, Lernwerte der Fixture, Akku 100", "n": 2, "variante": "normal", "batt": 100 }
+ {
+  "name": "Plan 1 normal, Beispiel-Lernwerte, Akku 100",
+  "n": 1,
+  "variante": "normal",
+  "batt": 100,
+  "lern": {
+   "laeufe_gesamt": 6,
+   "raten": {
+    "Saugen/Standard": {
+     "min_pro_m2": 0.9,
+     "pct_pro_min": 0.3,
+     "laeufe": 3
+    },
+    "Saugen/Turbo": {
+     "min_pro_m2": 0.95,
+     "pct_pro_min": 0.55,
+     "laeufe": 2
+    },
+    "Saugen + Wischen/Standard": {
+     "min_pro_m2": 1.6,
+     "pct_pro_min": 0.42,
+     "laeufe": 1
+    }
+   },
+   "raeume": {
+    "1": {
+     "flaeche": 6,
+     "belag": "Fliesen"
+    },
+    "2": {
+     "flaeche": 16,
+     "belag": "Holz"
+    },
+    "3": {
+     "flaeche": 3,
+     "belag": "Fliesen"
+    },
+    "4": {
+     "flaeche": 14,
+     "belag": "Holz"
+    },
+    "5": {
+     "flaeche": 12,
+     "belag": "Holz"
+    },
+    "6": {
+     "flaeche": 12,
+     "belag": "Fliesen"
+    },
+    "7": {
+     "flaeche": 30,
+     "belag": "Holz"
+    }
+   },
+   "laden": {
+    "schnell_pct_min": 1.1,
+    "langsam_pct_min": 0.5,
+    "rueckkehr_pct": 15,
+    "weiter_pct": 80
+   },
+   "waesche": {
+    "vor_start_min": 4,
+    "zwischen_min": 5,
+    "nach_m2": 25
+   }
+  }
+ },
+ {
+  "name": "Plan 1 schnell",
+  "n": 1,
+  "variante": "schnell",
+  "batt": 100,
+  "lern": {
+   "laeufe_gesamt": 6,
+   "raten": {
+    "Saugen/Standard": {
+     "min_pro_m2": 0.9,
+     "pct_pro_min": 0.3,
+     "laeufe": 3
+    },
+    "Saugen/Turbo": {
+     "min_pro_m2": 0.95,
+     "pct_pro_min": 0.55,
+     "laeufe": 2
+    },
+    "Saugen + Wischen/Standard": {
+     "min_pro_m2": 1.6,
+     "pct_pro_min": 0.42,
+     "laeufe": 1
+    }
+   },
+   "raeume": {
+    "1": {
+     "flaeche": 6,
+     "belag": "Fliesen"
+    },
+    "2": {
+     "flaeche": 16,
+     "belag": "Holz"
+    },
+    "3": {
+     "flaeche": 3,
+     "belag": "Fliesen"
+    },
+    "4": {
+     "flaeche": 14,
+     "belag": "Holz"
+    },
+    "5": {
+     "flaeche": 12,
+     "belag": "Holz"
+    },
+    "6": {
+     "flaeche": 12,
+     "belag": "Fliesen"
+    },
+    "7": {
+     "flaeche": 30,
+     "belag": "Holz"
+    }
+   },
+   "laden": {
+    "schnell_pct_min": 1.1,
+    "langsam_pct_min": 0.5,
+    "rueckkehr_pct": 15,
+    "weiter_pct": 80
+   },
+   "waesche": {
+    "vor_start_min": 4,
+    "zwischen_min": 5,
+    "nach_m2": 25
+   }
+  }
+ },
+ {
+  "name": "Plan 1 leise",
+  "n": 1,
+  "variante": "leise",
+  "batt": 100,
+  "lern": {
+   "laeufe_gesamt": 6,
+   "raten": {
+    "Saugen/Standard": {
+     "min_pro_m2": 0.9,
+     "pct_pro_min": 0.3,
+     "laeufe": 3
+    },
+    "Saugen/Turbo": {
+     "min_pro_m2": 0.95,
+     "pct_pro_min": 0.55,
+     "laeufe": 2
+    },
+    "Saugen + Wischen/Standard": {
+     "min_pro_m2": 1.6,
+     "pct_pro_min": 0.42,
+     "laeufe": 1
+    }
+   },
+   "raeume": {
+    "1": {
+     "flaeche": 6,
+     "belag": "Fliesen"
+    },
+    "2": {
+     "flaeche": 16,
+     "belag": "Holz"
+    },
+    "3": {
+     "flaeche": 3,
+     "belag": "Fliesen"
+    },
+    "4": {
+     "flaeche": 14,
+     "belag": "Holz"
+    },
+    "5": {
+     "flaeche": 12,
+     "belag": "Holz"
+    },
+    "6": {
+     "flaeche": 12,
+     "belag": "Fliesen"
+    },
+    "7": {
+     "flaeche": 30,
+     "belag": "Holz"
+    }
+   },
+   "laden": {
+    "schnell_pct_min": 1.1,
+    "langsam_pct_min": 0.5,
+    "rueckkehr_pct": 15,
+    "weiter_pct": 80
+   },
+   "waesche": {
+    "vor_start_min": 4,
+    "zwischen_min": 5,
+    "nach_m2": 25
+   }
+  }
+ },
+ {
+  "name": "Plan 2 normal mit Raumwerten (nass, Zwischenwäschen)",
+  "n": 2,
+  "variante": "normal",
+  "batt": 100,
+  "lern": {
+   "laeufe_gesamt": 6,
+   "raten": {
+    "Saugen/Standard": {
+     "min_pro_m2": 0.9,
+     "pct_pro_min": 0.3,
+     "laeufe": 3
+    },
+    "Saugen/Turbo": {
+     "min_pro_m2": 0.95,
+     "pct_pro_min": 0.55,
+     "laeufe": 2
+    },
+    "Saugen + Wischen/Standard": {
+     "min_pro_m2": 1.6,
+     "pct_pro_min": 0.42,
+     "laeufe": 1
+    }
+   },
+   "raeume": {
+    "1": {
+     "flaeche": 6,
+     "belag": "Fliesen"
+    },
+    "2": {
+     "flaeche": 16,
+     "belag": "Holz"
+    },
+    "3": {
+     "flaeche": 3,
+     "belag": "Fliesen"
+    },
+    "4": {
+     "flaeche": 14,
+     "belag": "Holz"
+    },
+    "5": {
+     "flaeche": 12,
+     "belag": "Holz"
+    },
+    "6": {
+     "flaeche": 12,
+     "belag": "Fliesen"
+    },
+    "7": {
+     "flaeche": 30,
+     "belag": "Holz"
+    }
+   },
+   "laden": {
+    "schnell_pct_min": 1.1,
+    "langsam_pct_min": 0.5,
+    "rueckkehr_pct": 15,
+    "weiter_pct": 80
+   },
+   "waesche": {
+    "vor_start_min": 4,
+    "zwischen_min": 5,
+    "nach_m2": 25
+   }
+  }
+ },
+ {
+  "name": "Plan 2 schnell",
+  "n": 2,
+  "variante": "schnell",
+  "batt": 100,
+  "lern": {
+   "laeufe_gesamt": 6,
+   "raten": {
+    "Saugen/Standard": {
+     "min_pro_m2": 0.9,
+     "pct_pro_min": 0.3,
+     "laeufe": 3
+    },
+    "Saugen/Turbo": {
+     "min_pro_m2": 0.95,
+     "pct_pro_min": 0.55,
+     "laeufe": 2
+    },
+    "Saugen + Wischen/Standard": {
+     "min_pro_m2": 1.6,
+     "pct_pro_min": 0.42,
+     "laeufe": 1
+    }
+   },
+   "raeume": {
+    "1": {
+     "flaeche": 6,
+     "belag": "Fliesen"
+    },
+    "2": {
+     "flaeche": 16,
+     "belag": "Holz"
+    },
+    "3": {
+     "flaeche": 3,
+     "belag": "Fliesen"
+    },
+    "4": {
+     "flaeche": 14,
+     "belag": "Holz"
+    },
+    "5": {
+     "flaeche": 12,
+     "belag": "Holz"
+    },
+    "6": {
+     "flaeche": 12,
+     "belag": "Fliesen"
+    },
+    "7": {
+     "flaeche": 30,
+     "belag": "Holz"
+    }
+   },
+   "laden": {
+    "schnell_pct_min": 1.1,
+    "langsam_pct_min": 0.5,
+    "rueckkehr_pct": 15,
+    "weiter_pct": 80
+   },
+   "waesche": {
+    "vor_start_min": 4,
+    "zwischen_min": 5,
+    "nach_m2": 25
+   }
+  }
+ },
+ {
+  "name": "Plan 2 leise",
+  "n": 2,
+  "variante": "leise",
+  "batt": 100,
+  "lern": {
+   "laeufe_gesamt": 6,
+   "raten": {
+    "Saugen/Standard": {
+     "min_pro_m2": 0.9,
+     "pct_pro_min": 0.3,
+     "laeufe": 3
+    },
+    "Saugen/Turbo": {
+     "min_pro_m2": 0.95,
+     "pct_pro_min": 0.55,
+     "laeufe": 2
+    },
+    "Saugen + Wischen/Standard": {
+     "min_pro_m2": 1.6,
+     "pct_pro_min": 0.42,
+     "laeufe": 1
+    }
+   },
+   "raeume": {
+    "1": {
+     "flaeche": 6,
+     "belag": "Fliesen"
+    },
+    "2": {
+     "flaeche": 16,
+     "belag": "Holz"
+    },
+    "3": {
+     "flaeche": 3,
+     "belag": "Fliesen"
+    },
+    "4": {
+     "flaeche": 14,
+     "belag": "Holz"
+    },
+    "5": {
+     "flaeche": 12,
+     "belag": "Holz"
+    },
+    "6": {
+     "flaeche": 12,
+     "belag": "Fliesen"
+    },
+    "7": {
+     "flaeche": 30,
+     "belag": "Holz"
+    }
+   },
+   "laden": {
+    "schnell_pct_min": 1.1,
+    "langsam_pct_min": 0.5,
+    "rueckkehr_pct": 15,
+    "weiter_pct": 80
+   },
+   "waesche": {
+    "vor_start_min": 4,
+    "zwischen_min": 5,
+    "nach_m2": 25
+   }
+  }
+ },
+ {
+  "name": "Plan 2 ohne Raumwerte",
+  "n": 2,
+  "variante": "normal",
+  "batt": 100,
+  "lern": {
+   "laeufe_gesamt": 6,
+   "raten": {
+    "Saugen/Standard": {
+     "min_pro_m2": 0.9,
+     "pct_pro_min": 0.3,
+     "laeufe": 3
+    },
+    "Saugen/Turbo": {
+     "min_pro_m2": 0.95,
+     "pct_pro_min": 0.55,
+     "laeufe": 2
+    },
+    "Saugen + Wischen/Standard": {
+     "min_pro_m2": 1.6,
+     "pct_pro_min": 0.42,
+     "laeufe": 1
+    }
+   },
+   "raeume": {
+    "1": {
+     "flaeche": 6,
+     "belag": "Fliesen"
+    },
+    "2": {
+     "flaeche": 16,
+     "belag": "Holz"
+    },
+    "3": {
+     "flaeche": 3,
+     "belag": "Fliesen"
+    },
+    "4": {
+     "flaeche": 14,
+     "belag": "Holz"
+    },
+    "5": {
+     "flaeche": 12,
+     "belag": "Holz"
+    },
+    "6": {
+     "flaeche": 12,
+     "belag": "Fliesen"
+    },
+    "7": {
+     "flaeche": 30,
+     "belag": "Holz"
+    }
+   },
+   "laden": {
+    "schnell_pct_min": 1.1,
+    "langsam_pct_min": 0.5,
+    "rueckkehr_pct": 15,
+    "weiter_pct": 80
+   },
+   "waesche": {
+    "vor_start_min": 4,
+    "zwischen_min": 5,
+    "nach_m2": 25
+   }
+  },
+  "plan": {
+   "raum": {}
+  }
+ },
+ {
+  "name": "Plan 2 Akku 40 (ein Ladestopp)",
+  "n": 2,
+  "variante": "normal",
+  "batt": 40,
+  "lern": {
+   "laeufe_gesamt": 6,
+   "raten": {
+    "Saugen/Standard": {
+     "min_pro_m2": 0.9,
+     "pct_pro_min": 0.3,
+     "laeufe": 3
+    },
+    "Saugen/Turbo": {
+     "min_pro_m2": 0.95,
+     "pct_pro_min": 0.55,
+     "laeufe": 2
+    },
+    "Saugen + Wischen/Standard": {
+     "min_pro_m2": 1.6,
+     "pct_pro_min": 0.42,
+     "laeufe": 1
+    }
+   },
+   "raeume": {
+    "1": {
+     "flaeche": 6,
+     "belag": "Fliesen"
+    },
+    "2": {
+     "flaeche": 16,
+     "belag": "Holz"
+    },
+    "3": {
+     "flaeche": 3,
+     "belag": "Fliesen"
+    },
+    "4": {
+     "flaeche": 14,
+     "belag": "Holz"
+    },
+    "5": {
+     "flaeche": 12,
+     "belag": "Holz"
+    },
+    "6": {
+     "flaeche": 12,
+     "belag": "Fliesen"
+    },
+    "7": {
+     "flaeche": 30,
+     "belag": "Holz"
+    }
+   },
+   "laden": {
+    "schnell_pct_min": 1.1,
+    "langsam_pct_min": 0.5,
+    "rueckkehr_pct": 15,
+    "weiter_pct": 80
+   },
+   "waesche": {
+    "vor_start_min": 4,
+    "zwischen_min": 5,
+    "nach_m2": 25
+   }
+  }
+ },
+ {
+  "name": "Plan 2 Akku 20 (Ladestopp früh)",
+  "n": 2,
+  "variante": "normal",
+  "batt": 20,
+  "lern": {
+   "laeufe_gesamt": 6,
+   "raten": {
+    "Saugen/Standard": {
+     "min_pro_m2": 0.9,
+     "pct_pro_min": 0.3,
+     "laeufe": 3
+    },
+    "Saugen/Turbo": {
+     "min_pro_m2": 0.95,
+     "pct_pro_min": 0.55,
+     "laeufe": 2
+    },
+    "Saugen + Wischen/Standard": {
+     "min_pro_m2": 1.6,
+     "pct_pro_min": 0.42,
+     "laeufe": 1
+    }
+   },
+   "raeume": {
+    "1": {
+     "flaeche": 6,
+     "belag": "Fliesen"
+    },
+    "2": {
+     "flaeche": 16,
+     "belag": "Holz"
+    },
+    "3": {
+     "flaeche": 3,
+     "belag": "Fliesen"
+    },
+    "4": {
+     "flaeche": 14,
+     "belag": "Holz"
+    },
+    "5": {
+     "flaeche": 12,
+     "belag": "Holz"
+    },
+    "6": {
+     "flaeche": 12,
+     "belag": "Fliesen"
+    },
+    "7": {
+     "flaeche": 30,
+     "belag": "Holz"
+    }
+   },
+   "laden": {
+    "schnell_pct_min": 1.1,
+    "langsam_pct_min": 0.5,
+    "rueckkehr_pct": 15,
+    "weiter_pct": 80
+   },
+   "waesche": {
+    "vor_start_min": 4,
+    "zwischen_min": 5,
+    "nach_m2": 25
+   }
+  }
+ },
+ {
+  "name": "Plan 3 normal",
+  "n": 3,
+  "variante": "normal",
+  "batt": 100,
+  "lern": {
+   "laeufe_gesamt": 6,
+   "raten": {
+    "Saugen/Standard": {
+     "min_pro_m2": 0.9,
+     "pct_pro_min": 0.3,
+     "laeufe": 3
+    },
+    "Saugen/Turbo": {
+     "min_pro_m2": 0.95,
+     "pct_pro_min": 0.55,
+     "laeufe": 2
+    },
+    "Saugen + Wischen/Standard": {
+     "min_pro_m2": 1.6,
+     "pct_pro_min": 0.42,
+     "laeufe": 1
+    }
+   },
+   "raeume": {
+    "1": {
+     "flaeche": 6,
+     "belag": "Fliesen"
+    },
+    "2": {
+     "flaeche": 16,
+     "belag": "Holz"
+    },
+    "3": {
+     "flaeche": 3,
+     "belag": "Fliesen"
+    },
+    "4": {
+     "flaeche": 14,
+     "belag": "Holz"
+    },
+    "5": {
+     "flaeche": 12,
+     "belag": "Holz"
+    },
+    "6": {
+     "flaeche": 12,
+     "belag": "Fliesen"
+    },
+    "7": {
+     "flaeche": 30,
+     "belag": "Holz"
+    }
+   },
+   "laden": {
+    "schnell_pct_min": 1.1,
+    "langsam_pct_min": 0.5,
+    "rueckkehr_pct": 15,
+    "weiter_pct": 80
+   },
+   "waesche": {
+    "vor_start_min": 4,
+    "zwischen_min": 5,
+    "nach_m2": 25
+   }
+  }
+ },
+ {
+  "name": "Plan 3 Akku 20",
+  "n": 3,
+  "variante": "normal",
+  "batt": 20,
+  "lern": {
+   "laeufe_gesamt": 6,
+   "raten": {
+    "Saugen/Standard": {
+     "min_pro_m2": 0.9,
+     "pct_pro_min": 0.3,
+     "laeufe": 3
+    },
+    "Saugen/Turbo": {
+     "min_pro_m2": 0.95,
+     "pct_pro_min": 0.55,
+     "laeufe": 2
+    },
+    "Saugen + Wischen/Standard": {
+     "min_pro_m2": 1.6,
+     "pct_pro_min": 0.42,
+     "laeufe": 1
+    }
+   },
+   "raeume": {
+    "1": {
+     "flaeche": 6,
+     "belag": "Fliesen"
+    },
+    "2": {
+     "flaeche": 16,
+     "belag": "Holz"
+    },
+    "3": {
+     "flaeche": 3,
+     "belag": "Fliesen"
+    },
+    "4": {
+     "flaeche": 14,
+     "belag": "Holz"
+    },
+    "5": {
+     "flaeche": 12,
+     "belag": "Holz"
+    },
+    "6": {
+     "flaeche": 12,
+     "belag": "Fliesen"
+    },
+    "7": {
+     "flaeche": 30,
+     "belag": "Holz"
+    }
+   },
+   "laden": {
+    "schnell_pct_min": 1.1,
+    "langsam_pct_min": 0.5,
+    "rueckkehr_pct": 15,
+    "weiter_pct": 80
+   },
+   "waesche": {
+    "vor_start_min": 4,
+    "zwischen_min": 5,
+    "nach_m2": 25
+   }
+  }
+ },
+ {
+  "name": "Plan 4 normal (Nur-Wischen-artig, Turbo, 3×)",
+  "n": 4,
+  "variante": "normal",
+  "batt": 100,
+  "lern": {
+   "laeufe_gesamt": 6,
+   "raten": {
+    "Saugen/Standard": {
+     "min_pro_m2": 0.9,
+     "pct_pro_min": 0.3,
+     "laeufe": 3
+    },
+    "Saugen/Turbo": {
+     "min_pro_m2": 0.95,
+     "pct_pro_min": 0.55,
+     "laeufe": 2
+    },
+    "Saugen + Wischen/Standard": {
+     "min_pro_m2": 1.6,
+     "pct_pro_min": 0.42,
+     "laeufe": 1
+    }
+   },
+   "raeume": {
+    "1": {
+     "flaeche": 6,
+     "belag": "Fliesen"
+    },
+    "2": {
+     "flaeche": 16,
+     "belag": "Holz"
+    },
+    "3": {
+     "flaeche": 3,
+     "belag": "Fliesen"
+    },
+    "4": {
+     "flaeche": 14,
+     "belag": "Holz"
+    },
+    "5": {
+     "flaeche": 12,
+     "belag": "Holz"
+    },
+    "6": {
+     "flaeche": 12,
+     "belag": "Fliesen"
+    },
+    "7": {
+     "flaeche": 30,
+     "belag": "Holz"
+    }
+   },
+   "laden": {
+    "schnell_pct_min": 1.1,
+    "langsam_pct_min": 0.5,
+    "rueckkehr_pct": 15,
+    "weiter_pct": 80
+   },
+   "waesche": {
+    "vor_start_min": 4,
+    "zwischen_min": 5,
+    "nach_m2": 25
+   }
+  }
+ },
+ {
+  "name": "Plan 4 schnell",
+  "n": 4,
+  "variante": "schnell",
+  "batt": 100,
+  "lern": {
+   "laeufe_gesamt": 6,
+   "raten": {
+    "Saugen/Standard": {
+     "min_pro_m2": 0.9,
+     "pct_pro_min": 0.3,
+     "laeufe": 3
+    },
+    "Saugen/Turbo": {
+     "min_pro_m2": 0.95,
+     "pct_pro_min": 0.55,
+     "laeufe": 2
+    },
+    "Saugen + Wischen/Standard": {
+     "min_pro_m2": 1.6,
+     "pct_pro_min": 0.42,
+     "laeufe": 1
+    }
+   },
+   "raeume": {
+    "1": {
+     "flaeche": 6,
+     "belag": "Fliesen"
+    },
+    "2": {
+     "flaeche": 16,
+     "belag": "Holz"
+    },
+    "3": {
+     "flaeche": 3,
+     "belag": "Fliesen"
+    },
+    "4": {
+     "flaeche": 14,
+     "belag": "Holz"
+    },
+    "5": {
+     "flaeche": 12,
+     "belag": "Holz"
+    },
+    "6": {
+     "flaeche": 12,
+     "belag": "Fliesen"
+    },
+    "7": {
+     "flaeche": 30,
+     "belag": "Holz"
+    }
+   },
+   "laden": {
+    "schnell_pct_min": 1.1,
+    "langsam_pct_min": 0.5,
+    "rueckkehr_pct": 15,
+    "weiter_pct": 80
+   },
+   "waesche": {
+    "vor_start_min": 4,
+    "zwischen_min": 5,
+    "nach_m2": 25
+   }
+  }
+ },
+ {
+  "name": "Plan 1 uniform Turbo (Vergleichslinie)",
+  "n": 1,
+  "variante": "normal",
+  "batt": 100,
+  "lern": {
+   "laeufe_gesamt": 6,
+   "raten": {
+    "Saugen/Standard": {
+     "min_pro_m2": 0.9,
+     "pct_pro_min": 0.3,
+     "laeufe": 3
+    },
+    "Saugen/Turbo": {
+     "min_pro_m2": 0.95,
+     "pct_pro_min": 0.55,
+     "laeufe": 2
+    },
+    "Saugen + Wischen/Standard": {
+     "min_pro_m2": 1.6,
+     "pct_pro_min": 0.42,
+     "laeufe": 1
+    }
+   },
+   "raeume": {
+    "1": {
+     "flaeche": 6,
+     "belag": "Fliesen"
+    },
+    "2": {
+     "flaeche": 16,
+     "belag": "Holz"
+    },
+    "3": {
+     "flaeche": 3,
+     "belag": "Fliesen"
+    },
+    "4": {
+     "flaeche": 14,
+     "belag": "Holz"
+    },
+    "5": {
+     "flaeche": 12,
+     "belag": "Holz"
+    },
+    "6": {
+     "flaeche": 12,
+     "belag": "Fliesen"
+    },
+    "7": {
+     "flaeche": 30,
+     "belag": "Holz"
+    }
+   },
+   "laden": {
+    "schnell_pct_min": 1.1,
+    "langsam_pct_min": 0.5,
+    "rueckkehr_pct": 15,
+    "weiter_pct": 80
+   },
+   "waesche": {
+    "vor_start_min": 4,
+    "zwischen_min": 5,
+    "nach_m2": 25
+   }
+  },
+  "uniform": {
+   "saug": "Turbo"
+  }
+ },
+ {
+  "name": "Plan 1 uniform Standard bei Plan mit Turbo-Raumwerten",
+  "n": 2,
+  "variante": "normal",
+  "batt": 100,
+  "lern": {
+   "laeufe_gesamt": 6,
+   "raten": {
+    "Saugen/Standard": {
+     "min_pro_m2": 0.9,
+     "pct_pro_min": 0.3,
+     "laeufe": 3
+    },
+    "Saugen/Turbo": {
+     "min_pro_m2": 0.95,
+     "pct_pro_min": 0.55,
+     "laeufe": 2
+    },
+    "Saugen + Wischen/Standard": {
+     "min_pro_m2": 1.6,
+     "pct_pro_min": 0.42,
+     "laeufe": 1
+    }
+   },
+   "raeume": {
+    "1": {
+     "flaeche": 6,
+     "belag": "Fliesen"
+    },
+    "2": {
+     "flaeche": 16,
+     "belag": "Holz"
+    },
+    "3": {
+     "flaeche": 3,
+     "belag": "Fliesen"
+    },
+    "4": {
+     "flaeche": 14,
+     "belag": "Holz"
+    },
+    "5": {
+     "flaeche": 12,
+     "belag": "Holz"
+    },
+    "6": {
+     "flaeche": 12,
+     "belag": "Fliesen"
+    },
+    "7": {
+     "flaeche": 30,
+     "belag": "Holz"
+    }
+   },
+   "laden": {
+    "schnell_pct_min": 1.1,
+    "langsam_pct_min": 0.5,
+    "rueckkehr_pct": 15,
+    "weiter_pct": 80
+   },
+   "waesche": {
+    "vor_start_min": 4,
+    "zwischen_min": 5,
+    "nach_m2": 25
+   }
+  },
+  "uniform": {
+   "saug": "Standard"
+  }
+ },
+ {
+  "name": "Plan 2 mit Lernwerten der Fixture (nur eine Rate, Ersatzraten)",
+  "n": 2,
+  "variante": "normal",
+  "batt": 100
+ },
+ {
+  "name": "Plan 1 mit Lernwerten der Fixture (Saugen ohne Basis → Erfahrungswerte)",
+  "n": 1,
+  "variante": "normal",
+  "batt": 100
+ },
+ {
+  "name": "batt0 explizit 55 überschreibt Sensor",
+  "n": 1,
+  "variante": "normal",
+  "batt": 100,
+  "batt0": 55,
+  "lern": {
+   "laeufe_gesamt": 6,
+   "raten": {
+    "Saugen/Standard": {
+     "min_pro_m2": 0.9,
+     "pct_pro_min": 0.3,
+     "laeufe": 3
+    },
+    "Saugen/Turbo": {
+     "min_pro_m2": 0.95,
+     "pct_pro_min": 0.55,
+     "laeufe": 2
+    },
+    "Saugen + Wischen/Standard": {
+     "min_pro_m2": 1.6,
+     "pct_pro_min": 0.42,
+     "laeufe": 1
+    }
+   },
+   "raeume": {
+    "1": {
+     "flaeche": 6,
+     "belag": "Fliesen"
+    },
+    "2": {
+     "flaeche": 16,
+     "belag": "Holz"
+    },
+    "3": {
+     "flaeche": 3,
+     "belag": "Fliesen"
+    },
+    "4": {
+     "flaeche": 14,
+     "belag": "Holz"
+    },
+    "5": {
+     "flaeche": 12,
+     "belag": "Holz"
+    },
+    "6": {
+     "flaeche": 12,
+     "belag": "Fliesen"
+    },
+    "7": {
+     "flaeche": 30,
+     "belag": "Holz"
+    }
+   },
+   "laden": {
+    "schnell_pct_min": 1.1,
+    "langsam_pct_min": 0.5,
+    "rueckkehr_pct": 15,
+    "weiter_pct": 80
+   },
+   "waesche": {
+    "vor_start_min": 4,
+    "zwischen_min": 5,
+    "nach_m2": 25
+   }
+  }
+ },
+ {
+  "name": "ohne Lernwerte → null",
+  "n": 1,
+  "variante": "normal",
+  "batt": 100,
+  "overrides": {
+   "sensor.heidi_lernwerte": {
+    "state": "unavailable"
+   }
+  }
+ }
 ]

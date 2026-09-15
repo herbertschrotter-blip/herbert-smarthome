@@ -1,0 +1,40 @@
+{
+  "zweck": "Handgeschriebene Grenzfälle für Dauer & Akku (Bauplan 2.2, Abschnitt 6). Unabhängig von v1.",
+  "lern": {
+    "raten": { "Saugen/Standard": { "min_pro_m2": 1, "pct_pro_min": 1, "laeufe": 2 }, "Saugen + Wischen/Standard": { "min_pro_m2": 1, "pct_pro_min": 1, "laeufe": 1 } },
+    "raeume": { "1": { "flaeche": 10 }, "2": { "flaeche": 10 }, "3": { "flaeche": 9 } },
+    "laden": { "schnell_pct_min": 1, "langsam_pct_min": 0.5, "rueckkehr_pct": 15, "weiter_pct": 80 },
+    "waesche": { "vor_start_min": 4, "zwischen_min": 5, "nach_m2": 20 }
+  },
+  "plan": { "raeume": [1, 2], "modus": "Saugen", "saug": "Standard", "wasser": "Mittel", "route": "Standard", "wdh": "1", "spSaug": "Standard", "spWdh": "1", "hoSaug": "Leise", "hoWdh": "1", "raum": {} },
+  "faelle": [
+    { "name": "Ladestopp exakt an rueckkehr_pct: batt − drain = 15 → kein Stopp", "plan": { "raeume": [1] }, "batt0": 25, "erwartet": { "charges": 0, "battEnd": 15, "total": 13, "typen": ["raum", "heim"] } },
+    { "name": "Ladestopp exakt an rueckkehr_pct: batt − drain = 14.9 → Stopp, Laden 24.9→80 = 55.1 min + 4", "plan": { "raeume": [1] }, "batt0": 24.9, "erwartet": { "charges": 1, "battEnd": 70, "total": 72.1, "typen": ["laden", "raum", "heim"] } },
+    { "name": "Zwischenwäsche exakt bei nach_m2: 10 + 10 = 20 ≥ 20 → Wäsche nach Raum 2", "plan": { "raeume": [1, 2], "modus": "Saugen + Wischen" }, "batt0": 100, "erwartet": { "charges": 0, "typen": ["wasch", "raum", "raum", "wasch", "heim"], "total": 32 } },
+    { "name": "Zwischenwäsche knapp nicht: 10 + 9 = 19 < 20 → keine Wäsche", "plan": { "raeume": [1, 3], "modus": "Saugen + Wischen" }, "batt0": 100, "erwartet": { "charges": 0, "typen": ["wasch", "raum", "raum", "heim"], "total": 26 } },
+    { "name": "leere Raumliste: nur Heimfahrt", "plan": { "raeume": [] }, "batt0": 100, "erwartet": { "charges": 0, "battEnd": 100, "total": 3, "typen": ["heim"] } },
+    { "name": "Raum ohne Lernfläche → 8 m²", "plan": { "raeume": [7] }, "batt0": 100, "erwartet": { "charges": 0, "total": 11, "battEnd": 92, "typen": ["raum", "heim"], "area": 8 } },
+    { "name": "schnell nutzt sp-Profil und nur Saugen, ignoriert Raumwerte", "plan": { "raeume": [1], "modus": "Saugen + Wischen", "raum": { "1": { "modus": "Nur Wischen", "saug": "Turbo", "wasser": "Viel", "route": "Tief", "wdh": "3" } } }, "variante": "schnell", "batt0": 100, "erwartet": { "typen": ["raum", "heim"], "sub": "Saugen · Standard · 1×", "total": 13 } },
+    { "name": "uniform überschreibt Standard und Raumwerte", "plan": { "raeume": [1], "raum": { "1": { "modus": "Saugen", "saug": "Turbo", "wdh": "3" } } }, "uniform": { "saug": "Standard", "wdh": "2" }, "batt0": 100, "erwartet": { "typen": ["raum", "heim"], "sub": "Saugen · Standard · 2×", "total": 23 } },
+    { "name": "Wasser erscheint im Untertitel nur bei nassem Modus", "plan": { "raeume": [1], "raum": { "1": { "modus": "Saugen + Wischen", "saug": "Standard", "wasser": "Viel", "wdh": "1" } } }, "batt0": 100, "erwartet": { "sub": "Saugen + Wischen · Standard · 1× · Viel" } }
+  ],
+  "rate": [
+    { "name": "gelernt", "modus": "Saugen", "saug": "Standard", "erwartet": { "min_pro_m2": 1, "pct_pro_min": 1, "gelernt": true } },
+    { "name": "Ersatz mit Basis desselben Modus: Turbo = Standard × 1.6", "modus": "Saugen", "saug": "Turbo", "erwartet": { "min_pro_m2": 1, "pct_pro_min": 1.6, "gelernt": false } },
+    { "name": "Ersatz ohne Basis, trocken: Erfahrungswert 0.9 / 0.3 × Faktor Leise 0.8", "lern": { "raten": {} }, "modus": "Saugen", "saug": "Leise", "erwartet": { "min_pro_m2": 0.9, "pct_pro_min": 0.24, "gelernt": false } },
+    { "name": "Ersatz ohne Basis, nass: Erfahrungswert 1.6 / 0.42 × Faktor Stark 1.25", "lern": { "raten": {} }, "modus": "Nur Wischen", "saug": "Stark", "erwartet": { "min_pro_m2": 1.6, "pct_pro_min": 0.525, "gelernt": false } },
+    { "name": "Rate mit laeufe 0 zählt nicht als gelernt", "lern": { "raten": { "Saugen/Turbo": { "min_pro_m2": 5, "pct_pro_min": 5, "laeufe": 0 } } }, "modus": "Saugen", "saug": "Turbo", "erwartet": { "min_pro_m2": 0.9, "pct_pro_min": 0.48, "gelernt": false } }
+  ],
+  "chargeMin": [
+    { "name": "10 → 80 nur schnell", "from": 10, "to": 80, "erwartet": 70 },
+    { "name": "10 → 90: 70 schnell + 20 langsam", "from": 10, "to": 90, "erwartet": 90 },
+    { "name": "85 → 90 nur langsam", "from": 85, "to": 90, "erwartet": 10 },
+    { "name": "to < from → 0", "from": 90, "to": 80, "erwartet": 0 }
+  ],
+  "restMin": [
+    { "name": "Prognose gültig", "in": { "prognoseAktiv": true, "abweichungHeute": false, "prognoseTage": 20, "mindesttage": 14, "rueckkehrMin": 123, "rueckkehr": "17:00:00", "now": "2026-09-15T09:30:00" }, "erwartet": { "min": 123, "quelle": "Prognose" } },
+    { "name": "zu wenige Tage → übliche Rückkehr 17:00 um 09:30 = 450", "in": { "prognoseAktiv": true, "abweichungHeute": false, "prognoseTage": 13, "mindesttage": 14, "rueckkehrMin": 123, "rueckkehr": "17:00:00", "now": "2026-09-15T09:30:00" }, "erwartet": { "min": 450, "quelle": "übliche Rückkehr 17:00" } },
+    { "name": "Abweichung heute → übliche Rückkehr, negativ möglich", "in": { "prognoseAktiv": true, "abweichungHeute": true, "prognoseTage": 20, "mindesttage": 14, "rueckkehrMin": 123, "rueckkehr": "08:00:00", "now": "2026-09-15T09:30:00" }, "erwartet": { "min": -90, "quelle": "übliche Rückkehr 08:00" } },
+    { "name": "rueckkehr_min 0 → kein Prognose-Wert", "in": { "prognoseAktiv": true, "abweichungHeute": false, "prognoseTage": 20, "mindesttage": null, "rueckkehrMin": 0, "rueckkehr": null, "now": "2026-09-15T16:00:00" }, "erwartet": { "min": 60, "quelle": "übliche Rückkehr 17:00" } }
+  ]
+}
