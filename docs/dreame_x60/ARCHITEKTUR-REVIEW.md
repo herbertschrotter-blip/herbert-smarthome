@@ -26,7 +26,7 @@ Chromium-Pfad, den die anderen drei Tests bereits als Fallback haben).
 - **Empfehlung**: ES-Module + esbuild (weiterhin eine `heidi-panel.js`), TypeScript zusammen mit
   der Modul-Trennung, **Lit** statt nacktem `HTMLElement`, **Custom Card behalten** (kein
   `panel_custom`), grobe Komponenten je Bereich (ca. 14, nicht 40), reine Fachlogik-Module mit
-  Unit-Tests, eine dünne `HeidiApi`-Klasse für alle Service-Aufrufe, ein Layout mit Container
+  Unit-Tests, eine dünne `DxApi`-Klasse für alle Service-Aufrufe, ein Layout mit Container
   Queries statt drei Oberflächen. Kein React, kein State-Framework, keine UI-Bibliothek.
 - **Zuerst** (klein, sofort lohnend): Tests fehlschlagen lassen + Fixture erneuern; Build
   einführen, ohne eine Zeile Panel-Code zu ändern; Fachlogik in reine Module ziehen und testen.
@@ -115,7 +115,7 @@ kostet mehr als die vorige, und Fehler werden später und am Roboter statt im Te
 | 4 | Lit | **Ja** | Löst exakt das Kernproblem (Render-Modell). Standard in HA-Frontend und den meisten gepflegten Karten (Mushroom, mini-graph-card, xiaomi-vacuum-map-card; die dreame-vacuum-map-card ist die React-Ausnahme). ~6 KB, wird mit eingebündelt |
 | 5 | Eigene Web Components je Bereich | **Ja, grob** | Ca. 14 Elemente, keine Chip/Tile/Ring-Elemente (das bleiben Template-Funktionen + CSS) |
 | 6 | State-/ViewModel-Schicht | **Ja, als reine Funktionen** | `readPlan(states, n)`, `readRobot(states)` … existieren implizit schon (`_planRead`, `_roomVals`, `_lern`, `_histAttrs`). Kein Store-Framework – `hass` *ist* der Store |
-| 7 | Service-/Controller-Schicht | **Ja, dünn** | Eine Klasse `HeidiApi` mit ~12 Methoden. Testbar, einziger Ort für Entitäts-Namensschema |
+| 7 | Service-/Controller-Schicht | **Ja, dünn** | Eine Klasse `DxApi` mit ~12 Methoden. Testbar, einziger Ort für Entitäts-Namensschema |
 | 8 | CSS modularisieren | **Ja, mit der Komponententrennung** | Tokens zentral, Basis-Styles geteilt, Rest je Komponente in `static styles` |
 | 9 | Build (Vite/Rollup/esbuild) → eine Datei | **Ja, esbuild** | Ein Befehl, keine Konfiguration, TS inklusive. Vite ist für ein Bauteil ohne Dev-Server überdimensioniert; Rollup ist das Community-Übliche, aber mehr Konfiguration für denselben Output |
 | 10 | Full-Width Custom Card | **Ja, behalten** | Siehe 11 |
@@ -133,13 +133,13 @@ Home Assistant (hass.states, callService, callApi, Recorder)
         │
         ▼
 src/ha/selectors.ts      ← reine Funktionen: states → typisierte Sichten (Plan, Robot, RoomValues, LearnValues, History)
-src/ha/api.ts            ← HeidiApi: alle Service-/API-Aufrufe (startPlan, savePlan, cleanRooms, setZones, loadHistory …)
+src/ha/api.ts            ← DxApi: alle Service-/API-Aufrufe (startPlan, savePlan, cleanRooms, setZones, loadHistory …)
         │                  (kennt Entitäts-Namensschema; einziger Ort mit callService)
         ▼
 src/domain/*.ts          ← reine Fachlogik ohne DOM und ohne hass: raumwerte (Codec), estimate, timeline, calibration, labels, status
         │
         ▼
-src/components/*.ts      ← Lit-Elemente je Bereich; bekommen `hass` (oder fertige Sichten) als Property, rufen HeidiApi
+src/components/*.ts      ← Lit-Elemente je Bereich; bekommen `hass` (oder fertige Sichten) als Property, rufen DxApi
         │
         ▼
 src/heidi-panel.ts       ← Shell: Layout, Tabs, Overlay-Routing, Update-Gating (shouldUpdate über relevante Entitäten)
@@ -190,7 +190,7 @@ herbert-smarthome/
 │  │  ├─ ha/
 │  │  │  ├─ types.ts            minimales HomeAssistant-Interface (states, callService, callApi) – keine externe Abhängigkeit nötig
 │  │  │  ├─ selectors.ts        readPlan, readRobot, readRoomValues, readLearn, readHistory, readPrognose (+ jeweils entityIds)
-│  │  │  └─ api.ts              class HeidiApi
+│  │  │  └─ api.ts              class DxApi
 │  │  ├─ domain/
 │  │  │  ├─ raumwerte.ts        parseRaum / encodeRaum / RV-Tabellen
 │  │  │  ├─ estimate.ts         estimate(), rate(), chargeMin(), restMin(input)
@@ -322,7 +322,7 @@ Ergebnis: ~14 Elemente + 1 Dialog-Rahmen. Feiner wäre zu kleinteilig.
 ### Wiederverwendung
 
 - **Innerhalb Heidi**: `dx-dialog`, `shared/templates.ts` (chip/tile/seg/ring), `tokens`,
-  `HeidiApi`, Selektoren. Das ist die Wiederverwendung, die sich heute schon auszahlt.
+  `DxApi`, Selektoren. Das ist die Wiederverwendung, die sich heute schon auszahlt.
 - **Für das spätere allgemeine Dashboard**: nur `dx-hero`, `dx-planer` (kompakt),
   eventuell `dx-consumables`/`dx-station`. Bau sie so, dass sie `hass` + minimale Config
   bekommen – und registriere die `custom:`-Typen **erst, wenn das Dashboard sie braucht**. Keine
@@ -355,7 +355,7 @@ export function readPlan(states: States, n: 1|2|3|4): Plan
 export const planEntityIds = (n) => [...]
 
 // ha/api.ts – nur schreiben
-class HeidiApi { constructor(private hass) {}
+class DxApi { constructor(private hass) {}
   savePlan(n, plan: Plan) { /* die 16 Calls */ }
   setRoomValue(roomId, key, value) { /* kennt "x"-Suffix und RV_HA */ }
   cleanRooms(ids) …  startPlan(n, variante) …  setZones(zones, noMops) …  history(start, end) … }
@@ -484,7 +484,7 @@ Jeder Schritt endet mit einer deploybaren `ha/www/heidi-panel.js`, grünen Tests
 | **0. Tests scharf stellen** | `process.exitCode = 1` bei jedem FEHLER; `test-timeline` in `npm test`; Harness in eine Datei; Fixture per `dump-states.ps1` erneuern + `states-cleaning.json` | 1–2 h | keins |
 | **1. Build ohne Codeänderung** | `heidi/src/heidi-panel.js` = heutige Datei 1:1; esbuild `--bundle --format=esm --outfile=ha/www/heidi-panel.js`; Version aus `package.json` per `--define`; Tests laufen gegen das Build-Ergebnis; `deploy.ps1` liest die Version aus dem Banner-Kommentar | 1–2 h | minimal (Output ≈ Input) |
 | **2. Fachlogik herausziehen** | `domain/raumwerte`, `estimate`, `timeline`, `calibration`, `status`, `labels` als TS-Module; Panel importiert sie; Unit-Tests + gemeinsame Vektoren mit Python; `rest_min` nach Jinja verlagern (Attribut) | 1–2 Tage | gering – reine Verschiebung, Tests belegen Gleichheit |
-| **3. Selektoren und API** | `ha/selectors.ts`, `ha/api.ts`; `_saveEditor`, `_rvClick`, `_zonesAction`, `_onClick`-Service-Zweige rufen `HeidiApi`; `test-editor` prüft `api`-Calls | 1 Tag | gering |
+| **3. Selektoren und API** | `ha/selectors.ts`, `ha/api.ts`; `_saveEditor`, `_rvClick`, `_zonesAction`, `_onClick`-Service-Zweige rufen `DxApi`; `test-editor` prüft `api`-Calls | 1 Tag | gering |
 | **4. Lit in die Shell, Bereiche einzeln** | Shell wird `LitElement`; alte String-Renderer werden übergangsweise mit `unsafeHTML(this._hero())` eingebettet – **das ist der Trick, der die Karte in jedem Zwischenstand funktionsfähig hält**. Reihenfolge nach Schmerz: Editor-Dialog (hebt das Einfrieren auf), History (Scroll), Hero, Map, Räume-Dialog, Dauer & Akku, Rest | 3–5 Tage verteilt | mittel – deshalb Bereich für Bereich mit Deploy dazwischen |
 | **5. CSS aufteilen** | Tokens/Basis geteilt, Rest in `static styles`; Media → Container Queries; Bottom-Sheet im `dx-dialog` | 1 Tag | gering |
 | **6. Aufräumen** | Signaturliste durch `shouldUpdate` aus `entityIds` ersetzen; `data-*`-Dispatcher entfernen; Overlay-Zustand vereinheitlichen; Google-Fonts entweder lokal unter `/local/fonts/` oder System-Fonts | 1 Tag | gering |
@@ -557,7 +557,7 @@ fremden Themes.
 5. `sensor.heidi_task_status` in die Signaturliste (Ein-Zeilen-Fix, bis Schritt 6 sie ersetzt).
 
 ### Später sinnvoll
-6. `HeidiApi` + Selektoren, `test-editor` gegen die API.
+6. `DxApi` + Selektoren, `test-editor` gegen die API.
 7. Lit in der Shell, Bereiche einzeln umziehen (Editor zuerst).
 8. TypeScript-Typen für Plan/RoomValues/Estimate/LearnValues (parallel zu 3 und 6 einführbar).
 9. CSS-Tokens/Basis trennen, Container Queries, Bottom-Sheet-Dialoge, „mehr anzeigen“ im Protokoll.

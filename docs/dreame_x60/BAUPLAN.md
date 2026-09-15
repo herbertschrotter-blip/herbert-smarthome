@@ -47,7 +47,7 @@ Claude Code im Web bereitet diese Aufgaben vor, führt sie aber nicht aus.
 | 2.6 | `domain/labels.ts` + Tests | fertig (15.09.; 25 v1-Vektoren + Formate) |
 | 2.7 | `ha/prognose/tests/test_runlog.py` gegen dieselben Vektoren | geschrieben (15.09.); **[PC]** Ausführung offen: kein Python auf Herberts PC – `winget install Python.Python.3.12` + `pip install pytest`, oder auf dem Pi |
 | 3.1 | `ha/types.ts`, `ha/memo-selector.ts`, `ha/selectors.ts` + Tests | fertig (15.09.; memo-selector 68 Zeilen, 24 Selektoren, Proxy-/Memo-/Leer-Tests grün) |
-| 3.2 | `ha/api.ts` (`HeidiApi`) + Tests inkl. Teilfehler | offen |
+| 3.2 | `ha/api.ts` (`DxApi`) + Tests inkl. Teilfehler | fertig (15.09.; 18 Calls exakt gegen heidi/tests/expected/editor-calls.json, Teilfehler, Optionen, Domänen) |
 | 3.3 | Shell: `page`-Config, Views, Overlay, Toast, Escape, more-info, Modul-Caches | offen |
 | 3.4 | **[PC-Abnahme]** Mockup Seitenstruktur `dreame_x60/mockups/seiten.html` | fertig (15de525; Design-Referenz `dreame_x60/mockups/bento.html`, abgenommen 15.09.) |
 | 4.0 | Startseite: `dx-nav-tiles` + Seitenaufbau nach Mockup | offen |
@@ -232,7 +232,7 @@ dreame_x60/card/
 │  │  ├─ types.ts
 │  │  ├─ memo-selector.ts       memoizeSelector(ids, fn, compare?) – < 100 Zeilen
 │  │  ├─ selectors.ts           readRobot, readPlan(n), readRoomValues(id), readAllRoomValues, readLearn, readHistory, readPrognose, readSettings, readDiagnostics
-│  │  └─ api.ts                 class HeidiApi
+│  │  └─ api.ts                 class DxApi
 │  ├─ components/               Abschnitt 7
 │  ├─ shared/                   templates.ts (icon, chip, tile, seg, ring, miniRing, switchRow, rangeRow, selectRow), toast.ts, overlay.ts, navigate.ts
 │  └─ styles/                   tokens.ts (aus v1 .root/.root.light), base.ts
@@ -269,10 +269,10 @@ dreame_x60/card/
 | `_histAttrs` | `selectors.readHistory` | Bei `unknown/unavailable` oder ohne `timestamp`-Attribute letzten Stand behalten (Modul-Cache) |
 | `_lern` | `selectors.readLearn` | `null` ohne `raten` oder bei unavailable |
 | `_signature` | `memo-selector.ts` | Kein globaler Vergleich; je Selektor |
-| `_saveEditor` | `HeidiApi.savePlan` | Name nicht leer, ≥ 1 Raum; Raumwerte nur gewählter Räume; 18 Calls wie v1 (5 input_text, 10 input_select, 2 input_boolean, 1 input_datetime); Zeit `HH:MM:00`; Ergebnis `{ok, fehlgeschlagen[]}` |
-| `_rvClick` (Roboter) | `HeidiApi.setRoomValue` | Option über `RV_HA`-Inverse, Wdh + `x`; „Alle“ = 7 parallel |
-| `_zonesAction("save")` | `HeidiApi.setZones` | Beide Listen senden |
-| `_onClick` svc/press/reset/run/app/shell/toggle/option | `HeidiApi.vacuum/press/runPlan/runScene/shell/toggle/selectOption/setNumber/setTime` | `runPlan` verweigert bei inaktiv; `setTime` unterscheidet `time.` und `input_datetime`; Intervall auf 5/10/15/20/30/60 runden; Dark-Mode `turn_on/off` |
+| `_saveEditor` | `DxApi.savePlan` | Name nicht leer, ≥ 1 Raum; Raumwerte nur gewählter Räume; 18 Calls wie v1 (5 input_text, 10 input_select, 2 input_boolean, 1 input_datetime); Zeit `HH:MM:00`; Ergebnis `{ok, fehlgeschlagen[]}` |
+| `_rvClick` (Roboter) | `DxApi.setRoomValue` | Option über `RV_HA`-Inverse, Wdh + `x`; „Alle“ = 7 parallel |
+| `_zonesAction("save")` | `DxApi.setZones` | Beide Listen senden |
+| `_onClick` svc/press/reset/run/app/shell/toggle/option | `DxApi.vacuum/press/runPlan/runScene/shell/toggle/selectOption/setNumber/setTime` | `runPlan` verweigert bei inaktiv; `setTime` unterscheidet `time.` und `input_datetime`; Intervall auf 5/10/15/20/30/60 runden; Dark-Mode `turn_on/off` |
 | `_mountMap` | `dx-map-card` | Drei Konfigurationen 1:1; Cache je `kind|dark` auf Modulebene |
 | `_clockHtml`, clock-Zweige | `dx-clock-picker` | 24-h-Ring (0–11 außen, 12–23 innen), 5-min-Schritte, Stunde → Minutenmodus, OK/Abbrechen |
 | `_roomsHtml`, `_rvClick` (Plan) | `dx-rooms-dialog` | Plan: nur gewählte Räume, „eigene Werte“, Standard sonst, Wasser nur nass, Route nur „Nur Wischen“, „Alle auf Standard“; Roboter: „Alle Räume“ mit gemeinsamen Werten (`–` bei Abweichung), sofort schreiben, Hinweis bei unavailable |
@@ -481,7 +481,7 @@ Sechs Felder je Karte: **Voraussetzung** (Aufgaben, die `fertig` sein müssen), 
 
 **3.2 API mit Teilfehlern**
 - Voraussetzung: 2.0
-- Ziel: `HeidiApi` (Methoden aus Abschnitt 6). `savePlan` führt die 18 Calls aus, sammelt Fehler (`Promise.allSettled`) und liefert `{ok, fehlgeschlagen: string[]}`; `setZones` analog.
+- Ziel: `DxApi` (Methoden aus Abschnitt 6). `savePlan` führt die 18 Calls aus, sammelt Fehler (`Promise.allSettled`) und liefert `{ok, fehlgeschlagen: string[]}`; `setZones` analog.
 - Nicht ändern: Dienst-Namen und Payloads.
 - Akzeptanz: Call-Log-Tests: 18 Calls exakt; `setRoomValue` mappt Optionen; `setTime` unterscheidet Domänen; `runPlan` bei inaktiv ohne Call; Fehlerinjektion „Call 5 wirft“ → Ergebnis nennt genau diese Entität, übrige Calls wurden trotzdem abgesetzt.
 - Tests: `npm run test:unit -- api`
@@ -706,6 +706,7 @@ Format: `- [Datum] [Aufgabe] Art (Widerspruch | Messung | Befund | Wunsch) · Sc
 Für 2.0 müssen `Blocker` und `Functional` = 0 sein. `Cosmetic` und `Post-2.0` dürfen offen bleiben.
 
 - [2026-09-15] [0.1] Widerspruch · Functional: Der Bauplan nennt für das Speichern eines Planer-Eintrags **16** Service-Calls (0.1, 3.2, 4.5, Abschnitt 6 `_saveEditor`). v1 setzt tatsächlich **18** ab: 5 `input_text.set_value` (name, raeume, tage, personen, raumwerte), 10 `input_select.select_option` (modus, saugstufe, wasser, route, wiederholungen, homeoffice, ho_saug, ho_wdh, sp_saug, sp_wdh), 2 `input_boolean.turn_on/off` (aktiv, schnell), 1 `input_datetime.set_datetime` (zeit). Festgeschrieben in `heidi/tests/expected/editor-calls.json` (Characterization aus v1). Vermutlich Zählfehler im Bauplan; die Klickfolge blieb unverändert. Entscheidung Herbert (15.09.): 18 ist richtig; Bauplan in 0.1, 3.2, 4.5 und Abschnitt 6 auf 18 korrigiert.
+- [2026-09-15] [3.2] Befund · Info: Die API-Klasse heißt `DxApi` (Namensregel 15.09., Bauplan nannte `DxApi`). `savePlan` prüft Name/Räume vorab und liefert `{ok:false, grund}` ohne Aufruf; danach 18 Aufrufe parallel (`Promise.allSettled`), `fehlgeschlagen` enthält die Entitäts-IDs. `setZones` sendet `walls` nur, wenn übergeben (v1 sendet nur zones/no_mops; Wände kommen mit 4.12, PD-004). `setNumber` gibt den tatsächlich gesetzten (gerundeten) Wert zurück, damit der Regler nachziehen kann.
 - [2026-09-15] [3.1] Befund · Info: Sichten für Bedienelemente (Einstellungen, Automatik-Regeln, Roboter-Einstellungen, Station, Verschleiß) führen die Entitäts-ID des jeweiligen Elements mit (`id`/`entity`/`resetEntity`), damit Komponenten sie an die API reichen können, ohne selbst IDs zu bilden – die IDs stammen weiterhin nur aus `contract.ts` (Regel 1). `readRobot` vergleicht `vacuum.heidi` nur über `state` + 13 genutzte Attribute, damit das ständige `last_updated` keine Renderläufe auslöst. `readHistory` hält den letzten gültigen Stand im Modul (`stale: true`, solange der Sensor unavailable ist). Zusätzlich zu den Karten-Selektoren: `readAutomatik`, `readConsumables`, `readStation`, `readRobotSettings`, `readMap`, `readPlans`.
 - [2026-09-15] [2.7] Befund · Functional (Python ↔ JS, vorab aus dem Code): `parse_raumwerte` in `runlog.py` liest nur Modus/Saugstufe/Wdh, verlangt fünf Felder, filtert Raum-IDs nicht auf 1..7 und liefert bei unbekanntem Code `None` (→ Standard des Eintrags), während v1/v2 unbekannten Modus als „Saugen“, Saugstufe als „Standard“ und Wdh als „1“ lesen. Wirkt nur bei kaputten Kurzcodes. Im Test als XFAIL markiert; runlog.py laut Karte 2.7 nicht anpassen. Entscheidung Herbert: … (Python an JS angleichen = eigener Backend-Schritt, oder so lassen). Ausführung des Tests steht aus: auf dem PC fehlt Python.
 - [2026-09-15] [2.5] Befund · Cosmetic (v1): Ist `time.heidi_dnd_start`/`_end` `unknown`, zeigt der DND-Chip „–unkno“ (`slice(0,5)` des Zustands). v2 reproduziert das (Parität); Korrektur später über 10a, wenn gewünscht. `status.v1.json` enthält außerdem fünf Streifen-Fälle (Jetzt/Startpunkt/Fährt durch/letzter Raum/unavailable) als Vorgabe für `dx-hero` (4.1).
