@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.22 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.23 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -1989,7 +1989,7 @@ var base = i`
     border-left: 0;
   }
   /* Einrichtungsprüfung (PD-014): nur die Symbole mit Befund zwischen Titel und Uhr; rot pulsiert; Klick springt zur Stelle */
-  .topbar .setupicons { display: flex; align-items: center; gap: 8px; margin-left: 16px; }
+  .topbar .setupicons { display: flex; align-items: center; gap: 8px; padding-right: 6px; } /* rechtsbündig, direkt links neben der Uhr */
   .topbar .si { width: 36px; height: 36px; border-radius: 50%; display: inline-grid; place-items: center; border: 1px solid transparent; cursor: pointer; padding: 0; }
   .topbar .si ha-icon { --mdc-icon-size: 20px; width: 20px; height: 20px; }
   .topbar .si.warn { background: color-mix(in srgb, var(--dx-warning) 22%, transparent); color: var(--dx-warning); border-color: var(--dx-warning); }
@@ -2134,7 +2134,7 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.22";
+var VERSION = "2.0.0-alpha.23";
 
 // src/shared/robot-svg.ts
 var robotSvg = w`<svg viewBox="0 0 200 200" class="robotpic" aria-hidden="true">
@@ -3516,8 +3516,8 @@ var DreameX60Panel = class extends i4 {
       <div class="topbar">
         ${page !== "start" ? b2`<button class="back" @click=${() => navigate("start")}><ha-icon icon="mdi:chevron-left"></ha-icon>Übersicht</button>` : A}
         <div><h1>${title}</h1><div class="sub">${sub}</div></div>
-        ${this.renderSetupIcons(robot)}
         <div class="meta">
+          ${this.renderSetupIcons(robot)}
           <div class="mi time"><ha-icon icon="mdi:clock-outline"></ha-icon><div><b>${now.toLocaleTimeString("de-AT", { hour: "2-digit", minute: "2-digit" })}</b><small>${now.toLocaleDateString("de-AT", { weekday: "long", day: "numeric", month: "short", year: "numeric" })}</small></div></div>
           <div class="mi home"><ha-icon icon="mdi:home-outline"></ha-icon><div><b>${home.length ? "Zu Hause" : "Niemand zu Hause"}<span class="dot ${home.length ? "on" : ""}"></span></b><small>${home.length ? home.join(" \xB7 ") + " anwesend" : "alle unterwegs"}</small></div></div>
           <div class="mi dnd"><ha-icon icon="mdi:weather-night"></ha-icon><div><b>${robot.hero.dnd}</b><small>Nicht stören</small></div></div>

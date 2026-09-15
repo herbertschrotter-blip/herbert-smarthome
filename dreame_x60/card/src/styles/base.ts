@@ -122,7 +122,7 @@ export const base = css`
     border-left: 0;
   }
   /* Einrichtungsprüfung (PD-014): nur die Symbole mit Befund zwischen Titel und Uhr; rot pulsiert; Klick springt zur Stelle */
-  .topbar .setupicons { display: flex; align-items: center; gap: 8px; margin-left: 16px; }
+  .topbar .setupicons { display: flex; align-items: center; gap: 8px; padding-right: 6px; } /* rechtsbündig, direkt links neben der Uhr */
   .topbar .si { width: 36px; height: 36px; border-radius: 50%; display: inline-grid; place-items: center; border: 1px solid transparent; cursor: pointer; padding: 0; }
   .topbar .si ha-icon { --mdc-icon-size: 20px; width: 20px; height: 20px; }
   .topbar .si.warn { background: color-mix(in srgb, var(--dx-warning) 22%, transparent); color: var(--dx-warning); border-color: var(--dx-warning); }
