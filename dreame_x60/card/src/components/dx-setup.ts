@@ -40,7 +40,7 @@ export class DxSetup extends LitElement {
 
   private go(a: SetupAction | undefined): void {
     if (!a) return;
-    if (a.kind === 'more-info') moreInfo(this, a.entity);
+    if (a.kind === 'more-info' || a.kind === 'vacuum-areas') moreInfo(this, a.entity);
     else if (a.kind === 'page') emit(this, EVENTS.navigate, { page: a.page });
     else navigateHa(a.path);
   }
@@ -61,7 +61,7 @@ export class DxSetup extends LitElement {
           ${problems.map((p) => html`
             <div class="row" data-problem=${p.key}>
               <span class="ic ${p.level}"><ha-icon icon=${p.icon}></ha-icon></span>
-              <div class="tx"><b>${p.label}</b>${p.text}${p.action?.kind === 'more-info' && p.action.hint ? html`<div class="hint">Dort: ${p.action.hint}</div>` : nothing}</div>
+              <div class="tx"><b>${p.label}</b>${p.text}${(p.action?.kind === 'more-info' || p.action?.kind === 'vacuum-areas') && p.action.hint ? html`<div class="hint">Dort: ${p.action.hint}</div>` : nothing}</div>
               ${p.action ? html`<button class="btn sm" data-go=${p.key} @click=${() => this.go(p.action)}><ha-icon icon="mdi:arrow-right"></ha-icon>Öffnen</button>` : nothing}
             </div>`)}
         </div>

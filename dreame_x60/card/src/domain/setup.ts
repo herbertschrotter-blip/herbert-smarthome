@@ -9,6 +9,7 @@ import { ROOM_TYPES } from './rooms';
 export type SetupLevel = 'ok' | 'warn' | 'error';
 export type SetupAction =
   | { kind: 'more-info'; entity: string; hint?: string }
+  | { kind: 'vacuum-areas'; entity: string; hint: string }
   | { kind: 'ha-path'; path: string }
   | { kind: 'page'; page: Page };
 export interface SetupCheck { key: string; icon: string; label: string; level: SetupLevel; text: string; action?: SetupAction }
@@ -76,7 +77,7 @@ export function setupChecks(i: SetupInput): SetupCheck[] {
   if (i.robot && i.mapping) {
     const open = i.mapping.segments.filter((s) => !i.mapping!.assigned.has(s.id));
     out.push(open.length
-      ? { key: 'areas', icon: 'mdi:home-map-marker', label: 'Räume ↔ Bereiche', level: 'error', text: `${open.length === 1 ? 'Ein Raum ist' : open.length + ' Räume sind'} keinem HA-Bereich zugeordnet: ${open.map((s) => s.name).join(', ')}`, action: { kind: 'more-info', entity: i.robot.vac, hint: 'Reinigung → Nach Bereich → Konfigurieren' } }
+      ? { key: 'areas', icon: 'mdi:home-map-marker', label: 'Räume ↔ Bereiche', level: 'error', text: `${open.length === 1 ? 'Ein Raum ist' : open.length + ' Räume sind'} keinem HA-Bereich zugeordnet: ${open.map((s) => s.name).join(', ')}`, action: { kind: 'vacuum-areas', entity: i.robot.vac, hint: 'Reinigung → Nach Bereich → Konfigurieren' } }
       : ok('areas', 'mdi:home-map-marker', 'Alle Räume einem HA-Bereich zugeordnet'));
   }
   // 8 Reparaturen von HA

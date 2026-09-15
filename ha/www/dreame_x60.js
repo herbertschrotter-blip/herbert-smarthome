@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.23 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.24 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -1239,7 +1239,7 @@ function setupChecks(i5) {
   }
   if (i5.robot && i5.mapping) {
     const open = i5.mapping.segments.filter((s4) => !i5.mapping.assigned.has(s4.id));
-    out.push(open.length ? { key: "areas", icon: "mdi:home-map-marker", label: "R\xE4ume \u2194 Bereiche", level: "error", text: `${open.length === 1 ? "Ein Raum ist" : open.length + " R\xE4ume sind"} keinem HA-Bereich zugeordnet: ${open.map((s4) => s4.name).join(", ")}`, action: { kind: "more-info", entity: i5.robot.vac, hint: "Reinigung \u2192 Nach Bereich \u2192 Konfigurieren" } } : ok("areas", "mdi:home-map-marker", "Alle R\xE4ume einem HA-Bereich zugeordnet"));
+    out.push(open.length ? { key: "areas", icon: "mdi:home-map-marker", label: "R\xE4ume \u2194 Bereiche", level: "error", text: `${open.length === 1 ? "Ein Raum ist" : open.length + " R\xE4ume sind"} keinem HA-Bereich zugeordnet: ${open.map((s4) => s4.name).join(", ")}`, action: { kind: "vacuum-areas", entity: i5.robot.vac, hint: "Reinigung \u2192 Nach Bereich \u2192 Konfigurieren" } } : ok("areas", "mdi:home-map-marker", "Alle R\xE4ume einem HA-Bereich zugeordnet"));
   }
   if (i5.repairs) {
     const mine = i5.repairs.filter((r4) => r4.domain === "dreame_vacuum" || r4.translation_key === "segments_changed" || r4.domain === "vacuum");
@@ -1280,6 +1280,61 @@ function askConfirm(target, text, onOk, opts2 = {}) {
 }
 function moreInfo(target, entityId) {
   emit(target, "hass-more-info", { entityId });
+}
+
+// src/shared/ha-deep.ts
+var MAPPING_TAG = "ha-more-info-view-vacuum-segment-mapping";
+var AREAS_TAG = "ha-more-info-view-vacuum-clean-areas";
+var AREAS_HEADER_TAG = "ha-more-info-view-vacuum-clean-areas-header-action";
+function deepFind(root, selector, limit = 4e3) {
+  if (!root) return null;
+  const queue = [root];
+  let seen = 0;
+  while (queue.length && seen < limit) {
+    const node = queue.shift();
+    const hit = node.querySelector(selector);
+    if (hit) return hit;
+    for (const el of node.querySelectorAll("*")) {
+      seen++;
+      if (el.shadowRoot) queue.push(el.shadowRoot);
+    }
+  }
+  return null;
+}
+var sleep = (ms) => new Promise((r4) => setTimeout(r4, ms));
+async function waitFor(probe, timeoutMs) {
+  const end = Date.now() + timeoutMs;
+  for (; ; ) {
+    const v2 = probe();
+    if (v2) return v2;
+    if (Date.now() >= end) return null;
+    await sleep(100);
+  }
+}
+var haRoot = () => document.querySelector("home-assistant")?.shadowRoot ?? null;
+var findDialog = () => haRoot()?.querySelector("ha-more-info-dialog") ?? null;
+async function openVacuumSegmentMapping(target, entityId) {
+  moreInfo(target, entityId);
+  if (!haRoot()) return "fallback";
+  const dialog = await waitFor(findDialog, 3e3);
+  if (!dialog) return "fallback";
+  const showMapping = () => {
+    dialog.dispatchEvent(new CustomEvent("show-child-view", { detail: { viewTag: MAPPING_TAG, viewTitle: "Zuordnung von Staubsauger-Abschnitten zu Bereichen", viewParams: { entityId } }, bubbles: true, composed: true }));
+  };
+  if (customElements.get(MAPPING_TAG)) {
+    showMapping();
+    return "direct";
+  }
+  const areasBtn = await waitFor(() => deepFind(dialog.shadowRoot, "more-info-vacuum") ? deepFind(dialog.shadowRoot, "button.clean-areas-button") : null, 3e3);
+  if (!areasBtn) return "fallback";
+  areasBtn.click();
+  const header = await waitFor(() => customElements.get(AREAS_TAG) ? deepFind(dialog.shadowRoot, AREAS_HEADER_TAG) : null, 4e3);
+  if (!header) return "fallback";
+  const gear = await waitFor(() => deepFind(header, "ha-icon-button, button"), 2e3);
+  if (!gear) return "fallback";
+  gear.click();
+  const ok2 = await waitFor(() => customElements.get(MAPPING_TAG) && deepFind(dialog.shadowRoot, MAPPING_TAG) ? true : null, 4e3);
+  return ok2 ? "clicked" : "fallback";
 }
 
 // src/ha/setup-loader.ts
@@ -2134,7 +2189,7 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.23";
+var VERSION = "2.0.0-alpha.24";
 
 // src/shared/robot-svg.ts
 var robotSvg = w`<svg viewBox="0 0 200 200" class="robotpic" aria-hidden="true">
@@ -3533,7 +3588,11 @@ var DreameX60Panel = class extends i4 {
   runSetupAction(a3) {
     if (!a3) return;
     if (a3.kind === "more-info") moreInfo(this, a3.entity);
-    else if (a3.kind === "page") navigate(a3.page);
+    else if (a3.kind === "vacuum-areas") {
+      void openVacuumSegmentMapping(this, a3.entity).then((r4) => {
+        if (r4 === "fallback") this.toast(`Im Dialog: ${a3.hint}`);
+      });
+    } else if (a3.kind === "page") navigate(a3.page);
     else navigateHa(a3.path);
   }
   /** Bento-Übersicht (Bauplan 4.0): Bausteine, wo sie schon existieren (4.1 dx-hero, dx-auftrag), sonst Platzhalter mit einer Vorschau der Sichten. */

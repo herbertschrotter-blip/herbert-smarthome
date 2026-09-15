@@ -13,6 +13,7 @@ import { setupChecks, setupProblems } from './domain/setup';
 import type { SetupAction, SetupCheck } from './domain/setup';
 import { navigate, navigateHa } from './shared/navigate';
 import { moreInfo } from './shared/overlay';
+import { openVacuumSegmentMapping } from './shared/ha-deep';
 import { loadSetupData } from './ha/setup-loader';
 import type { SetupData } from './ha/setup-loader';
 import { readAllRoomValues, readAutomatik, readConsumables, readDiagnostics, readHistory, readLearn, readMap, readPlans, readPrognose, readRobot, readRobotSettings, readSettings, readStation } from './ha/selectors';
@@ -232,6 +233,7 @@ export class DreameX60Panel extends LitElement {
   private runSetupAction(a: SetupAction | undefined): void {
     if (!a) return;
     if (a.kind === 'more-info') moreInfo(this, a.entity);
+    else if (a.kind === 'vacuum-areas') { void openVacuumSegmentMapping(this, a.entity).then((r) => { if (r === 'fallback') this.toast(`Im Dialog: ${a.hint}`); }); }
     else if (a.kind === 'page') navigate(a.page);
     else navigateHa(a.path);
   }

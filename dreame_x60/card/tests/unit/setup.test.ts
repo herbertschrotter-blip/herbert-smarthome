@@ -60,7 +60,7 @@ test('Bereiche: nicht zugeordnete Räume → Fehler mit Namen und Sprung zum mor
   const c = setupChecks({ ...base(), mapping: { segments: [{ id: '1_1', name: 'Bathroom' }, { id: '1_3', name: 'WC' }, { id: '1_6', name: 'Kitchen' }], assigned: new Set(['1_6']) } });
   const a = c.find((x) => x.key === 'areas')!;
   assert.equal(a.level, 'error'); assert.equal(a.text, '2 Räume sind keinem HA-Bereich zugeordnet: Bathroom, WC');
-  assert.deepEqual(a.action, { kind: 'more-info', entity: 'vacuum.heidi', hint: 'Reinigung → Nach Bereich → Konfigurieren' });
+  assert.deepEqual(a.action, { kind: 'vacuum-areas', entity: 'vacuum.heidi', hint: 'Reinigung → Nach Bereich → Konfigurieren' });
   assert.match(setupChecks({ ...base(), mapping: { segments: [{ id: '1_1', name: 'Bathroom' }], assigned: new Set() } }).find((x) => x.key === 'areas')!.text, /^Ein Raum ist/);
   assert.equal(setupChecks({ ...base(), mapping: null }).some((x) => x.key === 'areas'), false);
 });
