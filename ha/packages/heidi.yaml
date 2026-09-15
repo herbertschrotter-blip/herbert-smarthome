@@ -346,8 +346,8 @@ template:
           {% set mopp = a.get('mop_pad', false) %}
           {% if s == 'error' or a.get('has_error') %}Fehler
           {% elif s == 'paused' or a.get('paused') %}Pausiert
-          {% elif a.get('washing') %}{{ 'Wäscht Mopps vor dem Start' if laeuft and (a.get('cleaned_area',0) | int(0)) == 0 else 'Wäscht Mopps zwischendurch' if laeuft else 'Wäscht Mopps nach dem Lauf' }}
-          {% elif a.get('drying') %}Trocknet Mopps
+          {% elif a.get('washing') %}{{ 'Wäscht Mopp vor dem Start' if laeuft and (a.get('cleaned_area',0) | int(0)) == 0 else 'Wäscht Mopp zwischendurch' if laeuft else 'Wäscht Mopp nach dem Lauf' }}
+          {% elif a.get('drying') %}Trocknet Mopp
           {% elif states('sensor.heidi_auto_empty_status') not in ['idle','unknown','unavailable'] %}Saugt Staub ab
           {% elif a.get('returning_to_wash') %}Fährt zum Mopp-Waschen
           {% elif s == 'returning' %}Fährt zur Station

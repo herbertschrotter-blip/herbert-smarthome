@@ -179,8 +179,10 @@ def lernwerte(rows):
                 rm["flaechen"].append(s["area"] / s["times"])
             if s["belag"]:
                 rm["belag"] = s["belag"]
-        vor += phase_durations(run, "Wäscht Mopps vor dem Start")
-        zw += phase_durations(run, "Wäscht Mopps zwischendurch")
+        vor += phase_durations(run, "Wäscht Mopp vor dem Start")
+        vor += phase_durations(run, "Wäscht Mopps vor dem Start")  # Historie vor dem 15.09.2026 (alte Schreibweise)
+        zw += phase_durations(run, "Wäscht Mopp zwischendurch")
+        zw += phase_durations(run, "Wäscht Mopps zwischendurch")  # Historie vor dem 15.09.2026 (alte Schreibweise)
         for r in run:
             if r.get("selfclean"):
                 selfclean = _f(r["selfclean"], 25)

@@ -43,7 +43,7 @@ export const STATUS_DE: Record<string, string> = {
 
 /** Hinweise/Fehler des Roboters (sensor.heidi_error); Hinweise sind keine echten Fehler (vacuum has_error = false). */
 export const ERR_DE: Record<string, string> = {
-  clean_mop_pad: 'Mopps reinigen', dust_bag_full: 'Staubbeutel voll', clean_water_tank_empty: 'Frischwasser leer', dirty_water_tank_full: 'Abwasser voll',
+  clean_mop_pad: 'Mopp reinigen', dust_bag_full: 'Staubbeutel voll', clean_water_tank_empty: 'Frischwasser leer', dirty_water_tank_full: 'Abwasser voll',
   dust_box_missing: 'Staubbox fehlt', mop_pad_stop_rotate: 'Mopp blockiert', wheels_stuck: 'Rad blockiert', brush_stuck: 'Bürste blockiert', low_battery: 'Akku leer',
   station_disconnected: 'Station getrennt', detergent_empty: 'Reinigungsmittel leer', water_tank_missing: 'Wassertank fehlt', clean_water_tank_missing: 'Frischwassertank fehlt',
   dirty_water_tank_missing: 'Abwassertank fehlt',

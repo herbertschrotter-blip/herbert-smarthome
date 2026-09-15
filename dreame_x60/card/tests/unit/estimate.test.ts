@@ -44,7 +44,7 @@ test(`Parität mit ${v1.quelle}: ${v1.vektoren.length} Schätzungen`, () => {
       const w = want.steps[i]!;
       near(s.min, w.min, `${v.name}: Schritt ${i} min`);
       near(s.batt, w.batt, `${v.name}: Schritt ${i} batt`);
-      assert.equal(s.text, w.text, `${v.name}: Schritt ${i} text`);
+      assert.equal(s.text, w.text.replace('Mopps', 'Mopp') /* PD-008 */, `${v.name}: Schritt ${i} text`);
       if (s.typ === 'raum' && w.typ === 'raum') { assert.equal(s.sub, w.sub, `${v.name}: Schritt ${i} sub`); assert.equal(s.area, w.area); assert.equal(s.gelernt, w.gelernt); assert.equal(s.id, w.id); }
     });
   }

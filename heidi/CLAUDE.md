@@ -18,8 +18,8 @@
 - Eigene Template-Sensoren (Paket): `binary_sensor.heidi_arbeitszeit`, `binary_sensor.heidi_nicht_storen`
   (Achtung: ö→o in der ID; spiegelt `time.heidi_dnd_start/_end` des Roboters, aktuell 20:00–07:00),
   `sensor.heidi_heutiger_plan`, `sensor.heidi_automatik_status`,
-  `sensor.heidi_phase` = feiner Arbeitsschritt als Text („Wäscht Mopps vor dem Start“, „Saugt und wischt
-  Küche“, „Fährt zum Mopp-Waschen“, „Trocknet Mopps“, „Saugt Staub ab“, „Schläft“ …), abgeleitet aus
+  `sensor.heidi_phase` = feiner Arbeitsschritt als Text („Wäscht Mopp vor dem Start“, „Saugt und wischt
+  Küche“, „Fährt zum Mopp-Waschen“, „Trocknet Mopp“, „Saugt Staub ab“, „Schläft“ …), abgeleitet aus
   den vacuum-Attributen washing/drying/returning_to_wash/mop_pad/cleaning_mode + current_room.
   Der Recorder speichert jede Änderung → die Karte holt daraus per `history/period` die Zeitleiste.
 - Weitere Sensoren: heidi_status, heidi_battery_level, heidi_error, heidi_task_status,

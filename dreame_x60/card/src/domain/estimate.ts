@@ -96,7 +96,7 @@ export function estimate(p: PlanForEstimate, lern: Lernwerte | null, opts: Estim
   const steps: Step[] = [];
   let t = 0, batt = batt0, since = 0, charges = 0, unlearned = 0, used = 0;
   const wet = order.some((id) => setting(id).modus !== 'Saugen');
-  if (wet) { steps.push({ typ: 'wasch', text: 'Wäscht Mopps vor dem Start', min: W.vor_start_min, batt }); t += W.vor_start_min; }
+  if (wet) { steps.push({ typ: 'wasch', text: 'Wäscht Mopp vor dem Start', min: W.vor_start_min, batt }); t += W.vor_start_min; }
   for (const id of order) {
     const s = setting(id), modus = s.modus ?? 'Saugen', saug = s.saug ?? 'Standard';
     const r = rate(lern, modus, saug);
@@ -110,7 +110,7 @@ export function estimate(p: PlanForEstimate, lern: Lernwerte | null, opts: Estim
     }
     batt -= drain; t += min; since += area; used += drain;
     steps.push({ typ: 'raum', id, text: roomById(id)?.short ?? String(id), sub: `${modus} · ${saug} · ${s.wdh}×${modus !== 'Saugen' && s.wasser ? ' · ' + s.wasser : ''}`, min, batt, area, gelernt: r.gelernt });
-    if (modus !== 'Saugen' && since >= W.nach_m2) { steps.push({ typ: 'wasch', text: 'Wäscht Mopps zwischendurch', min: W.zwischen_min, batt }); t += W.zwischen_min; since = 0; }
+    if (modus !== 'Saugen' && since >= W.nach_m2) { steps.push({ typ: 'wasch', text: 'Wäscht Mopp zwischendurch', min: W.zwischen_min, batt }); t += W.zwischen_min; since = 0; }
   }
   steps.push({ typ: 'heim', text: 'Fährt zur Station', min: HOME_MIN, batt }); t += HOME_MIN;
   return { steps, total: t, batt0, battEnd: batt, charges, unlearned, used, order };

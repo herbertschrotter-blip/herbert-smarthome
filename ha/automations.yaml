@@ -82,7 +82,7 @@
       state: docked
     - condition: template
       value_template: "{{ states('sensor.heidi_battery_level') | int(0) >= states('input_number.heidi_min_akku') | int(30) }}"
-    # Nur echte Fehler blockieren – Hinweise wie "clean_mop_pad" (Mopps reinigen) nicht
+    # Nur echte Fehler blockieren – Hinweise wie "clean_mop_pad" (Mopp reinigen) nicht
     - condition: template
       value_template: "{{ not state_attr('vacuum.heidi', 'has_error') }}"
   variables:
@@ -239,7 +239,7 @@
       value_template: >-
         {{ states('vacuum.heidi') in ['cleaning', 'paused', 'returning']
            or (state_attr('vacuum.heidi', 'charging') and states('sensor.heidi_battery_level') | int(100) < 100)
-           or states('sensor.heidi_phase') in ['Wäscht Mopps nach dem Lauf', 'Saugt Staub ab'] }}
+           or states('sensor.heidi_phase') in ['Wäscht Mopp nach dem Lauf', 'Saugt Staub ab'] }}
   actions:
     - variables:
         seg: "{{ state_attr('vacuum.heidi', 'current_segment') or '' }}"

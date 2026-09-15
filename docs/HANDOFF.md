@@ -255,6 +255,7 @@ Uhr (10:15). Einrichten im Ordner `heidi/tests`: `npm i` und dann `npx playwrigh
   Herbert: „passt“, PD-007 freigegeben. 4.1 `dx-hero` (Roboter-Panel) + `dx-auftrag` (rechte Spalte im Lauf) gebaut,
   Streifen als `domain/strip.ts`, gemeinsame Bedienstile `styles/controls.ts`; hero.js prüft alle 85 v1-Kopf-Zustände und
   die Render-Ruhe. Version 2.0.0-alpha.7 eingespielt (mit Heidis Lauf 08:37 live geprüft).
+- **Wortwahl „Mopp“ (15.09., Herbert):** Backend-Phasentexte in `heidi.yaml` und die Bedingung in `automations.yaml` auf „Wäscht Mopp …“/„Trocknet Mopp“, `runlog.py` zählt beide Schreibweisen (alte Historie); v2-Texte „Mopp reinigen“, „Wäscht Mopp …“ (PD-008); v1 unverändert. Eingespielt ohne Neustart (template/automation reload).
 - **Nächstes:** 4.2 `dx-dialog`, dann 4.3 Karte (`dx-map-card` + `dx-quickstart`). Offene Entscheidungen: Bauplan Abschnitt 10 und ClickUp.
 
 ## 4. Offene Punkte (Stand 14.09.2026, Claude-Code-Sitzung)

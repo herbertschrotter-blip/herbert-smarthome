@@ -35,7 +35,7 @@ let bad = 0;
 for (const v of v1.vektoren) {
   await setStates(statesFor(v));
   const got = await readHero();
-  const want = { big: v.output.big, sub: v.output.sub, btns: v.output.btns, chips: v.output.chips.map((c) => ({ text: c.text, on: /\bon\b/.test(c.cls) })), strip: v.output.strip };
+  const want = { big: v.output.big, sub: v.output.sub, btns: v.output.btns, chips: v.output.chips.map((c) => ({ text: c.text.replace('Mopps', 'Mopp') /* PD-008 */, on: /\bon\b/.test(c.cls) })), strip: v.output.strip };
   const ok = got.big === want.big && got.sub === want.sub && JSON.stringify(got.btns) === JSON.stringify(want.btns)
     && JSON.stringify(got.chips) === JSON.stringify(want.chips) && norm(got.strip) === norm(want.strip);
   if (!ok) { bad++; H.check(`Kopf: ${v.name}`, false, { erwartet: want, bekommen: got }); }
@@ -80,7 +80,7 @@ const jetzt = v1.vektoren.find((v) => /Streifen · Jetzt/.test(v.name));
 {
   const s = { ...docked };
   s['vacuum.heidi'] = { ...s['vacuum.heidi'], state: 'cleaning', attributes: { ...s['vacuum.heidi'].attributes, docked: true, charging: true, washing: true, drying: false, current_segment: 0, active_segments: [], cleaned_area: 1 } };
-  s['sensor.heidi_phase'] = { ...s['sensor.heidi_phase'], state: 'Wäscht Mopps nach dem Lauf' };
+  s['sensor.heidi_phase'] = { ...s['sensor.heidi_phase'], state: 'Wäscht Mopp nach dem Lauf' };
   await setStates(s);
   const st = await page.evaluate(() => { const root = document.querySelector('dreame-x60-panel').shadowRoot; const h = root.querySelector('dx-hero').shadowRoot; return [h.querySelector('.station div:last-child').textContent.trim(), root.querySelector('.topbar h1').textContent.trim(), !!root.querySelector('dx-auftrag'), !!h.querySelector('.batt .bolt')]; });
   H.checkEqual('Mopp-Wäsche in der Station: „Mopp-Wäsche · lädt“, Titel „Heidi ist in der Station“, keine Auftrag-Kachel, Blitz am Akku', st, ['Mopp-Wäsche · lädt', 'Heidi ist in der Station', false, true]);

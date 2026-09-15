@@ -63,7 +63,7 @@ test(`Parität mit ${v1.quelle}: ${v1.vektoren.length} Kopf-Zustände`, () => {
     const dnd = other[other.length - 1]!;
     assert.equal(m.dnd, dnd.text, `${v.name}: DND-Chip`);
     const err = other.find((c) => /\bbad\b|\bwarn\b/.test(c.cls));
-    if (err) { assert.ok(m.errorChip, `${v.name}: Fehler-Chip erwartet`); assert.equal(m.errorChip.text, err.text, `${v.name}: Fehler-Text`); assert.equal(m.errorChip.level, /\bbad\b/.test(err.cls) ? 'danger' : 'warning', `${v.name}: Fehler-Stufe`); }
+    if (err) { assert.ok(m.errorChip, `${v.name}: Fehler-Chip erwartet`); assert.equal(m.errorChip.text, err.text.replace('Mopps', 'Mopp') /* PD-008 */, `${v.name}: Fehler-Text`); assert.equal(m.errorChip.level, /\bbad\b/.test(err.cls) ? 'danger' : 'warning', `${v.name}: Fehler-Stufe`); }
     else assert.equal(m.errorChip, null, `${v.name}: kein Fehler-Chip`);
     const room = other.find((c) => /\bon\b/.test(c.cls) && !/\bbad\b|\bwarn\b/.test(c.cls) && c !== dnd);
     assert.equal(m.roomChip, room ? room.text : null, `${v.name}: Raum-Chip`);
@@ -85,7 +85,7 @@ test('Tabelle aus test-timeline.js', () => {
   assert.equal(heroModel({ ...base, vac: 'cleaning', phase: 'unknown', room: 'Küche' }).roomChip, 'Küche');
   assert.equal(heroModel({ ...base, vac: 'docked', phase: '', status: 'charging_completed' }).big, 'Voll geladen');
   assert.deepEqual(heroModel({ ...base, error: 'brush_stuck', hasError: true }).errorChip, { text: 'Bürste blockiert', level: 'danger' });
-  assert.deepEqual(heroModel({ ...base, error: 'clean_mop_pad' }).errorChip, { text: 'Mopps reinigen', level: 'warning' });
+  assert.deepEqual(heroModel({ ...base, error: 'clean_mop_pad' }).errorChip, { text: 'Mopp reinigen', level: 'warning' });
   assert.equal(heroModel({ ...base, error: 'unavailable' }).errorChip, null);
   assert.equal(heroModel({ ...base, vac: 'cleaning' }).dot, 'accent');
   assert.equal(heroModel({ ...base, vac: 'returning' }).dot, 'warning');

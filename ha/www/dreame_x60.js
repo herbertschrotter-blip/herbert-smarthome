@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.7 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.8 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -971,7 +971,7 @@ var STATUS_DE = {
   cruising: "f\xE4hrt"
 };
 var ERR_DE = {
-  clean_mop_pad: "Mopps reinigen",
+  clean_mop_pad: "Mopp reinigen",
   dust_bag_full: "Staubbeutel voll",
   clean_water_tank_empty: "Frischwasser leer",
   dirty_water_tank_full: "Abwasser voll",
@@ -1777,7 +1777,7 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.7";
+var VERSION = "2.0.0-alpha.8";
 
 // src/shared/robot-svg.ts
 var robotSvg = w`<svg viewBox="0 0 200 200" class="robotpic" aria-hidden="true">
