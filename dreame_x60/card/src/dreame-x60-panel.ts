@@ -70,6 +70,9 @@ export class DreameX60Panel extends LitElement {
   declare private _setupData: SetupData | null;
   private _setupVac = '';
   private _setupEntities: unknown = UNSET;
+  /** Abo auf entity_registry_updated (Bereichszuordnung gespeichert → sofort neu laden), einmal je Verbindung */
+  private _registryUnsub: (() => void) | null = null;
+  private _registryConn: unknown = null;
 
   /** Schreibzugriffe – eine Instanz je Shell, liest hass zur Laufzeit. */
   readonly api = new DxApi(() => this.hass);
@@ -84,9 +87,22 @@ export class DreameX60Panel extends LitElement {
       const vac = device()?.vac ?? '';
       if (vac && vac !== this._setupVac) { this._setupVac = vac; this.refreshSetup(false); }
       // Entitäts-Register geändert (z. B. Bereichszuordnung gespeichert): HA tauscht hass.entities aus → sofort neu laden
+      this.subscribeRegistry(this.hass);
       const ents = this.hass.entities;
       if (ents !== this._setupEntities) { const first = this._setupEntities === UNSET; this._setupEntities = ents; if (!first) this.refreshSetup(true); }
     }
+  }
+
+  /** entity_registry_updated abonnieren: Änderung am Roboter-Eintrag (z. B. Bereichszuordnung) → Einrichtungsprüfung sofort neu. */
+  private subscribeRegistry(hass: HomeAssistant): void {
+    const conn = hass.connection;
+    if (!conn || conn === this._registryConn) return;
+    this._registryConn = conn;
+    this._registryUnsub?.(); this._registryUnsub = null;
+    void conn.subscribeEvents<{ data?: { entity_id?: string; action?: string } }>((ev) => {
+      const id = ev?.data?.entity_id;
+      if (!id || id === this._setupVac || id.startsWith('vacuum.')) this.refreshSetup(true);
+    }, 'entity_registry_updated').then((unsub) => { this._registryUnsub = unsub; }, () => undefined);
   }
 
   /** Bereichszuordnung/Reparaturen nachladen (Cache 5 min); Ergebnis nur setzen, wenn es sich geändert hat. */
@@ -138,6 +154,7 @@ export class DreameX60Panel extends LitElement {
   override disconnectedCallback(): void {
     window.removeEventListener('keydown', this._onKey);
     if (this._clockTimer) { clearTimeout(this._clockTimer); this._clockTimer = null; }
+    this._registryUnsub?.(); this._registryUnsub = null; this._registryConn = null;
     super.disconnectedCallback();
   }
 

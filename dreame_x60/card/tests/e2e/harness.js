@@ -75,6 +75,7 @@ export async function mount(browser, opts = {}) {
       callService: async (d, s, x) => { window._calls.push([d, s, x]); if ((failCalls || []).includes(d + '.' + s)) throw new Error('injiziert: ' + d + '.' + s); },
       callApi: async (m, p) => { window._api.push(p); return apiResponse ?? []; },
       callWS: async (msg) => { window._ws.push(msg); const r = (window._wsResponses || {})[msg.type]; if (r === undefined) throw new Error('kein WS-Stub für ' + msg.type); return r; },
+      connection: { subscribeEvents: async (cb, type) => { (window._subs = window._subs || {})[type] = cb; return () => { delete window._subs[type]; }; } },
     };
     document.body.appendChild(el);
   }, { states, config: opts.config || { page: pg }, failCalls: opts.failCalls || [], apiResponse: opts.apiResponse ?? null, wsResponses: opts.wsResponses || null });

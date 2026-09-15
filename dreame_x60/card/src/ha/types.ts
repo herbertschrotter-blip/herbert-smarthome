@@ -15,6 +15,8 @@ export interface HomeAssistant {
   callApi?<T = unknown>(method: 'GET' | 'POST', path: string, data?: Record<string, unknown>): Promise<T>;
   /** WebSocket-Befehl (Entitäts-Register, vacuum/get_segments, Reparaturen – Einrichtungsprüfung PD-014). */
   callWS?<T = unknown>(msg: Record<string, unknown>): Promise<T>;
+  /** Ereignisse des HA-Busses abonnieren (entity_registry_updated → Einrichtungsprüfung sofort neu laden). */
+  connection?: { subscribeEvents<T = unknown>(callback: (ev: T) => void, eventType: string): Promise<() => void> };
   language?: string;
   themes?: { darkMode?: boolean };
   /** Angemeldeter Benutzer (für den Tagesgruß der Übersicht, Bauplan 4.0). */

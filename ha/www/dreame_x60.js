@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.26 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.27 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -2197,7 +2197,7 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.26";
+var VERSION = "2.0.0-alpha.27";
 
 // src/shared/robot-svg.ts
 var robotSvg = w`<svg viewBox="0 0 200 200" class="robotpic" aria-hidden="true">
@@ -3411,6 +3411,9 @@ var DreameX60Panel = class extends i4 {
     super();
     this._setupVac = "";
     this._setupEntities = UNSET;
+    /** Abo auf entity_registry_updated (Bereichszuordnung gespeichert → sofort neu laden), einmal je Verbindung */
+    this._registryUnsub = null;
+    this._registryConn = null;
     /** Schreibzugriffe – eine Instanz je Shell, liest hass zur Laufzeit. */
     this.api = new DxApi(() => this.hass);
     this._toastTimer = null;
@@ -3452,6 +3455,7 @@ var DreameX60Panel = class extends i4 {
         this._setupVac = vac;
         this.refreshSetup(false);
       }
+      this.subscribeRegistry(this.hass);
       const ents = this.hass.entities;
       if (ents !== this._setupEntities) {
         const first = this._setupEntities === UNSET;
@@ -3459,6 +3463,20 @@ var DreameX60Panel = class extends i4 {
         if (!first) this.refreshSetup(true);
       }
     }
+  }
+  /** entity_registry_updated abonnieren: Änderung am Roboter-Eintrag (z. B. Bereichszuordnung) → Einrichtungsprüfung sofort neu. */
+  subscribeRegistry(hass) {
+    const conn = hass.connection;
+    if (!conn || conn === this._registryConn) return;
+    this._registryConn = conn;
+    this._registryUnsub?.();
+    this._registryUnsub = null;
+    void conn.subscribeEvents((ev) => {
+      const id = ev?.data?.entity_id;
+      if (!id || id === this._setupVac || id.startsWith("vacuum.")) this.refreshSetup(true);
+    }, "entity_registry_updated").then((unsub) => {
+      this._registryUnsub = unsub;
+    }, () => void 0);
   }
   /** Bereichszuordnung/Reparaturen nachladen (Cache 5 min); Ergebnis nur setzen, wenn es sich geändert hat. */
   refreshSetup(force) {
@@ -3498,6 +3516,9 @@ var DreameX60Panel = class extends i4 {
       clearTimeout(this._clockTimer);
       this._clockTimer = null;
     }
+    this._registryUnsub?.();
+    this._registryUnsub = null;
+    this._registryConn = null;
     super.disconnectedCallback();
   }
   /** Nächster Tick zur vollen Minute (+50 ms), damit die Uhr nie eine Minute hinterherhinkt. */

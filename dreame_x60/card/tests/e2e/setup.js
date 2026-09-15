@@ -52,9 +52,13 @@ const tick = (page, ms = 250) => page.waitForTimeout(ms);
   const { page, errs } = await H.mount(b, { page: 'start', states: withSwitch(docked, true), wsResponses: { 'config/entity_registry/get': partialMapping, 'vacuum/get_segments': segments, 'repairs/list_issues': { issues: [] } }, viewport: { width: 1400, height: 1400 } });
   await tick(page);
   H.checkEqual('vorher: rotes Bereiche-Symbol', (await icons(page)).map((i) => i.key), ['areas']);
-  await page.evaluate((full) => { window._wsResponses['config/entity_registry/get'] = full; const el = document.querySelector('dreame-x60-panel'); el.hass = { ...el.hass, entities: { 'vacuum.heidi': { entity_id: 'vacuum.heidi' } } }; }, fullMapping);
+  H.check('Abo auf entity_registry_updated besteht', await page.evaluate(() => typeof (window._subs || {}).entity_registry_updated === 'function'));
+  await page.evaluate((full) => { window._wsResponses['config/entity_registry/get'] = full; window._subs.entity_registry_updated({ data: { action: 'update', entity_id: 'vacuum.heidi' } }); }, fullMapping);
   await tick(page, 400);
-  H.checkEqual('nachher: kein Symbol (Register-Wechsel löst Neuladen aus)', (await icons(page)).map((i) => i.key), []);
+  H.checkEqual('nachher: kein Symbol (Ereignis entity_registry_updated löst Neuladen aus)', (await icons(page)).map((i) => i.key), []);
+  await page.evaluate(() => { window._wsResponses['config/entity_registry/get'] = { options: {} }; const el = document.querySelector('dreame-x60-panel'); el.hass = { ...el.hass, entities: { 'vacuum.heidi': { entity_id: 'vacuum.heidi' } } }; });
+  await tick(page, 400);
+  H.checkEqual('auch ein neues hass.entities lädt neu (wieder rot)', (await icons(page)).map((i) => i.key), ['areas']);
   H.check('keine Konsolenfehler', errs.length === 0, errs);
   await page.close();
 }
