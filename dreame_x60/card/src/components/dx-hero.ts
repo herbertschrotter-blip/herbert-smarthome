@@ -1,5 +1,6 @@
 // dx-hero – Roboter-Panel der Übersicht (Bauplan 4.1, Mockup bento.html): Name, Status, Station, Roboter-Bild, Akku,
-// Chips (Personen, Raum, Hinweis/Fehler, Nicht stören), drei Werte Modus/Saugleistung/Wasser, Knöpfe, Streifen im Lauf.
+// Chips (Raum, Hinweis/Fehler), drei Werte Modus/Saugleistung/Wasser, Knöpfe, Streifen im Lauf.
+// Personen und Nicht-stören-Zeit stehen nicht mehr hier (PD-009): Kopfzeile bzw. Kachel „Heute“ (4.10) und Roboter-Einstellungen.
 // Texte und Knöpfe kommen aus domain/status.ts (hero), der Streifen aus domain/strip.ts. Schreiben nur über api.vacuum.
 // Bekommt memoisierte Sichten; bei gleicher Referenz rendert Lit nicht neu (Regel 10).
 import { LitElement, html, css, nothing } from 'lit';
@@ -108,7 +109,7 @@ export class DxHero extends LitElement {
           <div class="battrow"><div class="battbar ${battCls}" style="--p:${r.battery}"><i></i></div>${r.charging ? html`<ha-icon class="bolt" icon="mdi:flash" title="lädt"></ha-icon>` : nothing}</div>
         </button>
       </div>
-      <div class="chips">${r.persons.filter((p) => p.known).map((p) => html`<button class="chip ${p.home ? 'on' : ''} ${p.counts ? '' : 'dim'}" title="${p.home ? 'zu Hause' : 'abwesend'}${p.counts ? '' : ' · zählt nicht'}" @click=${() => moreInfo(this, p.id)}><ha-icon icon=${p.home ? 'mdi:account' : 'mdi:account-outline'}></ha-icon>${p.name}</button>`)}${h.roomChip ? html`<span class="chip on"><ha-icon icon="mdi:floor-plan"></ha-icon>${h.roomChip}</span>` : nothing}${h.errorChip ? html`<button class="chip ${h.errorChip.level === 'danger' ? 'bad' : 'warn'}" @click=${() => moreInfo(this, r.moreInfo.error)}><ha-icon icon=${h.errorChip.level === 'danger' ? 'mdi:alert' : 'mdi:information-outline'}></ha-icon>${h.errorChip.text}</button>` : nothing}<span class="chip" title="Nicht stören"><ha-icon icon="mdi:sleep"></ha-icon>${h.dnd}</span></div>
+      ${h.roomChip || h.errorChip ? html`<div class="chips">${h.roomChip ? html`<span class="chip on"><ha-icon icon="mdi:floor-plan"></ha-icon>${h.roomChip}</span>` : nothing}${h.errorChip ? html`<button class="chip ${h.errorChip.level === 'danger' ? 'bad' : 'warn'}" @click=${() => moreInfo(this, r.moreInfo.error)}><ha-icon icon=${h.errorChip.level === 'danger' ? 'mdi:alert' : 'mdi:information-outline'}></ha-icon>${h.errorChip.text}</button>` : nothing}</div>` : nothing}
       <div class="params">
         <button class="param" title="Reinigungsmodus" @click=${this.openRooms}><ha-icon icon="mdi:broom"></ha-icon><b>${modus}</b><span>Modus</span></button>
         <button class="param" title="Saugleistung" @click=${this.openRooms}><ha-icon icon="mdi:fan"></ha-icon><b>${saug}</b><span>Saugstufe</span></button>

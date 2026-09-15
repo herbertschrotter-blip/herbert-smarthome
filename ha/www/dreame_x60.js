@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.8 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.9 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -1777,7 +1777,7 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.8";
+var VERSION = "2.0.0-alpha.9";
 
 // src/shared/robot-svg.ts
 var robotSvg = w`<svg viewBox="0 0 200 200" class="robotpic" aria-hidden="true">
@@ -2075,7 +2075,7 @@ var DxHero = class extends i4 {
           <div class="battrow"><div class="battbar ${battCls}" style="--p:${r4.battery}"><i></i></div>${r4.charging ? b2`<ha-icon class="bolt" icon="mdi:flash" title="lädt"></ha-icon>` : A}</div>
         </button>
       </div>
-      <div class="chips">${r4.persons.filter((p3) => p3.known).map((p3) => b2`<button class="chip ${p3.home ? "on" : ""} ${p3.counts ? "" : "dim"}" title="${p3.home ? "zu Hause" : "abwesend"}${p3.counts ? "" : " \xB7 z\xE4hlt nicht"}" @click=${() => moreInfo(this, p3.id)}><ha-icon icon=${p3.home ? "mdi:account" : "mdi:account-outline"}></ha-icon>${p3.name}</button>`)}${h3.roomChip ? b2`<span class="chip on"><ha-icon icon="mdi:floor-plan"></ha-icon>${h3.roomChip}</span>` : A}${h3.errorChip ? b2`<button class="chip ${h3.errorChip.level === "danger" ? "bad" : "warn"}" @click=${() => moreInfo(this, r4.moreInfo.error)}><ha-icon icon=${h3.errorChip.level === "danger" ? "mdi:alert" : "mdi:information-outline"}></ha-icon>${h3.errorChip.text}</button>` : A}<span class="chip" title="Nicht stören"><ha-icon icon="mdi:sleep"></ha-icon>${h3.dnd}</span></div>
+      ${h3.roomChip || h3.errorChip ? b2`<div class="chips">${h3.roomChip ? b2`<span class="chip on"><ha-icon icon="mdi:floor-plan"></ha-icon>${h3.roomChip}</span>` : A}${h3.errorChip ? b2`<button class="chip ${h3.errorChip.level === "danger" ? "bad" : "warn"}" @click=${() => moreInfo(this, r4.moreInfo.error)}><ha-icon icon=${h3.errorChip.level === "danger" ? "mdi:alert" : "mdi:information-outline"}></ha-icon>${h3.errorChip.text}</button>` : A}</div>` : A}
       <div class="params">
         <button class="param" title="Reinigungsmodus" @click=${this.openRooms}><ha-icon icon="mdi:broom"></ha-icon><b>${modus}</b><span>Modus</span></button>
         <button class="param" title="Saugleistung" @click=${this.openRooms}><ha-icon icon="mdi:fan"></ha-icon><b>${saug}</b><span>Saugstufe</span></button>

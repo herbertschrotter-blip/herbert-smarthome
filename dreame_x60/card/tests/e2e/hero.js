@@ -35,7 +35,9 @@ let bad = 0;
 for (const v of v1.vektoren) {
   await setStates(statesFor(v));
   const got = await readHero();
-  const want = { big: v.output.big, sub: v.output.sub, btns: v.output.btns, chips: v.output.chips.map((c) => ({ text: c.text.replace('Mopps', 'Mopp') /* PD-008 */, on: /\bon\b/.test(c.cls) })), strip: v.output.strip };
+  // PD-009: Personen- und Nicht-stören-Chips sind nicht mehr im Panel (Kopfzeile / Kachel „Heute“) – aus der v1-Vorgabe herausfiltern
+  const PERSONS = ['Herbert', 'Nicole', 'Nina'];
+  const want = { big: v.output.big, sub: v.output.sub, btns: v.output.btns, chips: v.output.chips.filter((c) => !PERSONS.includes(c.text) && !/^\d\d:\d\d–/.test(c.text) && !/^–/.test(c.text)).map((c) => ({ text: c.text.replace('Mopps', 'Mopp') /* PD-008 */, on: /\bon\b/.test(c.cls) })), strip: v.output.strip };
   const ok = got.big === want.big && got.sub === want.sub && JSON.stringify(got.btns) === JSON.stringify(want.btns)
     && JSON.stringify(got.chips) === JSON.stringify(want.chips) && norm(got.strip) === norm(want.strip);
   if (!ok) { bad++; H.check(`Kopf: ${v.name}`, false, { erwartet: want, bekommen: got }); }
@@ -111,12 +113,16 @@ await setStates(docked);
   await page.waitForTimeout(40);
   H.check('Wert antippen → Overlay rooms (Roboter)', await page.evaluate(() => { const el = document.querySelector('dreame-x60-panel'); return !!el.shadowRoot.querySelector('.overlay[data-kind="rooms"]') && el.overlay.mode === 'robot'; }));
   await page.evaluate(() => document.querySelector('dreame-x60-panel').closeOverlay());
+  H.check('Leerlauf ohne Hinweis: keine Chip-Zeile (Personen/DND nicht mehr im Panel, PD-009)', !(await page.evaluate(() => !!document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-hero').shadowRoot.querySelector('.chips'))));
+  const s = { ...docked }; s['sensor.heidi_error'] = { ...s['sensor.heidi_error'], state: 'clean_mop_pad' };
+  await setStates(s);
   const more = await page.evaluate(() => new Promise((resolve) => {
     document.addEventListener('hass-more-info', (e) => resolve(e.detail.entityId), { once: true });
     document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-hero').shadowRoot.querySelector('.chips .chip').click();
     setTimeout(() => resolve(null), 300);
   }));
-  H.checkEqual('Personen-Chip → hass-more-info mit person-Entität', more, 'person.herbert_schrotter');
+  H.checkEqual('Hinweis-Chip „Mopp reinigen“ → hass-more-info mit sensor.heidi_error', more, 'sensor.heidi_error');
+  await setStates(docked);
 }
 
 // ── Render-Ruhe: 20 irrelevante Ticks → 0 Renderaufrufe; relevanter Tick → 1 ──
