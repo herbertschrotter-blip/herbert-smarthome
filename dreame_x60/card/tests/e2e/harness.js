@@ -1,5 +1,6 @@
 // Gemeinsames Gerüst für die E2E-Tests der v2-Karte (Playwright, Chromium).
-// - Lädt das gebaute Bundle ha/www/dreame_x60.js in eine leere Seite mit ha-icon- und loadCardHelpers-Stubs.
+// - Serviert eine leere Seite unter http://dx.test/dreame-x60/<page> (echter Ursprung, damit history.pushState geht)
+//   mit ha-icon- und loadCardHelpers-Stubs und lädt das gebaute Bundle ha/www/dreame_x60.js.
 // - hass-Mock mit Call-Log (callService), callApi-Mock und Fehlerinjektion.
 // - check/checkEqual setzen process.exitCode = 1 bei jeder Abweichung (Regel 7).
 import { chromium } from 'playwright';
@@ -13,6 +14,7 @@ export const BUNDLE = path.resolve(CARD_DIR, '..', '..', 'ha', 'www', 'dreame_x6
 export const FIXTURES = path.resolve(CARD_DIR, 'tests', 'fixtures');
 export const OUT = path.resolve(CARD_DIR, 'tests', 'e2e', 'out');
 export const VERSION = JSON.parse(fs.readFileSync(path.resolve(CARD_DIR, 'package.json'), 'utf8')).version;
+export const ORIGIN = 'http://dx.test';
 
 let failed = 0, passed = 0;
 const fmt = (v) => (typeof v === 'string' ? v : JSON.stringify(v));
@@ -37,9 +39,15 @@ export function loadFixture(name = 'states-docked.json') {
   return JSON.parse(fs.readFileSync(path.join(FIXTURES, name), 'utf8'));
 }
 
+const PAGE_HTML = `<!doctype html><html><head><meta charset="utf-8"><title>dx test</title></head><body style="margin:0;background:#06090c"><script>
+  class HaIcon extends HTMLElement { connectedCallback(){ this.innerHTML='<span style="display:inline-block;width:1em;height:1em;border-radius:3px;background:currentColor;opacity:.6"></span>'; } }
+  customElements.define('ha-icon', HaIcon);
+  window.loadCardHelpers = async () => ({ createCardElement: (cfg) => { const d=document.createElement('div'); d.className='map-stub'; d.style.cssText='height:300px;background:#1c2732;color:#9ab;display:grid;place-items:center'; d.textContent='[Karte: '+cfg.type+']'; return d; } });
+</script></body></html>`;
+
 /**
  * Seite mit der Karte aufbauen.
- * opts: { fixture, page, viewport, config, failCalls: [ 'domain.service' ], apiResponse }
+ * opts: { fixture, states, page, viewport, config, failCalls: ['domain.service'], apiResponse }
  * Liefert { page, errs, states }. Im Browser: window._calls (Call-Log), window._api (callApi-Pfade).
  */
 export async function mount(browser, opts = {}) {
@@ -47,13 +55,11 @@ export async function mount(browser, opts = {}) {
   const errs = [];
   page.on('pageerror', (e) => errs.push(e.message));
   page.on('console', (m) => { if (m.type() === 'error') errs.push('console: ' + m.text()); });
+  await page.route(`${ORIGIN}/**`, (route) => route.fulfill({ status: 200, contentType: 'text/html; charset=utf-8', body: PAGE_HTML }));
+  const pg = opts.config?.page ?? opts.page ?? 'start';
+  await page.goto(`${ORIGIN}/dreame-x60/${pg}`);
   const js = fs.readFileSync(BUNDLE, 'utf8');
   const states = opts.states || loadFixture(opts.fixture);
-  await page.setContent(`<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0;background:#06090c"><script>
-    class HaIcon extends HTMLElement { connectedCallback(){ this.innerHTML='<span style="display:inline-block;width:1em;height:1em;border-radius:3px;background:currentColor;opacity:.6"></span>'; } }
-    customElements.define('ha-icon', HaIcon);
-    window.loadCardHelpers = async () => ({ createCardElement: (cfg) => { const d=document.createElement('div'); d.className='map-stub'; d.style.cssText='height:300px;background:#1c2732;color:#9ab;display:grid;place-items:center'; d.textContent='[Karte: '+cfg.type+']'; return d; } });
-  </script></body></html>`);
   await page.addScriptTag({ content: js, type: 'module' });
   await page.waitForFunction(() => !!customElements.get('dreame-x60-panel'));
   await page.evaluate(({ states, config, failCalls, apiResponse }) => {
@@ -66,7 +72,7 @@ export async function mount(browser, opts = {}) {
       callApi: async (m, p) => { window._api.push(p); return apiResponse ?? []; },
     };
     document.body.appendChild(el);
-  }, { states, config: opts.config || { page: opts.page || 'start' }, failCalls: opts.failCalls || [], apiResponse: opts.apiResponse ?? null });
+  }, { states, config: opts.config || { page: pg }, failCalls: opts.failCalls || [], apiResponse: opts.apiResponse ?? null });
   await page.waitForTimeout(150);
   return { page, errs, states };
 }

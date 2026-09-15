@@ -550,6 +550,845 @@ var o4 = s3.litElementPolyfillSupport;
 o4?.({ LitElement: i4 });
 (s3.litElementVersions ??= []).push("4.2.2");
 
+// src/ha/contract.ts
+var ROOM_IDS = [1, 2, 3, 4, 5, 6, 7];
+var PLAN_NUMBERS = [1, 2, 3, 4];
+var ENTITIES = {
+  // Roboter (Dreame-Integration)
+  vac: "vacuum.heidi",
+  map: "camera.heidi_map",
+  status: "sensor.heidi_status",
+  error: "sensor.heidi_error",
+  taskStatus: "sensor.heidi_task_status",
+  battery: "sensor.heidi_battery_level",
+  currentRoom: "sensor.heidi_current_room",
+  cleanedArea: "sensor.heidi_cleaned_area",
+  cleaningTime: "sensor.heidi_cleaning_time",
+  cleaningHistory: "sensor.heidi_cleaning_history",
+  cleaningCount: "sensor.heidi_cleaning_count",
+  totalCleanedArea: "sensor.heidi_total_cleaned_area",
+  totalCleaningTime: "sensor.heidi_total_cleaning_time",
+  firstCleaningDate: "sensor.heidi_first_cleaning_date",
+  mainBrushLeft: "sensor.heidi_main_brush_left",
+  sideBrushLeft: "sensor.heidi_side_brush_left",
+  filterLeft: "sensor.heidi_filter_left",
+  sensorDirtyLeft: "sensor.heidi_sensor_dirty_left",
+  wheelDirtyLeft: "sensor.heidi_wheel_dirty_left",
+  dustBagStatus: "sensor.heidi_dust_bag_status",
+  cleanWaterTankStatus: "sensor.heidi_clean_water_tank_status",
+  dirtyWaterTankStatus: "sensor.heidi_dirty_water_tank_status",
+  detergentStatus: "sensor.heidi_detergent_status",
+  lowWaterWarning: "sensor.heidi_low_water_warning",
+  autoEmptyStatus: "sensor.heidi_auto_empty_status",
+  selfWashBaseStatus: "sensor.heidi_self_wash_base_status",
+  resetMainBrush: "button.heidi_reset_main_brush",
+  resetSideBrush: "button.heidi_reset_side_brush",
+  resetFilter: "button.heidi_reset_filter",
+  resetSensor: "button.heidi_reset_sensor",
+  resetWheel: "button.heidi_reset_wheel",
+  startAutoEmpty: "button.heidi_start_auto_empty",
+  selfClean: "button.heidi_self_clean",
+  manualDrying: "button.heidi_manual_drying",
+  baseStationCleaning: "button.heidi_base_station_cleaning",
+  customizedCleaning: "switch.heidi_customized_cleaning",
+  carpetCleaning: "select.heidi_carpet_cleaning",
+  waterTemperature: "select.heidi_water_temperature",
+  dryingTime: "select.heidi_drying_time",
+  autoEmptyMode: "select.heidi_auto_empty_mode",
+  selfCleanFrequency: "select.heidi_self_clean_frequency",
+  cleangenius: "select.heidi_cleangenius",
+  mapRotation: "select.heidi_map_rotation",
+  selfCleanArea: "number.heidi_self_clean_area",
+  volume: "number.heidi_volume",
+  dndStart: "time.heidi_dnd_start",
+  dndEnd: "time.heidi_dnd_end",
+  // Paket (ha/packages/heidi.yaml)
+  heutePlan: "sensor.heidi_heutiger_plan",
+  autoStatus: "sensor.heidi_automatik_status",
+  phase: "sensor.heidi_phase",
+  prognose: "sensor.heidi_prognose",
+  lern: "sensor.heidi_lernwerte",
+  jemand: "binary_sensor.heidi_jemand_zu_hause",
+  arbeitszeit: "binary_sensor.heidi_arbeitszeit",
+  nichtStoeren: "binary_sensor.heidi_nicht_storen",
+  // ö → o in der ID (HA), nicht „stoeren“
+  automatik: "input_boolean.heidi_automatik",
+  dark: "input_boolean.heidi_dark_mode",
+  planerBereich: "input_boolean.heidi_planer_bereich",
+  prognoseAktiv: "input_boolean.heidi_prognose_aktiv",
+  abweichungHeute: "input_boolean.heidi_abweichung_heute",
+  ninaZaehlt: "input_boolean.heidi_nina_zaehlt",
+  progHerbert: "input_boolean.heidi_prog_herbert",
+  progNicole: "input_boolean.heidi_prog_nicole",
+  progNina: "input_boolean.heidi_prog_nina",
+  autoLauf: "input_boolean.heidi_auto_lauf",
+  chairs: "input_boolean.stuehle_am_boden",
+  autoLetzterPlan: "input_text.heidi_auto_letzter_plan",
+  raumSnapshot: "input_text.heidi_raum_snapshot",
+  laufReihenfolge: "input_text.heidi_lauf_reihenfolge",
+  letzteAutoReinigung: "input_datetime.heidi_letzte_auto_reinigung",
+  arbeitszeitStart: "input_datetime.heidi_arbeitszeit_start",
+  arbeitszeitEnde: "input_datetime.heidi_arbeitszeit_ende",
+  rueckkehr: "input_datetime.heidi_rueckkehr",
+  karte: "input_select.heidi_kartendarstellung",
+  raumnamen: "input_select.heidi_raumnamen",
+  beiHeimkehr: "input_select.heidi_bei_heimkehr",
+  schnellMinuten: "input_number.heidi_schnell_minuten",
+  minAkku: "input_number.heidi_min_akku",
+  prognoseIntervall: "input_number.heidi_prognose_intervall",
+  prognoseAufloesung: "input_number.heidi_prognose_aufloesung",
+  prognoseWochen: "input_number.heidi_prognose_wochen",
+  prognoseHalbwert: "input_number.heidi_prognose_halbwert",
+  prognoseMindesttage: "input_number.heidi_prognose_mindesttage"
+};
+var PERSONS = [
+  { id: "person.herbert_schrotter", key: "herbert", name: "Herbert", letter: "H" },
+  { id: "person.nicole_2", key: "nicole", name: "Nicole", letter: "N" },
+  { id: "person.nina_2", key: "nina", name: "Nina", letter: "N", optional: ENTITIES.ninaZaehlt }
+];
+var PLAN_TEXT_FIELDS = ["name", "raeume", "tage", "personen", "raumwerte"];
+var PLAN_SELECT_FIELDS = ["modus", "saugstufe", "wasser", "route", "wiederholungen", "homeoffice", "ho_saug", "ho_wdh", "sp_saug", "sp_wdh"];
+var PLAN_BOOL_FIELDS = ["aktiv", "schnell"];
+var PLAN_TIME_FIELDS = ["zeit"];
+function planEntity(n4, feld) {
+  const domain = PLAN_TEXT_FIELDS.includes(feld) ? "input_text" : PLAN_SELECT_FIELDS.includes(feld) ? "input_select" : PLAN_BOOL_FIELDS.includes(feld) ? "input_boolean" : "input_datetime";
+  return `${domain}.heidi_plan${n4}_${feld}`;
+}
+var ROOM_SELECT_FIELDS = ["cleaning_mode", "suction_level", "cleaning_times", "mop_pad_humidity", "cleaning_route"];
+function roomEntity(id, feld) {
+  return `select.heidi_room_${id}_${feld}`;
+}
+var ROOM_VALUE_CODES = {
+  RV: {
+    modus: { S: "Saugen", B: "Saugen + Wischen", W: "Nur Wischen" },
+    saug: { L: "Leise", S: "Standard", K: "Stark", T: "Turbo" },
+    wasser: { W: "Wenig", M: "Mittel", V: "Viel" },
+    route: { S: "Standard", I: "Intensiv", T: "Tief" }
+  },
+  RV_HA: {
+    modus: { sweeping: "Saugen", sweeping_and_mopping: "Saugen + Wischen", mopping: "Nur Wischen" },
+    saug: { quiet: "Leise", standard: "Standard", strong: "Stark", turbo: "Turbo" },
+    wasser: { slightly_dry: "Wenig", moist: "Mittel", wet: "Viel" },
+    route: { standard: "Standard", intensive: "Intensiv", deep: "Tief" }
+  },
+  RV_ENT: { modus: "cleaning_mode", saug: "suction_level", wasser: "mop_pad_humidity", route: "cleaning_route", wdh: "cleaning_times" },
+  RV_KEYS: ["modus", "saug", "wasser", "route", "wdh"]
+};
+var SERVICES = {
+  vacuum: { domain: "vacuum", services: ["start", "pause", "stop", "return_to_base", "locate"] },
+  cleanSegment: { domain: "dreame_vacuum", service: "vacuum_clean_segment" },
+  // { entity_id, segments, repeats?, suction_level? }
+  setRestrictedZone: { domain: "dreame_vacuum", service: "vacuum_set_restricted_zone" },
+  // { entity_id, zones, no_mops, walls? } – ersetzt alle
+  planStarten: { domain: "script", service: "heidi_plan_starten" },
+  // { plan: 1..4, variante: normal|schnell|leise }
+  appSzene: { domain: "script", service: "heidi_app_szene" },
+  // { shortcut_id }
+  prognoseReset: { domain: "shell_command", service: "heidi_prognose_reset" },
+  press: { domain: "button", service: "press" },
+  selectOption: { domain: "select", service: "select_option" },
+  inputSelectOption: { domain: "input_select", service: "select_option" },
+  inputText: { domain: "input_text", service: "set_value" },
+  inputNumber: { domain: "input_number", service: "set_value" },
+  inputDatetime: { domain: "input_datetime", service: "set_datetime" },
+  number: { domain: "number", service: "set_value" },
+  time: { domain: "time", service: "set_value" },
+  inputBoolean: { domain: "input_boolean", services: ["turn_on", "turn_off", "toggle"] }
+};
+function historyPath(startIso, endIso) {
+  return `history/period/${startIso}?filter_entity_id=${ENTITIES.phase},${ENTITIES.vac}&end_time=${encodeURIComponent(endIso)}&minimal_response&no_attributes`;
+}
+function allContractIds() {
+  const ids = [...Object.values(ENTITIES), ...PERSONS.map((p3) => p3.id)];
+  for (const n4 of PLAN_NUMBERS) for (const f3 of [...PLAN_TEXT_FIELDS, ...PLAN_SELECT_FIELDS, ...PLAN_BOOL_FIELDS, ...PLAN_TIME_FIELDS]) ids.push(planEntity(n4, f3));
+  for (const r4 of ROOM_IDS) for (const f3 of ROOM_SELECT_FIELDS) ids.push(roomEntity(r4, f3));
+  return [...new Set(ids)];
+}
+
+// src/domain/raumwerte.ts
+var { RV } = ROOM_VALUE_CODES;
+function lookup(table, code) {
+  return code !== void 0 && Object.prototype.hasOwnProperty.call(table, code) ? table[code] : void 0;
+}
+function inverse(table) {
+  return Object.fromEntries(Object.entries(table).map(([k2, v2]) => [v2, k2]));
+}
+var INV = { modus: inverse(RV.modus), saug: inverse(RV.saug), wasser: inverse(RV.wasser), route: inverse(RV.route) };
+function parseRaum(s4) {
+  const out = {};
+  String(s4 ?? "").split(";").forEach((part) => {
+    const [id, rest] = part.split(":");
+    if (!id || !rest) return;
+    const f3 = rest.split("/");
+    const n4 = parseInt(id, 10);
+    if (!(n4 >= 1 && n4 <= 7)) return;
+    out[n4] = {
+      modus: lookup(RV.modus, f3[0]) ?? "Saugen",
+      saug: lookup(RV.saug, f3[1]) ?? "Standard",
+      wasser: lookup(RV.wasser, f3[2]) ?? null,
+      route: lookup(RV.route, f3[3]) ?? null,
+      wdh: /^[123]$/.test(f3[4] ?? "") ? f3[4] : "1"
+    };
+  });
+  return out;
+}
+function encodeRaum(o5) {
+  return Object.keys(o5).map((n4) => parseInt(n4, 10)).sort((a3, b3) => a3 - b3).map((n4) => {
+    const v2 = o5[n4] ?? {};
+    const code = (k2) => {
+      const val = v2[k2];
+      return val != null && INV[k2][val] || "-";
+    };
+    return `${n4}:${code("modus")}/${code("saug")}/${v2.modus === "Saugen" ? "-" : code("wasser")}/${v2.modus === "Nur Wischen" ? code("route") : "-"}/${v2.wdh || "1"}`;
+  }).join(";");
+}
+
+// src/ha/api.ts
+var INTERVAL_STEPS = [5, 10, 15, 20, 30, 60];
+var roundInterval = (v2) => INTERVAL_STEPS.reduce((a3, b3) => Math.abs(b3 - v2) < Math.abs(a3 - v2) ? b3 : a3, INTERVAL_STEPS[0]);
+var inverse2 = (t3) => Object.fromEntries(Object.entries(t3).map(([k2, v2]) => [v2, k2]));
+var RV_HA_INV = { modus: inverse2(ROOM_VALUE_CODES.RV_HA.modus), saug: inverse2(ROOM_VALUE_CODES.RV_HA.saug), wasser: inverse2(ROOM_VALUE_CODES.RV_HA.wasser), route: inverse2(ROOM_VALUE_CODES.RV_HA.route) };
+var DxApi = class {
+  constructor(getHass) {
+    this.getHass = getHass;
+  }
+  hass() {
+    const h3 = this.getHass();
+    if (!h3) throw new Error("Keine Verbindung zu Home Assistant");
+    return h3;
+  }
+  /** Ein Dienstaufruf. */
+  async call(domain, service, data) {
+    return this.hass().callService(domain, service, data);
+  }
+  /** Mehrere Aufrufe parallel; liefert die fehlgeschlagenen Kennungen. */
+  async many(calls) {
+    const results = await Promise.allSettled(calls.map((c4) => c4.run()));
+    const fehlgeschlagen = results.flatMap((r4, i5) => r4.status === "rejected" ? [calls[i5].key] : []);
+    return { ok: fehlgeschlagen.length === 0, fehlgeschlagen };
+  }
+  // ───────── Roboter ─────────
+  vacuum(service) {
+    return this.call(SERVICES.vacuum.domain, service, { entity_id: ENTITIES.vac });
+  }
+  press(entityId) {
+    return this.call(SERVICES.press.domain, SERVICES.press.service, { entity_id: entityId });
+  }
+  cleanSegments(segments) {
+    return this.call(SERVICES.cleanSegment.domain, SERVICES.cleanSegment.service, { entity_id: ENTITIES.vac, segments });
+  }
+  /** Raumwert am Roboter sofort setzen; `'all'` = alle sieben Räume parallel. Wdh als „2x“, sonst HA-Option aus RV_HA. */
+  setRoomValue(room, key, value) {
+    const ids = room === "all" ? ROOM_IDS : [room];
+    const option = key === "wdh" ? `${value}x` : RV_HA_INV[key][value] ?? value;
+    const field = ROOM_VALUE_CODES.RV_ENT[key];
+    return this.many(ids.map((id) => ({ key: roomEntity(id, field), run: () => this.call(SERVICES.selectOption.domain, SERVICES.selectOption.service, { entity_id: roomEntity(id, field), option }) })));
+  }
+  /** Sperrzonen: ersetzt alle Einträge der gesendeten Listen (ein Aufruf). */
+  async setZones(z2) {
+    const data = { entity_id: ENTITIES.vac, zones: z2.zones, no_mops: z2.no_mops };
+    if (z2.walls) data.walls = z2.walls;
+    return this.many([{ key: SERVICES.setRestrictedZone.service, run: () => this.call(SERVICES.setRestrictedZone.domain, SERVICES.setRestrictedZone.service, data) }]);
+  }
+  // ───────── Planer ─────────
+  /** Eintrag starten; verweigert (ohne Aufruf), wenn der Eintrag inaktiv ist. */
+  async runPlan(n4, variante = "normal") {
+    const aktiv = this.hass().states[planEntity(n4, "aktiv")]?.state === "on";
+    if (!aktiv) return { ok: false, fehlgeschlagen: [], grund: "inaktiv" };
+    await this.call(SERVICES.planStarten.domain, SERVICES.planStarten.service, { plan: n4, variante });
+    return { ok: true, fehlgeschlagen: [] };
+  }
+  runScene(shortcutId) {
+    return this.call(SERVICES.appSzene.domain, SERVICES.appSzene.service, { shortcut_id: shortcutId });
+  }
+  /** Eintrag speichern: 18 Aufrufe in v1-Reihenfolge, Teilfehler benannt. Prüft Name und mindestens einen Raum. */
+  async savePlan(n4, d3) {
+    const name = d3.name.trim();
+    if (!name) return { ok: false, fehlgeschlagen: [], grund: "name" };
+    if (!d3.raeume.length) return { ok: false, fehlgeschlagen: [], grund: "raeume" };
+    const calls = [];
+    const txt2 = (k2, value) => {
+      const id = planEntity(n4, k2);
+      calls.push({ key: id, run: () => this.call(SERVICES.inputText.domain, SERVICES.inputText.service, { entity_id: id, value }) });
+    };
+    const sel = (k2, option) => {
+      const id = planEntity(n4, k2);
+      calls.push({ key: id, run: () => this.call(SERVICES.inputSelectOption.domain, SERVICES.inputSelectOption.service, { entity_id: id, option }) });
+    };
+    const bool = (k2, v2) => {
+      const id = planEntity(n4, k2);
+      calls.push({ key: id, run: () => this.call(SERVICES.inputBoolean.domain, v2 ? "turn_on" : "turn_off", { entity_id: id }) });
+    };
+    const raum = {};
+    for (const [id, v2] of Object.entries(d3.raum)) if (d3.raeume.includes(parseInt(id, 10))) raum[id] = v2;
+    txt2("name", name);
+    txt2("raeume", d3.raeume.join(","));
+    txt2("tage", d3.tage.map((b3) => b3 ? "1" : "0").join(""));
+    txt2("personen", d3.personen.join(","));
+    txt2("raumwerte", encodeRaum(raum));
+    sel("modus", d3.modus);
+    sel("saugstufe", d3.saug);
+    sel("wasser", d3.wasser);
+    sel("route", d3.route);
+    sel("wiederholungen", d3.wdh);
+    sel("homeoffice", d3.ho);
+    sel("ho_saug", d3.hoSaug);
+    sel("ho_wdh", d3.hoWdh);
+    sel("sp_saug", d3.spSaug);
+    sel("sp_wdh", d3.spWdh);
+    bool("aktiv", d3.aktiv);
+    bool("schnell", d3.schnell);
+    const zeitId = planEntity(n4, "zeit");
+    calls.push({ key: zeitId, run: () => this.call(SERVICES.inputDatetime.domain, SERVICES.inputDatetime.service, { entity_id: zeitId, time: `${d3.zeit}:00` }) });
+    return this.many(calls);
+  }
+  // ───────── Helfer und Einstellungen ─────────
+  toggle(entityId) {
+    return this.call(SERVICES.inputBoolean.domain, "toggle", { entity_id: entityId });
+  }
+  /** Ein-/Ausschalten ausdrücklich (Dark-Mode-Segment: turn_on/turn_off statt toggle). */
+  setBoolean(entityId, on2) {
+    return this.call(SERVICES.inputBoolean.domain, on2 ? "turn_on" : "turn_off", { entity_id: entityId });
+  }
+  /** select.* und input_select.*: Domäne aus der ID. */
+  selectOption(entityId, option) {
+    return this.call(entityId.split(".")[0], "select_option", { entity_id: entityId, option });
+  }
+  /** number.* und input_number.*: Domäne aus der ID; Prognose-Intervall wird auf 5/10/15/20/30/60 gerundet. Liefert den gesetzten Wert. */
+  async setNumber(entityId, value) {
+    const v2 = entityId === ENTITIES.prognoseIntervall ? roundInterval(value) : value;
+    await this.call(entityId.split(".")[0], "set_value", { entity_id: entityId, value: v2 });
+    return v2;
+  }
+  /** time.* → time.set_value, input_datetime.* → input_datetime.set_datetime; Zeit „HH:MM“ → „HH:MM:00“. */
+  setTime(entityId, hhmm) {
+    if (!hhmm) return Promise.resolve();
+    const time = `${hhmm.slice(0, 5)}:00`;
+    return entityId.startsWith("time.") ? this.call(SERVICES.time.domain, SERVICES.time.service, { entity_id: entityId, time }) : this.call(SERVICES.inputDatetime.domain, SERVICES.inputDatetime.service, { entity_id: entityId, time });
+  }
+  prognoseReset() {
+    return this.call(SERVICES.prognoseReset.domain, SERVICES.prognoseReset.service, {});
+  }
+  // ───────── Lesen über die REST-API ─────────
+  /** Historie von sensor.heidi_phase und vacuum.heidi im Fenster (Sekunden). */
+  history(startSec, endSec) {
+    const h3 = this.hass();
+    if (!h3.callApi) return Promise.resolve([]);
+    return h3.callApi("GET", historyPath(new Date(startSec * 1e3).toISOString(), new Date(endSec * 1e3).toISOString()));
+  }
+};
+
+// src/ha/memo-selector.ts
+var sameStateAndUpdated = (a3, b3) => {
+  if (a3 === b3) return true;
+  if (!a3 || !b3) return false;
+  return a3.state === b3.state && a3.last_updated === b3.last_updated;
+};
+function stateAndAttributes(attrs) {
+  return (a3, b3) => {
+    if (a3 === b3) return true;
+    if (!a3 || !b3) return false;
+    if (a3.state !== b3.state) return false;
+    for (const k2 of attrs) if (!sameValue(a3.attributes[k2], b3.attributes[k2])) return false;
+    return true;
+  };
+}
+function sameValue(x2, y3) {
+  if (x2 === y3) return true;
+  if (Array.isArray(x2) && Array.isArray(y3)) return x2.length === y3.length && x2.every((v2, i5) => sameValue(v2, y3[i5]));
+  if (x2 && y3 && typeof x2 === "object" && typeof y3 === "object") {
+    const kx = Object.keys(x2), ky = Object.keys(y3);
+    return kx.length === ky.length && kx.every((k2) => sameValue(x2[k2], y3[k2]));
+  }
+  return false;
+}
+function memoizeSelector(ids, fn, compare = {}) {
+  let prev = null;
+  let result;
+  const sel = (states) => {
+    if (prev !== null) {
+      let same = true;
+      for (const id of ids) {
+        const cmp = compare[id] ?? sameStateAndUpdated;
+        if (!cmp(prev[id], states[id])) {
+          same = false;
+          break;
+        }
+      }
+      if (same) return result;
+    }
+    result = fn(states);
+    prev = states;
+    return result;
+  };
+  Object.defineProperty(sel, "ids", { value: ids, writable: false });
+  sel.reset = () => {
+    prev = null;
+  };
+  return sel;
+}
+
+// src/config.ts
+var ROOMS = [
+  { id: 7, short: "Wohnz.", name: "Wohnzimmer", icon: "mdi:sofa-outline" },
+  { id: 6, short: "K\xFCche", name: "K\xFCche", icon: "mdi:chef-hat" },
+  { id: 5, short: "B\xFCro", name: "B\xFCro", icon: "mdi:desk" },
+  { id: 4, short: "Flur", name: "Flur", icon: "mdi:foot-print" },
+  { id: 3, short: "WC", name: "WC", icon: "mdi:toilet" },
+  { id: 2, short: "Schlafz.", name: "Schlafzimmer", icon: "mdi:bed-king-outline" },
+  { id: 1, short: "Bad", name: "Bad", icon: "mdi:shower" }
+];
+var ROOMS_DE = { Bathroom: "Bad", "Primary Bedroom": "Schlafzimmer", WC: "WC", Corridor: "Flur", Study: "B\xFCro", Kitchen: "K\xFCche", "Living Room": "Wohnzimmer" };
+var STATUS_DE = {
+  sleeping: "schl\xE4ft",
+  charging: "l\xE4dt",
+  cleaning: "reinigt",
+  sweeping: "saugt",
+  mopping: "wischt",
+  sweeping_and_mopping: "saugt und wischt",
+  returning: "f\xE4hrt zur Station",
+  paused: "pausiert",
+  idle: "bereit",
+  docked: "angedockt",
+  washing: "Mopp-W\xE4sche",
+  drying: "trocknet",
+  auto_emptying: "saugt ab",
+  error: "Fehler",
+  charging_completed: "voll geladen",
+  segment_cleaning: "reinigt R\xE4ume",
+  zone_cleaning: "reinigt Zone",
+  spot_cleaning: "reinigt Punkt",
+  cruising: "f\xE4hrt"
+};
+var ERR_DE = {
+  clean_mop_pad: "Mopps reinigen",
+  dust_bag_full: "Staubbeutel voll",
+  clean_water_tank_empty: "Frischwasser leer",
+  dirty_water_tank_full: "Abwasser voll",
+  dust_box_missing: "Staubbox fehlt",
+  mop_pad_stop_rotate: "Mopp blockiert",
+  wheels_stuck: "Rad blockiert",
+  brush_stuck: "B\xFCrste blockiert",
+  low_battery: "Akku leer",
+  station_disconnected: "Station getrennt",
+  detergent_empty: "Reinigungsmittel leer",
+  water_tank_missing: "Wassertank fehlt",
+  clean_water_tank_missing: "Frischwassertank fehlt",
+  dirty_water_tank_missing: "Abwassertank fehlt"
+};
+
+// src/domain/status.ts
+var TASK_DE = {
+  room_cleaning: "Reinigt R\xE4ume",
+  zone_cleaning: "Reinigt Zone",
+  spot_cleaning: "Reinigt Punkt",
+  cleaning: "Reinigt",
+  cruising: "F\xE4hrt",
+  mapping: "Erstellt Karte",
+  fast_mapping: "Erstellt Karte"
+};
+var EMPTY = ["unknown", "unavailable", ""];
+var cap = (s4) => s4.replace(/^./, (c4) => c4.toUpperCase());
+var B2 = (service, icon, label, primary = false) => ({ service, icon, label, primary });
+function heroButtons(vac) {
+  switch (vac) {
+    case "cleaning":
+      return [B2("pause", "mdi:pause", "Pause", true), B2("stop", "mdi:stop", "Stopp"), B2("return_to_base", "mdi:home-import-outline", "Station")];
+    case "paused":
+      return [B2("start", "mdi:play", "Weiter", true), B2("stop", "mdi:stop", "Stopp"), B2("return_to_base", "mdi:home-import-outline", "Station")];
+    case "returning":
+      return [B2("pause", "mdi:pause", "Pause", true), B2("stop", "mdi:stop", "Stopp"), B2("locate", "mdi:map-marker", "Orten")];
+    case "docked":
+      return [B2("start", "mdi:play", "Start", true), B2("locate", "mdi:map-marker", "Orten")];
+    default:
+      return [B2("start", "mdi:play", "Start", true), B2("return_to_base", "mdi:home-import-outline", "Station"), B2("locate", "mdi:map-marker", "Orten")];
+  }
+}
+function heroModel(i5) {
+  const phaseOk = !EMPTY.includes(i5.phase);
+  const statusTxt = phaseOk ? i5.phase : cap(STATUS_DE[i5.status] ?? i5.status.replace(/_/g, " "));
+  const auto = i5.autoLauf ? i5.autoLetzterPlan : "";
+  const job = auto && !EMPTY.includes(auto) ? auto : TASK_DE[i5.task] ?? "Reinigt";
+  let big = statusTxt, sub = "";
+  if (i5.vac === "error") big = "Fehler";
+  else if (i5.vac === "paused") {
+    big = "Pausiert";
+    sub = job;
+  } else if (i5.vac === "returning") {
+    big = "F\xE4hrt zur Station";
+    sub = phaseOk && i5.phase !== big ? i5.phase : "";
+  } else if (i5.vac === "cleaning") {
+    big = job;
+    sub = phaseOk ? i5.phase : "";
+  }
+  if (sub === big) sub = "";
+  const dot = i5.vac === "cleaning" ? "accent" : i5.vac === "returning" ? "warning" : i5.vac === "error" ? "danger" : "positive";
+  const errorChip = i5.error !== "no_error" && i5.error !== "unavailable" ? { text: ERR_DE[i5.error] ?? i5.error.replace(/_/g, " "), level: i5.hasError ? "danger" : "warning" } : null;
+  const roomChip = i5.room !== "\u2013" && i5.vac === "cleaning" && !phaseOk ? i5.room : null;
+  const dnd = `${(i5.dndStart || "").slice(0, 5)}\u2013${(i5.dndEnd || "").slice(0, 5)}`;
+  return { big, sub, dot, buttons: heroButtons(i5.vac), errorChip, roomChip, dnd, phaseOk };
+}
+
+// src/domain/labels.ts
+function roomName(raw, deutsch) {
+  if (!raw || ["unknown", "unavailable"].includes(raw)) return "\u2013";
+  return deutsch ? ROOMS_DE[raw] ?? raw : raw;
+}
+
+// src/ha/selectors.ts
+var EMPTY2 = ["unknown", "unavailable"];
+var E2 = ENTITIES;
+var ent = (s4, id) => s4[id];
+var st = (s4, id) => ent(s4, id)?.state ?? "unavailable";
+var txt = (s4, id) => {
+  const v2 = st(s4, id);
+  return EMPTY2.includes(v2) ? "" : v2;
+};
+var on = (s4, id) => st(s4, id) === "on";
+var num = (s4, id, d3 = 0) => {
+  const v2 = parseFloat(st(s4, id));
+  return isNaN(v2) ? d3 : v2;
+};
+var attr = (s4, id, a3) => ent(s4, id)?.attributes?.[a3];
+var opts = (s4, id, fallback = []) => {
+  const o5 = attr(s4, id, "options");
+  return Array.isArray(o5) ? o5.map(String) : [...fallback];
+};
+var available = (s4, id) => {
+  const e4 = ent(s4, id);
+  return !!e4 && !EMPTY2.includes(e4.state);
+};
+var VAC_ATTRS = ["has_error", "current_segment", "active_segments", "cleaning_sequence", "cleaned_area", "charging", "mop_pad", "paused", "washing", "drying", "returning_to_wash", "mapping", "cruising"];
+var ROBOT_IDS = [E2.vac, E2.status, E2.error, E2.taskStatus, E2.battery, E2.currentRoom, E2.cleanedArea, E2.cleaningTime, E2.phase, E2.autoLauf, E2.autoLetzterPlan, E2.laufReihenfolge, E2.dndStart, E2.dndEnd, E2.raumnamen, E2.ninaZaehlt, ...PERSONS.map((p3) => p3.id)];
+var intList = (v2) => Array.isArray(v2) ? v2.map((x2) => parseInt(String(x2), 10)).filter((x2) => !isNaN(x2)) : [];
+var readRobot = memoizeSelector(ROBOT_IDS, (s4) => {
+  const vac = st(s4, E2.vac);
+  const deutsch = st(s4, E2.raumnamen) === "Deutsch";
+  const seg = parseInt(String(attr(s4, E2.vac, "current_segment") ?? ""), 10);
+  const persons = PERSONS.map((p3) => {
+    const e4 = ent(s4, p3.id);
+    return { key: p3.key, id: p3.id, name: p3.name, home: e4?.state === "home", counts: !("optional" in p3) || on(s4, p3.optional), known: !!e4 };
+  });
+  const hero = heroModel({
+    vac,
+    status: st(s4, E2.status),
+    error: st(s4, E2.error),
+    hasError: !!attr(s4, E2.vac, "has_error"),
+    task: st(s4, E2.taskStatus),
+    phase: st(s4, E2.phase),
+    autoLauf: on(s4, E2.autoLauf),
+    autoLetzterPlan: st(s4, E2.autoLetzterPlan),
+    dndStart: st(s4, E2.dndStart),
+    dndEnd: st(s4, E2.dndEnd),
+    room: roomName(st(s4, E2.currentRoom), deutsch)
+  });
+  return {
+    vac,
+    running: ["cleaning", "paused", "returning"].includes(vac),
+    hasError: !!attr(s4, E2.vac, "has_error"),
+    battery: num(s4, E2.battery, 0),
+    currentSegment: isNaN(seg) ? null : seg,
+    activeSegments: intList(attr(s4, E2.vac, "active_segments")),
+    cleaningSequence: intList(attr(s4, E2.vac, "cleaning_sequence")),
+    cleanedArea: parseFloat(String(attr(s4, E2.vac, "cleaned_area") ?? "")) || 0,
+    cleaningTime: num(s4, E2.cleaningTime, 0),
+    charging: !!attr(s4, E2.vac, "charging"),
+    phase: st(s4, E2.phase),
+    status: st(s4, E2.status),
+    task: st(s4, E2.taskStatus),
+    error: st(s4, E2.error),
+    autoLauf: on(s4, E2.autoLauf),
+    autoLetzterPlan: txt(s4, E2.autoLetzterPlan),
+    laufReihenfolge: txt(s4, E2.laufReihenfolge).split(",").map((x2) => parseInt(x2, 10)).filter((x2) => !isNaN(x2)),
+    room: roomName(st(s4, E2.currentRoom), deutsch),
+    deutsch,
+    persons,
+    hero
+  };
+}, { [E2.vac]: stateAndAttributes(VAC_ATTRS) });
+var PLAN_FIELDS = ["name", "raeume", "tage", "personen", "raumwerte", "modus", "saugstufe", "wasser", "route", "wiederholungen", "homeoffice", "ho_saug", "ho_wdh", "sp_saug", "sp_wdh", "aktiv", "schnell", "zeit"];
+var planIds = (n4) => PLAN_FIELDS.map((f3) => planEntity(n4, f3));
+function makeReadPlan(n4) {
+  const id = (f3) => planEntity(n4, f3);
+  return memoizeSelector(planIds(n4), (s4) => {
+    const sel = (f3) => st(s4, id(f3));
+    const tx = (f3) => txt(s4, id(f3));
+    const mask = tx("tage").padEnd(7, "0").slice(0, 7);
+    return {
+      n: n4,
+      name: tx("name"),
+      aktiv: on(s4, id("aktiv")),
+      raeume: [...new Set(tx("raeume").split(",").map((x2) => parseInt(x2, 10)).filter((x2) => x2 >= 1 && x2 <= 7))],
+      modus: sel("modus"),
+      saug: sel("saugstufe"),
+      wasser: sel("wasser"),
+      route: sel("route"),
+      wdh: sel("wiederholungen"),
+      tage: [...mask].map((c4) => c4 === "1"),
+      zeit: (txt(s4, id("zeit")) || "09:30").slice(0, 5),
+      personen: tx("personen").split(",").map((x2) => x2.trim()).filter(Boolean),
+      ho: sel("homeoffice"),
+      hoSaug: sel("ho_saug"),
+      hoWdh: sel("ho_wdh"),
+      schnell: on(s4, id("schnell")),
+      spSaug: sel("sp_saug"),
+      spWdh: sel("sp_wdh"),
+      raum: parseRaum(tx("raumwerte")),
+      entities: Object.fromEntries(PLAN_FIELDS.map((f3) => [f3, id(f3)]))
+    };
+  });
+}
+var PLAN_SELECTORS = { 1: makeReadPlan(1), 2: makeReadPlan(2), 3: makeReadPlan(3), 4: makeReadPlan(4) };
+var readPlans = memoizeSelector([...PLAN_NUMBERS.flatMap(planIds), E2.heutePlan, E2.planerBereich], (s4) => {
+  const slot = parseInt(st(s4, E2.heutePlan), 10);
+  const heute = PLAN_NUMBERS.includes(slot) ? slot : null;
+  const stoerer = attr(s4, E2.heutePlan, "stoerer");
+  return {
+    plans: PLAN_NUMBERS.map((n4) => PLAN_SELECTORS[n4](s4)),
+    heute,
+    heuteName: String(attr(s4, E2.heutePlan, "name") ?? ""),
+    heuteZeit: String(attr(s4, E2.heutePlan, "zeit") ?? ""),
+    heuteErledigt: attr(s4, E2.heutePlan, "erledigt") === true,
+    stoerer: Array.isArray(stoerer) ? stoerer.map(String) : [],
+    planerBereich: on(s4, E2.planerBereich)
+  };
+});
+var { RV_HA, RV_ENT } = ROOM_VALUE_CODES;
+var roomIds = (id) => ROOM_SELECT_FIELDS.map((f3) => roomEntity(id, f3));
+function roomValuesOf(s4, id) {
+  const g2 = (k2) => {
+    const v2 = st(s4, roomEntity(id, RV_ENT[k2]));
+    return EMPTY2.includes(v2) ? null : v2;
+  };
+  const m2 = g2("modus");
+  if (m2 === null) return null;
+  const saugRaw = g2("saug"), wasserRaw = g2("wasser"), routeRaw = g2("route");
+  return {
+    modus: RV_HA.modus[m2] ?? m2,
+    saug: saugRaw && RV_HA.saug[saugRaw] || "\u2013",
+    wasser: wasserRaw ? RV_HA.wasser[wasserRaw] ?? wasserRaw : null,
+    route: routeRaw ? RV_HA.route[routeRaw] ?? routeRaw : null,
+    wdh: (g2("wdh") ?? "1x").replace("x", "")
+  };
+}
+var ROOM_SELECTORS = Object.fromEntries(ROOM_IDS.map((id) => [id, memoizeSelector(roomIds(id), (s4) => roomValuesOf(s4, id))]));
+var readAllRoomValues = memoizeSelector([...ROOM_IDS.flatMap(roomIds), E2.customizedCleaning], (s4) => {
+  const rooms = Object.fromEntries(ROOM_IDS.map((id) => [id, ROOM_SELECTORS[id](s4)]));
+  return { rooms, customized: on(s4, E2.customizedCleaning), anyUnavailable: ROOM_IDS.some((id) => rooms[id] === null) };
+});
+var readLearn = memoizeSelector([E2.lern], (s4) => {
+  const e4 = ent(s4, E2.lern);
+  return e4 && !EMPTY2.includes(e4.state) && e4.attributes?.raten ? e4.attributes : null;
+});
+var histCache = {};
+var histOk = (e4) => !!e4 && !EMPTY2.includes(e4.state) && Object.values(e4.attributes ?? {}).some((v2) => v2 && typeof v2 === "object" && "timestamp" in v2);
+var readHistory = memoizeSelector([E2.cleaningHistory, E2.cleaningCount, E2.totalCleanedArea, E2.totalCleaningTime], (s4) => {
+  const live = ent(s4, E2.cleaningHistory);
+  const ok = histOk(live);
+  if (ok && live) histCache = live.attributes;
+  const a3 = ok && live ? live.attributes : histCache;
+  const entries = Object.entries(a3).filter(([, v2]) => v2 && typeof v2 === "object" && "timestamp" in v2).map(([, v2]) => v2).sort((x2, y3) => Number(y3.timestamp) - Number(x2.timestamp)).slice(0, 30).map((v2) => ({ key: String(Math.floor(Number(v2.timestamp))), ts: Math.floor(Number(v2.timestamp)), area: parseInt(String(v2.cleaned_area ?? "").replace(/[^0-9]/g, ""), 10) || 0, min: parseInt(String(v2.cleaning_time ?? "").replace(/[^0-9]/g, ""), 10) || 0, raw: v2 }));
+  return { entries, count: num(s4, E2.cleaningCount, 0), totalArea: num(s4, E2.totalCleanedArea, 0), totalTime: num(s4, E2.totalCleaningTime, 0), stale: !ok };
+});
+var readPrognose = memoizeSelector([E2.prognose, E2.prognoseAktiv, E2.abweichungHeute, E2.progHerbert, E2.progNicole, E2.progNina, E2.prognoseWochen, E2.prognoseMindesttage], (s4) => {
+  const p3 = ent(s4, E2.prognose);
+  const a3 = p3?.attributes ?? {};
+  const str = (k2, d3 = "") => a3[k2] === void 0 || a3[k2] === null ? d3 : String(a3[k2]);
+  return {
+    aktiv: on(s4, E2.prognoseAktiv),
+    known: !!p3,
+    state: p3?.state ?? "\u2013",
+    tage: parseInt(str("tage", "0"), 10) || 0,
+    sicherheit: parseInt(str("sicherheit", "0"), 10) || 0,
+    freiesFenster: str("freies_fenster", "\u2013"),
+    rueckkehr: str("rueckkehr", "\u2013"),
+    rueckkehrWer: str("rueckkehr_wer", ""),
+    rueckkehrMin: parseInt(str("rueckkehr_min", "0"), 10) || 0,
+    homeoffice: str("homeoffice", "\u2013"),
+    empfehlung: str("empfehlung", "\u2013"),
+    aktualisiert: str("aktualisiert", "\u2013"),
+    aufloesung: str("aufloesung", "30"),
+    wochen: num(s4, E2.prognoseWochen, 8),
+    mindesttage: num(s4, E2.prognoseMindesttage, 14),
+    schalter: [
+      { id: E2.abweichungHeute, label: "Abweichung heute", sub: "Urlaub, Feiertag", on: on(s4, E2.abweichungHeute) },
+      { id: E2.progHerbert, label: "Herbert einbeziehen", sub: "GPS + WLAN", on: on(s4, E2.progHerbert) },
+      { id: E2.progNicole, label: "Nicole einbeziehen", sub: "WLAN", on: on(s4, E2.progNicole) },
+      { id: E2.progNina, label: "Nina einbeziehen", sub: "WLAN", on: on(s4, E2.progNina) }
+    ]
+  };
+});
+var readAutomatik = memoizeSelector([E2.automatik, E2.autoStatus, E2.arbeitszeitStart, E2.arbeitszeitEnde, E2.rueckkehr, E2.schnellMinuten, E2.minAkku, E2.beiHeimkehr, E2.autoLetzterPlan, E2.letzteAutoReinigung], (s4) => {
+  const rest = attr(s4, E2.autoStatus, "rest_min");
+  const letzte = st(s4, E2.letzteAutoReinigung);
+  return {
+    on: on(s4, E2.automatik),
+    status: txt(s4, E2.autoStatus),
+    detail: String(attr(s4, E2.autoStatus, "detail") ?? ""),
+    restMin: typeof rest === "number" ? rest : rest !== void 0 && !isNaN(parseInt(String(rest), 10)) ? parseInt(String(rest), 10) : null,
+    restQuelle: String(attr(s4, E2.autoStatus, "rest_quelle") ?? ""),
+    arbeitszeitStart: txt(s4, E2.arbeitszeitStart).slice(0, 5),
+    arbeitszeitEnde: txt(s4, E2.arbeitszeitEnde).slice(0, 5),
+    rueckkehr: txt(s4, E2.rueckkehr).slice(0, 5),
+    schnellMinuten: num(s4, E2.schnellMinuten, 90),
+    minAkku: num(s4, E2.minAkku, 30),
+    beiHeimkehr: txt(s4, E2.beiHeimkehr),
+    beiHeimkehrOptions: opts(s4, E2.beiHeimkehr),
+    letzterPlan: txt(s4, E2.autoLetzterPlan) || "\u2013",
+    letzteAutoReinigung: !letzte || EMPTY2.includes(letzte) || letzte.startsWith("2000") ? "noch nie" : letzte
+  };
+});
+var CONSUMABLES = [
+  ["Hauptb\xFCrste", E2.mainBrushLeft, E2.resetMainBrush],
+  ["Seitenb\xFCrste", E2.sideBrushLeft, E2.resetSideBrush],
+  ["Filter", E2.filterLeft, E2.resetFilter],
+  ["Sensoren", E2.sensorDirtyLeft, E2.resetSensor],
+  ["R\xE4der", E2.wheelDirtyLeft, E2.resetWheel]
+];
+var readConsumables = memoizeSelector(CONSUMABLES.flatMap(([, s4, b3]) => [s4, b3]), (s4) => CONSUMABLES.map(([name, sensor, reset]) => {
+  const pct = num(s4, sensor, 0);
+  return { name, pct, level: pct <= 10 ? "danger" : pct <= 25 ? "warning" : "ok", resetEntity: reset, known: available(s4, sensor) };
+}));
+var readStation = memoizeSelector([E2.dustBagStatus, E2.cleanWaterTankStatus, E2.dirtyWaterTankStatus, E2.detergentStatus, E2.lowWaterWarning, E2.startAutoEmpty, E2.selfClean, E2.manualDrying, E2.baseStationCleaning], (s4) => {
+  const inst = (id) => st(s4, id) === "installed";
+  const lowWater = st(s4, E2.lowWaterWarning) !== "no_warning";
+  const tiles = [
+    { key: "beutel", label: "Beutel", value: inst(E2.dustBagStatus) ? "OK" : "Pr\xFCfen", warn: !inst(E2.dustBagStatus) },
+    { key: "frisch", label: "Frisch", value: lowWater ? "Leer" : inst(E2.cleanWaterTankStatus) ? "OK" : "Fehlt", warn: lowWater || !inst(E2.cleanWaterTankStatus) },
+    { key: "abwasser", label: "Abwasser", value: inst(E2.dirtyWaterTankStatus) ? "OK" : "Voll", warn: !inst(E2.dirtyWaterTankStatus) },
+    { key: "mittel", label: "Mittel", value: inst(E2.detergentStatus) ? "OK" : "Leer", warn: !inst(E2.detergentStatus) }
+  ];
+  return {
+    tiles,
+    ok: tiles.every((t3) => !t3.warn),
+    buttons: [
+      { entity: E2.startAutoEmpty, label: "Absaugen", confirm: null },
+      { entity: E2.selfClean, label: "Mopp", confirm: null },
+      { entity: E2.manualDrying, label: "Trocknen", confirm: null },
+      { entity: E2.baseStationCleaning, label: "Station", confirm: "Reinigung der Station starten?" }
+    ]
+  };
+});
+var rng = (s4, id, label, unit, sub, dMin, dMax, dStep) => {
+  const a3 = ent(s4, id)?.attributes ?? {};
+  const n4 = (v2, d3) => typeof v2 === "number" ? v2 : d3;
+  return { id, label, sub, unit, value: num(s4, id, n4(a3.min, dMin)), min: n4(a3.min, dMin), max: n4(a3.max, dMax), step: n4(a3.step, dStep) };
+};
+var ROT_DEFAULT = ["0", "90", "180", "270"];
+var readSettings = memoizeSelector([E2.dark, E2.karte, E2.mapRotation, E2.raumnamen, E2.automatik, E2.planerBereich, E2.prognoseAktiv, E2.ninaZaehlt, E2.prognoseIntervall, E2.prognoseAufloesung, E2.prognoseWochen, E2.prognoseHalbwert, E2.prognoseMindesttage], (s4) => {
+  const rotOpts = opts(s4, E2.mapRotation, ROT_DEFAULT);
+  return {
+    dark: st(s4, E2.dark) !== "off",
+    darkId: E2.dark,
+    karte: { id: E2.karte, value: st(s4, E2.karte), options: opts(s4, E2.karte), labels: opts(s4, E2.karte) },
+    rotation: { id: E2.mapRotation, value: st(s4, E2.mapRotation), options: rotOpts, labels: rotOpts.map((x2) => x2 + "\xB0") },
+    raumnamen: { id: E2.raumnamen, value: st(s4, E2.raumnamen), options: opts(s4, E2.raumnamen, ["Original", "Deutsch"]), labels: opts(s4, E2.raumnamen, ["Original", "Deutsch"]) },
+    schalter: [
+      { id: E2.automatik, label: "Automatik", sub: "", on: on(s4, E2.automatik) },
+      { id: E2.planerBereich, label: "Planer anzeigen", sub: "", on: on(s4, E2.planerBereich) },
+      { id: E2.prognoseAktiv, label: "Prognose", sub: "Lernende Anwesenheit, eigene Seite", on: on(s4, E2.prognoseAktiv) },
+      { id: E2.ninaZaehlt, label: "Nina z\xE4hlt f\xFCr Anwesenheit", sub: "", on: on(s4, E2.ninaZaehlt) }
+    ],
+    prognose: [
+      rng(s4, E2.prognoseIntervall, "Protokoll-Intervall", " min", "Wie oft die Anwesenheit gespeichert wird", 5, 60, 5),
+      rng(s4, E2.prognoseAufloesung, "Aufl\xF6sung", " min", "Rasterbreite der Heatmap und Prognose", 15, 60, 15),
+      rng(s4, E2.prognoseWochen, "Lernzeitraum", " Wochen", "\xC4ltere Daten werden verworfen", 2, 12, 1),
+      rng(s4, E2.prognoseHalbwert, "Gewichtung", " Tage", "Halbwertszeit \u2013 so alt z\xE4hlt ein Tag nur noch halb", 7, 60, 1),
+      rng(s4, E2.prognoseMindesttage, "Aktiv ab", " Tagen", "Erst dann nutzt die Automatik die Prognose", 3, 28, 1)
+    ],
+    version: ""
+  };
+});
+var readRobotSettings = memoizeSelector([E2.carpetCleaning, E2.waterTemperature, E2.dryingTime, E2.autoEmptyMode, E2.selfCleanFrequency, E2.cleangenius, E2.selfCleanArea, E2.volume, E2.dndStart, E2.dndEnd], (s4) => {
+  const sel = (id, label) => ({ id, label, value: st(s4, id), options: opts(s4, id) });
+  return {
+    selects: [sel(E2.carpetCleaning, "Teppich"), sel(E2.waterTemperature, "Wassertemperatur"), sel(E2.dryingTime, "Trocknung"), sel(E2.autoEmptyMode, "Absaugen"), sel(E2.selfCleanFrequency, "Mopp-W\xE4sche"), sel(E2.cleangenius, "CleanGenius")],
+    numbers: [rng(s4, E2.selfCleanArea, "Mopp-W\xE4sche nach", " m\xB2", "", 0, 100, 1), rng(s4, E2.volume, "Lautst\xE4rke", " %", "", 0, 100, 1)],
+    dndStart: txt(s4, E2.dndStart).slice(0, 5),
+    dndEnd: txt(s4, E2.dndEnd).slice(0, 5),
+    dndStartId: E2.dndStart,
+    dndEndId: E2.dndEnd
+  };
+});
+var readMap = memoizeSelector([E2.map, E2.karte, E2.chairs], (s4) => ({
+  entityPicture: String(attr(s4, E2.map, "entity_picture") ?? ""),
+  calibrationPoints: attr(s4, E2.map, "calibration_points") ?? null,
+  noGoAreas: attr(s4, E2.map, "no_go_areas") ?? null,
+  noMoppingAreas: attr(s4, E2.map, "no_mopping_areas") ?? null,
+  virtualWalls: attr(s4, E2.map, "virtual_walls") ?? null,
+  rooms: attr(s4, E2.map, "rooms") ?? null,
+  karte: st(s4, E2.karte),
+  chairs: on(s4, E2.chairs),
+  roomOrder: ROOMS
+}), { [E2.map]: stateAndAttributes(["entity_picture", "calibration_points", "no_go_areas", "no_mopping_areas", "virtual_walls", "rooms"]) });
+var isRobotId = (id) => /^(vacuum|camera|switch|button|select\.heidi_(room_|carpet|water|drying|auto_empty|self_clean|cleangenius|map_rotation)|number|time)\./.test(id) || /^sensor\.heidi_(status|error|task_status|battery_level|current_room|cleaned_area|cleaning_time|cleaning_history|cleaning_count|total_|first_cleaning|main_brush|side_brush|filter_left|sensor_dirty|wheel_dirty|dust_bag|clean_water|dirty_water|detergent|low_water|auto_empty|self_wash)/.test(id);
+var readDiagnostics = memoizeSelector(allContractIds(), (s4) => {
+  const ids = allContractIds();
+  const group = (name, list) => ({ name, total: list.length, missing: list.filter((id) => !s4[id]), unavailable: list.filter((id) => s4[id] && EMPTY2.includes(s4[id].state)) });
+  const robot = group("Roboter (Dreame)", ids.filter(isRobotId));
+  const paket = group("Paket (Helfer, Sensoren)", ids.filter((id) => !isRobotId(id)));
+  return { total: ids.length, missing: [...robot.missing, ...paket.missing], unavailable: [...robot.unavailable, ...paket.unavailable], groups: [robot, paket] };
+});
+var ALL_SELECTORS = {
+  readRobot,
+  readPlans,
+  readAllRoomValues,
+  readLearn,
+  readHistory,
+  readPrognose,
+  readAutomatik,
+  readConsumables,
+  readStation,
+  readSettings,
+  readRobotSettings,
+  readMap,
+  readDiagnostics,
+  ...Object.fromEntries(PLAN_NUMBERS.map((n4) => [`readPlan(${n4})`, PLAN_SELECTORS[n4]])),
+  ...Object.fromEntries(ROOM_IDS.map((id) => [`readRoomValues(${id})`, ROOM_SELECTORS[id]]))
+};
+
+// src/pages.ts
+var PAGES = ["start", "reinigen", "planer", "protokoll", "prognose", "einstellungen"];
+var PAGE_TITLE = {
+  start: { title: "Heidi", sub: "\xDCbersicht" },
+  reinigen: { title: "Karte", sub: "R\xE4ume, Zone oder Punkt reinigen \xB7 Hinfahren \xB7 Sperrzonen" },
+  planer: { title: "Planer", sub: "Vier Eintr\xE4ge \xB7 Automatik" },
+  protokoll: { title: "Verlauf", sub: "Reinigungsprotokoll \xB7 Zeitleiste \xB7 Lernwerte" },
+  prognose: { title: "Prognose", sub: "Lernende Anwesenheit" },
+  einstellungen: { title: "Einstellungen", sub: "Darstellung, Funktionen, Prognose, Roboter, Diagnose" }
+};
+var PAGE_PARTS = {
+  start: ["dx-hero (4.1)", "dx-map-card compact (4.3)", "dx-automatik (4.9)", "dx-consumables (4.9)", "dx-nav-tiles (4.0)", "dx-station (4.9)"],
+  reinigen: ["dx-map-card full (4.3)", "App-Szenen", "St\xFChle am Boden", "R\xE4ume (Roboter-Werte) \u2192 dx-rooms-dialog (4.6)"],
+  planer: ["dx-planer (4.4)", "dx-planer-editor + dx-clock-picker (4.5)", "Automatik-Regeln", "dx-estimate-dialog (4.8)"],
+  protokoll: ["dx-history (4.7)", "Lernwerte-Tabelle"],
+  prognose: ["dx-prognose-view (4.10)"],
+  einstellungen: ["dx-settings-panel (4.11)", "dx-robot-settings (4.7)", "Diagnose", "Version"]
+};
+function toPage(value) {
+  return PAGES.includes(String(value)) ? value : "start";
+}
+
+// src/shared/overlay.ts
+var EVENTS = {
+  openOverlay: "dx-open-overlay",
+  close: "dx-close",
+  back: "dx-back",
+  confirm: "dx-confirm",
+  toast: "dx-toast",
+  navigate: "dx-navigate"
+};
+
+// src/shared/navigate.ts
+var DASHBOARD_PATH = "/dreame-x60";
+var pagePath = (page) => `${DASHBOARD_PATH}/${page}`;
+function navigate(page, replace = false) {
+  const path = pagePath(page);
+  if (replace) history.replaceState(null, "", path);
+  else history.pushState(null, "", path);
+  window.dispatchEvent(new CustomEvent("location-changed", { detail: { replace } }));
+}
+
 // src/styles/tokens.ts
 var tokens = i`
   :host {
@@ -763,51 +1602,102 @@ var base = i`
   }
 `;
 
+// src/styles/shell.ts
+var shell = i`
+  :host { position: relative; }
+  .list { margin: 0; padding-left: 18px; }
+  .preview li { color: var(--dx-text); }
+  .overlay { position: fixed; inset: 0; z-index: 30; }
+  .scrim { position: absolute; inset: 0; background: rgba(3, 6, 9, 0.62); animation: fade var(--dx-dur) both; }
+  .dlg {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    width: min(640px, calc(100% - 32px)); max-height: calc(100% - 32px); overflow: auto;
+    background: var(--dx-bg-elevated); border: 1px solid var(--dx-border-strong); border-radius: var(--dx-radius-xl);
+    padding: 18px 20px 20px; box-shadow: var(--dx-shadow-float); display: grid; gap: 14px; align-content: start; animation: fade var(--dx-dur) var(--dx-ease) both;
+  }
+  .dlg > h2 { font-size: 18px; display: flex; align-items: center; gap: 8px; }
+  .dlg > h2 .iconbtn { margin-left: auto; }
+  .dlg .foot { display: flex; justify-content: flex-end; gap: 8px; }
+  .iconbtn { width: 40px; height: 40px; border-radius: var(--dx-radius-md); display: inline-flex; align-items: center; justify-content: center; color: var(--dx-text-muted); }
+  .iconbtn:hover { background: var(--dx-surface-raised); color: var(--dx-text); }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: var(--dx-touch); padding: 0 16px;
+    border-radius: var(--dx-radius-md); background: var(--dx-surface-raised); border: 1px solid var(--dx-border); font-weight: 600; font-size: 14px; color: var(--dx-text);
+  }
+  .btn:hover { background: var(--dx-surface-active); }
+  .btn.primary { background: var(--dx-positive); color: var(--dx-on-positive); border-color: transparent; }
+  .alert {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(360px, calc(100% - 48px));
+    background: var(--dx-bg-elevated); border: 1px solid var(--dx-border-strong); border-radius: var(--dx-radius-lg); box-shadow: var(--dx-shadow-float); overflow: hidden; animation: fade var(--dx-dur) var(--dx-ease) both;
+  }
+  .alert .m { padding: 20px 18px 16px; font-weight: 600; font-size: 15px; text-align: center; }
+  .alert .m small { display: block; font-weight: 400; color: var(--dx-text-muted); font-size: 13px; margin-top: 6px; }
+  .alert .b { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--dx-border); }
+  .alert .b button { height: 48px; font-weight: 600; color: var(--dx-text-muted); }
+  .alert .b button + button { border-left: 1px solid var(--dx-border); color: var(--dx-accent); }
+  .alert .b button.danger { color: var(--dx-danger); }
+  .toast {
+    position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); z-index: 60;
+    background: var(--dx-surface-active); border: 1px solid var(--dx-border-strong); color: var(--dx-text);
+    padding: 10px 16px; border-radius: var(--dx-radius-md); font-size: 13px; font-weight: 500; box-shadow: var(--dx-shadow-float);
+    max-width: min(90vw, 520px); text-align: center; pointer-events: none; animation: fade var(--dx-dur) var(--dx-ease) both;
+  }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+  @container content (max-width: 640px) {
+    .dlg { top: auto; bottom: 0; left: 0; transform: none; width: 100%; max-height: 92%; border-radius: var(--dx-radius-xl) var(--dx-radius-xl) 0 0; padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
+    .alert { top: auto; bottom: 16px; left: 16px; right: 16px; transform: none; width: auto; }
+  }
+`;
+
 // src/version.ts
 var VERSION = "2.0.0-alpha.1";
 
 // src/dreame-x60-panel.ts
 var ELEMENT = "dreame-x60-panel";
-var PAGES = ["start", "reinigen", "planer", "protokoll", "prognose", "einstellungen"];
-var PAGE_TITLE = {
-  start: { title: "Heidi", sub: "\xDCbersicht" },
-  reinigen: { title: "Karte", sub: "R\xE4ume, Zone oder Punkt reinigen \xB7 Hinfahren \xB7 Sperrzonen" },
-  planer: { title: "Planer", sub: "Vier Eintr\xE4ge \xB7 Automatik" },
-  protokoll: { title: "Verlauf", sub: "Reinigungsprotokoll \xB7 Zeitleiste \xB7 Lernwerte" },
-  prognose: { title: "Prognose", sub: "Lernende Anwesenheit" },
-  einstellungen: { title: "Einstellungen", sub: "Darstellung, Funktionen, Prognose, Roboter, Diagnose" }
-};
-var PAGE_PARTS = {
-  start: ["dx-hero (4.1)", "dx-map-card compact (4.3)", "dx-automatik (4.9)", "dx-consumables (4.9)", "dx-nav-tiles (4.0)", "dx-station (4.9)"],
-  reinigen: ["dx-map-card full (4.3)", "App-Szenen", "St\xFChle am Boden", "R\xE4ume (Roboter-Werte) \u2192 dx-rooms-dialog (4.6)"],
-  planer: ["dx-planer (4.4)", "dx-planer-editor + dx-clock-picker (4.5)", "Automatik-Regeln", "dx-estimate-dialog (4.8)"],
-  protokoll: ["dx-history (4.7)", "Lernwerte-Tabelle"],
-  prognose: ["dx-prognose-view (4.10)"],
-  einstellungen: ["dx-settings-panel (4.11)", "dx-robot-settings (4.7)", "Diagnose", "Version"]
-};
-function toPage(value) {
-  return PAGES.includes(String(value)) ? value : "start";
-}
+var TOAST_MS = 1900;
 var DreameX60Panel = class extends i4 {
+  constructor() {
+    super();
+    /** Schreibzugriffe – eine Instanz je Shell, liest hass zur Laufzeit. */
+    this.api = new DxApi(() => this.hass);
+    this._toastTimer = null;
+    this._onKey = (e4) => {
+      if (e4.key === "Escape" && this._overlay) this.closeOverlay();
+    };
+    this._config = { page: "start" };
+    this._overlay = null;
+    this._toast = null;
+    this.addEventListener(EVENTS.openOverlay, (e4) => this.openOverlay(e4.detail));
+    this.addEventListener(EVENTS.close, () => this.closeOverlay());
+    this.addEventListener(EVENTS.back, () => this.backOverlay());
+    this.addEventListener(EVENTS.confirm, () => this.confirmOverlay());
+    this.addEventListener(EVENTS.toast, (e4) => this.toast(String(e4.detail ?? "")));
+    this.addEventListener(EVENTS.navigate, (e4) => navigate(toPage(e4.detail?.page)));
+  }
   static {
-    this.styles = [tokens, base];
+    this.styles = [tokens, base, shell];
   }
   static {
     this.properties = {
       hass: { attribute: false },
-      _config: { state: true }
+      _config: { state: true },
+      _overlay: { state: true },
+      _toast: { state: true }
     };
   }
-  constructor() {
-    super();
-    this._config = { page: "start" };
+  connectedCallback() {
+    super.connectedCallback();
+    window.addEventListener("keydown", this._onKey);
   }
-  /** Von HA beim Anlegen der Karte aufgerufen. */
+  disconnectedCallback() {
+    window.removeEventListener("keydown", this._onKey);
+    super.disconnectedCallback();
+  }
+  // ───────── HA-Schnittstelle der Karte ─────────
   setConfig(config) {
     if (!config || typeof config !== "object") throw new Error("dreame-x60-panel: Konfiguration fehlt");
     this._config = { ...config, page: toPage(config.page) };
   }
-  /** Grobe Höhe in 50-px-Zeilen (HA nutzt sie für das Masonry-Layout; Panel-Views ignorieren sie). */
   getCardSize() {
     return 12;
   }
@@ -817,31 +1707,113 @@ var DreameX60Panel = class extends i4 {
   get page() {
     return toPage(this._config.page);
   }
+  // ───────── Overlay und Toast ─────────
+  get overlay() {
+    return this._overlay;
+  }
+  openOverlay(o5) {
+    this._overlay = o5;
+  }
+  closeOverlay() {
+    this._overlay = null;
+  }
+  /** Zurück zum vorherigen Overlay (Räume/Dauer → Eintrag), sonst schließen. */
+  backOverlay() {
+    this._overlay = this._overlay && "back" in this._overlay && this._overlay.back ? this._overlay.back : null;
+  }
+  confirmOverlay() {
+    const o5 = this._overlay;
+    if (o5?.kind === "confirm") {
+      this._overlay = o5.back ?? null;
+      o5.onOk();
+    }
+  }
+  toast(msg) {
+    this._toast = msg;
+    if (this._toastTimer) clearTimeout(this._toastTimer);
+    this._toastTimer = setTimeout(() => {
+      this._toast = null;
+      this._toastTimer = null;
+    }, TOAST_MS);
+  }
+  // ───────── Rendern ─────────
   render() {
+    const s4 = this.hass?.states ?? {};
+    const settings = readSettings(s4);
+    this.classList.toggle("light", !settings.dark);
     const page = this.page;
     const t3 = PAGE_TITLE[page];
-    const entities = this.hass ? Object.keys(this.hass.states).length : 0;
     return b2`
       <div class="page" data-page=${page}>
         <div class="topbar">
-          <div>
-            <h1>${t3.title}</h1>
-            <div class="sub">${t3.sub}</div>
-          </div>
+          <div><h1>${t3.title}</h1><div class="sub">${t3.sub}</div></div>
           <span class="version">dreame_x60 v${VERSION}</span>
         </div>
-        <div class="bento">
-          <section class="b span12">
-            <div class="hd"><h2>Seite „${page}“</h2><span class="r">${entities ? `${entities} Entit\xE4ten verbunden` : "keine Zustandsdaten"}</span></div>
-            <div class="lbl">Hier entstehen</div>
-            <ul class="hint" style="margin:0;padding-left:18px">
-              ${PAGE_PARTS[page].map((p3) => b2`<li>${p3}</li>`)}
-            </ul>
-            ${page === "start" ? b2`<div class="hint">Leere Shell aus Aufgabe 1.2 – Optik nach Mockup <code>dreame_x60/mockups/bento.html</code>.</div>` : A}
-          </section>
-        </div>
+        ${this.renderPage(page, s4)}
       </div>
+      ${this.renderOverlay()}
+      ${this._toast ? b2`<div class="toast" role="status">${this._toast}</div>` : A}
     `;
+  }
+  /** Seiteninhalt: bis Phase 4 Platzhalter mit einer Vorschau der Sichten, damit die Verdrahtung sichtbar ist. */
+  renderPage(page, s4) {
+    const robot = readRobot(s4);
+    const preview = [];
+    if (page === "start") {
+      preview.push(`Kopf: ${robot.hero.big}${robot.hero.sub ? " \xB7 " + robot.hero.sub : ""} \xB7 Akku ${robot.battery} %`);
+      preview.push(`Automatik: ${readAutomatik(s4).status || "\u2013"}`);
+      preview.push(`Verschlei\xDF: ${readConsumables(s4).map((c4) => `${c4.name} ${c4.pct} %`).join(", ")}`);
+      preview.push(`Station: ${readStation(s4).tiles.map((x2) => `${x2.label} ${x2.value}`).join(", ")}`);
+    }
+    if (page === "reinigen") {
+      const m2 = readMap(s4);
+      preview.push(`Kartendarstellung: ${m2.karte} \xB7 St\xFChle am Boden: ${m2.chairs ? "an" : "aus"} \xB7 Kalibrierung: ${Array.isArray(m2.calibrationPoints) ? m2.calibrationPoints.length + " Punkte" : "fehlt"}`);
+    }
+    if (page === "planer") {
+      const p3 = readPlans(s4);
+      preview.push(...p3.plans.map((x2) => `${x2.n} ${x2.name || "\u2013"} \xB7 ${x2.aktiv ? "aktiv" : "inaktiv"} \xB7 ${x2.raeume.length} R\xE4ume \xB7 ${x2.zeit}`));
+      preview.push(`Lernwerte: ${readLearn(s4) ? "vorhanden" : "keine"}`);
+    }
+    if (page === "protokoll") {
+      const h3 = readHistory(s4);
+      preview.push(`${h3.entries.length} Eintr\xE4ge \xB7 ${h3.count} L\xE4ufe \xB7 ${h3.totalArea} m\xB2 \xB7 ${h3.totalTime} min${h3.stale ? " \xB7 letzter Stand" : ""}`);
+    }
+    if (page === "prognose") {
+      const p3 = readPrognose(s4);
+      preview.push(p3.aktiv ? `${p3.state} \xB7 ${p3.tage} Tage \xB7 frei ${p3.freiesFenster} \xB7 R\xFCckkehr ${p3.rueckkehr}` : "Prognose aus");
+    }
+    if (page === "einstellungen") {
+      const d3 = readDiagnostics(s4);
+      const r4 = readRobotSettings(s4);
+      preview.push(`Karte ${readSettings(s4).karte.value} \xB7 Diagnose: ${d3.missing.length} fehlend, ${d3.unavailable.length} unavailable von ${d3.total}`);
+      preview.push(`Roboter: ${r4.selects.map((x2) => `${x2.label} ${x2.value}`).join(", ")} \xB7 DND ${r4.dndStart}\u2013${r4.dndEnd}`);
+    }
+    const entities = Object.keys(s4).length;
+    return b2`
+      <div class="bento">
+        <section class="b span12">
+          <div class="hd"><h2>Seite „${page}“</h2><span class="r">${entities ? `${entities} Entit\xE4ten verbunden` : "keine Zustandsdaten"}</span></div>
+          <div class="lbl">Hier entstehen</div>
+          <ul class="hint list">${PAGE_PARTS[page].map((p3) => b2`<li>${p3}</li>`)}</ul>
+          <div class="lbl">Sichten (Vorschau aus den Selektoren)</div>
+          <ul class="hint list preview">${preview.map((p3) => b2`<li>${p3}</li>`)}</ul>
+          <div class="hint">Leere Shell aus Aufgabe 3.3 – Optik nach Mockup <code>dreame_x60/mockups/bento.html</code>.</div>
+        </section>
+      </div>`;
+  }
+  /** Overlay: bis 4.2 (dx-dialog) ein Platzhalter-Rahmen; confirm ist schon bedienbar. */
+  renderOverlay() {
+    const o5 = this._overlay;
+    if (!o5) return A;
+    if (o5.kind === "confirm") {
+      return b2`<div class="overlay" data-kind="confirm"><div class="scrim" @click=${() => this.closeOverlay()}></div>
+        <div class="alert" role="alertdialog" aria-modal="true"><div class="m">${o5.text}${o5.sub ? b2`<small>${o5.sub}</small>` : A}</div>
+          <div class="b"><button @click=${() => this.closeOverlay()}>Abbrechen</button><button class=${o5.danger ? "danger" : ""} @click=${() => this.confirmOverlay()}>${o5.okLabel ?? "OK"}</button></div></div></div>`;
+    }
+    return b2`<div class="overlay" data-kind=${o5.kind}><div class="scrim" @click=${() => this.closeOverlay()}></div>
+      <div class="dlg" role="dialog" aria-modal="true"><h2>Overlay „${o5.kind}“ <button class="iconbtn" aria-label="Schließen" @click=${() => this.closeOverlay()}>✕</button></h2>
+        <div class="hint">Platzhalter – der Dialog entsteht in Phase 4 (dx-dialog 4.2).</div>
+        <div class="foot">${"back" in o5 && o5.back ? b2`<button class="btn" @click=${() => this.backOverlay()}>Zurück</button>` : A}<button class="btn primary" @click=${() => this.closeOverlay()}>Schließen</button></div></div></div>`;
   }
 };
 if (!customElements.get(ELEMENT)) customElements.define(ELEMENT, DreameX60Panel);
