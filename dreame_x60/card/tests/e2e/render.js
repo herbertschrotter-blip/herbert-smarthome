@@ -36,6 +36,15 @@ for (const pg of PAGES) {
   H.check('im Lauf: keine Fehler', errs.length === 0, errs);
   await page.close();
 }
+// Zweite Fixture (im Lauf, 0.2): jede Seite ohne Konsolenfehler, Übersicht mit Auftrag-Kachel
+{
+  for (const pg of PAGES) {
+    const { page, errs } = await H.mount(b, { page: pg, fixture: 'states-cleaning.json', viewport: { width: 1400, height: 1400 } });
+    H.check(`cleaning-Fixture ${pg}: keine Seiten-/Konsolenfehler`, errs.length === 0, errs);
+    if (pg === 'start') H.checkEqual('cleaning-Fixture start: Fläche auftrag statt automatik', await slots(page), SLOTS_IDLE.map((s) => (s === 'automatik' ? 'auftrag' : s)));
+    await page.close();
+  }
+}
 // Schmal (390): eine Spalte, kein waagrechter Überlauf, Meta der Kopfzeile ausgeblendet
 {
   const { page, errs } = await H.mount(b, { page: 'start', viewport: { width: 390, height: 844 } });

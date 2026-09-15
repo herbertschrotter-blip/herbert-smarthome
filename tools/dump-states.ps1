@@ -16,7 +16,7 @@ $root = Split-Path $PSScriptRoot -Parent
 $json = & (Join-Path $PSScriptRoot 'ha.ps1') get states
 $arr = $json | ConvertFrom-Json
 $keep = @('person.herbert_schrotter', 'person.nicole_2', 'person.nina_2', 'input_boolean.stuehle_am_boden')
-$strip = @('latitude', 'longitude', 'gps_accuracy', 'source', 'user_id', 'device_trackers', 'id')
+$strip = @('latitude', 'longitude', 'gps_accuracy', 'source', 'user_id', 'device_trackers', 'id', 'access_token')
 $map = [ordered]@{}
 foreach ($s in ($arr | Sort-Object entity_id)) {
   if (-not ($s.entity_id -like '*heidi*' -or $keep -contains $s.entity_id)) { continue }

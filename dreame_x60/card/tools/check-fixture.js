@@ -12,7 +12,7 @@ const states = JSON.parse(fs.readFileSync(file, 'utf8'));
 const missing = ids.filter((id) => !states[id]);
 const unavailable = ids.filter((id) => states[id] && ['unavailable', 'unknown'].includes(states[id].state));
 const extra = Object.keys(states).filter((id) => !ids.includes(id));
-const leaks = Object.entries(states).filter(([, s]) => s.attributes && ('latitude' in s.attributes || 'longitude' in s.attributes || /token=(?!ENTFERNT)/.test(String(s.attributes.entity_picture || '')))).map(([id]) => id);
+const leaks = Object.entries(states).filter(([, s]) => s.attributes && ('latitude' in s.attributes || 'longitude' in s.attributes || 'access_token' in s.attributes || /token=(?!ENTFERNT)/.test(String(s.attributes.entity_picture || '')))).map(([id]) => id);
 
 console.log(`${file}: ${Object.keys(states).length} Entitäten, Vertrag ${ids.length} IDs, vacuum.heidi = ${states['vacuum.heidi']?.state ?? '–'}`);
 console.log(`  fehlend (Vertrag gebrochen): ${missing.length}${missing.length ? '\n    ' + missing.join('\n    ') : ''}`);

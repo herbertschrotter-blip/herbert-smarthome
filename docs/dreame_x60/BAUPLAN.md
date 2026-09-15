@@ -31,7 +31,7 @@ Claude Code im Web bereitet diese Aufgaben vor, führt sie aber nicht aus.
 | Nr. | Aufgabe | Status |
 |---|---|---|
 | 0.1 | v1-Tests: Exit-Code bei Abweichung, `test-timeline` in `npm test`, ein Harness | fertig (d6f6778) |
-| 0.2 | **[PC]** Fixtures `states-docked.json`, `states-cleaning.json` erneuern | docked fertig (15.09., 351 Entitäten, 0 fehlend); cleaning offen – beim nächsten Lauf ziehen |
+| 0.2 | **[PC]** Fixtures `states-docked.json`, `states-cleaning.json` erneuern | fertig (15.09.; docked 351 Entitäten, cleaning 361 Entitäten beim Lauf 08:37, je 0 fehlend; `access_token` der Kameras jetzt ebenfalls entfernt) |
 | 0.3 | v1: `sensor.heidi_task_status` in `_signature()`, Version 1.6.2 (1.6.1 war auf H: schon vergeben) | fertig (b09fe23, a3c9ad9; eingespielt 15.09. 06:24, Ressource ?v=1.6.2); Sichtprüfung Kopf durch Herbert nach Strg+F5 offen |
 | 0.4 | Backend: `rest_min`/`rest_quelle` als Attribute, Automation liest sie | fertig (44d5406; eingespielt, check_config valid, Attribute geprüft); Trace-Vergleich beim nächsten Automatik-Lauf offen |
 | 1.1 | Toolchain `dreame_x60/card/` | fertig (15.09.; build/check/lint grün) |
