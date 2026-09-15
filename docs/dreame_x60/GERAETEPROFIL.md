@@ -114,10 +114,31 @@ interface RobotAdapter {
 - Grenzen: Manche Fähigkeiten gibt es nur bei Dreame (App-Szenen, Kartenpaket im PNG-Chunk). Das Profil sagt dann
   „nicht vorhanden“, die Karte blendet aus – kein Fehler.
 
-### Stufe 4 – zwei Roboter gleichzeitig
+### Stufe 4 – Installation, zweiter Roboter, Weitergabe (Herbert, 16.09.: „muss ich alles manuell nochmal machen?“)
 
-Paket als Vorlage mit Präfix-Platzhalter (`{{p}}_plan1_name`), ein Paket je Roboter, je Dashboard-Eintrag eine Karte
-mit `robot:`. Erst sinnvoll, wenn es einen zweiten Roboter gibt.
+**Ist-Zustand:** Alles außer den Roboter-Entitäten der Integration entsteht von Hand: Paket `heidi.yaml` (~90 Helfer und
+Sensoren), Automationen, Skripte, Prognose-Skripte, Theme, Einträge in `configuration.yaml` (Dashboard, Paket,
+Shell-Befehle), Karte `dreame_x60.js` + Lovelace-Ressource, Datenkarte aktivieren, HACS-Karten, Personen. Ein zweiter
+Roboter bräuchte eine Kopie von Paket/Automationen/Skripten mit anderem Präfix und Roboternamen (~390 Stellen); eine
+Weitergabe an Dritte hat heute keine Anleitung. Die Karte selbst ist fertig dafür (`robot:` je Dashboard-Eintrag,
+Diagnose-Seite zeigt fehlende Roboter- und Paket-Entitäten getrennt).
+
+**Ziel (drei Teile):**
+
+1. **Paket als Vorlage + Generator.** `ha/templates/` mit Platzhaltern `{{p}}` (Präfix) und `{{vac}}` (Roboter-Entität,
+   daraus die Roboter-IDs nach dem Muster der Integration) für Paket, Automationen, Skripte und Dashboard-Eintrag;
+   `tools/setup.ps1 -Name berta -Robot vacuum.berta` erzeugt die Dateien nach `ha/generated/<name>/` und deployt sie.
+   Das heutige `heidi`-Paket wird die erste Instanz der Vorlage (Regressionstest: Generator mit `heidi` muss byte-gleich
+   das heutige Paket liefern, bis auf Kommentare). Paket-Präfix in der Karte kommt dann aus der Kartenkonfiguration
+   (`package: berta`, Standard = Präfix des Roboters).
+2. **Installationsanleitung** `docs/INSTALL.md`: Voraussetzungen (HA-Version, Dreame-Integration Beta, HACS-Karten
+   optional), Schritte in Reihenfolge, Prüfung am Ende über die Diagnose-Seite der Karte, bekannte Stolperfallen
+   (Datenkarte aktivieren, `switch.<gerät>_customized_cleaning`, Umlaute in IDs, Personen).
+3. **Karte als HACS-Paket** in eigenem Repo (`hacs.json`, Releases mit `dreame_x60.js`), damit Empfänger Installation und
+   Updates über HACS bekommen. Nach 6.5.
+
+**Reihenfolge:** Teil 1 und 2 nach 4.4/4.5, wenn das Paket nicht mehr täglich umgebaut wird; Teil 3 nach 6.5.
+ClickUp: „Post-2.0: Installation, zweiter Roboter, Weitergabe – Paket-Vorlage + setup.ps1, INSTALL.md, HACS“.
 
 ## Reihenfolge – Empfehlung
 

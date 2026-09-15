@@ -802,6 +802,8 @@ Wünsche `Post-2.0`: lokale Font-Dateien (Sora/IBM Plex).
 
 - [2026-09-16] [Heidi-Karte] Wunsch · Post-2.0 (Herbert, „merk dir das für später“): **Deutsche Raumnamen im Kartenbild trotz Standardtypen.** Befund: Die Integration zeichnet die Raumnamen bei Standardtypen aus ihrer englischen Liste ins Bild (SEGMENT_TYPE_CODE_TO_NAME, keine Sprachoption, de.json ohne Raumnamen); Text im Bild ist nicht bearbeitbar. Darum hatte Herbert in v1 benutzerdefinierte deutsche Namen gesetzt und damit Standardtyp und Sprachsteuerung verloren. Lösung, wenn gewünscht: (1) in der Integration die Kartenobjekte „Room Names“, „Room Icons“, „Room Name Background“ ausblenden (Optionen, Herbert), (2) dx-heidi-map zeichnet Symbol + deutschen Namen je Raum aus dem Profil (ROOM_TYPES) im Stil des Bildes, ohne dunkle Chips; die Übersichtskachel (compact) nutzt dann ebenfalls dx-heidi-map (nur lesen) statt picture-entity. Nebeneffekt: Dreame-App-/Xiaomi-Karte zeigen das Bild dann ohne Namen. Vorerst bleibt es beim englischen Bild (Herbert, 16.09.).
 
+- [2026-09-16] [Plan] Wunsch · Post-2.0 (Herbert: „Wenn ich einen zweiten Roboter hinzufüge, muss ich alles manuell nochmal machen? Was, wenn ich das Dashboard weitergebe?“): Heute Handarbeit (Paket, Automationen, Skripte, configuration.yaml, Ressource, Datenkarte, Personen). Plan als Stufe 4 in `docs/dreame_x60/GERAETEPROFIL.md`: Paket-Vorlage mit Platzhaltern + `tools/setup.ps1` (Generator, heidi = erste Instanz, byte-gleich als Regressionstest), `docs/INSTALL.md` mit Prüfung über die Diagnose-Seite, Karte als HACS-Paket nach 6.5. Reihenfolge: nach 4.4/4.5. ClickUp-Task angelegt.
+
 ## 10a. Paritätsabweichungen (Register)
 
 Jede gewollte Abweichung von v1 hat hier einen Eintrag. Ohne Eintrag mit Status `freigegeben`
