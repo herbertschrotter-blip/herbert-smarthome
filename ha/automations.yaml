@@ -93,12 +93,8 @@
     ho: "{{ blockiert and is_state('binary_sensor.heidi_arbeitszeit', 'on') }}"
     ho_leise: "{{ ho and is_state('input_select.heidi_plan' ~ slot ~ '_homeoffice', 'Leise starten') }}"
     schnell_erlaubt: "{{ is_state('input_boolean.heidi_plan' ~ slot ~ '_schnell', 'on') }}"
-    use_prog: >-
-      {{ is_state('input_boolean.heidi_prognose_aktiv','on') and is_state('input_boolean.heidi_abweichung_heute','off')
-         and (state_attr('sensor.heidi_prognose','tage') | int(0)) >= (states('input_number.heidi_prognose_mindesttage') | int(14)) and (state_attr('sensor.heidi_prognose','rueckkehr_min') | int(0)) > 0 }}
-    rest_min: >-
-      {% if use_prog %}{{ state_attr('sensor.heidi_prognose','rueckkehr_min') | int(0) }}
-      {% else %}{% set rk = states('input_datetime.heidi_rueckkehr') %}{{ (rk[:2] | int) * 60 + (rk[3:5] | int) - now().hour * 60 - now().minute }}{% endif %}
+    # Rest bis zur Rückkehr kommt vom Status-Sensor (eine Rechnung für Karte, Sensor und Automation; Bauplan 0.4)
+    rest_min: "{{ state_attr('sensor.heidi_automatik_status', 'rest_min') | int(0) }}"
     # Alte Regel (Rückfall, solange keine Lernwerte da sind): Schnellprogramm unter X Minuten Rest
     schnell: "{{ schnell_erlaubt and (rest_min | int) < (states('input_number.heidi_schnell_minuten') | int(90)) and not blockiert }}"
     est_args: >-

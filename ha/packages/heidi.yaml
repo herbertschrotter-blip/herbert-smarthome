@@ -316,6 +316,19 @@ template:
             {{ 'Prognose: Rückkehr ' ~ prog if use_prog else 'Übliche Rückkehr ' ~ rk }}
             ({{ (rest // 60) if rest > 0 else 0 }} h {{ (rest % 60) if rest > 0 else 0 }} min) →
             {{ 'Schnellprogramm' if schnell else 'volles Programm' }}.
+          # Rest bis zur erwarteten Rückkehr in Minuten (kann negativ sein) – dieselbe Logik wie detail;
+          # die Automation heidi_planer liest diesen Wert, statt ihn selbst zu rechnen (Bauplan 0.4)
+          rest_min: >-
+            {%- set rk = states('input_datetime.heidi_rueckkehr')[:5] -%}
+            {%- set prog = state_attr('sensor.heidi_prognose','rueckkehr') -%}
+            {%- set use_prog = is_state('input_boolean.heidi_prognose_aktiv','on') and is_state('input_boolean.heidi_abweichung_heute','off') and (state_attr('sensor.heidi_prognose','tage') | int(0)) >= (states('input_number.heidi_prognose_mindesttage') | int(14)) and prog not in [none, '', '–'] -%}
+            {{ state_attr('sensor.heidi_prognose','rueckkehr_min') | int(0) if use_prog else ((rk[:2] | int) * 60 + (rk[3:5] | int) - now().hour * 60 - now().minute) }}
+          # Woher rest_min stammt: 'Prognose' oder 'übliche Rückkehr HH:MM'
+          rest_quelle: >-
+            {%- set rk = states('input_datetime.heidi_rueckkehr')[:5] -%}
+            {%- set prog = state_attr('sensor.heidi_prognose','rueckkehr') -%}
+            {%- set use_prog = is_state('input_boolean.heidi_prognose_aktiv','on') and is_state('input_boolean.heidi_abweichung_heute','off') and (state_attr('sensor.heidi_prognose','tage') | int(0)) >= (states('input_number.heidi_prognose_mindesttage') | int(14)) and prog not in [none, '', '–'] -%}
+            {{ 'Prognose' if use_prog else 'übliche Rückkehr ' ~ rk }}
 
       # Feiner Arbeitsschritt als lesbarer Text (Kopfzeile der Karte + Zeitleiste im Protokoll).
       # HA zeichnet jede Änderung auf (Recorder) – die Karte holt daraus die Zeitleiste je Lauf.
