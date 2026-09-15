@@ -1,3 +1,11 @@
 [
-  { "name": "Punkte der Fixture, Hin und Rück", "px": [[633, 122], [553, 42], [600, 100]], "mm": [[0, 0], [1000, 1000], [-4200, -4775]], "rects": [{ "x0": 10, "y0": 20, "x1": 30, "y1": 20, "x2": 30, "y2": 40, "x3": 10, "y3": 40 }] }
+  { "name": "Punkte der Fixture: Hin (Kalibrierpunkte + Zwischenpunkt) und Rück", "px": [[633, 122], [633, 42], [553, 122], [600, 100], [0, 0], [1332, 716]], "mm": [[0, 0], [1000, 0], [0, 1000], [-4200, -4775], [-1550, -188], [937, -643]] },
+  { "name": "eigene Punkte mit Drehung und Versatz", "points": [{ "vacuum": { "x": 100, "y": 200 }, "map": { "x": 10, "y": 20 } }, { "vacuum": { "x": 1100, "y": 200 }, "map": { "x": 10, "y": -30 } }, { "vacuum": { "x": 100, "y": 1200 }, "map": { "x": 60, "y": 20 } }], "px": [[10, 20], [35, -5], [100, 100]], "mm": [[100, 200], [600, 700], [0, 0]] },
+  { "name": "nur zwei Punkte → null", "points": [{ "vacuum": { "x": 0, "y": 0 }, "map": { "x": 633, "y": 122 } }, { "vacuum": { "x": 1000, "y": 0 }, "map": { "x": 633, "y": 42 } }] },
+  { "name": "kollineare Punkte → null", "points": [{ "vacuum": { "x": 0, "y": 0 }, "map": { "x": 0, "y": 0 } }, { "vacuum": { "x": 1000, "y": 0 }, "map": { "x": 10, "y": 10 } }, { "vacuum": { "x": 2000, "y": 0 }, "map": { "x": 20, "y": 20 } }] },
+  { "name": "Rechtecke: Objekt mit vier Ecken", "rects": { "x0": 10, "y0": 20, "x1": 30, "y1": 20, "x2": 30, "y2": 40, "x3": 10, "y3": 40 } },
+  { "name": "Rechtecke: Liste, Ecken vertauscht", "rects": [{ "x0": 30, "y0": 40, "x1": 10, "y1": 40, "x2": 10, "y2": 20, "x3": 30, "y3": 20 }, { "x0": -5, "y0": -5, "x1": 5, "y1": -5, "x2": 5, "y2": 5, "x3": -5, "y3": 5 }] },
+  { "name": "Rechtecke: nur zwei Ecken angegeben", "rects": [{ "x0": 1, "y0": 2, "x2": 3, "y2": 4 }] },
+  { "name": "Rechtecke: null und leere Liste", "rects": null },
+  { "name": "Rechtecke: leere Liste", "rects": [] }
 ]

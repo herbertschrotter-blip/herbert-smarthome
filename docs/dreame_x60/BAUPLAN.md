@@ -42,7 +42,7 @@ Claude Code im Web bereitet diese Aufgaben vor, führt sie aber nicht aus.
 | 2.1 | `domain/raumwerte.ts` + Vektoren | fertig (15.09.; 14 v1-Vektoren + spec grün) |
 | 2.2 | `domain/estimate.ts` + Vektoren | fertig (15.09.; 19 v1-Vektoren + spec grün) |
 | 2.3 | `domain/timeline.ts` + Vektoren | fertig (15.09.; 3 v1-Vektoren + spec grün, 7 Zeilen aus test-timeline ohne Browser) |
-| 2.4 | `domain/calibration.ts` + Tests | offen |
+| 2.4 | `domain/calibration.ts` + Tests | fertig (15.09.; 9 v1-Vektoren, Hin/Rück, null-Fälle, Zonen-Geste aus test-zones.js ohne Browser) |
 | 2.5 | `domain/status.ts` + Tests | offen |
 | 2.6 | `domain/labels.ts` + Tests | offen |
 | 2.7 | `ha/prognose/tests/test_runlog.py` gegen dieselben Vektoren | offen |

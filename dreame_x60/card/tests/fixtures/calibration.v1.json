@@ -1,9 +1,9 @@
 {
  "quelle": "ha/www/heidi-panel.js v1.6.2",
- "erzeugt": "2026-09-15T05:13:48.224Z",
+ "erzeugt": "2026-09-15T05:27:07.402Z",
  "vektoren": [
   {
-   "name": "Punkte der Fixture, Hin und Rück",
+   "name": "Punkte der Fixture: Hin (Kalibrierpunkte + Zwischenpunkt) und Rück",
    "input": {
     "px": [
      [
@@ -11,12 +11,24 @@
       122
      ],
      [
-      553,
+      633,
       42
+     ],
+     [
+      553,
+      122
      ],
      [
       600,
       100
+     ],
+     [
+      0,
+      0
+     ],
+     [
+      1332,
+      716
      ]
     ],
     "mm": [
@@ -26,24 +38,24 @@
      ],
      [
       1000,
+      0
+     ],
+     [
+      0,
       1000
      ],
      [
       -4200,
       -4775
+     ],
+     [
+      -1550,
+      -188
+     ],
+     [
+      937,
+      -643
      ]
-    ],
-    "rects": [
-     {
-      "x0": 10,
-      "y0": 20,
-      "x1": 30,
-      "y1": 20,
-      "x2": 30,
-      "y2": 40,
-      "x3": 10,
-      "y3": 40
-     }
     ]
    },
    "output": {
@@ -55,11 +67,23 @@
      ],
      [
       1000,
+      0
+     ],
+     [
+      0,
       1000
      ],
      [
       275,
       412.5
+     ],
+     [
+      1525,
+      7912.5
+     ],
+     [
+      -7425,
+      -8737.5
      ]
     ],
     "toMap": [
@@ -68,14 +92,210 @@
       122
      ],
      [
-      553,
+      633,
       42
+     ],
+     [
+      553,
+      122
      ],
      [
       1015,
       458
+     ],
+     [
+      648.04,
+      246
+     ],
+     [
+      684.44,
+      47.04
+     ]
+    ]
+   }
+  },
+  {
+   "name": "eigene Punkte mit Drehung und Versatz",
+   "input": {
+    "points": [
+     {
+      "vacuum": {
+       "x": 100,
+       "y": 200
+      },
+      "map": {
+       "x": 10,
+       "y": 20
+      }
+     },
+     {
+      "vacuum": {
+       "x": 1100,
+       "y": 200
+      },
+      "map": {
+       "x": 10,
+       "y": -30
+      }
+     },
+     {
+      "vacuum": {
+       "x": 100,
+       "y": 1200
+      },
+      "map": {
+       "x": 60,
+       "y": 20
+      }
+     }
+    ],
+    "px": [
+     [
+      10,
+      20
+     ],
+     [
+      35,
+      -5
+     ],
+     [
+      100,
+      100
      ]
     ],
+    "mm": [
+     [
+      100,
+      200
+     ],
+     [
+      600,
+      700
+     ],
+     [
+      0,
+      0
+     ]
+    ]
+   },
+   "output": {
+    "calibNull": false,
+    "toVac": [
+     [
+      100,
+      200
+     ],
+     [
+      600,
+      700
+     ],
+     [
+      -1500,
+      2000
+     ]
+    ],
+    "toMap": [
+     [
+      10,
+      20
+     ],
+     [
+      35,
+      -5
+     ],
+     [
+      0,
+      25
+     ]
+    ]
+   }
+  },
+  {
+   "name": "nur zwei Punkte → null",
+   "input": {
+    "points": [
+     {
+      "vacuum": {
+       "x": 0,
+       "y": 0
+      },
+      "map": {
+       "x": 633,
+       "y": 122
+      }
+     },
+     {
+      "vacuum": {
+       "x": 1000,
+       "y": 0
+      },
+      "map": {
+       "x": 633,
+       "y": 42
+      }
+     }
+    ]
+   },
+   "output": {
+    "calibNull": true
+   }
+  },
+  {
+   "name": "kollineare Punkte → null",
+   "input": {
+    "points": [
+     {
+      "vacuum": {
+       "x": 0,
+       "y": 0
+      },
+      "map": {
+       "x": 0,
+       "y": 0
+      }
+     },
+     {
+      "vacuum": {
+       "x": 1000,
+       "y": 0
+      },
+      "map": {
+       "x": 10,
+       "y": 10
+      }
+     },
+     {
+      "vacuum": {
+       "x": 2000,
+       "y": 0
+      },
+      "map": {
+       "x": 20,
+       "y": 20
+      }
+     }
+    ]
+   },
+   "output": {
+    "calibNull": true
+   }
+  },
+  {
+   "name": "Rechtecke: Objekt mit vier Ecken",
+   "input": {
+    "rects": {
+     "x0": 10,
+     "y0": 20,
+     "x1": 30,
+     "y1": 20,
+     "x2": 30,
+     "y2": 40,
+     "x3": 10,
+     "y3": 40
+    }
+   },
+   "output": {
+    "calibNull": false,
     "rects": [
      [
       10,
@@ -84,6 +304,94 @@
       40
      ]
     ]
+   }
+  },
+  {
+   "name": "Rechtecke: Liste, Ecken vertauscht",
+   "input": {
+    "rects": [
+     {
+      "x0": 30,
+      "y0": 40,
+      "x1": 10,
+      "y1": 40,
+      "x2": 10,
+      "y2": 20,
+      "x3": 30,
+      "y3": 20
+     },
+     {
+      "x0": -5,
+      "y0": -5,
+      "x1": 5,
+      "y1": -5,
+      "x2": 5,
+      "y2": 5,
+      "x3": -5,
+      "y3": 5
+     }
+    ]
+   },
+   "output": {
+    "calibNull": false,
+    "rects": [
+     [
+      10,
+      20,
+      30,
+      40
+     ],
+     [
+      -5,
+      -5,
+      5,
+      5
+     ]
+    ]
+   }
+  },
+  {
+   "name": "Rechtecke: nur zwei Ecken angegeben",
+   "input": {
+    "rects": [
+     {
+      "x0": 1,
+      "y0": 2,
+      "x2": 3,
+      "y2": 4
+     }
+    ]
+   },
+   "output": {
+    "calibNull": false,
+    "rects": [
+     [
+      1,
+      2,
+      3,
+      4
+     ]
+    ]
+   }
+  },
+  {
+   "name": "Rechtecke: null und leere Liste",
+   "input": {
+    "rects": null
+   },
+   "output": {
+    "calibNull": false,
+    "rects": []
+   }
+  },
+  {
+   "name": "Rechtecke: leere Liste",
+   "input": {
+    "rects": []
+   },
+   "output": {
+    "calibNull": false,
+    "rects": []
    }
   }
  ]
