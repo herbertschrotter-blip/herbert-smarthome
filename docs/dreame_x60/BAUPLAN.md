@@ -747,6 +747,8 @@ Für 2.0 müssen `Blocker` und `Functional` = 0 sein. `Cosmetic` und `Post-2.0` 
 - [2026-09-14] [4.3] Wunsch · Post-2.0: Pixelgenaue Raumauswahl wie in der App über `camera.heidi_map_data` (Valetudo-Format, Segment-Masken) in einer eigenen Kartenansicht; die Xiaomi-Karte kann nur Polygone (`outline`) und trifft an Raumrändern ungenau.
 - [2026-09-14] [4.3] Wunsch · Post-2.0: Kartenwahl für mehrere Etagen (`switch.heidi_multi_floor_map`, `select.heidi_selected_map`, `camera.heidi_map_1..3`), sobald eine zweite Karte existiert; Reihenfolge der Räume per Ziehen (`vacuum_set_cleaning_sequence`).
 
+- [2026-09-15] [UX] Wunsch · Post-2.0 (Herbert): **App-artige Übergänge Bento ↔ Detail** (Expand/Morph beim Öffnen einer Detailansicht, Collapse/Morph zurück; Bewegungssprache für Tabs, Panels, Dialoge, Status, Karte; 120–300 ms, ruhig, `prefers-reduced-motion`). Vollständig in `docs/dreame_x60/UX-TRANSITIONS.md`; ClickUp „Post-2.0: App-artige Übergänge Bento ↔ Detail“. **Gilt schon jetzt (nur Leitplanken, kein Scope):** Navigation nur über `navigate.ts`/`dx-navigate`; keine Komponente hängt am HA-Ansichts-Lebenszyklus (die Seiten sind heute HA-Unteransichten, später rendert die Karte Detailseiten selbst – Wechsel nur in Shell + `navigate.ts`); `data-slot`-Namen der Übersicht und die Bausteinnamen bleiben stabil (Anker für Morph); gleiche Sache auf Übersicht und Detail = ein Element mit `variant`, nicht zwei; keine Animations-Infrastruktur auf Vorrat.
+
 Wünsche `Post-2.0`: lokale Font-Dateien (Sora/IBM Plex).
 
 ## 10a. Paritätsabweichungen (Register)
