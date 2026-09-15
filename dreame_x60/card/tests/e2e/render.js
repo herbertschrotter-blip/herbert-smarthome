@@ -26,7 +26,7 @@ for (const pg of PAGES) {
 // Im Lauf: rechte Spalte zeigt „Aktueller Auftrag“ statt Automatik, Titel „Heidi ist unterwegs“; Gruß mit Benutzername
 {
   const states = H.loadFixture();
-  states['vacuum.heidi'] = { ...states['vacuum.heidi'], state: 'cleaning' };
+  states['vacuum.heidi'] = { ...states['vacuum.heidi'], state: 'cleaning', attributes: { ...states['vacuum.heidi'].attributes, docked: false } };
   const { page, errs } = await H.mount(b, { page: 'start', states, viewport: { width: 1400, height: 1400 } });
   H.checkEqual('start im Lauf: Fläche auftrag statt automatik', await slots(page), SLOTS_IDLE.map((s) => (s === 'automatik' ? 'auftrag' : s)));
   H.check('start im Lauf: Titel „Heidi ist unterwegs“', (await H.shadowText(page, '.topbar h1')) === 'Heidi ist unterwegs');
@@ -41,7 +41,8 @@ for (const pg of PAGES) {
   for (const pg of PAGES) {
     const { page, errs } = await H.mount(b, { page: pg, fixture: 'states-cleaning.json', viewport: { width: 1400, height: 1400 } });
     H.check(`cleaning-Fixture ${pg}: keine Seiten-/Konsolenfehler`, errs.length === 0, errs);
-    if (pg === 'start') H.checkEqual('cleaning-Fixture start: Fläche auftrag statt automatik', await slots(page), SLOTS_IDLE.map((s) => (s === 'automatik' ? 'auftrag' : s)));
+    // Der Abzug entstand bei der Mopp-Wäsche vor dem Start (cleaning, aber docked) → Automatik statt Auftrag, Titel „in der Station“
+    if (pg === 'start') { H.checkEqual('cleaning-Fixture start (Mopp-Wäsche vor dem Start): Automatik statt Auftrag', await slots(page), SLOTS_IDLE); H.checkEqual('cleaning-Fixture: Titel „Heidi ist in der Station“', await H.shadowText(page, '.topbar h1'), 'Heidi ist in der Station'); }
     await page.close();
   }
 }

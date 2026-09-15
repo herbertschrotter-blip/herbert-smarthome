@@ -192,7 +192,7 @@ export class DreameX60Panel extends LitElement {
         <dx-hero class="b span3" data-slot="hero" .robot=${robot} .rooms=${rooms} .api=${this.api}></dx-hero>
         ${box(startSlot('map'))}
         <div class="span3 stack rightstack">
-          ${robot.vac === 'cleaning' || robot.vac === 'paused' ? html`<dx-auftrag class="b" data-slot="auftrag" .robot=${robot} .rooms=${rooms}></dx-auftrag>` : box(startSlot('automatik'))}
+          ${(robot.vac === 'cleaning' || robot.vac === 'paused') && !robot.docked ? html`<dx-auftrag class="b" data-slot="auftrag" .robot=${robot} .rooms=${rooms}></dx-auftrag>` : box(startSlot('automatik'))}
           ${box(startSlot('heute'))}
         </div>
         ${rest.map(box)}

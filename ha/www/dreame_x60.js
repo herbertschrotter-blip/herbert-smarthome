@@ -2105,7 +2105,7 @@ var DxAuftrag = class extends i4 {
   }
   render() {
     const r4 = this.robot;
-    if (!r4 || !["cleaning", "paused"].includes(r4.vac)) return b2``;
+    if (!r4 || !["cleaning", "paused"].includes(r4.vac) || r4.docked) return b2``;
     const { order, idx, rest } = runOrder(r4);
     const total = order.length;
     const startpunkt = r4.vac === "cleaning" && r4.cleanedArea === 0;
@@ -2300,7 +2300,7 @@ var DreameX60Panel = class extends i4 {
         <dx-hero class="b span3" data-slot="hero" .robot=${robot} .rooms=${rooms} .api=${this.api}></dx-hero>
         ${box(startSlot("map"))}
         <div class="span3 stack rightstack">
-          ${robot.vac === "cleaning" || robot.vac === "paused" ? b2`<dx-auftrag class="b" data-slot="auftrag" .robot=${robot} .rooms=${rooms}></dx-auftrag>` : box(startSlot("automatik"))}
+          ${(robot.vac === "cleaning" || robot.vac === "paused") && !robot.docked ? b2`<dx-auftrag class="b" data-slot="auftrag" .robot=${robot} .rooms=${rooms}></dx-auftrag>` : box(startSlot("automatik"))}
           ${box(startSlot("heute"))}
         </div>
         ${rest.map(box)}

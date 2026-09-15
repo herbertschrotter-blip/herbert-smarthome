@@ -48,6 +48,7 @@ const jetzt = v1.vektoren.find((v) => /Streifen · Jetzt/.test(v.name));
   // wie der v1-Vektor, zusätzlich Raum 5 (nächster Raum) mit Modus „Saugen“, damit die Auftrag-Kachel einen Modus-Tag zeigt
   const s = statesFor(jetzt);
   s['select.heidi_room_5_cleaning_mode'] = { ...s['select.heidi_room_5_cleaning_mode'], state: 'sweeping' };
+  s['vacuum.heidi'] = { ...s['vacuum.heidi'], attributes: { ...s['vacuum.heidi'].attributes, docked: false } }; // Abzug „angedockt“ hat docked=true; unterwegs ist es false
   await setStates(s);
   const got = await readHero();
   H.checkEqual('im Lauf: Modus/Saug/Wasser des aktuellen Raums', got.params, ['Saugen + Wischen', 'Turbo', 'Mittel']);
@@ -64,7 +65,9 @@ const jetzt = v1.vektoren.find((v) => /Streifen · Jetzt/.test(v.name));
 
 // ── Startpunkt-Fall (Fläche 0): Auftrag zeigt 0 / n und den ersten Raum als Ziel ──
 {
-  await setStates(statesFor(v1.vektoren.find((v) => /Streifen · Fährt zum Startpunkt/.test(v.name))));
+  const s = statesFor(v1.vektoren.find((v) => /Streifen · Fährt zum Startpunkt/.test(v.name)));
+  s['vacuum.heidi'] = { ...s['vacuum.heidi'], attributes: { ...s['vacuum.heidi'].attributes, docked: false } };
+  await setStates(s);
   const a = await page.evaluate(() => {
     const sr = document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-auftrag').shadowRoot;
     const t = (sel) => { const e = sr.querySelector(sel); return e ? e.textContent.replace(/\s+/g, ' ').trim() : null; };
