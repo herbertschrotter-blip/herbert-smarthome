@@ -79,6 +79,31 @@ Heute nur architektonisch nicht verbauen; nach erfolgreicher v2-Parität gezielt
 5. **Keine Animations-Infrastruktur auf Vorrat**, keine Transition jetzt implementieren, wenn sie nicht Teil der
    aktuellen Aufgabe ist. Bestehende kleine Übergänge (`fade`, `up` im Dialog, Toast) bleiben bei `--dx-dur`.
 
+## Weitere Ideen (Post-2.0, Herbert 15.09.2026): Kopfzeile als Einstieg, Seitenleiste optional
+
+Alle vier Ideen sind Anzeige- und Navigationsfunktionen ohne neue Backend-Logik; die Daten gibt es schon.
+ClickUp: „Post-2.0: Kopfzeile als Einstieg (Kalender, Zuhause, Nicht stören) + Seitenleiste optional“ (https://app.clickup.com/t/123ztrcv2wx).
+
+1. **Seitenleiste weglassen, alles über die Kacheln öffnen.** Sobald der Bento→Detail-Morph existiert, sind die
+   Kacheln der natürliche Einstieg (Karte → Reinigen, Planer → Planer, Letzte Läufe/Statistik → Verlauf, Heute →
+   Prognose). Zwei Seiten haben keine Kachel und brauchen dann einen festen Einstieg in der Kopfzeile:
+   Einstellungen (Zahnrad rechts) und Räume (über Karte oder Roboter-Panel). Am Handy gibt es heute schon keine
+   Seitenleiste (Tab-Leiste). Einschätzung: sinnvoll, aber erst nach dem Morph entscheiden – ohne Übergang wirkt
+   „Kachel antippen → Seite wechselt“ wie heute die Seitenleiste, nur mit weniger Orientierung.
+2. **Uhrzeit antippen → Kalender** mit vergangenen und künftigen Fahrten: vergangene Läufe aus
+   `sensor.heidi_cleaning_history`, künftige aus den vier Planer-Einträgen (Wochentage + Uhrzeit, nächste
+   Vorkommen berechnen) und aus der Automatik (heutiger Eintrag, Prognose-Fenster). Rein clientseitig.
+3. **„Zu Hause“ antippen → wer ist wann zu Hause**: heutiger Verlauf der drei Personen aus der HA-Historie
+   (`person.*`, History-API wie die Zeitleiste), dazu die Prognose-Heatmaps (`/local/prognose_<name>.png`), die
+   die Seite Prognose schon zeigt. Denkbar als Dialog mit Tagesbalken je Person + Link zur Prognose.
+4. **„Nicht stören“ antippen → Fenster „Zeiten“**: Nicht-stören-Zeit (`time.heidi_dnd_start/_end`), Arbeitszeit/
+   Homeoffice (`input_datetime.heidi_arbeitszeit_*`, Homeoffice-Verhalten der Einträge), übliche Rückkehr,
+   Schnellprogramm-Minuten. Das sind heute Felder auf Einstellungen/Planer; hier nur neu gruppiert. Einschätzung:
+   der einfachste der vier Punkte, kann direkt nach 4.11 (Einstellungen) als eigener Dialog kommen.
+
+Leitplanke für heute: Die drei Meta-Felder der Kopfzeile bleiben eigene Elemente mit stabilen Klassen
+(`.mi.time`, `.mi.home`, `.mi.dnd`), damit sie später anklickbar werden und als Morph-Anker dienen können.
+
 ## Zielbild
 
 Heidi bekommt langfristig eine eigene, konsistente Bewegungssprache. Der wiederkehrende Übergang

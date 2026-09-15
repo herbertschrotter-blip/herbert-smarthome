@@ -2383,7 +2383,8 @@ var DreameX60Panel = class extends i4 {
       ${this._toast ? b2`<div class="toast" role="status">${this._toast}</div>` : A}
     `;
   }
-  /** Kopfzeile: Übersicht mit Tagesgruß bzw. „Heidi ist unterwegs“, Unterseiten mit Zurück-Knopf; rechts Uhr, Zuhause, Nicht stören. */
+  /** Kopfzeile: Übersicht mit Tagesgruß bzw. „Heidi ist unterwegs“, Unterseiten mit Zurück-Knopf; rechts Uhr, Zuhause, Nicht stören
+   *  (stabile Klassen .mi.time/.home/.dnd – später antippbar: Kalender, Anwesenheit, Zeiten; docs/dreame_x60/UX-TRANSITIONS.md). */
   renderTopbar(page, robot) {
     const now = new Date(this._now);
     let title, sub;
@@ -2400,9 +2401,9 @@ var DreameX60Panel = class extends i4 {
         ${page !== "start" ? b2`<button class="back" @click=${() => navigate("start")}><ha-icon icon="mdi:chevron-left"></ha-icon>Übersicht</button>` : A}
         <div><h1>${title}</h1><div class="sub">${sub}</div></div>
         <div class="meta">
-          <div class="mi"><ha-icon icon="mdi:clock-outline"></ha-icon><div><b>${now.toLocaleTimeString("de-AT", { hour: "2-digit", minute: "2-digit" })}</b><small>${now.toLocaleDateString("de-AT", { weekday: "long", day: "numeric", month: "short", year: "numeric" })}</small></div></div>
-          <div class="mi"><ha-icon icon="mdi:home-outline"></ha-icon><div><b>${home.length ? "Zu Hause" : "Niemand zu Hause"}<span class="dot ${home.length ? "on" : ""}"></span></b><small>${home.length ? home.join(" \xB7 ") + " anwesend" : "alle unterwegs"}</small></div></div>
-          <div class="mi"><ha-icon icon="mdi:weather-night"></ha-icon><div><b>${robot.hero.dnd}</b><small>Nicht stören</small></div></div>
+          <div class="mi time"><ha-icon icon="mdi:clock-outline"></ha-icon><div><b>${now.toLocaleTimeString("de-AT", { hour: "2-digit", minute: "2-digit" })}</b><small>${now.toLocaleDateString("de-AT", { weekday: "long", day: "numeric", month: "short", year: "numeric" })}</small></div></div>
+          <div class="mi home"><ha-icon icon="mdi:home-outline"></ha-icon><div><b>${home.length ? "Zu Hause" : "Niemand zu Hause"}<span class="dot ${home.length ? "on" : ""}"></span></b><small>${home.length ? home.join(" \xB7 ") + " anwesend" : "alle unterwegs"}</small></div></div>
+          <div class="mi dnd"><ha-icon icon="mdi:weather-night"></ha-icon><div><b>${robot.hero.dnd}</b><small>Nicht stören</small></div></div>
         </div>
       </div>`;
   }
