@@ -43,7 +43,7 @@ export class DxHero extends LitElement {
     .param b { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .param span { font-size: 11px; color: var(--dx-text-muted); }
     .param ha-icon { --mdc-icon-size: 16px; width: 16px; height: 16px; color: var(--dx-text-muted); margin-bottom: 2px; }
     .ctl { display: flex; gap: 8px; }
-    .ctl .btn { flex: 1; min-width: 0; padding: 0 10px; } .ctl .btn:first-child { flex: 1.4; }
+    .ctl .btn { flex: 1 1 0; min-width: 0; padding: 0 8px; } /* alle Knöpfe gleich breit (Herbert, 15.09.) */
     .strip small { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-top: 2px; }
     .strip .chip { gap: 4px; }
     .strip > ha-icon:last-child { margin-left: auto; color: var(--dx-text-muted); align-self: center; }
