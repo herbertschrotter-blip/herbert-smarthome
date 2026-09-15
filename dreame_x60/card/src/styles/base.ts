@@ -228,7 +228,9 @@ export const base = css`
     .app { grid-template-columns: minmax(0, 1fr); grid-template-rows: 1fr auto; grid-template-areas: 'content' 'tab'; }
     .content { padding: 16px 16px 24px; }
     .topbar h1 { font-size: 22px; }
-    .topbar .meta { display: none; }
+    /* Handy: Uhr/Zuhause/Nicht stören ausblenden, die Symbole der Einrichtungsprüfung bleiben (rechts neben dem Titel) */
+    .topbar .meta .mi { display: none; }
+    .topbar .meta { gap: 0; }
   }
 
   /* Bento-Spalten (Container content = Inhaltsbereich) */

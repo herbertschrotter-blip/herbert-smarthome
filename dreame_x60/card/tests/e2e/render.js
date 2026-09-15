@@ -56,12 +56,12 @@ for (const pg of PAGES) {
     await page.close();
   }
 }
-// Schmal (390): eine Spalte, kein waagrechter Überlauf, Meta der Kopfzeile ausgeblendet
+// Schmal (390): eine Spalte, kein waagrechter Überlauf, Uhr/Zuhause/Nicht stören der Kopfzeile ausgeblendet
 {
   const { page, errs } = await H.mount(b, { page: 'start', viewport: { width: 390, height: 844 } });
-  const r = await page.evaluate(() => { const el = document.querySelector('dreame-x60-panel'); const meta = el.shadowRoot.querySelector('.topbar .meta'); return { overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth, meta: getComputedStyle(meta).display }; });
+  const r = await page.evaluate(() => { const el = document.querySelector('dreame-x60-panel'); const mi = el.shadowRoot.querySelector('.topbar .meta .mi'); return { overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth, meta: getComputedStyle(mi).display }; });
   H.check('390: kein waagrechter Überlauf', !r.overflow, r);
-  H.check('390: Meta ausgeblendet', r.meta === 'none', r);
+  H.check('390: Uhr/Zuhause/Nicht stören ausgeblendet (Einrichtungssymbole bleiben, PD-014)', r.meta === 'none', r);
   H.check('390: keine Fehler', errs.length === 0, errs);
   await H.screenshot(page, 'render-start-390.png');
   await page.close();

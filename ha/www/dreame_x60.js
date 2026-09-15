@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.27 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.28 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -2158,7 +2158,9 @@ var base = i`
     .app { grid-template-columns: minmax(0, 1fr); grid-template-rows: 1fr auto; grid-template-areas: 'content' 'tab'; }
     .content { padding: 16px 16px 24px; }
     .topbar h1 { font-size: 22px; }
-    .topbar .meta { display: none; }
+    /* Handy: Uhr/Zuhause/Nicht stören ausblenden, die Symbole der Einrichtungsprüfung bleiben (rechts neben dem Titel) */
+    .topbar .meta .mi { display: none; }
+    .topbar .meta { gap: 0; }
   }
 
   /* Bento-Spalten (Container content = Inhaltsbereich) */
@@ -2197,7 +2199,7 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.27";
+var VERSION = "2.0.0-alpha.28";
 
 // src/shared/robot-svg.ts
 var robotSvg = w`<svg viewBox="0 0 200 200" class="robotpic" aria-hidden="true">

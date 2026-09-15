@@ -63,6 +63,16 @@ const tick = (page, ms = 250) => page.waitForTimeout(ms);
   await page.close();
 }
 
+// ── Handy (390 px): Uhr/Zuhause/Nicht stören sind weg, die Symbole bleiben sichtbar und anklickbar ──
+{
+  const { page, errs } = await H.mount(b, { page: 'start', states: withSwitch(docked, false), viewport: { width: 390, height: 900 } });
+  await tick(page);
+  const vis = await page.evaluate(() => { const root = document.querySelector('dreame-x60-panel').shadowRoot; const si = root.querySelector('.topbar .si'); const mi = root.querySelector('.topbar .mi.time'); const r = si && si.getBoundingClientRect(); return { icon: !!r && r.width > 0 && r.height > 0 && r.right <= window.innerWidth, meta: mi ? getComputedStyle(mi).display : 'fehlt' }; });
+  H.check('390 px: Symbol sichtbar und im Bild, Uhr ausgeblendet', vis.icon && vis.meta === 'none', vis);
+  H.check('keine Konsolenfehler', errs.length === 0, errs);
+  await page.close();
+}
+
 // ── ohne WS (alte HA, Tests): Bereichs- und Reparaturprüfung entfallen; Datenkarte fehlt → ein gelbes Symbol ──
 {
   const states = withSwitch(docked, true);
