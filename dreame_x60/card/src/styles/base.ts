@@ -121,6 +121,19 @@ export const base = css`
   .meta .mi:first-child {
     border-left: 0;
   }
+  /* Einrichtungsprüfung (PD-014): Knopf in der Kopfzeile, nur bei Befund; öffnet den Dialog „Einrichtung“ */
+  .meta .mi.setup {
+    border-radius: var(--dx-radius-md);
+    cursor: pointer;
+    border-left: 0;
+    margin-left: 4px;
+    background: color-mix(in srgb, var(--dx-danger) 16%, transparent);
+    color: var(--dx-text);
+  }
+  .meta .mi.setup ha-icon { color: var(--dx-danger); }
+  .meta .mi.setup.warn { background: color-mix(in srgb, var(--dx-warning) 18%, transparent); }
+  .meta .mi.setup.warn ha-icon { color: var(--dx-warning); }
+  .meta .mi.setup:hover { filter: brightness(1.15); }
   .meta .mi ha-icon {
     color: var(--dx-text-muted);
   }

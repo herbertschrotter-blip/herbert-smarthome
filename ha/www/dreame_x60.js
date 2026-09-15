@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.20 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.21 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -1988,6 +1988,19 @@ var base = i`
   .meta .mi:first-child {
     border-left: 0;
   }
+  /* Einrichtungsprüfung (PD-014): Knopf in der Kopfzeile, nur bei Befund; öffnet den Dialog „Einrichtung“ */
+  .meta .mi.setup {
+    border-radius: var(--dx-radius-md);
+    cursor: pointer;
+    border-left: 0;
+    margin-left: 4px;
+    background: color-mix(in srgb, var(--dx-danger) 16%, transparent);
+    color: var(--dx-text);
+  }
+  .meta .mi.setup ha-icon { color: var(--dx-danger); }
+  .meta .mi.setup.warn { background: color-mix(in srgb, var(--dx-warning) 18%, transparent); }
+  .meta .mi.setup.warn ha-icon { color: var(--dx-warning); }
+  .meta .mi.setup:hover { filter: brightness(1.15); }
   .meta .mi ha-icon {
     color: var(--dx-text-muted);
   }
@@ -2122,7 +2135,7 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.20";
+var VERSION = "2.0.0-alpha.21";
 
 // src/shared/robot-svg.ts
 var robotSvg = w`<svg viewBox="0 0 200 200" class="robotpic" aria-hidden="true">
@@ -3571,8 +3584,17 @@ var DreameX60Panel = class extends i4 {
           <div class="mi time"><ha-icon icon="mdi:clock-outline"></ha-icon><div><b>${now.toLocaleTimeString("de-AT", { hour: "2-digit", minute: "2-digit" })}</b><small>${now.toLocaleDateString("de-AT", { weekday: "long", day: "numeric", month: "short", year: "numeric" })}</small></div></div>
           <div class="mi home"><ha-icon icon="mdi:home-outline"></ha-icon><div><b>${home.length ? "Zu Hause" : "Niemand zu Hause"}<span class="dot ${home.length ? "on" : ""}"></span></b><small>${home.length ? home.join(" \xB7 ") + " anwesend" : "alle unterwegs"}</small></div></div>
           <div class="mi dnd"><ha-icon icon="mdi:weather-night"></ha-icon><div><b>${robot.hero.dnd}</b><small>Nicht stören</small></div></div>
+          ${this.renderSetupItem(robot)}
         </div>
       </div>`;
+  }
+  /** Einrichtungsprüfung (PD-014): Knopf in der Kopfzeile, nur wenn etwas nicht stimmt; Klick öffnet den Dialog. */
+  renderSetupItem(robot) {
+    const problems = setupProblems(this.setupChecks(this.hass?.states ?? {}, robot));
+    if (!problems.length) return A;
+    const errors = problems.filter((p3) => p3.level === "error").length, warns = problems.length - errors;
+    const sum = [errors ? `${errors} ${errors === 1 ? "Problem" : "Probleme"}` : "", warns ? `${warns} ${warns === 1 ? "Hinweis" : "Hinweise"}` : ""].filter(Boolean).join(", ");
+    return b2`<button class="mi setup ${errors ? "error" : "warn"}" title="Einrichtung prüfen" @click=${() => this.openOverlay({ kind: "setup" })}><ha-icon icon=${errors ? "mdi:alert-circle-outline" : "mdi:alert-outline"}></ha-icon><div><b>${sum}</b><small>Einrichtung</small></div></button>`;
   }
   /** Bento-Übersicht (Bauplan 4.0): Bausteine, wo sie schon existieren (4.1 dx-hero, dx-auftrag), sonst Platzhalter mit einer Vorschau der Sichten. */
   renderStart(s4, robot) {
@@ -3602,7 +3624,6 @@ var DreameX60Panel = class extends i4 {
     const rest = START_SLOTS.filter((sl) => !["hero", "map", "automatik", "auftrag", "heute", "quickstart"].includes(sl.slot));
     const dark = readSettings(s4).dark;
     return b2`
-      <dx-setup class="setup" .checks=${this.setupChecks(s4, robot)}></dx-setup>
       <div class="bento">
         <dx-hero class="b span3" data-slot="hero" .robot=${robot} .rooms=${rooms} .roomOrder=${map.roomOrder} .api=${this.api}></dx-hero>
         <dx-map-card class="b span6" data-slot="map" variant="compact" .hass=${this.hass} .map=${map} .robot=${robot} .history=${hist} .api=${this.api} ?dark=${dark}></dx-map-card>
@@ -3687,6 +3708,13 @@ var DreameX60Panel = class extends i4 {
     if (!o5) return A;
     if (o5.kind === "confirm") {
       return b2`<dx-dialog class="overlay" data-kind="confirm" variant="confirm" .text=${o5.text} .subText=${o5.sub ?? ""} .okLabel=${o5.okLabel ?? "OK"} ?danger=${!!o5.danger}></dx-dialog>`;
+    }
+    if (o5.kind === "setup") {
+      const s4 = this.hass?.states ?? {};
+      return b2`<dx-dialog class="overlay" data-kind="setup" heading="Einrichtung" sub="Was der Karte noch fehlt – antippen führt zur Stelle">
+        <dx-setup .checks=${this.setupChecks(s4, readRobot(s4))}></dx-setup>
+        <button slot="foot" class="btn primary" @click=${() => this.closeOverlay()}>Schließen</button>
+      </dx-dialog>`;
     }
     const hasBack = "back" in o5 && !!o5.back;
     return b2`<dx-dialog class="overlay" data-kind=${o5.kind} heading=${"Overlay \u201E" + o5.kind + "\u201C"} ?back=${hasBack}>

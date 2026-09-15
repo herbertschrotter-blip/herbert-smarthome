@@ -3,6 +3,7 @@ import type { PlanNumber } from '../ha/contract';
 
 export type Overlay =
   | { kind: 'settings' }
+  | { kind: 'setup' }
   | { kind: 'editor'; n: PlanNumber }
   | { kind: 'rooms'; mode: 'robot' | 'plan'; n?: PlanNumber; back?: Overlay }
   | { kind: 'estimate'; n: PlanNumber; back?: Overlay }
