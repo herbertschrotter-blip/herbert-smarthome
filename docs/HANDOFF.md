@@ -227,26 +227,20 @@ Uhr (10:15). Einrichten im Ordner `heidi/tests`: `npm i` und dann `npx playwrigh
 
 ## 3e. Projekt dreame_x60 – Neubau der Karte (14./15.09.2026, Claude-Code-Sitzungen Teil 1 + 2)
 - **Was:** Neubau der Heidi-Karte (v2) als eigenes Projekt **dreame_x60** auf dem eingefrorenen Backend.
-  Branch  (Worktree ), Ordner ,
-  Bauplan  (Statusliste = Wahrheit, Regeln in Abschnitt 2, Entitäts-Vertrag
-  Abschnitt 4), Begründungen , ClickUp-Liste „dreame_x60 – Bauplan“.
-   bleibt die Linie, die auf  läuft;  wird regelmäßig in  gemergt.
-- **Design abgenommen (15.09.):**  – „Automotive Dark Bento“ (dunkles Graphit,
-  Bento-Flächen, Seitenleiste/Symbolleiste/Tab-Leiste je nach Breite, Design-Tokens , System-Schriften).
+  Branch `dreame_x60` (Worktree `C:\Users\herbe\source\herbert-smarthome-v2`), Ordner `dreame_x60/`,
+  Bauplan `docs/dreame_x60/BAUPLAN.md` (Statusliste = Wahrheit, Regeln in Abschnitt 2, Entitäts-Vertrag
+  Abschnitt 4), Begründungen `docs/dreame_x60/ARCHITEKTUR-REVIEW.md`, ClickUp-Liste „dreame_x60 – Bauplan“.
+  `main` bleibt die Linie, die auf `H:\` läuft; `main` wird regelmäßig in `dreame_x60` gemergt.
+- **Design abgenommen (15.09.):** `dreame_x60/mockups/bento.html` – „Automotive Dark Bento“ (dunkles Graphit,
+  Bento-Flächen, Seitenleiste/Symbolleiste/Tab-Leiste je nach Breite, Design-Tokens `--heidi-*`, System-Schriften).
   Ältere Glas-Mockups daneben (start, seiten, karte) nur noch als Funktionsreferenz. Heidi bleibt der Name in der Oberfläche.
-- **Phase 0 (15.09.):** 0.1 v1-Tests mit gemeinsamem Gerüst , Unknown command: "test"
-
-
-Did you mean this?
-  npm test # Test a package
-To see a list of supported npm commands, run:
-  npm help rot bei Abweichung,
-  18 Service-Calls beim Speichern festgeschrieben (). 0.3 Karte 1.6.2
-  ( in der Signatur + Raumreihenfolge des Eintrags mit Helfer ,
-  aus  übernommen). 0.4  hat /,  liest .
-  Alles am 15.09. 06:24 eingespielt (HA-Neustart, Ressource ). 0.2 (Fixtures per ) offen.
-- **Nächstes:** 0.2 am PC, dann Phase 1 (Toolchain , leere Lit-Shell ,
-  Dashboard , Ressource). Offene Entscheidungen stehen in Bauplan Abschnitt 10.
+- **Phase 0 (15.09.):** 0.1 v1-Tests mit gemeinsamem Gerüst `heidi/tests/harness.js`, `npm test` rot bei Abweichung,
+  18 Service-Calls beim Speichern festgeschrieben (`heidi/tests/expected/editor-calls.json`). 0.3 Karte 1.6.2
+  (`sensor.heidi_task_status` in der Signatur + Raumreihenfolge des Eintrags mit Helfer `input_text.heidi_lauf_reihenfolge`,
+  aus `main` übernommen). 0.4 `sensor.heidi_automatik_status` hat `rest_min`/`rest_quelle`, `heidi_planer` liest `rest_min`.
+  Alles am 15.09. 06:24 eingespielt (HA-Neustart, Ressource `?v=1.6.2`). 0.2 (Fixtures per `dump-states.ps1`) offen.
+- **Nächstes:** 0.2 am PC, dann Phase 1 (Toolchain `dreame_x60/card/`, leere Lit-Shell `dreame-x60-panel`,
+  Dashboard `dreame_x60.yaml`, Ressource). Offene Entscheidungen stehen in Bauplan Abschnitt 10.
 
 ## 4. Offene Punkte (Stand 14.09.2026, Claude-Code-Sitzung)
 Erledigt:
