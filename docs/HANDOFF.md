@@ -225,6 +225,29 @@ Uhr (10:15). Einrichten im Ordner `heidi/tests`: `npm i` und dann `npx playwrigh
   `sensor.heidi_lernwerte` Raten hat. Live-Mockup hat Beispielwerte (`build-live.js`).
 - Test der Schätzung ohne Lernwerte: `total 102 min` für Plan 2 (Erfahrungswerte), `gelernt: false`.
 
+## 3e. Projekt dreame_x60 – Neubau der Karte (14./15.09.2026, Claude-Code-Sitzungen Teil 1 + 2)
+- **Was:** Neubau der Heidi-Karte (v2) als eigenes Projekt **dreame_x60** auf dem eingefrorenen Backend.
+  Branch  (Worktree ), Ordner ,
+  Bauplan  (Statusliste = Wahrheit, Regeln in Abschnitt 2, Entitäts-Vertrag
+  Abschnitt 4), Begründungen , ClickUp-Liste „dreame_x60 – Bauplan“.
+   bleibt die Linie, die auf  läuft;  wird regelmäßig in  gemergt.
+- **Design abgenommen (15.09.):**  – „Automotive Dark Bento“ (dunkles Graphit,
+  Bento-Flächen, Seitenleiste/Symbolleiste/Tab-Leiste je nach Breite, Design-Tokens , System-Schriften).
+  Ältere Glas-Mockups daneben (start, seiten, karte) nur noch als Funktionsreferenz. Heidi bleibt der Name in der Oberfläche.
+- **Phase 0 (15.09.):** 0.1 v1-Tests mit gemeinsamem Gerüst , Unknown command: "test"
+
+
+Did you mean this?
+  npm test # Test a package
+To see a list of supported npm commands, run:
+  npm help rot bei Abweichung,
+  18 Service-Calls beim Speichern festgeschrieben (). 0.3 Karte 1.6.2
+  ( in der Signatur + Raumreihenfolge des Eintrags mit Helfer ,
+  aus  übernommen). 0.4  hat /,  liest .
+  Alles am 15.09. 06:24 eingespielt (HA-Neustart, Ressource ). 0.2 (Fixtures per ) offen.
+- **Nächstes:** 0.2 am PC, dann Phase 1 (Toolchain , leere Lit-Shell ,
+  Dashboard , Ressource). Offene Entscheidungen stehen in Bauplan Abschnitt 10.
+
 ## 4. Offene Punkte (Stand 14.09.2026, Claude-Code-Sitzung)
 Erledigt:
 - [x] HA neu gestartet (14.09. 06:33), v1.3.1 + v2-Helfer aktiv, Repo = `H:\`.
