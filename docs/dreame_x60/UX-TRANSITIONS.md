@@ -93,6 +93,13 @@ ClickUp: „Post-2.0: Kopfzeile als Einstieg (Kalender, Zuhause, Nicht stören) 
 2. **Uhrzeit antippen → Kalender** mit vergangenen und künftigen Fahrten: vergangene Läufe aus
    `sensor.heidi_cleaning_history`, künftige aus den vier Planer-Einträgen (Wochentage + Uhrzeit, nächste
    Vorkommen berechnen) und aus der Automatik (heutiger Eintrag, Prognose-Fenster). Rein clientseitig.
+   **Variante „Familienkalender in HA“ (Herbert, 15.09.):** Ein HA-Kalender (Integration „Lokaler Kalender“ oder ein
+   bestehender Google-/CalDAV-Familienkalender) als gemeinsame Ablage. Automationen tragen abgeschlossene Läufe per
+   `calendar.create_event` ein, der Planer beim Speichern die geplanten; die Karte liest die Termine über die
+   Kalender-REST-Schnittstelle von HA (`/api/calendars/<entity_id>?start=…&end=…`, stabil wie die History-API).
+   Familientermine (Urlaub, Homeoffice, Besuch) könnten später „Abweichung heute“ und den Homeoffice-Modus speisen;
+   die Prognose lernt weiter aus der echten Anwesenheit. Regel: Der Planer bleibt die Wahrheit für die Zeitpläne, der
+   Kalender spiegelt sie nur. Backend-Arbeit (neue Entität, Automationen) → nach 6.5.
 3. **„Zu Hause“ antippen → wer ist wann zu Hause**: heutiger Verlauf der drei Personen aus der HA-Historie
    (`person.*`, History-API wie die Zeitleiste), dazu die Prognose-Heatmaps (`/local/prognose_<name>.png`), die
    die Seite Prognose schon zeigt. Denkbar als Dialog mit Tagesbalken je Person + Link zur Prognose.
