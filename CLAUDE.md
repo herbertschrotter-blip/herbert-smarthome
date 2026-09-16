@@ -65,7 +65,9 @@ Für den Skill tracker (projektneutral): Projektkennung statt Memory-Eintrag.
 
 ## Code-Profil
 Für den Skill code-erstellen (projektneutral).
-- Stack: Karte TypeScript strict + Lit 3, esbuild → `ha/www/dreame_x60.js`; Backend HA-YAML (`ha/packages`, `automations.yaml`, `scripts.yaml`); Prognose Python (`ha/prognose`)
+- Stacks: typescript-lit, home-assistant-yaml, python (Stack-Referenzen des Skills code-erstellen, `references/stacks/<key>.md`)
+- Stack-Details: Karte TypeScript strict + Lit 3, esbuild → `ha/www/dreame_x60.js`; Backend HA-YAML (`ha/packages`, `automations.yaml`, `scripts.yaml`); Prognose Python (`ha/prognose`)
+- Build/Lint: `npm run check`, `npm run lint`, `npm run build` in `dreame_x60/card`
 - Pflicht-Docs vor dem Code: diese CLAUDE.md, `docs/HANDOFF.md` Abschnitt 3e, `docs/dreame_x60/BAUPLAN.md` Abschnitt 2 (Regeln) und 4 (Entitäts-Vertrag); bei Domänen-Logik Abschnitt 6 (Portierungstabelle)
 - Aufgabenquelle: BAUPLAN.md Abschnitt 8 (Aufgabenkarte: Ziel, Nicht ändern, Akzeptanz, Tests, Dateien) + ClickUp-Task DX-NNN; Akzeptanz-Zeilen = Testfälle
 - Schichten/Kopplung: `contract.ts` (IDs) → `device.ts`/`profile.ts` (Erkennung, Räume, Optionen) → `selectors.ts` (memoisierte Views) → Komponenten; Schreiben nach HA nur über `DxApi`; neue Entität/Dienst zuerst in Abschnitt 4 + contract.ts; nichts fest verdrahten, was Roboter oder HA liefern
