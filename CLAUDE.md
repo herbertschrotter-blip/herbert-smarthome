@@ -76,3 +76,15 @@ Für den Skill code-erstellen (projektneutral).
 - Mockup-Pflicht: ja bei großen UI-Umbauten (Modus Deep) – zuerst Mockup in `dreame_x60/mockups/`, Abnahme, dann bauen
 - Notiz-Ort für Befunde/Ideen ohne Task: BAUPLAN.md Abschnitt 10 (Abweichung → 10a als PD-Eintrag)
 - Pflicht-Branch: `dreame_x60` (Worktree `herbert-smarthome-v2`); `main` bleibt der Stand auf H:
+
+## Doku-Profil
+Für den Skill doc-pflege (projektneutral).
+- Doc-Standard: der Bauplan selbst (`docs/dreame_x60/BAUPLAN.md` Abschnitt 0–2; Formate in 8, 10, 10a) – kein DOC-STANDARD, kein Frontmatter/Quickload
+- Router/Index: diese CLAUDE.md (Repo-Aufbau) + `docs/HANDOFF.md` Abschnitt 5 (Referenzen)
+- Pflicht-Docs: `docs/dreame_x60/BAUPLAN.md` (Statusliste = Wahrheit), `docs/HANDOFF.md`, `CLAUDE.md`, `heidi/CLAUDE.md`, Plan-Docs `docs/dreame_x60/{ARCHITEKTUR-REVIEW,GERAETEPROFIL,PLANER-NACHHOLEN,UX-TRANSITIONS,ENTITAETEN}.md`
+- Doc-Typen/Vorlagen: Aufgabenkarte (Voraussetzung, Ziel, Nicht ändern, Akzeptanz, Tests, Dateien); Notiz Abschnitt 10 (`- [Datum] [Aufgabe] Art · Schwere: Text. Entscheidung Herbert: …`); PD-Eintrag 10a (id, bereich, v1, v2, grund, spec_test, Status); Plan-Doc mit Stufen und Stand-Datum
+- Validierung (Modus 6): Statusliste ↔ ClickUp DX-Status ↔ Code (fertig nur mit Tests + Commit); jede v1-Abweichung mit PD-Eintrag `freigegeben`; Abschnitt 4 ↔ `contract.ts`; HANDOFF 3e nennt letzten Bauschritt + Version; nichts Verbotenes im Repo; Warnungen: Notizformat, Karte ohne Akzeptanz/Tests, offene Punkte ohne ClickUp, Plan-Doc ohne Datum, Version uneinheitlich
+- Frühphasen-Regel: nein – Paritätsregel: Abweichung von v1 nur mit PD-Eintrag (10a), neue Entität/Dienst → Abschnitt 4 + contract.ts im selben Commit
+- Advisory: Doku-Checkliste des Commit-Profils (oben)
+- Sitzungsabschluss (Modus 8): Statusliste Abschnitt 1 ↔ ClickUp, Befunde Abschnitt 10/10a, HANDOFF 3e (Version, gebaut, Stolpersteine), offene Punkte HANDOFF Abschnitt 4 mit ClickUp-Bezug, Commit `[vX] Doku, Docs: Sitzungsabschluss <Datum> – …` + Push
+- Commit-Modul: Doku
