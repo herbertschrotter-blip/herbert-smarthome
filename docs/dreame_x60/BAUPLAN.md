@@ -15,11 +15,14 @@ Begründungen: `docs/dreame_x60/ARCHITEKTUR-REVIEW.md`. Fachliches: `heidi/CLAUD
 
 ## 0. Startprompt für jede Sitzung
 
-> Lies `CLAUDE.md`, `docs/HANDOFF.md` und `docs/dreame_x60/BAUPLAN.md`. Nimm die nächste offene Aufgabe
-> aus der Statusliste (Abschnitt 1), prüfe ihre Voraussetzungen, lies ihre Karte in Abschnitt 8
-> und arbeite nur diese Aufgabe ab. Halte dich an die Regeln in Abschnitt 2. Wenn Code und
-> Bauplan sich widersprechen: nicht entscheiden, Befund in Abschnitt 10 eintragen, Aufgabe auf
-> `blockiert`, stoppen. Am Ende Statusliste aktualisieren, committen, pushen.
+> Lies `CLAUDE.md`, `docs/HANDOFF.md` und `docs/dreame_x60/BAUPLAN.md`. Nimm das nächste offene
+> **Modul** aus der Baureihenfolge (Abschnitt 1a) und darin die nächste offene Aufgabe aus der
+> Statusliste (Abschnitt 1), prüfe ihre Voraussetzungen, lies ihre Karte in Abschnitt 8 und arbeite
+> nur diese Aufgabe ab (`tracker start` auf die DX-Aufgabe, code-erstellen nach Code-Profil). Ein Modul
+> wird komplett fertig (Abschnitt 11a), bevor das nächste beginnt. Halte dich an die Regeln in
+> Abschnitt 2. Wenn Code und Bauplan sich widersprechen: nicht entscheiden, Befund in Abschnitt 10
+> eintragen, Aufgabe auf `blockiert`, stoppen. Am Ende Statusliste aktualisieren, committen, pushen
+> (doc-pflege Modus 8).
 
 **[PC]** = braucht Herberts PC (Zugriff auf `H:\`, `ha.ps1`, `dump-states.ps1`, Browser mit HA).
 Claude Code im Web bereitet diese Aufgaben vor, führt sie aber nicht aus.
@@ -68,7 +71,7 @@ Claude Code im Web bereitet diese Aufgaben vor, führt sie aber nicht aus.
 | 4.11 | `dx-settings-panel` (Seite Einstellungen, inkl. Diagnose) | offen |
 | 4.12 | `dx-zones-editor` | offen |
 | 4.13 | Render-Messung (`perf.js`), Erwartung 0/0/0 bei irrelevanten Ticks | offen |
-| 5.1 | Container Queries, Bottom-Sheet, „mehr anzeigen“, Safe Area | offen |
+| 5.1 | Container Queries, Bottom-Sheet, „mehr anzeigen“, Safe Area | aufgelöst in die Module (16.09.; Regeln in Modul A, Anwendung je Modul, Prüfung in 5.2) |
 | 5.2 | E2E Breiten 390/820/1200 + Overflow | offen |
 | 6.1 | E2E Round-Trip v2 → v1 und `availability.js` | offen |
 | 6.2 | Paritäts-Checkliste (Abschnitt 9) vollständig | offen |
@@ -77,6 +80,28 @@ Claude Code im Web bereitet diese Aufgaben vor, führt sie aber nicht aus.
 | 6.5 | **[PC]** Umschalten, v1 archivieren, Doku auf v2 | v1 abgeschaltet und archiviert (15.09., vorgezogen); Rest (Dashboard-Pfad `/heidi/…`, Doku) offen |
 
 Status-Werte: `offen`, `in Arbeit (Datum)`, `fertig (Commit)`, `blockiert (Abschnitt 10)`.
+
+## 1a. Baureihenfolge nach Modulen (seit 16.09.2026)
+
+Entscheidung Herbert (16.09.2026, Abschnitt 10): **Modul für Modul fertigbauen** statt phasenweise.
+Die Phasen 0–3 sind abgeschlossen und bleiben als Historie; die Aufgaben der Phasen 4–6 behalten
+ihre Nummern und Karten, werden aber in dieser Reihenfolge gebaut. Ein Modul gilt erst als fertig,
+wenn Abschnitt 11a erfüllt ist – dann beginnt das nächste. Modul F läuft parallel (eigener Stack).
+
+| Modul | Aufgaben | Seiten / Bausteine | Stand |
+|---|---|---|---|
+| **A Planer** | 4.4, 4.5, 4.6, 4.8, 6.1 | Seite Planer, `dx-planer` (+ `compact`), Editor + Uhr, Raum-Dialog, Dauer & Akku, Round-Trip-Test | **nächstes** |
+| **B Karte und Räume** | 4.3 (Sichtprüfung), 4.3b (Sichtprüfung, Zoom/Gesten), 4.12 | Seite Reinigen, Heidi-Karte, Sperrzonen-Editor | 4.3/4.3b gebaut, Sichtprüfung offen |
+| **C Übersicht-Kacheln** | 4.9, 4.10 | Automatik, Station, Verschleiß, Heute, Seite Prognose | offen |
+| **D Verlauf und Statistik** | 4.7 (Verlauf, Zeitleiste, Lernwerte, Statistik) | Seite Verlauf, `dx-history` (+ `compact`), `dx-stats` | offen |
+| **E Einstellungen** | 4.11, Roboter-Einstellungen (aus 4.7), Befundliste `dx-setup`, Themes (Post-2.0, optional) | Seite Einstellungen | offen |
+| **F Backend** (parallel) | Planer nachholen (DX-048), 0.4-Entscheidung (DX-006), 2.7 **[PC]** (DX-019) | Paket, Automationen, Prognose | offen |
+| **G Abschluss** | 4.13, 5.2, 6.2, 6.3, 6.5 | Render-Messung, Breiten-E2E aller Seiten, Parität, Geräte-Sichtung, Version 2.0.0 | am Ende |
+
+**5.1 (Container Queries, Bottom-Sheet, Safe Area) ist in die Module aufgelöst:** Modul A legt die
+Regeln fest (Container `content`, Grenzen 640 / 1099 px wie in 4.0, Dialog als Sheet < 640 px Viewport,
+Safe Area) und jedes Modul wendet sie auf seine Seiten an; 5.2 prüft am Ende alle Seiten zusammen.
+In ClickUp gibt es je Modul eine Aufgabe (DX-056 … DX-062, Typ Meta) mit den Modul-Schritten als Checkliste; die Phase-Parents bleiben als Historie.
 
 ---
 
@@ -587,7 +612,8 @@ Nach jedem Build v2 neben v1 ansehen; Unterschiede → Abschnitt 10/10a.
 - Ziel: Vier Zeilen, Dauer-Kurzzeile (nur mit Lernwerten), ▶ mit Bestätigung, ✎ öffnet Editor; Automatik-Regeln-Details auf derselben Seite. Variante `compact` für die Übersicht: die ersten drei Einträge (Tage + Zeit, Name, aktiv/inaktiv nur als Anzeige – kein Schalter, Umschalten wie in v1 im Editor), Link „Alle 4“ → Seite Planer, Knopf „Eintrag bearbeiten“ (heutiger Eintrag, sonst 1).
 - Nicht ändern: `estimate.ts`.
 - Akzeptanz: vier Zeilen, heutiger markiert, Manuell-Tag; ▶ bei inaktiv nur Toast; `compact` ohne Schalter und ohne Service-Call.
-- Tests: `npm test`
+- Responsive (Modul A legt die Regeln für alle Module fest, ersetzt 5.1): Seite Planer und `compact` bei 390 / 820 / 1200 px ohne Overflow; `@container`-Regeln am Container `content` mit den Grenzen 640 / 1099 px aus 4.0; keine festen Smartphone-Modi; Safe Area unten (Tab-Leiste). Die gewählten Regeln in Abschnitt 10 festhalten, damit B–E sie übernehmen.
+- Tests: `npm test` (inkl. `widths`-Prüfung der Seite Planer bei 390/820/1200)
 - Dateien: `src/components/dx-planer.ts`, `tests/e2e/planer.js`
 
 **4.5 `dx-planer-editor`, `dx-clock-picker`**
@@ -664,7 +690,7 @@ Nach jedem Build v2 neben v1 ansehen; Unterschiede → Abschnitt 10/10a.
 
 ### Phase 5 – Responsive
 
-**5.1 Layout**
+**5.1 Layout** – seit 16.09.2026 in die Module aufgelöst (Abschnitt 1a): Regeln in Modul A (4.4/4.5) festlegen, je Modul anwenden; 5.2 prüft am Ende alle Seiten.
 - Voraussetzung: 4.13
 - Ziel: Container `app` (Navigation) und `content` (Bento 12/6/1 Spalten bei > 1099 / ≤ 1099 / ≤ 640 px) kommen schon aus 4.0; hier: `@container`-Regeln in Komponenten entsprechend den 12 v1-Media-Queries; Media Queries nur für Safe Area (`env(safe-area-inset-*)`), Pointer/Hover, sehr kleine Viewports; `dx-dialog` als Sheet < 600 px Container; Protokoll 30 + „mehr anzeigen“; kein fester Smartphone-Modus.
 - Nicht ändern: Komponentenschnitt.
@@ -744,6 +770,8 @@ Nach jedem Build v2 neben v1 ansehen; Unterschiede → Abschnitt 10/10a.
 Format: `- [Datum] [Aufgabe] Art (Widerspruch | Messung | Befund | Wunsch) · Schwere (Blocker | Functional | Cosmetic | Post-2.0): Text. Entscheidung Herbert: …`
 
 Für 2.0 müssen `Blocker` und `Functional` = 0 sein. `Cosmetic` und `Post-2.0` dürfen offen bleiben.
+
+- [2026-09-16] [Plan] Entscheidung Herbert · Info: **Bau modulweise statt phasenweise.** Die Phasen waren für den Parallelbetrieb mit v1 gedacht (alle Komponenten, dann responsive, dann sieben Tage nebeneinander); v1 ist seit 15.09. abgeschaltet, v2 läuft im Alltag. Ab jetzt wird ein Modul komplett fertig (Code, Tests, responsive, Parität, Doku, Sichtprüfung, ClickUp shipped – Abschnitt 11a), bevor das nächste beginnt. Reihenfolge A Planer → B Karte und Räume → C Übersicht-Kacheln → D Verlauf und Statistik → E Einstellungen → G Abschluss; F Backend parallel (Abschnitt 1a). Alle Aufgabenkarten und DX-Nummern bleiben; 5.1 ist in die Module aufgelöst (Regeln in Modul A). ClickUp: je Modul eine Meta-Aufgabe mit Checkliste (DX-056 … DX-062), Phase-Parents bleiben als Historie.
 
 - [2026-09-15] [4.0] Befund · Info: Karte 4.0, Abschnitt 7 und die Karten 4.1/4.3/4.4/4.7/4.9/4.10/5.1 auf das abgenommene Bento-Mockup umgeschrieben (ClickUp „Bauplan: Aufgabenkarte 4.0 auf das Bento-Layout umschreiben“). `dx-nav-tiles` entfällt; die Navigation heißt `dx-nav` und hat drei Formen nach dem Container `app` (Seitenleiste > 1180 px, Symbolleiste 761–1180 px, Tab-Leiste ≤ 760 px), die Übersicht ist ein 12-Spalten-Bento mit zehn Flächen. Neue Übersichts-Bausteine: `dx-auftrag` (4.1), `dx-quickstart` (4.3), `dx-stats` (4.7), `dx-heute` (4.10, statt `dx-prognose-card`) sowie `compact`-Varianten von `dx-planer` (4.4) und `dx-history` (4.7). Zwei Mockup-Extras haben kein v1-Gegenstück und bleiben draußen (der Mockup-Kommentar nennt sie selbst „nur in diesem Mockup“): Schalter direkt in der Planer-Kachel (v2 zeigt aktiv/inaktiv nur an, Umschalten im Editor wie v1) und die Kachel „Alles“ im Schnellstart als eigener Dienst (v2: Auswahlhilfe, wählt alle sieben Räume). Alle sichtbaren Abweichungen zur v1-Übersicht stehen gesammelt in PD-007. Offen und in 4.0 zu prüfen: ob `position: sticky` für die Tab-Leiste in HAs Ansicht hält (Scroll-Container ist HAs Ansicht, nicht die Karte). Entscheidung Herbert (15.09.): Fassung der Karte 4.0 bestätigt, PD-007 freigegeben.
 - [2026-09-15] [4.1] Befund · Functional (v1 = v2, Beobachtung am echten Lauf 08:37–08:45): Während Heidi fährt, ist `switch.heidi_customized_cleaning` **unavailable** und damit alle 35 `select.heidi_room_N_*` ebenfalls (Integration). Folge in v1 wie v2: kein Streifen und die drei Werte Modus/Saugstufe/Wasser zeigen „–“, obwohl ein Raum gereinigt wird. Die v1-Vektoren mit Streifen entstanden mit gesetzten Raum-Selects (angepasste Reinigung an). Außerdem enthält `active_segments` beim Lauf „ganze Wohnung“ eine ID **8** (kein Raum 1..7; von `runOrder` verworfen, weil `cleaning_sequence` sie nicht enthält), und `input_text.heidi_lauf_reihenfolge` bleibt `unknown` (Helfer wird nur vom Planer-Skript gesetzt). Entscheidung Herbert (15.09.): „Angepasste Reinigung“ in der Dreame-App eingeschaltet – der Schalter steht jetzt auf `on`, die Raum-Selects liefern Werte (alle Räume Saugen/Turbo, Wasser und Route bei „Saugen“ von der Integration deaktiviert). Panel zeigt im Leerlauf „Saugen · Turbo · –“ (Live-Abzug geprüft). Kein Rückfall auf Raumnamen ohne Werte nötig. Nachtrag (Herbert): Ein Start in der Dreame-App schaltet „Angepasste Reinigung“ aus. Neue Automation `heidi_angepasste_reinigung_an` in `ha/automations.yaml` (Backend, Herberts Auftrag 15.09.): schaltet den Schalter wieder ein, wenn Heidi angedockt ist und er 5 Minuten aus bleibt (Trigger: Schalter → off für 5 min, oder vacuum → docked für 5 min; Bedingung: Schalter off und nicht unterwegs). Beobachtung beim App-Lauf 09:58–10:10 (Küche+Flur): Der Schalter war während des Laufs `unavailable` und stand 11 s nach dem Andocken von selbst wieder auf `on` (Integration), die Automation musste nicht eingreifen – sie bleibt als Netz für den Fall „off“ (wie im Abzug 07:59, Ursache unbekannt). Kein neuer Helfer, Vertrag unverändert; eingespielt per automation reload. Außerdem (Herbert: „kurz vor einem geplanten Vorgang prüfen“): Schritt 0 im Skript `heidi_reinigung` schaltet den Schalter direkt vor dem Setzen der Raumwerte ein (`switch.turn_on` + `wait_template` bis `select.heidi_room_1_cleaning_mode` verfügbar, max. 15 s) – gilt damit für Planer- und Kartenstarts. Verhalten bei App-Lauf zur geplanten Zeit: heute überspringt der Planer (Bedingung `docked`) und holt den Lauf beim nächsten 10-Minuten-Tick nach dem Andocken nach, ohne Zeitlimit. Entscheidung Herbert (15.09.): nachholen ja, aber nur innerhalb der Arbeitszeit; später Ausgehen-Prüfung und Räume ausnehmen, die kurz vorher manuell gereinigt wurden – Analyse und Stufenplan in `docs/dreame_x60/PLANER-NACHHOLEN.md`, ClickUp „Backend: Planer nachholen …“; noch nichts eingebaut.
@@ -848,6 +876,19 @@ ist eine Abweichung ein Fehler.
 
 ## 11. Freigabekriterien (Definition „fertig“)
 
+### 11a. Definition „Modul fertig“ (seit 16.09.2026, Abschnitt 1a)
+
+Ein Modul aus Abschnitt 1a gilt als fertig, wenn:
+
+1. Alle Aufgaben des Moduls stehen in der Statusliste auf `fertig (Commit)`; `npm test` und `npm run lint` grün.
+2. Jede Seite des Moduls ist bei 390 / 820 / 1200 px ohne horizontalen Überlauf geprüft (Playwright `widths` für die Seiten des Moduls + Sichtprüfung am Handy).
+3. Die Paritätszeilen aus Abschnitt 9, die das Modul betreffen, sind abgehakt; jede Abweichung hat einen PD-Eintrag `freigegeben` (10a).
+4. Doku nachgezogen: Statusliste, Abschnitt 10/10a, HANDOFF 3e; neue Entitäten in Abschnitt 4 + `contract.ts`.
+5. Version eingespielt (`deploy.ps1 -OnlyCard`, Ressourcen-`?v=`), **Sichtprüfung Herbert** bestanden, ClickUp-Aufgaben auf `shipped`.
+6. Offene Befunde des Moduls: keine `Blocker`/`Functional`; `Cosmetic`/`Post-2.0` als Task oder Notiz festgehalten.
+
+Erst dann beginnt das nächste Modul. Die Kriterien 1–8 unten gelten weiterhin für die Freigabe von 2.0 (Modul G).
+
 1. Paritäts-Checkliste (Abschnitt 9) vollständig, jede Zeile an v1 und v2 nebeneinander geprüft.
 2. Alle `.v1.json`- und `.spec.json`-Vektoren grün, in TypeScript und Python.
 3. E2E grün: Render aller Seiten mit beiden Fixtures, Navigation, Editor-Klickfolge, Round-Trip
@@ -856,6 +897,6 @@ ist eine Abweichung ein Fehler.
 4. `npm run check` und `npm run lint` ohne Fehler.
 5. Abschnitt 10 ohne offene `Blocker`/`Functional`; Abschnitt 10a ohne Eintrag im Status `offen`.
 6. Geräte-Sichtung (6.3) erledigt.
-7. Sieben Tage Alltag mit v2 ohne offenen freigabeblockierenden Befund (6.4).
+7. ~~Sieben Tage Alltag mit v2 ohne offenen freigabeblockierenden Befund (6.4).~~ entfällt (v1 seit 15.09. aus; ersetzt durch die Sichtprüfung je Modul, 11a).
 8. Version `2.0.0`, `heidi.yaml` zeigt auf v2, v1 als `heidi-panel-v1.js` archiviert,
    HANDOFF/CLAUDE.md beschreiben v2 (6.5).
