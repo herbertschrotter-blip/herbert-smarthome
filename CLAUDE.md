@@ -88,6 +88,7 @@ Für den Skill doc-pflege (projektneutral).
 - Advisory: Doku-Checkliste des Commit-Profils (oben)
 - Sitzungsabschluss (Modus 8): Statusliste Abschnitt 1 ↔ ClickUp, Befunde Abschnitt 10/10a, HANDOFF 3e (Version, gebaut, Stolpersteine), offene Punkte HANDOFF Abschnitt 4 mit ClickUp-Bezug, Commit `[vX] Doku, Docs: Sitzungsabschluss <Datum> – …` + Push
 - Commit-Modul: Doku
+- Startprompt (chat-wechsel, Claude Code): BAUPLAN.md Abschnitt 0, ergänzt um nächste Aufgabe (DX-NNN), letzte Version, Branch, Warnungen der Sitzung; Stand vorher per doc-pflege Modus 8 ins Repo, kein Handover-Prompt
 
 ## Mockup-Profil
 Für den Skill mockup-erstellen (projektneutral).
