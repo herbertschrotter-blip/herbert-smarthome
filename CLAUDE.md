@@ -101,3 +101,14 @@ Für den Skill mockup-erstellen (projektneutral).
 - Vorschau: Claude Code Browser-Bereich (Datei öffnen, 390 px per resize) + Datei an Herbert; Abnahme im Browser durch Herbert
 - Abnahme-Ort: BAUPLAN.md Abschnitt 7 (Seitentabelle „Abgenommen von Herbert am <Datum> (Mockup <Datei>)“) + Notiz Abschnitt 10; Abweichung zu v1 → PD-Eintrag 10a
 - Commit-Modul: Doku (Mockup + Abnahme-Eintrag im selben Commit)
+
+## Review-Profil
+Für den Skill chatgpt-review (projektneutral).
+- Review-Ablage: `docs/chatgpt-reviews/` (Serien `CGR-YYYY-MM-DD-<thema>/r<N>/` mit 01–04, `INDEX.md`); Rundenstand aus README/Ordnern lesen
+- Themen: heidi-v2 (Neubau der Karte), karte, backend, geraeteprofil
+- GitHub-Repo: herbertschrotter-blip/herbert-smarthome, Branch aus der Shell (Pflicht-Branch `dreame_x60`); Push-Prüfung vor jedem Prompt
+- Pflicht-Block: „Regeln des Neubaus“ (Bauplan Abschnitt 2 in Kurzform: v1 nur Referenz, Vertrag eingefroren, Abweichung nur mit PD-Eintrag, Schreiben nur über DxApi, keine externen Ressourcen, Tests grün)
+- Kontextquelle: Bauplan Abschnitt 2 (Regeln), 4 (Vertrag, nur betroffene Entitäten), 7 (Seite), betroffene Karte aus 8, HANDOFF 3e, bekannte Befunde 10/10a; max. 3–5 Blöcke
+- Reviewer-Rolle: erfahrener Frontend-Architekt für Web Components (Lit) und Home Assistant
+- Ergebnis-Ort: Bauplan Abschnitt 10 (Notiz mit Entscheidung Herbert), 10a bei Abweichung, HANDOFF 3e; offene Punkte als DX-Tasks über tracker
+- Commit-Modul: Doku
