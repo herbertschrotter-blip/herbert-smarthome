@@ -88,3 +88,15 @@ Für den Skill doc-pflege (projektneutral).
 - Advisory: Doku-Checkliste des Commit-Profils (oben)
 - Sitzungsabschluss (Modus 8): Statusliste Abschnitt 1 ↔ ClickUp, Befunde Abschnitt 10/10a, HANDOFF 3e (Version, gebaut, Stolpersteine), offene Punkte HANDOFF Abschnitt 4 mit ClickUp-Bezug, Commit `[vX] Doku, Docs: Sitzungsabschluss <Datum> – …` + Push
 - Commit-Modul: Doku
+
+## Mockup-Profil
+Für den Skill mockup-erstellen (projektneutral).
+- Ablage: `dreame_x60/mockups/` (flach); Namensschema `<thema>.html`, klein, ohne Umlaute; ein Mockup zeigt alle betroffenen Seiten/Zustände mit Tabs
+- Design-Quelle: `dreame_x60/card/src/styles/tokens.ts` (`--dx-*`, Designvorgabe „Automotive Dark Bento“ 14.09.); Token-Abgleich vor dem Speichern
+- Referenz-Mockup: `dreame_x60/mockups/bento.html` (abgenommen 15.09.2026; löst `start.html`/`seiten.html` ab)
+- Token-Form im HTML: `:root { --dx-* }` mit denselben Werten wie tokens.ts; Klassen/Layout wie bento.html (Bento 12/6/1 Spalten, dx-nav-Formen); keine externen Ressourcen (Regel 14)
+- Ansichten: Desktop und 390 px nebeneinander; Tablet (761–1180 px) wenn Container-Regeln betroffen
+- Sitemap / Klick-Navigation: nein (Tabs in der Datei)
+- Vorschau: Claude Code Browser-Bereich (Datei öffnen, 390 px per resize) + Datei an Herbert; Abnahme im Browser durch Herbert
+- Abnahme-Ort: BAUPLAN.md Abschnitt 7 (Seitentabelle „Abgenommen von Herbert am <Datum> (Mockup <Datei>)“) + Notiz Abschnitt 10; Abweichung zu v1 → PD-Eintrag 10a
+- Commit-Modul: Doku (Mockup + Abnahme-Eintrag im selben Commit)
