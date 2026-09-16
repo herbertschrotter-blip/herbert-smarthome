@@ -63,7 +63,8 @@ Claude Code im Web bereitet diese Aufgaben vor, führt sie aber nicht aus.
 | 4.3e | **Einrichtungsprüfung** (Kopfzeile zwischen Titel und Uhr: nur die Symbole mit Befund, rot pulsiert, Klick springt direkt zur Stelle; `dx-setup` als Liste für die Seite Einstellungen 4.11 vorbereitet: Roboter, Paket, Roboter-Entitäten, Datenkarte, Angepasste Reinigung, Raumtypen, Räume ↔ HA-Bereiche, Reparaturen; Sprung zur Stelle; PD-014) | fertig (16.09.; setup.test.ts 7 grün, setup.js 20 grün; Version 2.0.0-alpha.28 eingespielt; Symbole rechtsbündig direkt links neben der Uhr; Bereiche-Symbol springt bis in HAs Zuordnungsansicht) |
 | 4.4 | `dx-planer` (Seite Planer) | offen |
 | 4.5 | `dx-planer-editor` + `dx-clock-picker` | offen |
-| 4.6 | `dx-rooms-dialog` | offen |
+| 4.6a | `dx-rooms-dialog` Roboter-Modus (Modul R; aus 4.6 geteilt 16.09.) | offen |
+| 4.6b | `dx-rooms-dialog` Plan-Modus im Editor-Kontext (Modul A; aus 4.6 geteilt 16.09.) | offen |
 | 4.7 | `dx-history` + `dx-robot-settings` (Seiten Protokoll, Einstellungen) | offen |
 | 4.8 | `dx-estimate-dialog` | offen |
 | 4.9 | `dx-automatik`, `dx-station`, `dx-consumables` | offen |
@@ -90,7 +91,8 @@ wenn Abschnitt 11a erfüllt ist – dann beginnt das nächste. Modul F läuft pa
 
 | Modul | Aufgaben | Seiten / Bausteine | Stand |
 |---|---|---|---|
-| **A Planer** | 4.4, 4.5, 4.6, 4.8, 6.1 | Seite Planer, `dx-planer` (+ `compact`), Editor + Uhr, Raum-Dialog, Dauer & Akku, Round-Trip-Test | **nächstes** |
+| **R Roboter-Panel** | 4.1 (Sichtprüfung, Nachbesserungen), 4.6a | Übersicht: Roboter-Panel `dx-hero` + `dx-auftrag` – alles, was den Roboter selbst zeigt und bedient; Räume-Dialog im Roboter-Modus (`dx-rooms-dialog`, „Räume einstellen“ aus dem Hero) | **nächstes** (Herbert, 16.09.: zuerst das Roboter-Panel; ClickUp DX-064) |
+| **A Planer** | 4.4, 4.5, 4.6b, 4.8, 6.1 | Seite Planer, `dx-planer` (+ `compact`), Editor + Uhr, Raum-Dialog im Plan-Modus, Dauer & Akku, Round-Trip-Test | danach |
 | **B Karte und Räume** | 4.3 (Sichtprüfung), 4.3b (Sichtprüfung, Zoom/Gesten), 4.12 | Seite Reinigen, Heidi-Karte, Sperrzonen-Editor | 4.3/4.3b gebaut, Sichtprüfung offen |
 | **C Übersicht-Kacheln** | 4.9, 4.10 | Automatik, Station, Verschleiß, Heute, Seite Prognose | offen |
 | **D Verlauf und Statistik** | 4.7 (Verlauf, Zeitleiste, Lernwerte, Statistik) | Seite Verlauf, `dx-history` (+ `compact`), `dx-stats` | offen |
@@ -101,7 +103,9 @@ wenn Abschnitt 11a erfüllt ist – dann beginnt das nächste. Modul F läuft pa
 **5.1 (Container Queries, Bottom-Sheet, Safe Area) ist in die Module aufgelöst:** Modul A legt die
 Regeln fest (Container `content`, Grenzen 640 / 1099 px wie in 4.0, Dialog als Sheet < 640 px Viewport,
 Safe Area) und jedes Modul wendet sie auf seine Seiten an; 5.2 prüft am Ende alle Seiten zusammen.
-In ClickUp gibt es je Modul eine Aufgabe (DX-056 … DX-062, Typ Meta) mit den Modul-Schritten als Checkliste; die Phase-Parents bleiben als Historie.
+In ClickUp gibt es je Modul eine Aufgabe (DX-056 … DX-062, DX-064 für Modul R, Typ Meta) mit den Modul-Schritten als Checkliste; die Phase-Parents bleiben als Historie.
+
+**Modul R zuerst (Herbert, 16.09.2026, Abschnitt 10):** Das Roboter-Panel kommt vor dem Planer. Modul R nutzt die schon in 4.0/4.2 festgelegten Grenzen (Container `content` 640 / 1099 px, Dialog als Sheet < 640 px Viewport, Safe Area) und legt `tests/e2e/widths.js` für die Übersicht an; jedes weitere Modul ergänzt dort seine Seiten. Abgrenzung (Auswahl Herbert): nur das Panel selbst – Station, Verschleiß und Roboter-Einstellungen bleiben in C/D/E, Karte und Räume in B. 4.6 ist dafür in 4.6a (Roboter-Modus, Modul R) und 4.6b (Plan-Modus, Modul A) geteilt.
 
 ---
 
@@ -624,11 +628,19 @@ Nach jedem Build v2 neben v1 ansehen; Unterschiede → Abschnitt 10/10a.
 - Tests: `npm test`
 - Dateien: `src/components/dx-planer-editor.ts`, `src/components/dx-clock-picker.ts`, `tests/e2e/{editor,live-update}.js`
 
-**4.6 `dx-rooms-dialog`**
-- Voraussetzung: 4.5
-- Ziel: Roboter- und Eintrag-Modus, Umschalter im Editor-Kontext, „Alle Räume“, Zurück zum Eintrag.
-- Nicht ändern: `setRoomValue`.
-- Akzeptanz: Roboter-Modus → `select_option` sofort; Plan-Modus nur Draft; Hinweis bei einem Raum auf `unavailable`.
+**4.6a `dx-rooms-dialog` – Roboter-Modus** (aus 4.6 geteilt, 16.09.; Modul R, ClickUp DX-033)
+- Voraussetzung: 4.2, 3.2, 4.3d
+- Ziel: Dialog „Räume einstellen“ (Overlay `rooms`, `mode: robot`; geöffnet aus dem Hero über die drei Werte und den Streifen, aus der Seite Reinigen und aus `dx-nav` „Räume“). Je Raum aus dem Profil (App-Reihenfolge, Kurzname + Symbol) die Roboter-Werte wie in v1 (Modus, Saugstufe, Wasser nur bei Modus ≠ Saugen, Route nur bei „Nur Wischen“, Wiederholungen; Optionen aus dem Profil, Abschnitt 6 Zeilen `_rvClick`/`_roomsHtml`); jede Änderung schreibt sofort über `DxApi.setRoomValue` (`select_option`). Zeile „Alle Räume“ mit den gemeinsamen Werten („–“ bei Abweichung), schreibt alle Räume parallel (`all`). Hinweis, wenn Raum-Werte `unavailable` sind (angepasste Reinigung aus, Abschnitt 10). `dx-dialog` als Rahmen (Sheet < 640 px Viewport). Kein Plan-Modus, kein Umschalter (4.6b).
+- Nicht ändern: `setRoomValue`, `raumwerte.ts`, `profile.ts`, `status.ts`.
+- Akzeptanz: `rooms.js`: Klick auf einen Wert → genau ein `select_option` mit richtiger Entität und Option (Tabelle je Schlüssel); „Alle Räume“ → ein Call je Raum des Profils; Wasser/Route nur bei passendem Modus sichtbar; Hinweis bei `unavailable` (Fixture „angedockt“); Räume in Profil-Reihenfolge; Escape schließt; 0 Renderaufrufe bei 20 irrelevanten Ticks. `widths.js`: Übersicht und offener Räume-Dialog bei 390 / 820 / 1200 px ohne horizontalen Überlauf.
+- Tests: `npm test`
+- Dateien: `src/components/dx-rooms-dialog.ts`, `src/dreame-x60-panel.ts` (Overlay `rooms` statt Platzhalter), `tests/e2e/rooms.js`, `tests/e2e/widths.js` (neu)
+
+**4.6b `dx-rooms-dialog` – Plan-Modus** (aus 4.6 geteilt, 16.09.; Modul A, ClickUp DX-065)
+- Voraussetzung: 4.6a, 4.5
+- Ziel: Eintrag-Modus (`mode: plan`, `n`, Draft): nur die gewählten Räume des Eintrags, „eigene Werte“ je Raum, sonst Standard des Eintrags, „Alle auf Standard“; Umschalter Roboter ↔ Eintrag im Editor-Kontext; Zurück zum Eintrag (`dx-back`, Overlay `back`). Schreibt nur in den Draft, nie nach HA.
+- Nicht ändern: `setRoomValue`, `savePlan`, `raumwerte.ts`.
+- Akzeptanz: Plan-Modus ohne Service-Call, Draft trägt die Werte; Umschalter wechselt die Ansicht; „Alle auf Standard“ leert die eigenen Werte; Zurück führt zum Editor mit unverändertem Draft.
 - Tests: `npm test`
 - Dateien: `src/components/dx-rooms-dialog.ts`, `tests/e2e/rooms.js`
 
@@ -775,6 +787,7 @@ Format: `- [Datum] [Aufgabe] Art (Widerspruch | Messung | Befund | Wunsch) · Sc
 
 Für 2.0 müssen `Blocker` und `Functional` = 0 sein. `Cosmetic` und `Post-2.0` dürfen offen bleiben.
 
+- [2026-09-16] [Plan] Entscheidung Herbert · Info: **Zuerst das Roboter-Panel.** Herbert (Sitzung Teil 5): „Modul für Modul fertigstellen, beginnend mit dx-hero – da will ich alles einbauen, was mit dem Roboter und Saugen zu tun hat.“ Neues Modul **R Roboter-Panel** vor Modul A (Abschnitt 1a): `dx-hero` + `dx-auftrag` (4.1: Sichtprüfung und Nachbesserungen am Panel) und der Räume-Dialog im Roboter-Modus (4.6a, „Räume einstellen“ aus dem Hero). Abgrenzung per Auswahlfrage (Herbert: „Nur das Roboter-Panel“): Station, Verschleiß und Roboter-Einstellungen bleiben in C/D/E, Karte und Räume in B. 4.6 ist in 4.6a (Roboter-Modus, Modul R) und 4.6b (Plan-Modus, Modul A) geteilt; `tests/e2e/widths.js` entsteht in Modul R. Wünsche fürs Panel über v1 hinaus: hier als `Post-2.0` oder als PD-Eintrag (Regel 2). ClickUp: DX-064 Modul R (ready for development, https://app.clickup.com/t/123ztrcvtmj), DX-033 → 4.6a, DX-065 4.6b (https://app.clickup.com/t/123ztrcvtmk), DX-056 Modul A → backlog (zweites Modul).
 - [2026-09-16] [Plan] Entscheidung Herbert · Info: **Bau modulweise statt phasenweise.** Die Phasen waren für den Parallelbetrieb mit v1 gedacht (alle Komponenten, dann responsive, dann sieben Tage nebeneinander); v1 ist seit 15.09. abgeschaltet, v2 läuft im Alltag. Ab jetzt wird ein Modul komplett fertig (Code, Tests, responsive, Parität, Doku, Sichtprüfung, ClickUp shipped – Abschnitt 11a), bevor das nächste beginnt. Reihenfolge A Planer → B Karte und Räume → C Übersicht-Kacheln → D Verlauf und Statistik → E Einstellungen → G Abschluss; F Backend parallel (Abschnitt 1a). Alle Aufgabenkarten und DX-Nummern bleiben; 5.1 ist in die Module aufgelöst (Regeln in Modul A). ClickUp: je Modul eine Meta-Aufgabe mit Checkliste (DX-056 … DX-062), Phase-Parents bleiben als Historie.
 - [2026-09-16] [Doku] Befund · Info (Teilaudit mit dem audit-Skill): Profile in der CLAUDE.md vollständig, alle referenzierten Pfade und Bauplan-Abschnitte vorhanden, Version in package.json/Lock/HANDOFF/Statusliste/Ressource einheitlich (alpha.28), PD-Register komplett freigegeben. Behoben: HANDOFF Abschnitt 4 (Stand, ClickUp-Bezug je Punkt, Remote Control gestrichen, Editor-Livetest → DX-032, HACS/H:\www → DX-063), `heidi/CLAUDE.md` Räume-Zeile (dynamisch seit PD-013), ENTITAETEN.md Spaltenerklärung, Karten 6.3/6.5 um Tests/Dateien ergänzt, „Heidi v2“ als historischer Name markiert, DX-041 (5.1) auf cancelled. Falschbefund zurückgenommen: Abschnitt 4 nennt alle Paket-Helfer (Kurzform mit `|`). Offen: `tests/e2e/widths.js` entsteht in Modul A (4.4 verlangt die Breitenprüfung).
 
