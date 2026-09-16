@@ -3,8 +3,10 @@
 ## Entitäten
 - `vacuum.heidi`, Karte `camera.heidi_map` (Attribute: rooms, no_go_areas, no_mopping_areas,
   virtual_walls, calibration_points, furnitures, entity_picture).
-- Räume (IDs, auf dem Roboter deutsch benannt): 1 Bad, 2 Schlafzimmer, 3 WC, 4 Flur, 5 Büro,
-  6 Küche, 7 Wohnzimmer.
+- Räume kommen aus `camera.heidi_map.rooms` (ID, Name, Typ, Reihenfolge, Sichtbarkeit); die Karte v2 liest sie
+  dynamisch (PD-013, Bauplan Abschnitt 4/GERAETEPROFIL.md). Stand 16.09.2026: 1 Bad, 2 Schlafzimmer, 3 WC, 4 Flur,
+  5 Büro, 6 Küche, 7 Wohnzimmer; 8 = versteckter Balkon. Namen und Reihenfolge nur in der Dreame-App ändern, nie
+  aus HA schreiben.
 - Pro Raum: `select.heidi_room_N_cleaning_mode` (sweeping|mopping|sweeping_and_mopping),
   `_suction_level` (quiet|standard|strong|turbo), `_cleaning_times` (1x|2x|3x),
   `_mop_pad_humidity` (slightly_dry|moist|wet), `_cleaning_route` (standard|intensive|deep).

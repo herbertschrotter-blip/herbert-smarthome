@@ -2,7 +2,7 @@
 
 Stand 2026-09-15, aus dem Entitäts-Register (239 Entitäten, Integration dreame-vacuum 2.0.0b25). Kategorien sind ein Vorschlag zur Einordnung (Herbert + Claude, 15.09.).
 
-Spalten: **v2** = die Karte v2 liest oder schreibt die Entität (Vertrag `contract.ts`, Abschnitt 4 des Bauplans). **Kat.** = HA-Kategorie der Integration (config = Einstellung, diagnostic = Diagnose). **aus** = im Register deaktiviert.
+Spalten: **v2** = die Karte v2 liest oder schreibt dieses Merkmal (Vertrag `contract.ts` `ROBOT_FEATURES`; die ID entsteht seit PD-012 zur Laufzeit aus dem erkannten Gerät, `heidi_` steht hier nur als Beispiel; Stand der Spalte 15.09., neue Merkmale seit 4.3b/4.3e: `map_data`, Bereichszuordnung über das Entitäts-Register). **Kat.** = HA-Kategorie der Integration (config = Einstellung, diagnostic = Diagnose). **aus** = im Register deaktiviert.
 
 ## Roboter: Zustand und Lauf (15)
 

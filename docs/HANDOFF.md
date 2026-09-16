@@ -241,7 +241,7 @@ Uhr (10:15). Einrichten im Ordner `heidi/tests`: `npm i` und dann `npx playwrigh
   Alles am 15.09. 06:24 eingespielt (HA-Neustart, Ressource `?v=1.6.2`). 0.2 (Fixtures per `dump-states.ps1`) offen.
 - **Phase 1 (15.09.):** Toolchain `dreame_x60/card/` (Lit 3, TypeScript strict, esbuild, ESLint 9, Playwright), Shell
   `dreame-x60-panel`, Dashboard `dreame_x60.yaml` (sechs Ansichten, URL `/dreame-x60/…`), Ressource `/local/dreame_x60.js?v=2.0.0-alpha.1`,
-  „Heidi v2“ in der Seitenleiste (Sichtprüfung durch Herbert offen). Namensregel: Bausteine/Ereignisse/Tokens `dx-*`, „Heidi“ nur als Titel.
+  „Heidi v2“ in der Seitenleiste (seit 15.09. heißt das Dashboard „Heidi“). Namensregel: Bausteine/Ereignisse/Tokens `dx-*`, „Heidi“ nur als Titel.
 - **Phase 2 (15.09.):** `src/domain/` (raumwerte, estimate, timeline, calibration, status, labels, constants) mit Vergleichs-
   vektoren aus v1 (`tools/v1-vectors.js` → `tests/fixtures/*.v1.json`) und handgeschriebenen Grenzfällen (`*.spec.json`).
   2.7 (pytest gegen dieselben Vektoren) geschrieben, nicht ausgeführt: kein Python auf dem PC.
@@ -268,7 +268,7 @@ Uhr (10:15). Einrichten im Ordner `heidi/tests`: `npm i` und dann `npx playwrigh
 - **Bau modulweise (16.09., Herbert):** Reihenfolge und Definition „Modul fertig“ im Bauplan Abschnitt 1a/11a; Skills sind projektneutral (Profile in CLAUDE.md: Commit, Tracker, Code, Doku, Mockup, Review); ClickUp-Aufgaben heißen `DX-NNN | KÜRZEL | Titel` mit allen Feldern.
 - **Nächstes:** Modul A Planer – 4.4 `dx-planer` (DX-031, legt die Responsive-Regeln fest), dann 4.5 Editor + Uhr (DX-032), 4.6, 4.8, 6.1; später Heidi-Karte: Zoom, Zone/Punkt/Hinfahren als Gesten, Sperrzonen (4.12) auf derselben Ebene. Offene Entscheidungen: Bauplan Abschnitt 10 und ClickUp.
 
-## 4. Offene Punkte (Stand 14.09.2026, Claude-Code-Sitzung)
+## 4. Offene Punkte (Stand 16.09.2026, Claude-Code-Sitzung; ClickUp-Bezug je Punkt, Audit 16.09.)
 Erledigt:
 - [x] HA neu gestartet (14.09. 06:33), v1.3.1 + v2-Helfer aktiv, Repo = `H:\`.
 - [x] Große Dateien sind im Repo.
@@ -283,19 +283,18 @@ Offen:
 - [x] Roboter-„Nicht stören“ von 20:00–08:00 auf 20:00–07:00 gesetzt (`time.heidi_dnd_end`),
       damit Plan 2 (Mo/Do, 07:00) pünktlich starten kann.
 - [ ] Im Planer-Editor ▶ (Sofortstart) und **Speichern** real im Browser testen (Tests sind grün,
-      Live-Klick fehlt noch).
+      Live-Klick fehlt noch) → Sichtprüfung in **DX-032** (4.5 Editor, Modul A).
 - [x] Aufgeräumt (14.09., per `ha-ws.js config/entity_registry/remove`): 18 v1-Planer-Helfer
       (`input_select.heidi_planN_tage/_raeume`, `input_boolean.heidi_planN_nur_abwesend/_homeoffice`,
       `heidi_homeoffice_modus`, `binary_sensor.heidi_homeoffice`), Integrationsreste
       (`button.heidi_start_mapping`, `camera.heidi_map_data`, `camera.heidi_wifi_map_1`) und die
       alten Personen-Entitäten `person.nicole`/`person.nina` (waren nur noch Register-Einträge,
       `person/delete` kannte sie nicht).
-- [ ] HACS-Karten Mushroom, card-mod, expander-card, stack-in-card in HACS deinstallieren
-      (nichts verweist mehr darauf; HACS räumt Ressource + `www/community`-Ordner mit weg).
-- [ ] Aufräumen: `H:\www\_deploy_yamls.txt.old`, `H:\www\heidi-panel-v1.1.0.bak.b64` löschen;
-      optional altes Storage-Dashboard und nicht mehr benötigte HACS-Karten entfernen.
-- [ ] Optional: Remote Control in Claude Code einrichten, damit vom Handy aus über diesen PC
-      in HA geschrieben werden kann.
+- [ ] **DX-063 [PC]:** HACS-Karten Mushroom, card-mod, expander-card, stack-in-card in HACS deinstallieren
+      (nichts verweist mehr darauf; HACS räumt Ressource + `www/community`-Ordner mit weg) und
+      `H:\www\_deploy_yamls.txt.old`, `H:\www\heidi-panel-v1.1.0.bak.b64` löschen (Modul F).
+- ~~Optional: Remote Control in Claude Code einrichten~~ gestrichen (Herbert, 16.09.; kein Projektpunkt).
+- Übersicht aller offenen Bauschritte: Bauplan Abschnitt 1a (Module) und ClickUp-Liste „dreame_x60 – Bauplan“ (DX-Aufgaben).
 
 ## 5. Referenzen
 - Räume: 1 Bad, 2 Schlafzimmer, 3 WC, 4 Flur, 5 Büro, 6 Küche, 7 Wohnzimmer.
