@@ -62,3 +62,15 @@ Für den Skill tracker (projektneutral): Projektkennung statt Memory-Eintrag.
 - ClickUp: Space Smart Home 1200660000001609, Liste dreame_x60 – Bauplan 1200660000004100
 - Status-Übergänge: tracker start → in development; tracker done → testing (Abnahme auf shipped macht Herbert)
 - Nummernschema: `DX-NNN | KÜRZEL | Kurztitel` (Kürzel KARTE/BACKEND/DOKU/TOOLS wie Commit-Profil); Kurztitel beginnt mit der Bauplan-Nummer (z. B. 4.3e) oder „Post-2.0:“; Phasen sind Parents ohne Nummer. **Nächste freie Nummer: DX-056** (nach jedem tracker neu +1)
+
+## Code-Profil
+Für den Skill code-erstellen (projektneutral).
+- Stack: Karte TypeScript strict + Lit 3, esbuild → `ha/www/dreame_x60.js`; Backend HA-YAML (`ha/packages`, `automations.yaml`, `scripts.yaml`); Prognose Python (`ha/prognose`)
+- Pflicht-Docs vor dem Code: diese CLAUDE.md, `docs/HANDOFF.md` Abschnitt 3e, `docs/dreame_x60/BAUPLAN.md` Abschnitt 2 (Regeln) und 4 (Entitäts-Vertrag); bei Domänen-Logik Abschnitt 6 (Portierungstabelle)
+- Aufgabenquelle: BAUPLAN.md Abschnitt 8 (Aufgabenkarte: Ziel, Nicht ändern, Akzeptanz, Tests, Dateien) + ClickUp-Task DX-NNN; Akzeptanz-Zeilen = Testfälle
+- Schichten/Kopplung: `contract.ts` (IDs) → `device.ts`/`profile.ts` (Erkennung, Räume, Optionen) → `selectors.ts` (memoisierte Views) → Komponenten; Schreiben nach HA nur über `DxApi`; neue Entität/Dienst zuerst in Abschnitt 4 + contract.ts; nichts fest verdrahten, was Roboter oder HA liefern
+- Tests: `npm test` in `dreame_x60/card` (check + unit + build + E2E) und `npm run lint`; Exit-Code 0 ist Pflicht vor jedem Commit; Unit `tests/unit/*.test.ts`, E2E `tests/e2e/*.js` mit Harness-Stubs
+- Auslieferung: Karte `.\tools\deploy.ps1 -OnlyCard`, dann Ressourcen-Version `node tools/ha-ws.js lovelace/resources/update {...,"url":"/local/dreame_x60.js?v=<ver>"}`, Strg+F5; Backend: `check_config`, dann passender reload oder restart; Sichtprüfung durch Herbert benennen
+- Mockup-Pflicht: ja bei großen UI-Umbauten (Modus Deep) – zuerst Mockup in `dreame_x60/mockups/`, Abnahme, dann bauen
+- Notiz-Ort für Befunde/Ideen ohne Task: BAUPLAN.md Abschnitt 10 (Abweichung → 10a als PD-Eintrag)
+- Pflicht-Branch: `dreame_x60` (Worktree `herbert-smarthome-v2`); `main` bleibt der Stand auf H:
