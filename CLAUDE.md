@@ -58,7 +58,7 @@ Commit-Format in allen Projekten: `[vX.Y.Z] Modul, Typ: Kurztitel` (Skill git-co
 Für den Skill tracker (projektneutral): Projektkennung statt Memory-Eintrag.
 - Projekt: heidi
 - Skill-Repo (OneDrive-relativ): Dokumente\02 Arbeit\05 Vorlagen - Scripte\00_claude-skills-bpm
-- Projekt-Config: projects/heidi/ (Liste, Status-Werte, Nummernschema, keine Custom Fields, keine Chat-Anker)
+- Projekt-Config: projects/heidi/ (Liste, Status-Werte, Nummernschema, Custom Fields wie BPM, Chat-Anker)
 - ClickUp: Space Smart Home 1200660000001609, Liste dreame_x60 – Bauplan 1200660000004100
 - Status-Übergänge: tracker start → in development; tracker done → testing (Abnahme auf shipped macht Herbert)
-- Nummernschema: Bauplan-Nummer am Anfang des Titels (z. B. 4.3e), Post-2.0-Wünsche mit Präfix „Post-2.0:“
+- Nummernschema: `DX-NNN | KÜRZEL | Kurztitel` (Kürzel KARTE/BACKEND/DOKU/TOOLS wie Commit-Profil); Kurztitel beginnt mit der Bauplan-Nummer (z. B. 4.3e) oder „Post-2.0:“; Phasen sind Parents ohne Nummer. **Nächste freie Nummer: DX-056** (nach jedem tracker neu +1)
