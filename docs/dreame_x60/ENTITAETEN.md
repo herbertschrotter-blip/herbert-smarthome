@@ -8,12 +8,12 @@ Spalten: **Kurzbeschreibung** = was die Entität zeigt oder schaltet (ergänzt 1
 
 | Entität | Name | Kurzbeschreibung | v2 | Kat. | aus | Integriert (alpha.28) |
 |---|---|---|---|---|---|---|
-| `button.heidi_clear_warning` | Clear Warning | Löscht die aktuelle Warnmeldung am Roboter |  | diagnostic |  | – |
+| `button.heidi_clear_warning` | Clear Warning | Quittiert die anstehende Warnung (nur dann verfügbar; Liste unten „Warnungen und Fehler“) |  | diagnostic |  | geplant Modul R: ✕ am gelben Hinweis-Chip des Roboter-Panels (Entscheidung Herbert 17.09., Mockup `warnung.html`, Abnahme offen) |
 | `sensor.heidi_cleaned_area` | Cleaned Area | Gereinigte Fläche des laufenden Laufs in m² | ja |  |  | Roboter-Panel (`dx-hero`) Streifen, Auftrag-Kachel (`dx-auftrag`) |
 | `sensor.heidi_cleaning_progress` | Cleaning Progress | Fortschritt des laufenden Laufs in % |  |  |  | – |
 | `sensor.heidi_cleaning_time` | Cleaning Time | Dauer des laufenden Laufs in Minuten | ja |  |  | Auftrag-Kachel (`dx-auftrag`) |
 | `sensor.heidi_current_room` | Current Room | Raum, in dem Heidi gerade ist | ja |  |  | Roboter-Panel (`dx-hero`) Raum-Chip + Streifen, Auftrag-Kachel, Bildunterschrift der Karte |
-| `sensor.heidi_error` | Error | Aktueller Fehlercode (`no_error` = alles in Ordnung) | ja |  |  | Roboter-Panel (`dx-hero`) Fehler-Chip |
+| `sensor.heidi_error` | Error | Aktueller Fehler- oder Warnungscode (`no_error` = alles in Ordnung; 22 Codes sind Warnungen, Liste unten) | ja |  |  | Roboter-Panel (`dx-hero`) Hinweis-Chip: gelb = Warnung, rot = Fehler |
 | `sensor.heidi_mapping_time` | Mapping Time | Dauer der laufenden Kartenerstellung |  |  |  | – |
 | `sensor.heidi_relocation_status` | Relocation Status | Sucht Heidi gerade ihre Position auf der Karte neu |  |  |  | – |
 | `sensor.heidi_state` | State | Grober Betriebszustand (cleaning, docked, paused …), wie `vacuum.heidi` |  |  |  | – |
@@ -218,3 +218,51 @@ Raum 8 = „Balkon“, in der App ausgeblendet (Bauplan Abschnitt 10). Raumnamen
 | `button.heidi_shortcut_2` | Shortcut Bad Saugen/Wischen | App-Szene „Bad Saugen/Wischen“ starten |  |  |  | Seite Reinigen „App-Szenen“ über das Paket-Skript `heidi_app_szene` (nicht über die Button-Entität) |
 | `button.heidi_shortcut_3` | Shortcut Wischen Nach Dem Saugen | App-Szene „Wischen nach dem Saugen“ starten |  |  |  | Seite Reinigen „App-Szenen“ über das Paket-Skript `heidi_app_szene` (nicht über die Button-Entität) |
 
+## Warnungen und Fehler (`sensor.heidi_error`, ausgelesen 17.09.2026)
+
+Die Integration kennt **kein eigenes Warnungs-Attribut**. Warnung und Fehler sind derselbe Fehlersensor
+`sensor.heidi_error` (Zustand = Code-Name, Attribute `value` = Nummer, `description`). Eine feste Liste von
+**22 Codes** gilt als Warnung (`WARNING_ERROR_CODE` in `custom_components/dreame_vacuum/dreame/types.py`),
+alle anderen rund 100 Codes sind Fehler. Daraus leitet die Integration ab:
+
+- `vacuum.heidi` Attribut `has_error` = Fehler, der **keine** Warnung ist (bei einer Warnung bleibt `has_error` false).
+- `button.heidi_clear_warning` ist nur verfügbar, solange eine Warnung ansteht, außerdem bei „Wasser knapp“
+  (`sensor.heidi_low_water_warning`) und „Entwässerung abgeschlossen“. Sonst `unavailable`.
+- Bei einer Warnung legt die Integration zusätzlich eine HA-Benachrichtigung „warning“ an (mit Bild vom Roboter, wenn vorhanden);
+  Quittieren entfernt sie. Fehler bekommen eine eigene Benachrichtigung je Code.
+- Die Karte v2 zeigt den Fehlersensor im Roboter-Panel als Chip: **gelb** bei Warnung (`has_error` false), **rot** bei Fehler;
+  deutsche Texte aus `ERR_DE` in `dreame_x60/card/src/config.ts` (v1-Stand). Entscheidung Herbert 17.09.: der gelbe Chip
+  bekommt ein ✕ zum Quittieren über `button.heidi_clear_warning` (Modul R, Bauplan Abschnitt 10; Mockup `dreame_x60/mockups/warnung.html`).
+
+Die 22 Warnungen (Nummer = Attribut `value`, Zustandswert = `sensor.heidi_error`):
+
+| Nr. | Zustandswert | Bedeutung | Text in der Karte (`ERR_DE`) |
+|---|---|---|---|
+| 9 | `no_tank_box` | Wassertank (Tankbox) nicht eingesetzt | – (fehlt) |
+| 10 | `water_box_empty` | Wassertank leer | – (fehlt) |
+| 20 | `battery_low` | Akku schwach | – (fehlt) |
+| 47 | `blocked` | Roboter blockiert (nur Code 47; die Codes 63 und 64 heißen ebenfalls `blocked`, zählen aber als Fehler) | – (fehlt) |
+| 51 | `filter_blocked` | Filter verstopft | – (fehlt) |
+| 56 | `laser` | Laser-Sensor verdeckt oder gestört | – (fehlt) |
+| 68 | `remove_mop` | Mopp abnehmen (z. B. vor reinem Saugen) | – (fehlt) |
+| 70 | `mop_removed` | Mopp abgenommen | – (fehlt) |
+| 71, 72 | `mop_pad_stop_rotate` | Mopp-Pad dreht sich nicht | „Mopp blockiert“ |
+| 75 | `low_battery_turn_off` | Wegen leerem Akku ausgeschaltet | – (fehlt) |
+| 82 | `slippery_floor` | Rutschiger Boden | – (fehlt) |
+| 85 | `check_mop_install` | Mopp-Halterung prüfen | – (fehlt) |
+| 107 | `water_tank_dry` | Frischwassertank der Station leer | – (fehlt) |
+| 114 | `clean_mop_pad` | Mopp reinigen | „Mopp reinigen“ |
+| 117 | `station_disconnected` | Station getrennt | „Station getrennt“ |
+| 121 | `dust_bag_full` | Staubbeutel voll | „Staubbeutel voll“ |
+| 122 | `unknown` | Unbekannte Warnung (die Integration meldet den Zustandswert `unknown`) | – (fehlt) |
+| 123 | `self_test_failed` | Selbsttest fehlgeschlagen | – (fehlt) |
+| 129 | `wash_failed` | Mopp-Wäsche fehlgeschlagen | – (fehlt) |
+| 213 | `onboard_water_tank_empty` | Wassertank im Roboter leer | – (fehlt) |
+| 214 | `onboard_dirty_water_tank_full` | Schmutzwassertank im Roboter voll | – (fehlt) |
+
+Nur 4 der 22 Warnungen haben heute einen deutschen Text in der Karte; die übrigen erscheinen als Zustandswert mit
+Leerzeichen (z. B. „water tank dry“). Die restlichen Schlüssel in `ERR_DE` (`clean_water_tank_empty`, `dirty_water_tank_full`,
+`dust_box_missing`, `wheels_stuck`, `brush_stuck`, `low_battery`, `detergent_empty`, `water_tank_missing`,
+`clean_water_tank_missing`, `dirty_water_tank_missing`) stammen aus v1 und passen zu keinem der 22 Warnungs-Codes
+dieser Integrationsversion – sie gehören zu Fehlercodes oder älteren Namen. Beim Bau des Warnungs-Chips (Modul R)
+werden die fehlenden 18 Texte ergänzt (Karte 4.1, Abschnitt 10).
