@@ -40,7 +40,8 @@ export class DxAuftrag extends LitElement {
     const startpunkt = r.vac === 'cleaning' && r.cleanedArea === 0;
     const cur = startpunkt ? -1 : idx;
     const done = startpunkt || idx < 0 ? 0 : idx;
-    const pct = total ? Math.round((done / total) * 100) : 0;
+    // Balken (PD-016): Prozent vom Roboter, solange der Sensor im Lauf verfügbar ist; sonst Raumzählung (springt je Raum)
+    const pct = r.progress !== null ? Math.round(r.progress) : total ? Math.round((done / total) * 100) : 0;
     const nextId = startpunkt ? order[0] : rest[0];
     const rl = this.roomOrder ?? [];
     const next = nextId !== undefined ? roomById(rl, nextId) : undefined;
@@ -53,7 +54,7 @@ export class DxAuftrag extends LitElement {
         <div class="lbl route">${total ? order.map((id, i) => html`${i ? ' → ' : ''}${i === cur ? html`<b>${short(id)}</b>` : short(id)}`) : (r.room !== dash ? html`<b>${r.room}</b>` : t('auftrag.noRooms'))}</div>
         <div class="kv"><span class="v">${r.cleaningTime}<span class="u"> ${t('unit.min')}</span></span><span class="u">· ${r.cleanedArea} ${t('unit.m2')}</span></div>
       </div>
-      ${total ? html`<div><div class="meter two"><span class="n">${t('auftrag.rooms')}</span><span class="p">${done} / ${total}</span></div><div class="bar" style="--p:${pct}"><i></i></div></div>` : nothing}
+      ${total || r.progress !== null ? html`<div>${total ? html`<div class="meter two"><span class="n">${t('auftrag.rooms')}</span><span class="p">${done} / ${total}</span></div>` : nothing}<div class="bar" data-pct=${pct} data-src=${r.progress !== null ? 'robot' : 'rooms'} style="--p:${pct}"><i></i></div></div>` : nothing}
       ${next
         ? html`<div class="row next"><div><div class="s">${startpunkt ? t('auftrag.first') : t('auftrag.next')}</div><div class="t">${next.short}</div></div>${nextVals ? html`<span class="tag">${nextVals.modus}</span>` : nothing}</div>`
         : (total ? html`<div class="row next"><div><div class="s">${t('auftrag.last')}</div><div class="t">${cur >= 0 ? short(order[cur]!) : dash}</div></div></div>` : nothing)}

@@ -64,10 +64,12 @@ export interface RobotView {
   moreInfo: { vac: string; battery: string; error: string };
   /** Warnung quittieren (PD-015): Knopf `button.<gerät>_clear_warning` ist nur verfügbar, solange eine Warnung ansteht */
   warning: { clearable: boolean; id: string };
+  /** Fortschritt des Auftrags in % vom Roboter (PD-016); null, wenn der Sensor fehlt oder außerhalb eines Laufs unavailable ist */
+  progress: number | null;
 }
 
 const VAC_ATTRS = ['has_error', 'current_segment', 'active_segments', 'cleaning_sequence', 'cleaned_area', 'charging', 'docked', 'mop_pad', 'paused', 'washing', 'drying', 'returning_to_wash', 'mapping', 'cruising'] as const;
-const ROBOT_IDS = (): string[] => [E.vac, E.status, E.error, E.taskStatus, E.battery, E.currentRoom, E.cleanedArea, E.cleaningTime, E.phase, E.autoLauf, E.autoLetzterPlan, E.laufReihenfolge, E.dndStart, E.dndEnd, E.raumnamen, E.ninaZaehlt, E.clearWarning, ...PERSONS.map((p) => p.id)];
+const ROBOT_IDS = (): string[] => [E.vac, E.status, E.error, E.taskStatus, E.battery, E.currentRoom, E.cleanedArea, E.cleaningTime, E.phase, E.autoLauf, E.autoLetzterPlan, E.laufReihenfolge, E.dndStart, E.dndEnd, E.raumnamen, E.ninaZaehlt, E.clearWarning, E.cleaningProgress, ...PERSONS.map((p) => p.id)];
 
 const intList = (v: unknown): number[] => (Array.isArray(v) ? v.map((x) => parseInt(String(x), 10)).filter((x) => !isNaN(x)) : []);
 
@@ -96,6 +98,7 @@ export const readRobot: Selector<RobotView> = memoizeSelector(ROBOT_IDS, (s) => 
     moreInfo: { vac: E.vac, battery: E.battery, error: E.error },
     // Knopf-Entitäten haben als Zustand den letzten Druck oder „unknown“ (nie gedrückt) – nur „unavailable“ heißt gesperrt
     warning: { clearable: !!ent(s, E.clearWarning) && st(s, E.clearWarning) !== 'unavailable', id: E.clearWarning },
+    progress: EMPTY.includes(st(s, E.cleaningProgress)) || isNaN(parseFloat(st(s, E.cleaningProgress))) ? null : Math.max(0, Math.min(100, parseFloat(st(s, E.cleaningProgress)))),
   };
 }, () => ({ [E.vac]: stateAndAttributes(VAC_ATTRS) }));
 

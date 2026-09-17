@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.30 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.31 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -621,6 +621,8 @@ var ROBOT_FEATURES = {
   currentRoom: ["sensor", "current_room"],
   cleanedArea: ["sensor", "cleaned_area"],
   cleaningTime: ["sensor", "cleaning_time"],
+  cleaningProgress: ["sensor", "cleaning_progress"],
+  // Fortschritt des Auftrags in % vom Roboter, nur im Lauf verfügbar (PD-016, 17.09.)
   cleaningHistory: ["sensor", "cleaning_history"],
   cleaningCount: ["sensor", "cleaning_count"],
   totalCleanedArea: ["sensor", "total_cleaned_area"],
@@ -2088,7 +2090,7 @@ var available = (s4, id) => {
   return !!e4 && !EMPTY2.includes(e4.state);
 };
 var VAC_ATTRS = ["has_error", "current_segment", "active_segments", "cleaning_sequence", "cleaned_area", "charging", "docked", "mop_pad", "paused", "washing", "drying", "returning_to_wash", "mapping", "cruising"];
-var ROBOT_IDS = () => [E2.vac, E2.status, E2.error, E2.taskStatus, E2.battery, E2.currentRoom, E2.cleanedArea, E2.cleaningTime, E2.phase, E2.autoLauf, E2.autoLetzterPlan, E2.laufReihenfolge, E2.dndStart, E2.dndEnd, E2.raumnamen, E2.ninaZaehlt, E2.clearWarning, ...PERSONS.map((p3) => p3.id)];
+var ROBOT_IDS = () => [E2.vac, E2.status, E2.error, E2.taskStatus, E2.battery, E2.currentRoom, E2.cleanedArea, E2.cleaningTime, E2.phase, E2.autoLauf, E2.autoLetzterPlan, E2.laufReihenfolge, E2.dndStart, E2.dndEnd, E2.raumnamen, E2.ninaZaehlt, E2.clearWarning, E2.cleaningProgress, ...PERSONS.map((p3) => p3.id)];
 var intList = (v2) => Array.isArray(v2) ? v2.map((x2) => parseInt(String(x2), 10)).filter((x2) => !isNaN(x2)) : [];
 var readRobot = memoizeSelector(ROBOT_IDS, (s4) => {
   const vac = st(s4, E2.vac);
@@ -2138,7 +2140,8 @@ var readRobot = memoizeSelector(ROBOT_IDS, (s4) => {
     hero,
     moreInfo: { vac: E2.vac, battery: E2.battery, error: E2.error },
     // Knopf-Entitäten haben als Zustand den letzten Druck oder „unknown“ (nie gedrückt) – nur „unavailable“ heißt gesperrt
-    warning: { clearable: !!ent(s4, E2.clearWarning) && st(s4, E2.clearWarning) !== "unavailable", id: E2.clearWarning }
+    warning: { clearable: !!ent(s4, E2.clearWarning) && st(s4, E2.clearWarning) !== "unavailable", id: E2.clearWarning },
+    progress: EMPTY2.includes(st(s4, E2.cleaningProgress)) || isNaN(parseFloat(st(s4, E2.cleaningProgress))) ? null : Math.max(0, Math.min(100, parseFloat(st(s4, E2.cleaningProgress))))
   };
 }, () => ({ [E2.vac]: stateAndAttributes(VAC_ATTRS) }));
 var PLAN_FIELDS = ["name", "raeume", "tage", "personen", "raumwerte", "modus", "saugstufe", "wasser", "route", "wiederholungen", "homeoffice", "ho_saug", "ho_wdh", "sp_saug", "sp_wdh", "aktiv", "schnell", "zeit"];
@@ -2818,7 +2821,7 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.30";
+var VERSION = "2.0.0-alpha.31";
 
 // src/config.ts
 var NAV = [
@@ -3252,7 +3255,7 @@ var DxAuftrag = class extends i4 {
     const startpunkt = r4.vac === "cleaning" && r4.cleanedArea === 0;
     const cur = startpunkt ? -1 : idx;
     const done = startpunkt || idx < 0 ? 0 : idx;
-    const pct = total ? Math.round(done / total * 100) : 0;
+    const pct = r4.progress !== null ? Math.round(r4.progress) : total ? Math.round(done / total * 100) : 0;
     const nextId = startpunkt ? order[0] : rest[0];
     const rl = this.roomOrder ?? [];
     const next = nextId !== void 0 ? roomById(rl, nextId) : void 0;
@@ -3265,7 +3268,7 @@ var DxAuftrag = class extends i4 {
         <div class="lbl route">${total ? order.map((id, i5) => b2`${i5 ? " \u2192 " : ""}${i5 === cur ? b2`<b>${short(id)}</b>` : short(id)}`) : r4.room !== dash ? b2`<b>${r4.room}</b>` : t3("auftrag.noRooms")}</div>
         <div class="kv"><span class="v">${r4.cleaningTime}<span class="u"> ${t3("unit.min")}</span></span><span class="u">· ${r4.cleanedArea} ${t3("unit.m2")}</span></div>
       </div>
-      ${total ? b2`<div><div class="meter two"><span class="n">${t3("auftrag.rooms")}</span><span class="p">${done} / ${total}</span></div><div class="bar" style="--p:${pct}"><i></i></div></div>` : A}
+      ${total || r4.progress !== null ? b2`<div>${total ? b2`<div class="meter two"><span class="n">${t3("auftrag.rooms")}</span><span class="p">${done} / ${total}</span></div>` : A}<div class="bar" data-pct=${pct} data-src=${r4.progress !== null ? "robot" : "rooms"} style="--p:${pct}"><i></i></div></div>` : A}
       ${next ? b2`<div class="row next"><div><div class="s">${startpunkt ? t3("auftrag.first") : t3("auftrag.next")}</div><div class="t">${next.short}</div></div>${nextVals ? b2`<span class="tag">${nextVals.modus}</span>` : A}</div>` : total ? b2`<div class="row next"><div><div class="s">${t3("auftrag.last")}</div><div class="t">${cur >= 0 ? short(order[cur]) : dash}</div></div></div>` : A}
     `;
   }

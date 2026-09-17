@@ -30,6 +30,7 @@ export const ROBOT_FEATURES = {
   currentRoom: ['sensor', 'current_room'],
   cleanedArea: ['sensor', 'cleaned_area'],
   cleaningTime: ['sensor', 'cleaning_time'],
+  cleaningProgress: ['sensor', 'cleaning_progress'], // Fortschritt des Auftrags in % vom Roboter, nur im Lauf verfügbar (PD-016, 17.09.)
   cleaningHistory: ['sensor', 'cleaning_history'],
   cleaningCount: ['sensor', 'cleaning_count'],
   totalCleanedArea: ['sensor', 'total_cleaned_area'],

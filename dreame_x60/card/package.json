@@ -1,6 +1,6 @@
 {
   "name": "dreame-x60-panel",
-  "version": "2.0.0-alpha.30",
+  "version": "2.0.0-alpha.31",
   "private": true,
   "description": "dreame_x60 – Neubau der Heidi-Karte (Custom Lovelace Card, Lit 3, TypeScript). Bundle: ha/www/dreame_x60.js",
   "type": "module",

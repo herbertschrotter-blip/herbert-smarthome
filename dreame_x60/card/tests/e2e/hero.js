@@ -107,6 +107,19 @@ const jetzt = v1.vektoren.find((v) => /Streifen · Jetzt/.test(v.name));
   H.checkEqual('App-Lauf: Auftrag Küche → Flur, 0 / 2, nächster Raum Flur (Saugen)', a, ['Küche → Flur', '0 / 2', 'Flur', 'Saugen']);
 }
 
+// ── PD-016: Balken der Auftrag-Kachel = Prozent vom Roboter (sensor.heidi_cleaning_progress), sonst Raumzählung ──
+{
+  const s = statesFor(jetzt);
+  s['vacuum.heidi'] = { ...s['vacuum.heidi'], attributes: { ...s['vacuum.heidi'].attributes, docked: false } };
+  s['sensor.heidi_cleaning_progress'] = { ...(s['sensor.heidi_cleaning_progress'] ?? { entity_id: 'sensor.heidi_cleaning_progress', attributes: {} }), state: '37' };
+  await setStates(s);
+  const bar = () => page.evaluate(() => { const b = document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-auftrag').shadowRoot.querySelector('.bar'); return b ? [b.dataset.pct, b.dataset.src, b.style.getPropertyValue('--p')] : null; });
+  H.checkEqual('Fortschritt 37 % vom Roboter → Balken 37 (Quelle robot)', await bar(), ['37', 'robot', '37']);
+  s['sensor.heidi_cleaning_progress'] = { ...s['sensor.heidi_cleaning_progress'], state: 'unavailable' };
+  await setStates(s);
+  H.checkEqual('Sensor unavailable → Balken aus der Raumzählung 1 / 3 = 33', await bar(), ['33', 'rooms', '33']);
+}
+
 // ── Leerlauf: gemeinsame Werte („–“ bei unavailable), kein Streifen, kein Auftrag ──
 await setStates(docked);
 {

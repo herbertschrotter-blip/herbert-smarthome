@@ -10,7 +10,7 @@ Spalten: **Art** = HA-Entitätstyp (Staubsauger, Sensor, Ja/Nein-Sensor, Schalte
 |---|---|---|---|---|---|---|
 | `button.heidi_clear_warning` | Knopf | Clear Warning | Quittiert die anstehende Warnung (nur dann verfügbar; Liste unten „Warnungen und Fehler“) | diagnostic |  | Roboter-Panel (`dx-hero`): ✕ am gelben Hinweis-Chip, `button.press` (PD-015, gebaut 17.09., alpha.30; Mockup `warnung.html`) |
 | `sensor.heidi_cleaned_area` | Sensor | Cleaned Area | Gereinigte Fläche des laufenden Laufs in m² |  |  | Roboter-Panel (`dx-hero`) Streifen, Auftrag-Kachel (`dx-auftrag`) |
-| `sensor.heidi_cleaning_progress` | Sensor | Cleaning Progress | Fortschritt des laufenden Laufs in % |  |  | – |
+| `sensor.heidi_cleaning_progress` | Sensor | Cleaning Progress | Fortschritt des laufenden Laufs in % (vom Roboter; nur im Lauf verfügbar, sonst `unavailable`) |  |  | Auftrag-Kachel (`dx-auftrag`): Fortschrittsbalken, Rückfall Raumzählung (PD-016, gebaut 17.09., alpha.31) |
 | `sensor.heidi_cleaning_time` | Sensor | Cleaning Time | Dauer des laufenden Laufs in Minuten |  |  | Auftrag-Kachel (`dx-auftrag`) |
 | `sensor.heidi_current_room` | Sensor | Current Room | Raum, in dem Heidi gerade ist |  |  | Roboter-Panel (`dx-hero`) Raum-Chip + Streifen, Auftrag-Kachel, Bildunterschrift der Karte |
 | `sensor.heidi_error` | Sensor | Error | Aktueller Fehler- oder Warnungscode (`no_error` = alles in Ordnung; 22 Codes sind Warnungen, Liste unten) |  |  | Roboter-Panel (`dx-hero`) Hinweis-Chip: gelb = Warnung, rot = Fehler |
