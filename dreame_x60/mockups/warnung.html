@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>dreame_x60 – Roboter-Panel: Warnungs-Chip mit „Quittieren“ (Mockup, clear_warning)</title>
+<style>
+/* ───────── Design Tokens = dreame_x60/card/src/styles/tokens.ts (Dark, 17.09.2026) ───────── */
+:root {
+  --dx-bg: #0b1015; --dx-bg-elevated: #10171e; --dx-surface: #111a22; --dx-surface-raised: #16212a; --dx-surface-active: #1c2a36;
+  --dx-text: #e7edf3; --dx-text-muted: #8a97a6; --dx-text-faint: #5d6b7a;
+  --dx-accent: #58b7f6; --dx-accent-soft: rgba(88,183,246,.14); --dx-positive: #39d98a; --dx-positive-soft: rgba(57,217,138,.14);
+  --dx-warning: #f2b544; --dx-warning-soft: rgba(242,181,68,.14); --dx-danger: #ef5b5b; --dx-danger-soft: rgba(239,91,91,.14);
+  --dx-on-positive: #062014; --dx-on-accent: #041623;
+  --dx-border: rgba(255,255,255,.08); --dx-border-strong: rgba(255,255,255,.14);
+  --dx-radius-sm: 8px; --dx-radius-md: 10px; --dx-radius-lg: 14px; --dx-radius-xl: 18px;
+  --dx-space-1: 4px; --dx-space-2: 8px; --dx-space-3: 12px; --dx-space-4: 16px; --dx-space-5: 24px;
+  --dx-shadow-float: 0 12px 32px rgba(0,0,0,.45);
+  --dx-dur: 160ms; --dx-ease: cubic-bezier(.2,.7,.2,1); --dx-touch: 44px;
+  --dx-font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* Kurzformen wie bento.html */
+  --bg: var(--dx-bg); --s1: var(--dx-surface); --s2: var(--dx-surface-raised); --s3: var(--dx-surface-active);
+  --text: var(--dx-text); --muted: var(--dx-text-muted); --faint: var(--dx-text-faint);
+  --accent: var(--dx-accent); --good: var(--dx-positive); --warn: var(--dx-warning); --bad: var(--dx-danger); --line: var(--dx-border);
+  color-scheme: dark;
+}
+[hidden] { display: none !important; }
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body { background: #06090c; color: var(--text); font-family: var(--dx-font); font-size: 14px; line-height: 1.4; -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+svg { width: 18px; height: 18px; flex: none; }
+
+/* ───────── Mockup-Leiste (nicht Teil der Karte) ───────── */
+.tools { position: sticky; top: 0; z-index: 50; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 8px 14px; background: rgba(3,5,7,.7); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+.tools b { color: var(--text); margin-right: 4px; }
+.tools .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+.tools .seg button { padding: 5px 11px; font-size: 12px; color: var(--muted); }
+.tools .seg button.on { background: var(--dx-surface-active); color: var(--text); }
+.tools .note { margin-left: auto; color: var(--faint); }
+.stage { padding: 18px; display: flex; gap: 28px; flex-wrap: wrap; justify-content: center; align-items: flex-start; }
+.col { display: grid; gap: 10px; justify-items: center; }
+.col .cap { font-size: 12px; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; font-weight: 600; }
+.frame { background: var(--bg); border: 1px solid var(--dx-border-strong); border-radius: 22px; padding: var(--dx-space-5); container-type: inline-size; container-name: content; }
+.frame.desktop { width: 372px; }
+.frame.phone { width: 390px; border-radius: 40px; padding: var(--dx-space-4); }
+.legend { max-width: 800px; margin: 0 auto 18px; padding: 0 18px; font-size: 13px; color: var(--muted); line-height: 1.5; }
+.legend b { color: var(--text); }
+.toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--s3); border: 1px solid var(--dx-border-strong); border-radius: var(--dx-radius-md); padding: 10px 14px; font-size: 13px; box-shadow: var(--dx-shadow-float); opacity: 0; transition: opacity var(--dx-dur); pointer-events: none; }
+.toast.show { opacity: 1; }
+
+/* ───────── Bento-Fläche + Roboter-Panel (Klassen wie bento.html / dx-hero) ───────── */
+.b { background: var(--s1); border: 1px solid var(--line); border-radius: var(--dx-radius-lg); padding: var(--dx-space-4); min-width: 0; display: flex; flex-direction: column; gap: var(--dx-space-3); }
+.lbl { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.hint { font-size: 12px; color: var(--muted); line-height: 1.45; }
+.st { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
+.st i { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
+.st.good i { background: var(--good); } .st.bad i { background: var(--bad); }
+.st.good { color: var(--good); } .st.bad { color: var(--bad); }
+.st.big { margin-top: 6px; text-align: left; }
+.kv { display: flex; align-items: baseline; gap: 10px; }
+.kv .v { font-size: 32px; font-weight: 600; letter-spacing: -.02em; line-height: 1; font-variant-numeric: tabular-nums; }
+.kv .u { font-size: 14px; color: var(--muted); }
+.robot { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: start; }
+.robot .name { font-size: 24px; font-weight: 700; letter-spacing: -.02em; line-height: 1.1; }
+.station { text-align: right; font-size: 13px; }
+.robotpic { grid-column: 1; width: 100%; height: auto; max-width: 230px; aspect-ratio: 1; justify-self: center; }
+.batt { grid-column: 2; grid-row: 2; align-self: center; display: grid; gap: 4px; justify-items: start; text-align: left; }
+.battbar { width: 18px; height: 34px; border: 2px solid var(--muted); border-radius: 4px; position: relative; padding: 2px; margin-top: 4px; }
+.battbar::before { content: ""; position: absolute; top: -5px; left: 5px; width: 6px; height: 3px; border-radius: 1px; background: var(--muted); }
+.battbar i { display: block; position: absolute; left: 2px; right: 2px; bottom: 2px; background: var(--good); border-radius: 2px; height: calc(var(--p) * 1%); }
+.battrow { display: flex; align-items: center; gap: 6px; }
+.battrow .bolt { width: 16px; height: 16px; color: var(--good); margin-top: 4px; }
+.params { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.param { background: var(--s2); border: 1px solid var(--line); border-radius: var(--dx-radius-md); padding: 10px; display: grid; gap: 2px; min-height: 44px; text-align: left; }
+.param:hover { background: var(--s3); }
+.param b { font-size: 14px; font-weight: 600; } .param span { font-size: 11px; color: var(--muted); }
+.param svg { width: 16px; height: 16px; color: var(--muted); margin-bottom: 2px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px; padding: 0 16px; border-radius: var(--dx-radius-md); background: var(--s2); border: 1px solid var(--line); font-weight: 600; font-size: 14px; color: var(--text); white-space: nowrap; }
+.btn:hover { background: var(--s3); }
+.btn.primary { background: var(--good); color: var(--dx-on-positive); border-color: transparent; } .btn.primary svg { color: var(--dx-on-positive); }
+.ctl { display: flex; gap: 8px; }
+.ctl .btn { flex: 1 1 0; min-width: 0; padding: 0 8px; }
+
+/* Chips (wie styles/controls.ts) */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border-radius: 999px; background: var(--s2); border: 1px solid var(--line); font-size: 12px; font-weight: 500; color: var(--text); white-space: nowrap; }
+.chip svg { width: 14px; height: 14px; color: var(--muted); }
+.chip.on { border-color: rgba(57,217,138,.45); background: var(--dx-positive-soft); } .chip.on svg { color: var(--good); }
+.chip.warn { border-color: rgba(242,181,68,.5); background: var(--dx-warning-soft); color: var(--warn); } .chip.warn svg { color: var(--warn); }
+.chip.bad { border-color: rgba(239,91,91,.5); background: var(--dx-danger-soft); color: var(--bad); } .chip.bad svg { color: var(--bad); }
+button.chip:hover { background: var(--s3); }
+
+/* NEU (Vorschlag für dx-hero, 4.1 / clear_warning): ein Hinweis-Chip aus sensor.heidi_error – gelb = Warnung (mit ✕ zum Quittieren), rot = Fehler.
+   Kurztext (max. 2 Wörter) im Chip, Langtext als Tooltip beim Verweilen; am Handy öffnet Antippen die Detailansicht. */
+.chip.msg { position: relative; max-width: 100%; }
+.chip.msg .txt { display: inline-flex; align-items: center; gap: 6px; overflow: hidden; text-overflow: ellipsis; }
+.chip.msg.warn { padding-right: 4px; }
+.chip.msg .x { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; margin-left: 2px; color: var(--warn); border: 1px solid rgba(242,181,68,.45); background: transparent; flex: none; }
+.chip.msg .x:hover { background: rgba(242,181,68,.25); }
+.chip.msg .x svg { width: 12px; height: 12px; color: var(--warn); }
+.chip.msg.pending { opacity: .5; }
+/* Tooltip mit Langtext (Mockup: CSS; Karte: eigenes Element, kein HA-Baustein – Regel 12) */
+.chip.msg[data-tip]:hover::after { content: attr(data-tip); position: absolute; left: 0; top: calc(100% + 6px); z-index: 5; width: max-content; max-width: 280px; padding: 8px 10px; border-radius: var(--dx-radius-sm); background: var(--s3); border: 1px solid var(--dx-border-strong); color: var(--text); font-size: 12px; font-weight: 400; line-height: 1.4; white-space: normal; box-shadow: var(--dx-shadow-float); }
+.chip.msg[data-tip]:hover::before { content: ""; position: absolute; left: 14px; top: calc(100% + 1px); border: 5px solid transparent; border-bottom-color: var(--dx-border-strong); z-index: 6; }
+.chips { overflow: visible; }
+
+@container content (max-width: 640px) { .robotpic { max-width: 170px; } }
+</style>
+</head>
+<body>
+<div class="tools"><b>Roboter-Panel</b> Zustand:
+  <span class="seg"><button class="on" data-state="ok">Ohne Meldung</button><button data-state="warn">Warnung (Station)</button><button data-state="run">Warnung im Lauf</button><button data-state="err">Fehler</button></span>
+  <span class="note">Mockup warnung.html · Vorschlag für 4.1 (clear_warning) · Tokens = tokens.ts</span>
+</div>
+<div class="stage">
+  <div class="col"><div class="cap">Desktop · Bento span3</div><div class="frame desktop"><section class="b" id="desk"></section></div></div>
+  <div class="col"><div class="cap">Smartphone · 390 px</div><div class="frame phone"><section class="b" id="phone"></section></div></div>
+</div>
+<div class="legend">
+  <b>Was neu ist:</b> Der Hinweis-Chip des Roboter-Panels kommt wie heute aus <code>sensor.heidi_error</code>. <b>Gelb</b> = Warnung (22 Codes, <code>has_error</code> false): Kurztext mit höchstens zwei Wörtern und rechts ein rundes ✕, das die Warnung über <code>button.heidi_clear_warning</code> quittiert. <b>Rot</b> = Fehler: gleicher Kurztext, kein ✕ (Fehler lassen sich nicht quittieren, sie verschwinden mit der Ursache). Maus über dem Chip zeigt den Langtext aus der Fehlertabelle (ENTITAETEN.md); am Handy öffnet Antippen die Detailansicht mit demselben Text. Ohne Meldung ist der Chip weg. Im Mockup: ✕ antippen, der Chip verschwindet.
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const svg = (p, extra = '') => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ${extra}>${p}</svg>`;
+const I = {
+  play: svg('<path d="M7 5l12 7-12 7z"/>'), pause: svg('<path d="M8 5v14M16 5v14"/>'), stop: svg('<rect x="6" y="6" width="12" height="12" rx="2"/>'),
+  home: svg('<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>'), locate: svg('<circle cx="12" cy="10" r="3"/><path d="M12 22s7-7 7-12a7 7 0 1 0-14 0c0 5 7 12 7 12z"/>'),
+  broom: svg('<path d="M3 21l6-6M14 4l6 6-8 8-6-6z"/><path d="M15 3l6 6"/>'), fan: svg('<circle cx="12" cy="12" r="2"/><path d="M12 10c0-4 3-6 5-6-1 3-3 5-5 6zM14 12c4 0 6 3 6 5-3-1-5-3-6-5zM12 14c0 4-3 6-5 6 1-3 3-5 5-6zM10 12c-4 0-6-3-6-5 3 1 5 3 6 5z"/>'),
+  water: svg('<path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/>'), flash: svg('<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>'),
+  info: svg('<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>'), alert: svg('<path d="M12 3l10 18H2z"/><path d="M12 10v4M12 17h.01"/>'),
+  x: svg('<path d="M6 6l12 12M18 6L6 18"/>', 'stroke-width="2.6"'), plan: svg('<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 10h18M10 10v11"/>'), chev: svg('<path d="M9 6l6 6-6 6"/>', 'stroke-width="2.5"'), repeat: svg('<path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>'),
+};
+const robotSvg = `<svg viewBox="0 0 200 200" class="robotpic" aria-hidden="true">
+  <defs><radialGradient id="rg" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#2a3a48"/><stop offset=".7" stop-color="#131c25"/><stop offset="1" stop-color="#0c1219"/></radialGradient></defs>
+  <ellipse cx="100" cy="176" rx="72" ry="9" fill="rgba(0,0,0,.45)"/>
+  <circle cx="100" cy="100" r="84" fill="url(#rg)" stroke="#33465a" stroke-width="1.5"/>
+  <circle cx="100" cy="100" r="70" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="1"/>
+  <path d="M40 130a66 66 0 0 0 120 0" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="10"/>
+  <circle cx="100" cy="82" r="20" fill="#0d141b" stroke="#3a4f63" stroke-width="1.5"/><circle cx="100" cy="82" r="8" fill="#1a2733" stroke="#58b7f6" stroke-width="1.2"/>
+  <rect x="86" y="118" width="28" height="6" rx="3" fill="#1c2a36"/><circle cx="100" cy="150" r="3" fill="#39d98a"/>
+  <path d="M60 46a56 56 0 0 1 80 0" fill="none" stroke="rgba(88,183,246,.35)" stroke-width="2" stroke-linecap="round"/></svg>`;
+
+// Ein Hinweis aus sensor.heidi_error: kind = 'warn' (22 Warnungs-Codes, has_error false) | 'error' (has_error true).
+// short = Kurztext (max. 2 Wörter) im Chip, long = Langtext im Tooltip (aus der Fehlertabelle in ENTITAETEN.md).
+const STATES = {
+  ok:   { big: 'Heidi ist in der Station', dot: 'good', station: 'angedockt · lädt', batt: 100, charging: true, msg: null, running: false },
+  warn: { big: 'Heidi ist in der Station', dot: 'good', station: 'angedockt · lädt', batt: 100, charging: true, running: false,
+          msg: { kind: 'warn', code: 'dust_bag_full', short: 'Staubbeutel voll', long: 'Warnung 121: Staubbeutel prüfen und wechseln. Absaugöffnungen von Staubbox und Station regelmäßig reinigen.' } },
+  run:  { big: 'Tägliches Saugen', sub: 'Saugt Küche', dot: 'acc', station: 'unterwegs', batt: 82, charging: false, running: true, room: 'Küche',
+          msg: { kind: 'warn', code: 'water_tank_dry', short: 'Frischwasser leer', long: 'Warnung 107: Zu wenig Wasser im Frischwassertank – bitte nachfüllen, sonst fährt Heidi während des Laufs nicht zur Mopp-Wäsche.' } },
+  err:  { big: 'Fehler', sub: 'Steckt fest', dot: 'bad', station: 'unterwegs', batt: 64, charging: false, running: false,
+          msg: { kind: 'error', code: 'robot_stuck_on_threshold', short: 'Steckt fest', long: 'Fehler 93: Heidi steckt an einer Stufe oder Schwelle fest. Bitte in einen freien Bereich setzen und den Lauf neu starten. Tipp: die Schwelle als Sperrzone eintragen.' } },
+};
+const S = { state: 'ok', acked: false };
+
+function chips(s) {
+  const out = [];
+  if (s.running && s.room) out.push(`<span class="chip on">${I.plan}${s.room}</span>`);
+  const m = s.msg;
+  if (m && !(m.kind === 'warn' && S.acked)) {
+    const cls = m.kind === 'warn' ? 'warn' : 'bad';
+    const icon = m.kind === 'warn' ? I.info : I.alert;
+    const ack = m.kind === 'warn' ? `<button class="x" data-ack aria-label="Warnung quittieren" title="Warnung quittieren (button.heidi_clear_warning)">${I.x}</button>` : '';
+    out.push(`<span class="chip msg ${cls}" data-tip="${m.long}"><button class="txt" data-toast="more-info: sensor.heidi_error (${m.code})">${icon}<span>${m.short}</span></button>${ack}</span>`);
+  }
+  return out.length ? `<div class="chips">${out.join('')}</div>` : '';
+}
+function buttons(s) {
+  const B = (icon, label, primary) => `<button class="btn ${primary ? 'primary' : ''}" data-toast="vacuum.${label}">${I[icon]}${label}</button>`;
+  if (s.running) return B('pause', 'Pause', 1) + B('stop', 'Stopp', 0) + B('home', 'Station', 0);
+  if (s.error) return B('play', 'Start', 1) + B('home', 'Station', 0) + B('locate', 'Orten', 0);
+  return B('play', 'Start', 1) + B('locate', 'Orten', 0);
+}
+function panel(s) {
+  const dotCls = s.dot === 'acc' ? '' : s.dot;
+  const battCls = s.batt <= 20 ? 'bad' : s.batt <= 30 ? 'warn' : '';
+  const strip = s.running ? `<button class="note" style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:var(--dx-radius-md);background:var(--s2);border:1px solid var(--line);font-size:13px;text-align:left" data-toast="Räume einstellen (rooms)">${I.broom}<div><b>Jetzt: Küche</b> <small style="color:var(--muted);font-size:12px">danach Wohnzimmer → Flur · <span class="chip" style="height:26px;font-size:11px;padding:0 8px">${I.broom}Saugen</span> <span class="chip" style="height:26px;font-size:11px;padding:0 8px">${I.fan}Standard</span> <span class="chip" style="height:26px;font-size:11px;padding:0 8px">${I.repeat}1×</span></small></div>${I.chev}</button>` : '';
+  return `<div class="robot">
+      <div><div class="name">Heidi</div><button class="st big ${dotCls}" style="color:${s.dot === 'acc' ? 'var(--accent)' : ''}" data-toast="more-info: vacuum.heidi"><i style="${s.dot === 'acc' ? 'background:var(--accent)' : ''}"></i><span>${s.big}</span></button>${s.sub ? `<div class="hint" style="margin-top:2px">${s.sub}</div>` : ''}</div>
+      <div class="station"><div class="lbl">Station</div><div>${s.station}</div></div>
+      ${robotSvg}
+      <button class="batt" title="Akku" data-toast="more-info: sensor.heidi_battery_level"><div class="kv"><span class="v">${s.batt}<span class="u"> %</span></span></div><div class="lbl">Akku</div><div class="battrow"><div class="battbar ${battCls}" style="--p:${s.batt}"><i></i></div>${s.charging ? `<span class="bolt">${I.flash}</span>` : ''}</div></button>
+    </div>
+    ${chips(s)}
+    <div class="params"><button class="param" data-toast="Räume einstellen (rooms)">${I.broom}<b>Saugen</b><span>Modus</span></button><button class="param" data-toast="Räume einstellen (rooms)">${I.fan}<b>Standard</b><span>Saugstufe</span></button><button class="param" data-toast="Räume einstellen (rooms)">${I.water}<b>–</b><span>Wasser</span></button></div>
+    <div class="ctl">${buttons(s)}</div>${strip}`;
+}
+function render() {
+  const s = STATES[S.state];
+  for (const id of ['desk', 'phone']) document.getElementById(id).innerHTML = panel(s);
+  document.querySelectorAll('.tools .seg button').forEach((b) => b.classList.toggle('on', b.dataset.state === S.state));
+}
+let toastT;
+function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 1800); }
+document.addEventListener('click', (e) => {
+  const seg = e.target.closest('.tools [data-state]'); if (seg) { S.state = seg.dataset.state; S.acked = false; render(); return; }
+  const ack = e.target.closest('[data-ack]'); if (ack) { document.querySelectorAll('.chip.msg').forEach((c) => c.classList.add('pending')); toast('button.press → button.heidi_clear_warning'); setTimeout(() => { S.acked = true; render(); }, 500); return; }
+  const t = e.target.closest('[data-toast]'); if (t) toast(t.dataset.toast);
+});
+render();
+</script>
+</body>
+</html>

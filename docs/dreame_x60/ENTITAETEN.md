@@ -8,7 +8,7 @@ Spalten: **Art** = HA-Entitätstyp (Staubsauger, Sensor, Ja/Nein-Sensor, Schalte
 
 | Entität | Art | Name | Kurzbeschreibung | Kat. | aus | Integriert (alpha.28) |
 |---|---|---|---|---|---|---|
-| `button.heidi_clear_warning` | Knopf | Clear Warning | Quittiert die anstehende Warnung (nur dann verfügbar; Liste unten „Warnungen und Fehler“) | diagnostic |  | geplant Modul R: ✕ am gelben Hinweis-Chip des Roboter-Panels (Entscheidung Herbert 17.09., Mockup `warnung.html`, Abnahme offen) |
+| `button.heidi_clear_warning` | Knopf | Clear Warning | Quittiert die anstehende Warnung (nur dann verfügbar; Liste unten „Warnungen und Fehler“) | diagnostic |  | geplant Modul R: ✕ am gelben Hinweis-Chip des Roboter-Panels (Entscheidung Herbert 17.09., Mockup `warnung.html` abgenommen 17.09., PD-015) |
 | `sensor.heidi_cleaned_area` | Sensor | Cleaned Area | Gereinigte Fläche des laufenden Laufs in m² |  |  | Roboter-Panel (`dx-hero`) Streifen, Auftrag-Kachel (`dx-auftrag`) |
 | `sensor.heidi_cleaning_progress` | Sensor | Cleaning Progress | Fortschritt des laufenden Laufs in % |  |  | – |
 | `sensor.heidi_cleaning_time` | Sensor | Cleaning Time | Dauer des laufenden Laufs in Minuten |  |  | Auftrag-Kachel (`dx-auftrag`) |
