@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.28 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.29 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -6,44 +6,44 @@ var e = t.ShadowRoot && (void 0 === t.ShadyCSS || t.ShadyCSS.nativeShadow) && "a
 var s = Symbol();
 var o = /* @__PURE__ */ new WeakMap();
 var n = class {
-  constructor(t3, e4, o5) {
+  constructor(t4, e4, o5) {
     if (this._$cssResult$ = true, o5 !== s) throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");
-    this.cssText = t3, this.t = e4;
+    this.cssText = t4, this.t = e4;
   }
   get styleSheet() {
-    let t3 = this.o;
+    let t4 = this.o;
     const s4 = this.t;
-    if (e && void 0 === t3) {
+    if (e && void 0 === t4) {
       const e4 = void 0 !== s4 && 1 === s4.length;
-      e4 && (t3 = o.get(s4)), void 0 === t3 && ((this.o = t3 = new CSSStyleSheet()).replaceSync(this.cssText), e4 && o.set(s4, t3));
+      e4 && (t4 = o.get(s4)), void 0 === t4 && ((this.o = t4 = new CSSStyleSheet()).replaceSync(this.cssText), e4 && o.set(s4, t4));
     }
-    return t3;
+    return t4;
   }
   toString() {
     return this.cssText;
   }
 };
-var r = (t3) => new n("string" == typeof t3 ? t3 : t3 + "", void 0, s);
-var i = (t3, ...e4) => {
-  const o5 = 1 === t3.length ? t3[0] : e4.reduce((e5, s4, o6) => e5 + ((t4) => {
-    if (true === t4._$cssResult$) return t4.cssText;
-    if ("number" == typeof t4) return t4;
-    throw Error("Value passed to 'css' function must be a 'css' function result: " + t4 + ". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.");
-  })(s4) + t3[o6 + 1], t3[0]);
-  return new n(o5, t3, s);
+var r = (t4) => new n("string" == typeof t4 ? t4 : t4 + "", void 0, s);
+var i = (t4, ...e4) => {
+  const o5 = 1 === t4.length ? t4[0] : e4.reduce((e5, s4, o6) => e5 + ((t5) => {
+    if (true === t5._$cssResult$) return t5.cssText;
+    if ("number" == typeof t5) return t5;
+    throw Error("Value passed to 'css' function must be a 'css' function result: " + t5 + ". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.");
+  })(s4) + t4[o6 + 1], t4[0]);
+  return new n(o5, t4, s);
 };
 var S = (s4, o5) => {
-  if (e) s4.adoptedStyleSheets = o5.map((t3) => t3 instanceof CSSStyleSheet ? t3 : t3.styleSheet);
+  if (e) s4.adoptedStyleSheets = o5.map((t4) => t4 instanceof CSSStyleSheet ? t4 : t4.styleSheet);
   else for (const e4 of o5) {
     const o6 = document.createElement("style"), n4 = t.litNonce;
     void 0 !== n4 && o6.setAttribute("nonce", n4), o6.textContent = e4.cssText, s4.appendChild(o6);
   }
 };
-var c = e ? (t3) => t3 : (t3) => t3 instanceof CSSStyleSheet ? ((t4) => {
+var c = e ? (t4) => t4 : (t4) => t4 instanceof CSSStyleSheet ? ((t5) => {
   let e4 = "";
-  for (const s4 of t4.cssRules) e4 += s4.cssText;
+  for (const s4 of t5.cssRules) e4 += s4.cssText;
   return r(e4);
-})(t3) : t3;
+})(t4) : t4;
 
 // node_modules/@lit/reactive-element/reactive-element.js
 var { is: i2, defineProperty: e2, getOwnPropertyDescriptor: h, getOwnPropertyNames: r2, getOwnPropertySymbols: o2, getPrototypeOf: n2 } = Object;
@@ -51,86 +51,86 @@ var a = globalThis;
 var c2 = a.trustedTypes;
 var l = c2 ? c2.emptyScript : "";
 var p = a.reactiveElementPolyfillSupport;
-var d = (t3, s4) => t3;
-var u = { toAttribute(t3, s4) {
+var d = (t4, s4) => t4;
+var u = { toAttribute(t4, s4) {
   switch (s4) {
     case Boolean:
-      t3 = t3 ? l : null;
+      t4 = t4 ? l : null;
       break;
     case Object:
     case Array:
-      t3 = null == t3 ? t3 : JSON.stringify(t3);
+      t4 = null == t4 ? t4 : JSON.stringify(t4);
   }
-  return t3;
-}, fromAttribute(t3, s4) {
-  let i5 = t3;
+  return t4;
+}, fromAttribute(t4, s4) {
+  let i5 = t4;
   switch (s4) {
     case Boolean:
-      i5 = null !== t3;
+      i5 = null !== t4;
       break;
     case Number:
-      i5 = null === t3 ? null : Number(t3);
+      i5 = null === t4 ? null : Number(t4);
       break;
     case Object:
     case Array:
       try {
-        i5 = JSON.parse(t3);
-      } catch (t4) {
+        i5 = JSON.parse(t4);
+      } catch (t5) {
         i5 = null;
       }
   }
   return i5;
 } };
-var f = (t3, s4) => !i2(t3, s4);
+var f = (t4, s4) => !i2(t4, s4);
 var b = { attribute: true, type: String, converter: u, reflect: false, useDefault: false, hasChanged: f };
 Symbol.metadata ??= Symbol("metadata"), a.litPropertyMetadata ??= /* @__PURE__ */ new WeakMap();
 var y = class extends HTMLElement {
-  static addInitializer(t3) {
-    this._$Ei(), (this.l ??= []).push(t3);
+  static addInitializer(t4) {
+    this._$Ei(), (this.l ??= []).push(t4);
   }
   static get observedAttributes() {
     return this.finalize(), this._$Eh && [...this._$Eh.keys()];
   }
-  static createProperty(t3, s4 = b) {
-    if (s4.state && (s4.attribute = false), this._$Ei(), this.prototype.hasOwnProperty(t3) && ((s4 = Object.create(s4)).wrapped = true), this.elementProperties.set(t3, s4), !s4.noAccessor) {
-      const i5 = Symbol(), h3 = this.getPropertyDescriptor(t3, i5, s4);
-      void 0 !== h3 && e2(this.prototype, t3, h3);
+  static createProperty(t4, s4 = b) {
+    if (s4.state && (s4.attribute = false), this._$Ei(), this.prototype.hasOwnProperty(t4) && ((s4 = Object.create(s4)).wrapped = true), this.elementProperties.set(t4, s4), !s4.noAccessor) {
+      const i5 = Symbol(), h3 = this.getPropertyDescriptor(t4, i5, s4);
+      void 0 !== h3 && e2(this.prototype, t4, h3);
     }
   }
-  static getPropertyDescriptor(t3, s4, i5) {
-    const { get: e4, set: r4 } = h(this.prototype, t3) ?? { get() {
+  static getPropertyDescriptor(t4, s4, i5) {
+    const { get: e4, set: r4 } = h(this.prototype, t4) ?? { get() {
       return this[s4];
-    }, set(t4) {
-      this[s4] = t4;
+    }, set(t5) {
+      this[s4] = t5;
     } };
     return { get: e4, set(s5) {
       const h3 = e4?.call(this);
-      r4?.call(this, s5), this.requestUpdate(t3, h3, i5);
+      r4?.call(this, s5), this.requestUpdate(t4, h3, i5);
     }, configurable: true, enumerable: true };
   }
-  static getPropertyOptions(t3) {
-    return this.elementProperties.get(t3) ?? b;
+  static getPropertyOptions(t4) {
+    return this.elementProperties.get(t4) ?? b;
   }
   static _$Ei() {
     if (this.hasOwnProperty(d("elementProperties"))) return;
-    const t3 = n2(this);
-    t3.finalize(), void 0 !== t3.l && (this.l = [...t3.l]), this.elementProperties = new Map(t3.elementProperties);
+    const t4 = n2(this);
+    t4.finalize(), void 0 !== t4.l && (this.l = [...t4.l]), this.elementProperties = new Map(t4.elementProperties);
   }
   static finalize() {
     if (this.hasOwnProperty(d("finalized"))) return;
     if (this.finalized = true, this._$Ei(), this.hasOwnProperty(d("properties"))) {
-      const t4 = this.properties, s4 = [...r2(t4), ...o2(t4)];
-      for (const i5 of s4) this.createProperty(i5, t4[i5]);
+      const t5 = this.properties, s4 = [...r2(t5), ...o2(t5)];
+      for (const i5 of s4) this.createProperty(i5, t5[i5]);
     }
-    const t3 = this[Symbol.metadata];
-    if (null !== t3) {
-      const s4 = litPropertyMetadata.get(t3);
-      if (void 0 !== s4) for (const [t4, i5] of s4) this.elementProperties.set(t4, i5);
+    const t4 = this[Symbol.metadata];
+    if (null !== t4) {
+      const s4 = litPropertyMetadata.get(t4);
+      if (void 0 !== s4) for (const [t5, i5] of s4) this.elementProperties.set(t5, i5);
     }
     this._$Eh = /* @__PURE__ */ new Map();
-    for (const [t4, s4] of this.elementProperties) {
-      const i5 = this._$Eu(t4, s4);
-      void 0 !== i5 && this._$Eh.set(i5, t4);
+    for (const [t5, s4] of this.elementProperties) {
+      const i5 = this._$Eu(t5, s4);
+      void 0 !== i5 && this._$Eh.set(i5, t5);
     }
     this.elementStyles = this.finalizeStyles(this.styles);
   }
@@ -142,78 +142,78 @@ var y = class extends HTMLElement {
     } else void 0 !== s4 && i5.push(c(s4));
     return i5;
   }
-  static _$Eu(t3, s4) {
+  static _$Eu(t4, s4) {
     const i5 = s4.attribute;
-    return false === i5 ? void 0 : "string" == typeof i5 ? i5 : "string" == typeof t3 ? t3.toLowerCase() : void 0;
+    return false === i5 ? void 0 : "string" == typeof i5 ? i5 : "string" == typeof t4 ? t4.toLowerCase() : void 0;
   }
   constructor() {
     super(), this._$Ep = void 0, this.isUpdatePending = false, this.hasUpdated = false, this._$Em = null, this._$Ev();
   }
   _$Ev() {
-    this._$ES = new Promise((t3) => this.enableUpdating = t3), this._$AL = /* @__PURE__ */ new Map(), this._$E_(), this.requestUpdate(), this.constructor.l?.forEach((t3) => t3(this));
+    this._$ES = new Promise((t4) => this.enableUpdating = t4), this._$AL = /* @__PURE__ */ new Map(), this._$E_(), this.requestUpdate(), this.constructor.l?.forEach((t4) => t4(this));
   }
-  addController(t3) {
-    (this._$EO ??= /* @__PURE__ */ new Set()).add(t3), void 0 !== this.renderRoot && this.isConnected && t3.hostConnected?.();
+  addController(t4) {
+    (this._$EO ??= /* @__PURE__ */ new Set()).add(t4), void 0 !== this.renderRoot && this.isConnected && t4.hostConnected?.();
   }
-  removeController(t3) {
-    this._$EO?.delete(t3);
+  removeController(t4) {
+    this._$EO?.delete(t4);
   }
   _$E_() {
-    const t3 = /* @__PURE__ */ new Map(), s4 = this.constructor.elementProperties;
-    for (const i5 of s4.keys()) this.hasOwnProperty(i5) && (t3.set(i5, this[i5]), delete this[i5]);
-    t3.size > 0 && (this._$Ep = t3);
+    const t4 = /* @__PURE__ */ new Map(), s4 = this.constructor.elementProperties;
+    for (const i5 of s4.keys()) this.hasOwnProperty(i5) && (t4.set(i5, this[i5]), delete this[i5]);
+    t4.size > 0 && (this._$Ep = t4);
   }
   createRenderRoot() {
-    const t3 = this.shadowRoot ?? this.attachShadow(this.constructor.shadowRootOptions);
-    return S(t3, this.constructor.elementStyles), t3;
+    const t4 = this.shadowRoot ?? this.attachShadow(this.constructor.shadowRootOptions);
+    return S(t4, this.constructor.elementStyles), t4;
   }
   connectedCallback() {
-    this.renderRoot ??= this.createRenderRoot(), this.enableUpdating(true), this._$EO?.forEach((t3) => t3.hostConnected?.());
+    this.renderRoot ??= this.createRenderRoot(), this.enableUpdating(true), this._$EO?.forEach((t4) => t4.hostConnected?.());
   }
-  enableUpdating(t3) {
+  enableUpdating(t4) {
   }
   disconnectedCallback() {
-    this._$EO?.forEach((t3) => t3.hostDisconnected?.());
+    this._$EO?.forEach((t4) => t4.hostDisconnected?.());
   }
-  attributeChangedCallback(t3, s4, i5) {
-    this._$AK(t3, i5);
+  attributeChangedCallback(t4, s4, i5) {
+    this._$AK(t4, i5);
   }
-  _$ET(t3, s4) {
-    const i5 = this.constructor.elementProperties.get(t3), e4 = this.constructor._$Eu(t3, i5);
+  _$ET(t4, s4) {
+    const i5 = this.constructor.elementProperties.get(t4), e4 = this.constructor._$Eu(t4, i5);
     if (void 0 !== e4 && true === i5.reflect) {
       const h3 = (void 0 !== i5.converter?.toAttribute ? i5.converter : u).toAttribute(s4, i5.type);
-      this._$Em = t3, null == h3 ? this.removeAttribute(e4) : this.setAttribute(e4, h3), this._$Em = null;
+      this._$Em = t4, null == h3 ? this.removeAttribute(e4) : this.setAttribute(e4, h3), this._$Em = null;
     }
   }
-  _$AK(t3, s4) {
-    const i5 = this.constructor, e4 = i5._$Eh.get(t3);
+  _$AK(t4, s4) {
+    const i5 = this.constructor, e4 = i5._$Eh.get(t4);
     if (void 0 !== e4 && this._$Em !== e4) {
-      const t4 = i5.getPropertyOptions(e4), h3 = "function" == typeof t4.converter ? { fromAttribute: t4.converter } : void 0 !== t4.converter?.fromAttribute ? t4.converter : u;
+      const t5 = i5.getPropertyOptions(e4), h3 = "function" == typeof t5.converter ? { fromAttribute: t5.converter } : void 0 !== t5.converter?.fromAttribute ? t5.converter : u;
       this._$Em = e4;
-      const r4 = h3.fromAttribute(s4, t4.type);
+      const r4 = h3.fromAttribute(s4, t5.type);
       this[e4] = r4 ?? this._$Ej?.get(e4) ?? r4, this._$Em = null;
     }
   }
-  requestUpdate(t3, s4, i5, e4 = false, h3) {
-    if (void 0 !== t3) {
+  requestUpdate(t4, s4, i5, e4 = false, h3) {
+    if (void 0 !== t4) {
       const r4 = this.constructor;
-      if (false === e4 && (h3 = this[t3]), i5 ??= r4.getPropertyOptions(t3), !((i5.hasChanged ?? f)(h3, s4) || i5.useDefault && i5.reflect && h3 === this._$Ej?.get(t3) && !this.hasAttribute(r4._$Eu(t3, i5)))) return;
-      this.C(t3, s4, i5);
+      if (false === e4 && (h3 = this[t4]), i5 ??= r4.getPropertyOptions(t4), !((i5.hasChanged ?? f)(h3, s4) || i5.useDefault && i5.reflect && h3 === this._$Ej?.get(t4) && !this.hasAttribute(r4._$Eu(t4, i5)))) return;
+      this.C(t4, s4, i5);
     }
     false === this.isUpdatePending && (this._$ES = this._$EP());
   }
-  C(t3, s4, { useDefault: i5, reflect: e4, wrapped: h3 }, r4) {
-    i5 && !(this._$Ej ??= /* @__PURE__ */ new Map()).has(t3) && (this._$Ej.set(t3, r4 ?? s4 ?? this[t3]), true !== h3 || void 0 !== r4) || (this._$AL.has(t3) || (this.hasUpdated || i5 || (s4 = void 0), this._$AL.set(t3, s4)), true === e4 && this._$Em !== t3 && (this._$Eq ??= /* @__PURE__ */ new Set()).add(t3));
+  C(t4, s4, { useDefault: i5, reflect: e4, wrapped: h3 }, r4) {
+    i5 && !(this._$Ej ??= /* @__PURE__ */ new Map()).has(t4) && (this._$Ej.set(t4, r4 ?? s4 ?? this[t4]), true !== h3 || void 0 !== r4) || (this._$AL.has(t4) || (this.hasUpdated || i5 || (s4 = void 0), this._$AL.set(t4, s4)), true === e4 && this._$Em !== t4 && (this._$Eq ??= /* @__PURE__ */ new Set()).add(t4));
   }
   async _$EP() {
     this.isUpdatePending = true;
     try {
       await this._$ES;
-    } catch (t4) {
-      Promise.reject(t4);
+    } catch (t5) {
+      Promise.reject(t5);
     }
-    const t3 = this.scheduleUpdate();
-    return null != t3 && await t3, !this.isUpdatePending;
+    const t4 = this.scheduleUpdate();
+    return null != t4 && await t4, !this.isUpdatePending;
   }
   scheduleUpdate() {
     return this.performUpdate();
@@ -222,28 +222,28 @@ var y = class extends HTMLElement {
     if (!this.isUpdatePending) return;
     if (!this.hasUpdated) {
       if (this.renderRoot ??= this.createRenderRoot(), this._$Ep) {
-        for (const [t5, s5] of this._$Ep) this[t5] = s5;
+        for (const [t6, s5] of this._$Ep) this[t6] = s5;
         this._$Ep = void 0;
       }
-      const t4 = this.constructor.elementProperties;
-      if (t4.size > 0) for (const [s5, i5] of t4) {
-        const { wrapped: t5 } = i5, e4 = this[s5];
-        true !== t5 || this._$AL.has(s5) || void 0 === e4 || this.C(s5, void 0, i5, e4);
+      const t5 = this.constructor.elementProperties;
+      if (t5.size > 0) for (const [s5, i5] of t5) {
+        const { wrapped: t6 } = i5, e4 = this[s5];
+        true !== t6 || this._$AL.has(s5) || void 0 === e4 || this.C(s5, void 0, i5, e4);
       }
     }
-    let t3 = false;
+    let t4 = false;
     const s4 = this._$AL;
     try {
-      t3 = this.shouldUpdate(s4), t3 ? (this.willUpdate(s4), this._$EO?.forEach((t4) => t4.hostUpdate?.()), this.update(s4)) : this._$EM();
+      t4 = this.shouldUpdate(s4), t4 ? (this.willUpdate(s4), this._$EO?.forEach((t5) => t5.hostUpdate?.()), this.update(s4)) : this._$EM();
     } catch (s5) {
-      throw t3 = false, this._$EM(), s5;
+      throw t4 = false, this._$EM(), s5;
     }
-    t3 && this._$AE(s4);
+    t4 && this._$AE(s4);
   }
-  willUpdate(t3) {
+  willUpdate(t4) {
   }
-  _$AE(t3) {
-    this._$EO?.forEach((t4) => t4.hostUpdated?.()), this.hasUpdated || (this.hasUpdated = true, this.firstUpdated(t3)), this.updated(t3);
+  _$AE(t4) {
+    this._$EO?.forEach((t5) => t5.hostUpdated?.()), this.hasUpdated || (this.hasUpdated = true, this.firstUpdated(t4)), this.updated(t4);
   }
   _$EM() {
     this._$AL = /* @__PURE__ */ new Map(), this.isUpdatePending = false;
@@ -254,33 +254,33 @@ var y = class extends HTMLElement {
   getUpdateComplete() {
     return this._$ES;
   }
-  shouldUpdate(t3) {
+  shouldUpdate(t4) {
     return true;
   }
-  update(t3) {
-    this._$Eq &&= this._$Eq.forEach((t4) => this._$ET(t4, this[t4])), this._$EM();
+  update(t4) {
+    this._$Eq &&= this._$Eq.forEach((t5) => this._$ET(t5, this[t5])), this._$EM();
   }
-  updated(t3) {
+  updated(t4) {
   }
-  firstUpdated(t3) {
+  firstUpdated(t4) {
   }
 };
 y.elementStyles = [], y.shadowRootOptions = { mode: "open" }, y[d("elementProperties")] = /* @__PURE__ */ new Map(), y[d("finalized")] = /* @__PURE__ */ new Map(), p?.({ ReactiveElement: y }), (a.reactiveElementVersions ??= []).push("2.1.2");
 
 // node_modules/lit-html/lit-html.js
 var t2 = globalThis;
-var i3 = (t3) => t3;
+var i3 = (t4) => t4;
 var s2 = t2.trustedTypes;
-var e3 = s2 ? s2.createPolicy("lit-html", { createHTML: (t3) => t3 }) : void 0;
+var e3 = s2 ? s2.createPolicy("lit-html", { createHTML: (t4) => t4 }) : void 0;
 var h2 = "$lit$";
 var o3 = `lit$${Math.random().toFixed(9).slice(2)}$`;
 var n3 = "?" + o3;
 var r3 = `<${n3}>`;
 var l2 = document;
 var c3 = () => l2.createComment("");
-var a2 = (t3) => null === t3 || "object" != typeof t3 && "function" != typeof t3;
+var a2 = (t4) => null === t4 || "object" != typeof t4 && "function" != typeof t4;
 var u2 = Array.isArray;
-var d2 = (t3) => u2(t3) || "function" == typeof t3?.[Symbol.iterator];
+var d2 = (t4) => u2(t4) || "function" == typeof t4?.[Symbol.iterator];
 var f2 = "[ 	\n\f\r]";
 var v = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g;
 var _ = /-->/g;
@@ -290,7 +290,7 @@ var p2 = RegExp(`>|${f2}(?:([^\\s"'>=/]+)(${f2}*=${f2}*(?:[^
 var g = /'/g;
 var $ = /"/g;
 var y2 = /^(?:script|style|textarea|title)$/i;
-var x = (t3) => (i5, ...s4) => ({ _$litType$: t3, strings: i5, values: s4 });
+var x = (t4) => (i5, ...s4) => ({ _$litType$: t4, strings: i5, values: s4 });
 var b2 = x(1);
 var w = x(2);
 var T = x(3);
@@ -298,68 +298,68 @@ var E = Symbol.for("lit-noChange");
 var A = Symbol.for("lit-nothing");
 var C = /* @__PURE__ */ new WeakMap();
 var P = l2.createTreeWalker(l2, 129);
-function V(t3, i5) {
-  if (!u2(t3) || !t3.hasOwnProperty("raw")) throw Error("invalid template strings array");
+function V(t4, i5) {
+  if (!u2(t4) || !t4.hasOwnProperty("raw")) throw Error("invalid template strings array");
   return void 0 !== e3 ? e3.createHTML(i5) : i5;
 }
-var N = (t3, i5) => {
-  const s4 = t3.length - 1, e4 = [];
+var N = (t4, i5) => {
+  const s4 = t4.length - 1, e4 = [];
   let n4, l3 = 2 === i5 ? "<svg>" : 3 === i5 ? "<math>" : "", c4 = v;
   for (let i6 = 0; i6 < s4; i6++) {
-    const s5 = t3[i6];
+    const s5 = t4[i6];
     let a3, u3, d3 = -1, f3 = 0;
     for (; f3 < s5.length && (c4.lastIndex = f3, u3 = c4.exec(s5), null !== u3); ) f3 = c4.lastIndex, c4 === v ? "!--" === u3[1] ? c4 = _ : void 0 !== u3[1] ? c4 = m : void 0 !== u3[2] ? (y2.test(u3[2]) && (n4 = RegExp("</" + u3[2], "g")), c4 = p2) : void 0 !== u3[3] && (c4 = p2) : c4 === p2 ? ">" === u3[0] ? (c4 = n4 ?? v, d3 = -1) : void 0 === u3[1] ? d3 = -2 : (d3 = c4.lastIndex - u3[2].length, a3 = u3[1], c4 = void 0 === u3[3] ? p2 : '"' === u3[3] ? $ : g) : c4 === $ || c4 === g ? c4 = p2 : c4 === _ || c4 === m ? c4 = v : (c4 = p2, n4 = void 0);
-    const x2 = c4 === p2 && t3[i6 + 1].startsWith("/>") ? " " : "";
+    const x2 = c4 === p2 && t4[i6 + 1].startsWith("/>") ? " " : "";
     l3 += c4 === v ? s5 + r3 : d3 >= 0 ? (e4.push(a3), s5.slice(0, d3) + h2 + s5.slice(d3) + o3 + x2) : s5 + o3 + (-2 === d3 ? i6 : x2);
   }
-  return [V(t3, l3 + (t3[s4] || "<?>") + (2 === i5 ? "</svg>" : 3 === i5 ? "</math>" : "")), e4];
+  return [V(t4, l3 + (t4[s4] || "<?>") + (2 === i5 ? "</svg>" : 3 === i5 ? "</math>" : "")), e4];
 };
 var S2 = class _S {
-  constructor({ strings: t3, _$litType$: i5 }, e4) {
+  constructor({ strings: t4, _$litType$: i5 }, e4) {
     let r4;
     this.parts = [];
     let l3 = 0, a3 = 0;
-    const u3 = t3.length - 1, d3 = this.parts, [f3, v2] = N(t3, i5);
+    const u3 = t4.length - 1, d3 = this.parts, [f3, v2] = N(t4, i5);
     if (this.el = _S.createElement(f3, e4), P.currentNode = this.el.content, 2 === i5 || 3 === i5) {
-      const t4 = this.el.content.firstChild;
-      t4.replaceWith(...t4.childNodes);
+      const t5 = this.el.content.firstChild;
+      t5.replaceWith(...t5.childNodes);
     }
     for (; null !== (r4 = P.nextNode()) && d3.length < u3; ) {
       if (1 === r4.nodeType) {
-        if (r4.hasAttributes()) for (const t4 of r4.getAttributeNames()) if (t4.endsWith(h2)) {
-          const i6 = v2[a3++], s4 = r4.getAttribute(t4).split(o3), e5 = /([.?@])?(.*)/.exec(i6);
-          d3.push({ type: 1, index: l3, name: e5[2], strings: s4, ctor: "." === e5[1] ? I : "?" === e5[1] ? L : "@" === e5[1] ? z : H }), r4.removeAttribute(t4);
-        } else t4.startsWith(o3) && (d3.push({ type: 6, index: l3 }), r4.removeAttribute(t4));
+        if (r4.hasAttributes()) for (const t5 of r4.getAttributeNames()) if (t5.endsWith(h2)) {
+          const i6 = v2[a3++], s4 = r4.getAttribute(t5).split(o3), e5 = /([.?@])?(.*)/.exec(i6);
+          d3.push({ type: 1, index: l3, name: e5[2], strings: s4, ctor: "." === e5[1] ? I : "?" === e5[1] ? L : "@" === e5[1] ? z : H }), r4.removeAttribute(t5);
+        } else t5.startsWith(o3) && (d3.push({ type: 6, index: l3 }), r4.removeAttribute(t5));
         if (y2.test(r4.tagName)) {
-          const t4 = r4.textContent.split(o3), i6 = t4.length - 1;
+          const t5 = r4.textContent.split(o3), i6 = t5.length - 1;
           if (i6 > 0) {
             r4.textContent = s2 ? s2.emptyScript : "";
-            for (let s4 = 0; s4 < i6; s4++) r4.append(t4[s4], c3()), P.nextNode(), d3.push({ type: 2, index: ++l3 });
-            r4.append(t4[i6], c3());
+            for (let s4 = 0; s4 < i6; s4++) r4.append(t5[s4], c3()), P.nextNode(), d3.push({ type: 2, index: ++l3 });
+            r4.append(t5[i6], c3());
           }
         }
       } else if (8 === r4.nodeType) if (r4.data === n3) d3.push({ type: 2, index: l3 });
       else {
-        let t4 = -1;
-        for (; -1 !== (t4 = r4.data.indexOf(o3, t4 + 1)); ) d3.push({ type: 7, index: l3 }), t4 += o3.length - 1;
+        let t5 = -1;
+        for (; -1 !== (t5 = r4.data.indexOf(o3, t5 + 1)); ) d3.push({ type: 7, index: l3 }), t5 += o3.length - 1;
       }
       l3++;
     }
   }
-  static createElement(t3, i5) {
+  static createElement(t4, i5) {
     const s4 = l2.createElement("template");
-    return s4.innerHTML = t3, s4;
+    return s4.innerHTML = t4, s4;
   }
 };
-function M(t3, i5, s4 = t3, e4) {
+function M(t4, i5, s4 = t4, e4) {
   if (i5 === E) return i5;
   let h3 = void 0 !== e4 ? s4._$Co?.[e4] : s4._$Cl;
   const o5 = a2(i5) ? void 0 : i5._$litDirective$;
-  return h3?.constructor !== o5 && (h3?._$AO?.(false), void 0 === o5 ? h3 = void 0 : (h3 = new o5(t3), h3._$AT(t3, s4, e4)), void 0 !== e4 ? (s4._$Co ??= [])[e4] = h3 : s4._$Cl = h3), void 0 !== h3 && (i5 = M(t3, h3._$AS(t3, i5.values), h3, e4)), i5;
+  return h3?.constructor !== o5 && (h3?._$AO?.(false), void 0 === o5 ? h3 = void 0 : (h3 = new o5(t4), h3._$AT(t4, s4, e4)), void 0 !== e4 ? (s4._$Co ??= [])[e4] = h3 : s4._$Cl = h3), void 0 !== h3 && (i5 = M(t4, h3._$AS(t4, i5.values), h3, e4)), i5;
 }
 var R = class {
-  constructor(t3, i5) {
-    this._$AV = [], this._$AN = void 0, this._$AD = t3, this._$AM = i5;
+  constructor(t4, i5) {
+    this._$AV = [], this._$AN = void 0, this._$AD = t4, this._$AM = i5;
   }
   get parentNode() {
     return this._$AM.parentNode;
@@ -367,35 +367,35 @@ var R = class {
   get _$AU() {
     return this._$AM._$AU;
   }
-  u(t3) {
-    const { el: { content: i5 }, parts: s4 } = this._$AD, e4 = (t3?.creationScope ?? l2).importNode(i5, true);
+  u(t4) {
+    const { el: { content: i5 }, parts: s4 } = this._$AD, e4 = (t4?.creationScope ?? l2).importNode(i5, true);
     P.currentNode = e4;
     let h3 = P.nextNode(), o5 = 0, n4 = 0, r4 = s4[0];
     for (; void 0 !== r4; ) {
       if (o5 === r4.index) {
         let i6;
-        2 === r4.type ? i6 = new k(h3, h3.nextSibling, this, t3) : 1 === r4.type ? i6 = new r4.ctor(h3, r4.name, r4.strings, this, t3) : 6 === r4.type && (i6 = new Z(h3, this, t3)), this._$AV.push(i6), r4 = s4[++n4];
+        2 === r4.type ? i6 = new k(h3, h3.nextSibling, this, t4) : 1 === r4.type ? i6 = new r4.ctor(h3, r4.name, r4.strings, this, t4) : 6 === r4.type && (i6 = new Z(h3, this, t4)), this._$AV.push(i6), r4 = s4[++n4];
       }
       o5 !== r4?.index && (h3 = P.nextNode(), o5++);
     }
     return P.currentNode = l2, e4;
   }
-  p(t3) {
+  p(t4) {
     let i5 = 0;
-    for (const s4 of this._$AV) void 0 !== s4 && (void 0 !== s4.strings ? (s4._$AI(t3, s4, i5), i5 += s4.strings.length - 2) : s4._$AI(t3[i5])), i5++;
+    for (const s4 of this._$AV) void 0 !== s4 && (void 0 !== s4.strings ? (s4._$AI(t4, s4, i5), i5 += s4.strings.length - 2) : s4._$AI(t4[i5])), i5++;
   }
 };
 var k = class _k {
   get _$AU() {
     return this._$AM?._$AU ?? this._$Cv;
   }
-  constructor(t3, i5, s4, e4) {
-    this.type = 2, this._$AH = A, this._$AN = void 0, this._$AA = t3, this._$AB = i5, this._$AM = s4, this.options = e4, this._$Cv = e4?.isConnected ?? true;
+  constructor(t4, i5, s4, e4) {
+    this.type = 2, this._$AH = A, this._$AN = void 0, this._$AA = t4, this._$AB = i5, this._$AM = s4, this.options = e4, this._$Cv = e4?.isConnected ?? true;
   }
   get parentNode() {
-    let t3 = this._$AA.parentNode;
+    let t4 = this._$AA.parentNode;
     const i5 = this._$AM;
-    return void 0 !== i5 && 11 === t3?.nodeType && (t3 = i5.parentNode), t3;
+    return void 0 !== i5 && 11 === t4?.nodeType && (t4 = i5.parentNode), t4;
   }
   get startNode() {
     return this._$AA;
@@ -403,45 +403,45 @@ var k = class _k {
   get endNode() {
     return this._$AB;
   }
-  _$AI(t3, i5 = this) {
-    t3 = M(this, t3, i5), a2(t3) ? t3 === A || null == t3 || "" === t3 ? (this._$AH !== A && this._$AR(), this._$AH = A) : t3 !== this._$AH && t3 !== E && this._(t3) : void 0 !== t3._$litType$ ? this.$(t3) : void 0 !== t3.nodeType ? this.T(t3) : d2(t3) ? this.k(t3) : this._(t3);
+  _$AI(t4, i5 = this) {
+    t4 = M(this, t4, i5), a2(t4) ? t4 === A || null == t4 || "" === t4 ? (this._$AH !== A && this._$AR(), this._$AH = A) : t4 !== this._$AH && t4 !== E && this._(t4) : void 0 !== t4._$litType$ ? this.$(t4) : void 0 !== t4.nodeType ? this.T(t4) : d2(t4) ? this.k(t4) : this._(t4);
   }
-  O(t3) {
-    return this._$AA.parentNode.insertBefore(t3, this._$AB);
+  O(t4) {
+    return this._$AA.parentNode.insertBefore(t4, this._$AB);
   }
-  T(t3) {
-    this._$AH !== t3 && (this._$AR(), this._$AH = this.O(t3));
+  T(t4) {
+    this._$AH !== t4 && (this._$AR(), this._$AH = this.O(t4));
   }
-  _(t3) {
-    this._$AH !== A && a2(this._$AH) ? this._$AA.nextSibling.data = t3 : this.T(l2.createTextNode(t3)), this._$AH = t3;
+  _(t4) {
+    this._$AH !== A && a2(this._$AH) ? this._$AA.nextSibling.data = t4 : this.T(l2.createTextNode(t4)), this._$AH = t4;
   }
-  $(t3) {
-    const { values: i5, _$litType$: s4 } = t3, e4 = "number" == typeof s4 ? this._$AC(t3) : (void 0 === s4.el && (s4.el = S2.createElement(V(s4.h, s4.h[0]), this.options)), s4);
+  $(t4) {
+    const { values: i5, _$litType$: s4 } = t4, e4 = "number" == typeof s4 ? this._$AC(t4) : (void 0 === s4.el && (s4.el = S2.createElement(V(s4.h, s4.h[0]), this.options)), s4);
     if (this._$AH?._$AD === e4) this._$AH.p(i5);
     else {
-      const t4 = new R(e4, this), s5 = t4.u(this.options);
-      t4.p(i5), this.T(s5), this._$AH = t4;
+      const t5 = new R(e4, this), s5 = t5.u(this.options);
+      t5.p(i5), this.T(s5), this._$AH = t5;
     }
   }
-  _$AC(t3) {
-    let i5 = C.get(t3.strings);
-    return void 0 === i5 && C.set(t3.strings, i5 = new S2(t3)), i5;
+  _$AC(t4) {
+    let i5 = C.get(t4.strings);
+    return void 0 === i5 && C.set(t4.strings, i5 = new S2(t4)), i5;
   }
-  k(t3) {
+  k(t4) {
     u2(this._$AH) || (this._$AH = [], this._$AR());
     const i5 = this._$AH;
     let s4, e4 = 0;
-    for (const h3 of t3) e4 === i5.length ? i5.push(s4 = new _k(this.O(c3()), this.O(c3()), this, this.options)) : s4 = i5[e4], s4._$AI(h3), e4++;
+    for (const h3 of t4) e4 === i5.length ? i5.push(s4 = new _k(this.O(c3()), this.O(c3()), this, this.options)) : s4 = i5[e4], s4._$AI(h3), e4++;
     e4 < i5.length && (this._$AR(s4 && s4._$AB.nextSibling, e4), i5.length = e4);
   }
-  _$AR(t3 = this._$AA.nextSibling, s4) {
-    for (this._$AP?.(false, true, s4); t3 !== this._$AB; ) {
-      const s5 = i3(t3).nextSibling;
-      i3(t3).remove(), t3 = s5;
+  _$AR(t4 = this._$AA.nextSibling, s4) {
+    for (this._$AP?.(false, true, s4); t4 !== this._$AB; ) {
+      const s5 = i3(t4).nextSibling;
+      i3(t4).remove(), t4 = s5;
     }
   }
-  setConnected(t3) {
-    void 0 === this._$AM && (this._$Cv = t3, this._$AP?.(t3));
+  setConnected(t4) {
+    void 0 === this._$AM && (this._$Cv = t4, this._$AP?.(t4));
   }
 };
 var H = class {
@@ -451,74 +451,74 @@ var H = class {
   get _$AU() {
     return this._$AM._$AU;
   }
-  constructor(t3, i5, s4, e4, h3) {
-    this.type = 1, this._$AH = A, this._$AN = void 0, this.element = t3, this.name = i5, this._$AM = e4, this.options = h3, s4.length > 2 || "" !== s4[0] || "" !== s4[1] ? (this._$AH = Array(s4.length - 1).fill(new String()), this.strings = s4) : this._$AH = A;
+  constructor(t4, i5, s4, e4, h3) {
+    this.type = 1, this._$AH = A, this._$AN = void 0, this.element = t4, this.name = i5, this._$AM = e4, this.options = h3, s4.length > 2 || "" !== s4[0] || "" !== s4[1] ? (this._$AH = Array(s4.length - 1).fill(new String()), this.strings = s4) : this._$AH = A;
   }
-  _$AI(t3, i5 = this, s4, e4) {
+  _$AI(t4, i5 = this, s4, e4) {
     const h3 = this.strings;
     let o5 = false;
-    if (void 0 === h3) t3 = M(this, t3, i5, 0), o5 = !a2(t3) || t3 !== this._$AH && t3 !== E, o5 && (this._$AH = t3);
+    if (void 0 === h3) t4 = M(this, t4, i5, 0), o5 = !a2(t4) || t4 !== this._$AH && t4 !== E, o5 && (this._$AH = t4);
     else {
-      const e5 = t3;
+      const e5 = t4;
       let n4, r4;
-      for (t3 = h3[0], n4 = 0; n4 < h3.length - 1; n4++) r4 = M(this, e5[s4 + n4], i5, n4), r4 === E && (r4 = this._$AH[n4]), o5 ||= !a2(r4) || r4 !== this._$AH[n4], r4 === A ? t3 = A : t3 !== A && (t3 += (r4 ?? "") + h3[n4 + 1]), this._$AH[n4] = r4;
+      for (t4 = h3[0], n4 = 0; n4 < h3.length - 1; n4++) r4 = M(this, e5[s4 + n4], i5, n4), r4 === E && (r4 = this._$AH[n4]), o5 ||= !a2(r4) || r4 !== this._$AH[n4], r4 === A ? t4 = A : t4 !== A && (t4 += (r4 ?? "") + h3[n4 + 1]), this._$AH[n4] = r4;
     }
-    o5 && !e4 && this.j(t3);
+    o5 && !e4 && this.j(t4);
   }
-  j(t3) {
-    t3 === A ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, t3 ?? "");
+  j(t4) {
+    t4 === A ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, t4 ?? "");
   }
 };
 var I = class extends H {
   constructor() {
     super(...arguments), this.type = 3;
   }
-  j(t3) {
-    this.element[this.name] = t3 === A ? void 0 : t3;
+  j(t4) {
+    this.element[this.name] = t4 === A ? void 0 : t4;
   }
 };
 var L = class extends H {
   constructor() {
     super(...arguments), this.type = 4;
   }
-  j(t3) {
-    this.element.toggleAttribute(this.name, !!t3 && t3 !== A);
+  j(t4) {
+    this.element.toggleAttribute(this.name, !!t4 && t4 !== A);
   }
 };
 var z = class extends H {
-  constructor(t3, i5, s4, e4, h3) {
-    super(t3, i5, s4, e4, h3), this.type = 5;
+  constructor(t4, i5, s4, e4, h3) {
+    super(t4, i5, s4, e4, h3), this.type = 5;
   }
-  _$AI(t3, i5 = this) {
-    if ((t3 = M(this, t3, i5, 0) ?? A) === E) return;
-    const s4 = this._$AH, e4 = t3 === A && s4 !== A || t3.capture !== s4.capture || t3.once !== s4.once || t3.passive !== s4.passive, h3 = t3 !== A && (s4 === A || e4);
-    e4 && this.element.removeEventListener(this.name, this, s4), h3 && this.element.addEventListener(this.name, this, t3), this._$AH = t3;
+  _$AI(t4, i5 = this) {
+    if ((t4 = M(this, t4, i5, 0) ?? A) === E) return;
+    const s4 = this._$AH, e4 = t4 === A && s4 !== A || t4.capture !== s4.capture || t4.once !== s4.once || t4.passive !== s4.passive, h3 = t4 !== A && (s4 === A || e4);
+    e4 && this.element.removeEventListener(this.name, this, s4), h3 && this.element.addEventListener(this.name, this, t4), this._$AH = t4;
   }
-  handleEvent(t3) {
-    "function" == typeof this._$AH ? this._$AH.call(this.options?.host ?? this.element, t3) : this._$AH.handleEvent(t3);
+  handleEvent(t4) {
+    "function" == typeof this._$AH ? this._$AH.call(this.options?.host ?? this.element, t4) : this._$AH.handleEvent(t4);
   }
 };
 var Z = class {
-  constructor(t3, i5, s4) {
-    this.element = t3, this.type = 6, this._$AN = void 0, this._$AM = i5, this.options = s4;
+  constructor(t4, i5, s4) {
+    this.element = t4, this.type = 6, this._$AN = void 0, this._$AM = i5, this.options = s4;
   }
   get _$AU() {
     return this._$AM._$AU;
   }
-  _$AI(t3) {
-    M(this, t3);
+  _$AI(t4) {
+    M(this, t4);
   }
 };
 var B = t2.litHtmlPolyfillSupport;
 B?.(S2, k), (t2.litHtmlVersions ??= []).push("3.3.3");
-var D = (t3, i5, s4) => {
+var D = (t4, i5, s4) => {
   const e4 = s4?.renderBefore ?? i5;
   let h3 = e4._$litPart$;
   if (void 0 === h3) {
-    const t4 = s4?.renderBefore ?? null;
-    e4._$litPart$ = h3 = new k(i5.insertBefore(c3(), t4), t4, void 0, s4 ?? {});
+    const t5 = s4?.renderBefore ?? null;
+    e4._$litPart$ = h3 = new k(i5.insertBefore(c3(), t5), t5, void 0, s4 ?? {});
   }
-  return h3._$AI(t3), h3;
+  return h3._$AI(t4), h3;
 };
 
 // node_modules/lit-element/lit-element.js
@@ -528,12 +528,12 @@ var i4 = class extends y {
     super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
   }
   createRenderRoot() {
-    const t3 = super.createRenderRoot();
-    return this.renderOptions.renderBefore ??= t3.firstChild, t3;
+    const t4 = super.createRenderRoot();
+    return this.renderOptions.renderBefore ??= t4.firstChild, t4;
   }
-  update(t3) {
+  update(t4) {
     const r4 = this.render();
-    this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(t3), this._$Do = D(r4, this.renderRoot, this.renderOptions);
+    this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(t4), this._$Do = D(r4, this.renderRoot, this.renderOptions);
   }
   connectedCallback() {
     super.connectedCallback(), this._$Do?.setConnected(true);
@@ -838,24 +838,701 @@ function memoizeSelector(ids, fn, compare = {}) {
   return sel;
 }
 
-// src/domain/rooms.ts
-var ROOM_TYPES = {
-  1: { name: "Wohnzimmer", en: "Living Room", icon: "mdi:sofa-outline" },
-  2: { name: "Schlafzimmer", en: "Primary Bedroom", icon: "mdi:bed-king-outline" },
-  3: { name: "Arbeitszimmer", en: "Study", icon: "mdi:bookshelf" },
-  4: { name: "K\xFCche", en: "Kitchen", icon: "mdi:chef-hat" },
-  5: { name: "Esszimmer", en: "Dining Hall", icon: "mdi:silverware-fork-knife" },
-  6: { name: "Bad", en: "Bathroom", icon: "mdi:shower" },
-  7: { name: "Balkon", en: "Balcony", icon: "mdi:balcony" },
-  8: { name: "Flur", en: "Corridor", icon: "mdi:foot-print" },
-  9: { name: "Allzweckraum", en: "Utility Room", icon: "mdi:archive-outline" },
-  10: { name: "Garderobe", en: "Closet", icon: "mdi:hanger" },
-  11: { name: "Salon", en: "Meeting Room", icon: "mdi:presentation" },
-  12: { name: "B\xFCro", en: "Office", icon: "mdi:monitor" },
-  13: { name: "Fitnessbereich", en: "Fitness Area", icon: "mdi:dumbbell" },
-  14: { name: "Freizeitbereich", en: "Recreation Area", icon: "mdi:gamepad-variant-outline" },
-  15: { name: "Nebenzimmer", en: "Secondary Bedroom", icon: "mdi:bed-single-outline" }
+// src/i18n/de.ts
+var de = {
+  // ── Allgemein ──
+  "common.robot": "Roboter",
+  "common.dash": "\u2013",
+  "common.ok": "OK",
+  "common.cancel": "Abbrechen",
+  "common.back": "Zur\xFCck",
+  "common.close": "Schlie\xDFen",
+  "common.open": "\xD6ffnen",
+  "common.start": "Starten",
+  "common.on": "an",
+  "common.off": "aus",
+  "common.active": "aktiv",
+  "common.inactive": "inaktiv",
+  "common.none": "keine",
+  "common.present": "vorhanden",
+  "common.missing": "fehlt",
+  "unit.min": "min",
+  "unit.m2": "m\xB2",
+  // ── Navigation (dx-nav, config NAV) ──
+  "nav.start": "\xDCbersicht",
+  "nav.reinigen": "Karte",
+  "nav.rooms": "R\xE4ume",
+  "nav.planer": "Planer",
+  "nav.protokoll": "Verlauf",
+  "nav.prognose": "Prognose",
+  "nav.einstellungen": "Einstellungen",
+  "nav.brandSub": "Dein Saugroboter",
+  "nav.model": "Dreame X60 Ultra",
+  "nav.sidebar": "Seitenleiste",
+  "nav.tabbar": "Tab-Leiste",
+  // ── Seiten (pages.ts) ──
+  "page.start.sub": "\xDCbersicht",
+  "page.reinigen.title": "Karte",
+  "page.reinigen.sub": "R\xE4ume, Zone oder Punkt reinigen \xB7 Hinfahren \xB7 Sperrzonen",
+  "page.planer.title": "Planer",
+  "page.planer.sub": "Vier Eintr\xE4ge \xB7 Automatik entscheidet voll, schnell oder warten",
+  "page.protokoll.title": "Verlauf",
+  "page.protokoll.sub": "Reinigungsprotokoll der App \xB7 Zeitleiste je Lauf \xB7 Lernwerte",
+  "page.prognose.title": "Prognose",
+  "page.prognose.sub": "Lernende Anwesenheit \xB7 Grundlage f\xFCr Start, Schnellprogramm und R\xFCckkehr",
+  "page.einstellungen.title": "Einstellungen",
+  "page.einstellungen.sub": "Darstellung, Funktionen, Prognose, Roboter, Diagnose",
+  // Platzhalter je Unterseite: welche Bausteine hier laut Bauplan Abschnitt 7 entstehen (verschwinden mit den Modulen)
+  "page.parts.reinigen": "dx-map-card full (4.3)|App-Szenen|St\xFChle am Boden|R\xE4ume (Roboter-Werte) \u2192 dx-rooms-dialog (4.6)",
+  "page.parts.planer": "dx-planer (4.4)|dx-planer-editor + dx-clock-picker (4.5)|Automatik-Regeln|dx-estimate-dialog (4.8)",
+  "page.parts.protokoll": "dx-history (4.7)|Lernwerte-Tabelle",
+  "page.parts.prognose": "dx-prognose-view (4.10)",
+  "page.parts.einstellungen": "dx-settings-panel (4.11)|dx-robot-settings (4.7)|Diagnose|Version",
+  // ── Flächen der Bento-Übersicht (pages.ts START_SLOTS) ──
+  "slot.map": "Live-Karte",
+  "slot.automatik": "Automatik",
+  "slot.auftrag": "Aktueller Auftrag",
+  "slot.heute": "Heute",
+  "slot.planer": "Planer",
+  "slot.consumables": "Verschlei\xDF",
+  "slot.station": "Station",
+  "slot.stats": "Statistik",
+  "slot.quickstart": "Schnellstart \u2013 R\xE4ume ausw\xE4hlen",
+  "slot.history": "Letzte L\xE4ufe",
+  // ── Kopfzeile (Shell) ──
+  "topbar.back": "\xDCbersicht",
+  "topbar.morning": "Guten Morgen",
+  "topbar.day": "Guten Tag",
+  "topbar.evening": "Guten Abend",
+  "topbar.away": "{name} ist unterwegs",
+  "topbar.inStation": "{name} ist in der Station",
+  "topbar.home": "Zu Hause",
+  "topbar.nobody": "Niemand zu Hause",
+  "topbar.present": "{names} anwesend",
+  "topbar.allAway": "alle unterwegs",
+  "topbar.dnd": "Nicht st\xF6ren",
+  "topbar.inDialog": "Im Dialog: {hint}",
+  // ── Roboter-Panel (dx-hero) ──
+  "hero.status": "Status",
+  "hero.station": "Station",
+  "hero.washing": "Mopp-W\xE4sche",
+  "hero.drying": "trocknet",
+  "hero.docked": "angedockt",
+  "hero.charging": "l\xE4dt",
+  "hero.away": "unterwegs",
+  "hero.battery": "Akku",
+  "hero.mode": "Modus",
+  "hero.modeTitle": "Reinigungsmodus",
+  "hero.suction": "Saugstufe",
+  "hero.suctionTitle": "Saugleistung",
+  "hero.water": "Wasser",
+  "hero.waterTitle": "Wassermenge",
+  "hero.roomsTitle": "R\xE4ume einstellen",
+  // ── Auftrag-Kachel (dx-auftrag) ──
+  "auftrag.title": "Aktueller Auftrag",
+  "auftrag.rooms": "R\xE4ume",
+  "auftrag.noRooms": "R\xE4ume \u2013",
+  "auftrag.first": "Erster Raum",
+  "auftrag.next": "N\xE4chster Raum",
+  "auftrag.last": "Letzter Raum",
+  // ── Schnellstart (dx-quickstart) ──
+  "quickstart.title": "Schnellstart \u2013 R\xE4ume ausw\xE4hlen",
+  "quickstart.multi": "Mehrfachauswahl",
+  "quickstart.selected": "{n} gew\xE4hlt",
+  "quickstart.all": "Alles",
+  "quickstart.hint": "R\xE4ume antippen, dann \u201Ereinigen\u201C \u2013 {name} f\xE4hrt mit den Roboter-Werten je Raum.",
+  "quickstart.robotFallback": "der Roboter",
+  // ── Raumauswahl (shared/rooms, Karte, Schnellstart) ──
+  "rooms.whole": "Ganze Wohnung",
+  "rooms.one": "{n} Raum",
+  "rooms.many": "{n} R\xE4ume",
+  "rooms.confirm": "Jetzt reinigen: {list}?",
+  "rooms.run": "{sel} reinigen",
+  "rooms.clear": "Auswahl aufheben",
+  "rooms.started": "Gestartet: {what}",
+  "rooms.failed": "Start fehlgeschlagen: {error}",
+  // ── Karte (dx-map-card, dx-heidi-map, map-config) ──
+  "map.title": "Karte",
+  "map.live": "Live-Karte",
+  "map.rooms": "R\xE4ume",
+  "map.zones": "Sperrzonen",
+  "map.history": "Reinigungsverlauf",
+  "map.toMap": "Zur Karte",
+  "map.open": "Karte \xF6ffnen",
+  "map.tapHint": "antippen f\xFCr R\xE4ume, Zone, Punkt, Sperrzonen",
+  "map.capAway": "unterwegs",
+  "map.capRest": "noch {rest}",
+  "map.capStation": "{name} in der Station",
+  "map.capLast": "letzter Lauf {time}",
+  "map.goto": "Hinfahren",
+  "map.all": "Alles",
+  "map.allConfirm": "Ganze Wohnung reinigen?",
+  "map.allStarted": "ganze Wohnung",
+  "map.hintHeidi": "R\xE4ume in der Karte oder \xFCber die Kacheln antippen, dann \u201Ereinigen\u201C",
+  "map.hintPlain": "R\xE4ume antippen, dann \u201Ereinigen\u201C",
+  "map.loadError": "Karte konnte nicht geladen werden: {error}",
+  "map.helpersMissing": "loadCardHelpers fehlt",
+  "map.alt": "Karte",
+  "map.noMapData": "Datenkarte fehlt \u2013 {entity} in der Dreame-Integration aktivieren",
+  "map.loading": "Kartenpaket wird geladen \u2026",
+  "map.noCalib": "Keine Kalibrierpunkte \u2013 R\xE4ume k\xF6nnen nicht eingezeichnet werden",
+  "mapmode.raeume": "R\xE4ume",
+  "mapmode.raeume.hint": "Auswahl per Kachel oder Tipp in die Raumfl\xE4che",
+  "mapmode.zone": "Zone",
+  "mapmode.zone.hint": "Rechteck auf der Karte aufziehen (bis zu 5), dann \u25B6 in der Karte",
+  "mapmode.punkt": "Punkt",
+  "mapmode.punkt.hint": "Punkt auf der Karte antippen, dann \u25B6 in der Karte",
+  "mapmode.goto": "Hinfahren",
+  "mapmode.goto.hint": "Punkt auf der Karte antippen \u2192 der Roboter f\xE4hrt hin und wartet",
+  // ── Dialog (dx-dialog, Shell-Overlay) ──
+  "dialog.overlay": "Overlay \u201E{kind}\u201C",
+  "dialog.placeholder": "Platzhalter \u2013 der Inhalt dieses Dialogs entsteht mit seinem Baustein in Phase 4.",
+  // ── Einrichtungsprüfung (domain/setup, dx-setup) ──
+  "setup.title": "Einrichtung",
+  "setup.problem": "Problem",
+  "setup.problems": "Probleme",
+  "setup.hint": "Hinweis",
+  "setup.hints": "Hinweise",
+  "setup.there": "Dort: {hint}",
+  "setup.robot.label": "Roboter",
+  "setup.robot.ok": "Roboter erkannt: {name}",
+  "setup.robot.error": "Kein Dreame-Roboter gefunden \u2013 Integration einrichten oder \u201Erobot:\u201C in der Kartenkonfiguration setzen",
+  "setup.package.label": "Paket",
+  "setup.package.ok": "Paket vollst\xE4ndig",
+  "setup.package.error": "{n} Helfer des Pakets fehlen \u2013 Paket heidi.yaml und Automationen pr\xFCfen",
+  "setup.entities.label": "Roboter-Entit\xE4ten",
+  "setup.entities.ok": "Roboter-Entit\xE4ten vollst\xE4ndig",
+  "setup.entities.warn": "{n} Entit\xE4ten des Roboters fehlen oder sind deaktiviert",
+  "setup.mapdata.label": "Datenkarte",
+  "setup.mapdata.ok": "Datenkarte aktiv",
+  "setup.mapdata.warn": "Datenkarte nicht aktiviert \u2013 R\xE4ume in der Heidi-Karte fehlen (Entit\xE4t \u201ECurrent Map Data\u201C in der Dreame-Integration einschalten)",
+  "setup.customized.label": "Angepasste Reinigung",
+  "setup.customized.ok": "Angepasste Reinigung an",
+  "setup.customized.warn": "Angepasste Reinigung ist aus \u2013 Raumwerte je Raum wirken nicht",
+  "setup.roomtypes.label": "Raumtypen",
+  "setup.roomtypes.ok": "Raumtypen passen",
+  "setup.roomtypes.warn": "{rooms}: benutzerdefiniert, obwohl die App den Standardtyp kennt \u2013 f\xFCr die Sprachsteuerung in der App \u201ERaum umbenennen\u201C den Typ w\xE4hlen",
+  "setup.areas.label": "R\xE4ume \u2194 Bereiche",
+  "setup.areas.ok": "Alle R\xE4ume einem HA-Bereich zugeordnet",
+  "setup.areas.one": "Ein Raum ist",
+  "setup.areas.many": "{n} R\xE4ume sind",
+  "setup.areas.error": "{who} keinem HA-Bereich zugeordnet: {rooms}",
+  "setup.areas.hint": "Reinigung \u2192 Nach Bereich \u2192 Konfigurieren",
+  "setup.repairs.label": "Reparaturen",
+  "setup.repairs.ok": "Keine offenen Reparaturen",
+  "setup.repairs.one": "Reparatur",
+  "setup.repairs.many": "Reparaturen",
+  "setup.repairs.error": "{n} offene {what} in HA ({list})",
+  // ── Seite Reinigen (Shell) ──
+  "reinigen.scenes": "Dreame-App-Szenen",
+  "reinigen.app": "App",
+  "reinigen.sceneConfirm": "\u201E{name}\u201C starten?",
+  "reinigen.chairs": "St\xFChle am Boden",
+  "reinigen.chairsSub": "Setzt eine Sperrzone um den Esstisch",
+  "reinigen.roomsTitle": "R\xE4ume (Roboter-Werte)",
+  "reinigen.roomsHint": "Modus, Saugstufe, Wasser, Route und Wiederholungen je Raum, wie in der Dreame-App. \xC4nderungen gelten sofort.",
+  "reinigen.roomsOpen": "R\xE4ume einstellen \u2026",
+  "scene.32.name": "Eingang reinigen",
+  "scene.32.sub": "Flur \xB7 Saugen + Wischen \xB7 2\xD7",
+  "scene.33.name": "Bad Saugen/Wischen",
+  "scene.33.sub": "Bad \xB7 1\xD7",
+  "scene.34.name": "Wischen nach dem Saugen",
+  "scene.34.sub": "Ganze Wohnung \xB7 nur Wischen",
+  // ── Platzhalter-Vorschauen der Shell (verschwinden mit den Modulen) ──
+  "preview.entities": "{n} Entit\xE4ten verbunden",
+  "preview.noStates": "keine Zustandsdaten",
+  "preview.map": "Kartendarstellung: {karte} \xB7 Kalibrierung: {calib}",
+  "preview.calibPoints": "{n} Punkte",
+  "preview.automatik": "Automatik: {status}",
+  "preview.today": "Heutiger Eintrag: {name}",
+  "preview.prognose": "Freies Fenster {window} \xB7 R\xFCckkehr {back}",
+  "preview.prognoseOff": "Prognose aus",
+  "preview.stats": "{runs} L\xE4ufe \xB7 {area} m\xB2 \xB7 {time} min",
+  "preview.rooms": "R\xE4ume: {list}",
+  "preview.noRooms": "keine (Karte fehlt)",
+  "preview.entries": "{n} Eintr\xE4ge",
+  "preview.stale": " \xB7 letzter Stand",
+  "preview.placeholder": "Platzhalter \u2013 entsteht in Aufgabe {task}.",
+  "preview.mapPage": "Kartendarstellung: {karte} \xB7 St\xFChle am Boden: {chairs} \xB7 Kalibrierung: {calib}",
+  "preview.plan": "{n} {name} \xB7 {state} \xB7 {rooms} R\xE4ume \xB7 {time}",
+  "preview.learn": "Lernwerte: {state}",
+  "preview.history": "{entries} Eintr\xE4ge \xB7 {runs} L\xE4ufe \xB7 {area} m\xB2 \xB7 {time} min{stale}",
+  "preview.prognosePage": "{state} \xB7 {days} Tage \xB7 frei {window} \xB7 R\xFCckkehr {back}",
+  "preview.settings": "Karte {karte} \xB7 Diagnose: {missing} fehlend, {unavailable} unavailable von {total}",
+  "preview.robot": "Roboter: {list} \xB7 DND {start}\u2013{end}",
+  "preview.pageTitle": "Seite \u201E{page}\u201C",
+  "preview.parts": "Hier entstehen",
+  "preview.views": "Sichten (Vorschau aus den Selektoren)",
+  "preview.mockup": "Platzhalter aus Aufgabe 3.3 \u2013 Optik nach Mockup",
+  // ── Karte in HA (customCards, Konfiguration) ──
+  "card.name": "Heidi (dreame_x60)",
+  "card.description": "Heidi-Karte v2 \u2013 \xDCbersicht und Unterseiten des Saugroboters",
+  "card.noConfig": "dreame-x60-panel: Konfiguration fehlt",
+  // ── Status des Roboters (sensor.<gerät>_status, vacuum-Zustand) – wie v1 STATUS_DE ──
+  "status.sleeping": "schl\xE4ft",
+  "status.charging": "l\xE4dt",
+  "status.cleaning": "reinigt",
+  "status.sweeping": "saugt",
+  "status.mopping": "wischt",
+  "status.sweeping_and_mopping": "saugt und wischt",
+  "status.returning": "f\xE4hrt zur Station",
+  "status.paused": "pausiert",
+  "status.idle": "bereit",
+  "status.docked": "angedockt",
+  "status.washing": "Mopp-W\xE4sche",
+  "status.drying": "trocknet",
+  "status.auto_emptying": "saugt ab",
+  "status.error": "Fehler",
+  "status.charging_completed": "voll geladen",
+  "status.segment_cleaning": "reinigt R\xE4ume",
+  "status.zone_cleaning": "reinigt Zone",
+  "status.spot_cleaning": "reinigt Punkt",
+  "status.cruising": "f\xE4hrt",
+  // ── Auftragsart (sensor.<gerät>_task_status) – wie v1 TASK ──
+  "task.room_cleaning": "Reinigt R\xE4ume",
+  "task.zone_cleaning": "Reinigt Zone",
+  "task.spot_cleaning": "Reinigt Punkt",
+  "task.cleaning": "Reinigt",
+  "task.cruising": "F\xE4hrt",
+  "task.mapping": "Erstellt Karte",
+  "task.fast_mapping": "Erstellt Karte",
+  "task.default": "Reinigt",
+  // ── Kopf (domain/status) ──
+  "head.error": "Fehler",
+  "head.paused": "Pausiert",
+  "head.returning": "F\xE4hrt zur Station",
+  "button.pause": "Pause",
+  "button.stop": "Stopp",
+  "button.station": "Station",
+  "button.resume": "Weiter",
+  "button.start": "Start",
+  "button.locate": "Orten",
+  // ── Beschriftungen (domain/labels) ──
+  "label.daily": "T\xE4glich",
+  "label.manual": "Manuell",
+  "label.weekdays": "Mo\u2013Fr",
+  "label.weekend": "Sa + So",
+  "label.allRooms": "Alle",
+  "label.noRooms": "keine R\xE4ume",
+  "label.min": "{n} min",
+  "label.hmin": "{h} h {m} min",
+  "label.lessMin": "< 1 min",
+  "label.today": "heute",
+  "day.0": "Mo",
+  "day.1": "Di",
+  "day.2": "Mi",
+  "day.3": "Do",
+  "day.4": "Fr",
+  "day.5": "Sa",
+  "day.6": "So",
+  // ── Dauer & Akku (domain/estimate) ──
+  "estimate.washBefore": "W\xE4scht Mopp vor dem Start",
+  "estimate.washBetween": "W\xE4scht Mopp zwischendurch",
+  "estimate.charge": "L\xE4dt {from} % \u2192 {to} %",
+  "estimate.home": "F\xE4hrt zur Station",
+  "estimate.sourcePrognose": "Prognose",
+  "estimate.sourceUsual": "\xFCbliche R\xFCckkehr {time}",
+  // ── Streifen (domain/strip) ──
+  "strip.startpoint": "F\xE4hrt zum Startpunkt",
+  "strip.to": "zu {rooms}",
+  "strip.through": "F\xE4hrt durch {room}",
+  "strip.now": "Jetzt: {room}",
+  "strip.then": "danach {rooms}",
+  "strip.lastRoom": "letzter Raum",
+  // ── Optionen des Roboters über die v1-Zuordnung hinaus (ha/profile) ──
+  "option.mopping_after_sweeping": "Wischen nach Saugen",
+  "option.quick": "Schnell",
+  "option.off": "Aus",
+  "option.on": "An",
+  // ── Raumnamen der Integration → deutsch (v1 ROOMS_DE) ──
+  "room.Bathroom": "Bad",
+  "room.Primary Bedroom": "Schlafzimmer",
+  "room.WC": "WC",
+  "room.Corridor": "Flur",
+  "room.Study": "B\xFCro",
+  "room.Kitchen": "K\xFCche",
+  "room.Living Room": "Wohnzimmer",
+  "room.fallback": "Raum {n}",
+  // ── Raumtypen der Dreame-App (domain/rooms ROOM_TYPES, type 1..15) ──
+  "roomtype.1": "Wohnzimmer",
+  "roomtype.2": "Schlafzimmer",
+  "roomtype.3": "Arbeitszimmer",
+  "roomtype.4": "K\xFCche",
+  "roomtype.5": "Esszimmer",
+  "roomtype.6": "Bad",
+  "roomtype.7": "Balkon",
+  "roomtype.8": "Flur",
+  "roomtype.9": "Allzweckraum",
+  "roomtype.10": "Garderobe",
+  "roomtype.11": "Salon",
+  "roomtype.12": "B\xFCro",
+  "roomtype.13": "Fitnessbereich",
+  "roomtype.14": "Freizeitbereich",
+  "roomtype.15": "Nebenzimmer",
+  // ── Einstellungen (ha/selectors readSettings) ──
+  "settings.automatik": "Automatik",
+  "settings.planer": "Planer anzeigen",
+  "settings.prognose": "Prognose",
+  "settings.prognoseSub": "Lernende Anwesenheit, eigene Seite",
+  "settings.nina": "Nina z\xE4hlt f\xFCr Anwesenheit",
+  "settings.interval": "Protokoll-Intervall",
+  "settings.intervalSub": "Wie oft die Anwesenheit gespeichert wird",
+  "settings.resolution": "Aufl\xF6sung",
+  "settings.resolutionSub": "Rasterbreite der Heatmap und Prognose",
+  "settings.weeks": "Lernzeitraum",
+  "settings.weeksSub": "\xC4ltere Daten werden verworfen",
+  "settings.halflife": "Gewichtung",
+  "settings.halflifeSub": "Halbwertszeit \u2013 so alt z\xE4hlt ein Tag nur noch halb",
+  "settings.minDays": "Aktiv ab",
+  "settings.minDaysSub": "Erst dann nutzt die Automatik die Prognose",
+  "settings.unitMin": " min",
+  "settings.unitWeeks": " Wochen",
+  "settings.unitDays": " Tage",
+  "settings.unitDaysFrom": " Tagen",
+  "settings.original": "Original",
+  "settings.german": "Deutsch",
+  // ── Prognose-Schalter (readPrognose) ──
+  "prognose.deviation": "Abweichung heute",
+  "prognose.deviationSub": "Urlaub, Feiertag",
+  "prognose.include": "{name} einbeziehen",
+  "prognose.gpsWlan": "GPS + WLAN",
+  "prognose.wlan": "WLAN",
+  // ── Station (readStation) ──
+  "station.bag": "Beutel",
+  "station.fresh": "Frisch",
+  "station.dirty": "Abwasser",
+  "station.detergent": "Mittel",
+  "station.ok": "OK",
+  "station.check": "Pr\xFCfen",
+  "station.empty": "Leer",
+  "station.missing": "Fehlt",
+  "station.full": "Voll",
+  "station.autoEmpty": "Absaugen",
+  "station.mop": "Mopp",
+  "station.dry": "Trocknen",
+  "station.clean": "Station",
+  "station.cleanConfirm": "Reinigung der Station starten?",
+  // ── Verschleiß (readConsumables) ──
+  "consumable.mainBrush": "Hauptb\xFCrste",
+  "consumable.sideBrush": "Seitenb\xFCrste",
+  "consumable.filter": "Filter",
+  "consumable.sensor": "Sensoren",
+  "consumable.wheel": "R\xE4der",
+  // ── Roboter-Einstellungen (readRobotSettings) ──
+  "robotsettings.carpet": "Teppich",
+  "robotsettings.waterTemp": "Wassertemperatur",
+  "robotsettings.drying": "Trocknung",
+  "robotsettings.autoEmpty": "Absaugen",
+  "robotsettings.selfClean": "Mopp-W\xE4sche",
+  "robotsettings.cleangenius": "CleanGenius",
+  "robotsettings.selfCleanArea": "Mopp-W\xE4sche nach",
+  "robotsettings.volume": "Lautst\xE4rke",
+  "robotsettings.unitM2": " m\xB2",
+  "robotsettings.unitPct": " %",
+  // ── Diagnose, Automatik ──
+  "diag.robot": "Roboter ({name})",
+  "diag.robotUnknown": "nicht erkannt",
+  "diag.package": "Paket (Helfer, Sensoren)",
+  "automatik.never": "noch nie",
+  // ── Hinweise und Fehler des Roboters (sensor.<gerät>_error): Kurztext (höchstens zwei Wörter) im Chip ──
+  // Quelle: docs/dreame_x60/ENTITAETEN.md „Warnungen und Fehler“ (Integration dreame-vacuum 2.0.0b25); dazu die
+  // v1-Schlüssel, die es dort nicht gibt (brush_stuck …), damit die v1-Vektoren gleich bleiben.
+  "error.drop": "R\xE4der frei",
+  "error.cliff": "Absturzsensor",
+  "error.bumper": "Sto\xDFsensor klemmt",
+  "error.gesture": "Steht schr\xE4g",
+  "error.bumper_repeat": "Sto\xDFsensor klemmt",
+  "error.drop_repeat": "R\xE4der frei",
+  "error.optical_flow": "Sensorfehler",
+  "error.no_box": "Staubbox fehlt",
+  "error.no_tank_box": "Tank fehlt",
+  "error.water_box_empty": "Wassertank leer",
+  "error.box_full": "Filter verstopft",
+  "error.brush": "Hauptb\xFCrste verwickelt",
+  "error.side_brush": "Seitenb\xFCrste verwickelt",
+  "error.fan": "Filter verstopft",
+  "error.left_wheel_motor": "Rad blockiert",
+  "error.right_wheel_motor": "Rad blockiert",
+  "error.turn_suffocate": "Steckt fest",
+  "error.forward_suffocate": "Steckt fest",
+  "error.charger_get": "Station fehlt",
+  "error.battery_low": "Akku schwach",
+  "error.charge_fault": "Ladefehler",
+  "error.battery_percentage": "Akkufehler",
+  "error.heart": "Interner Fehler",
+  "error.camera_occlusion": "Sensor verdeckt",
+  "error.move": "Sensorfehler",
+  "error.flow_shielding": "Sensor verdeckt",
+  "error.infrared_shielding": "Sensor verdeckt",
+  "error.charge_no_electric": "Station stromlos",
+  "error.battery_fault": "Akkutemperatur",
+  "error.fan_speed_error": "L\xFCfterfehler",
+  "error.left_wheell_speed": "Rad blockiert",
+  "error.right_wheell_speed": "Rad blockiert",
+  "error.bmi055_acce": "Sensorfehler",
+  "error.bmi055_gyro": "Gyroskopfehler",
+  "error.xv7001": "Gyroskopfehler",
+  "error.left_magnet": "Magnetsensor",
+  "error.right_magnet": "Magnetsensor",
+  "error.flow_error": "Sensorfehler",
+  "error.infrared_fault": "Infrarotfehler",
+  "error.camera_fault": "Kamerafehler",
+  "error.strong_magnet": "Magnetfeld",
+  "error.water_pump": "Wasserpumpe",
+  "error.rtc": "Uhrfehler",
+  "error.auto_key_trig": "Interner Fehler",
+  "error.p3v3": "Interner Fehler",
+  "error.camera_idle": "Interner Fehler",
+  "error.blocked": "Weg blockiert",
+  "error.lds_error": "Laserfehler",
+  "error.lds_bumper": "Laserturm klemmt",
+  "error.filter_blocked": "Filter verstopft",
+  "error.edge": "Kantensensor",
+  "error.carpet": "Teppich erkannt",
+  "error.laser": "Sensor gest\xF6rt",
+  "error.ultrasonic": "Ultraschallsensor",
+  "error.no_go_zone": "In Sperrzone",
+  "error.route": "Ziel unerreichbar",
+  "error.restricted": "In Sperrzone",
+  "error.remove_mop": "Mopp abnehmen",
+  "error.mop_removed": "Mopp abgefallen",
+  "error.mop_pad_stop_rotate": "Mopp blockiert",
+  "error.mop_install_failed": "Mopp anbringen",
+  "error.low_battery_turn_off": "Akku leer",
+  "error.dirty_tank_not_installed": "Abwassertank fehlt",
+  "error.robot_in_hidden_room": "Bereich ausgeblendet",
+  "error.lds_failed_to_lift": "Laserturm klemmt",
+  "error.robot_stuck": "Steckt fest",
+  "error.slippery_floor": "Rutschiger Boden",
+  "error.unknown": "Unbekannte Meldung",
+  "error.check_mop_install": "Mopp pr\xFCfen",
+  "error.dirty_water_tank_full": "Abwasser voll",
+  "error.retractable_leg_stuck": "Beine verwickelt",
+  "error.internal_error": "Interner Fehler",
+  "error.robot_stuck_on_tables": "Steckt fest",
+  "error.robot_stuck_on_passage": "Steckt fest",
+  "error.robot_stuck_on_threshold": "Steckt fest",
+  "error.robot_stuck_on_low_lying_area": "Steckt fest",
+  "error.robot_stuck_on_ramp": "Rampe erkannt",
+  "error.robot_stuck_on_obstacle": "Hindernis",
+  "error.robot_stuck_on_pet": "Person/Tier",
+  "error.robot_stuck_on_slippery_surface": "Rutscht",
+  "error.robot_stuck_on_carpet": "Steckt fest",
+  "error.bin_full": "Staubbeutel voll",
+  "error.bin_open": "Station offen",
+  "error.water_tank": "Frischwassertank fehlt",
+  "error.dirty_water_tank": "Abwasser voll",
+  "error.water_tank_dry": "Frischwasser leer",
+  "error.dirty_water_tank_blocked": "Abwassertank verstopft",
+  "error.dirty_water_tank_pump": "Abwasserpumpe",
+  "error.mop_pad": "Waschbrett fehlt",
+  "error.wet_mop_pad": "Waschbrett reinigen",
+  "error.clean_mop_pad": "Mopp reinigen",
+  "error.clean_tank_level": "Frischwasser knapp",
+  "error.station_disconnected": "Station getrennt",
+  "error.dirty_tank_level": "Abwasser voll",
+  "error.washboard_level": "Waschbrett reinigen",
+  "error.no_mop_in_station": "Mopp fehlt",
+  "error.dust_bag_full": "Staubbeutel voll",
+  "error.self_test_failed": "Selbsttest fehlgeschlagen",
+  "error.washboard_not_working": "Waschbrett defekt",
+  "error.drainage_failed": "Abpumpen gest\xF6rt",
+  "error.mop_not_detected": "Mopp fehlt",
+  "error.mop_holder_error": "Mopphalter falsch",
+  "error.dock_error": "Stationsfehler",
+  "error.wash_failed": "W\xE4sche fehlgeschlagen",
+  "error.robot_stuck_on_curtain": "Steckt fest",
+  "error.edge_mop_stop_rotate": "Kantenmopp blockiert",
+  "error.edge_mop_detached": "Kantenmopp abgefallen",
+  "error.chassis_lift_malfunction": "Fahrwerk defekt",
+  "error.mop_cover_error": "Moppabdeckung",
+  "error.roller_mop_error": "Rollenmopp gest\xF6rt",
+  "error.robotic_arm_stopped": "Arm gestoppt",
+  "error.onboard_water_tank_empty": "Wassertank leer",
+  "error.onboard_dirty_water_tank_full": "Abwasserbox voll",
+  "error.mop_not_installed": "Mopp fehlt",
+  "error.fluffing_roller_error": "Rolle gest\xF6rt",
+  "error.blocked_by_obstacle": "Hindernis",
+  "error.return_to_charge_failed": "R\xFCckkehr fehlgeschlagen",
+  "error.drainage_outlet_filter": "Abwasserfilter verstopft",
+  "error.main_wheels_error": "Radfehler",
+  // v1-Schlüssel ohne Gegenstück in dieser Integrationsversion (Vektoren)
+  "error.clean_water_tank_empty": "Frischwasser leer",
+  "error.dust_box_missing": "Staubbox fehlt",
+  "error.wheels_stuck": "Rad blockiert",
+  "error.brush_stuck": "B\xFCrste blockiert",
+  "error.low_battery": "Akku leer",
+  "error.detergent_empty": "Reinigungsmittel leer",
+  "error.water_tank_missing": "Wassertank fehlt",
+  "error.clean_water_tank_missing": "Frischwassertank fehlt",
+  "error.dirty_water_tank_missing": "Abwassertank fehlt",
+  // ── Langtext je Zustandswert (Tooltip / Detail, PD-015) – Bedeutung aus ENTITAETEN.md ──
+  "errorLong.drop": "R\xE4der h\xE4ngen in der Luft \u2013 Roboter neu aufsetzen und neu starten.",
+  "errorLong.cliff": "Absturzsensor gest\xF6rt \u2013 Sensor abwischen und nicht direkt an der Treppe starten.",
+  "errorLong.bumper": "Sto\xDFsensor klemmt \u2013 reinigen und vorsichtig antippen.",
+  "errorLong.gesture": "Roboter steht schr\xE4g \u2013 auf eine ebene Fl\xE4che setzen und neu starten.",
+  "errorLong.bumper_repeat": "Sto\xDFsensor klemmt wiederholt \u2013 reinigen und vorsichtig antippen.",
+  "errorLong.drop_repeat": "R\xE4der h\xE4ngen wiederholt in der Luft \u2013 Roboter neu aufsetzen.",
+  "errorLong.optical_flow": "Optischer Flusssensor gest\xF6rt \u2013 Roboter neu starten.",
+  "errorLong.no_box": "Staubbox nicht eingesetzt \u2013 Staubbox und Filter einsetzen.",
+  "errorLong.no_tank_box": "Wassertank nicht eingesetzt \u2013 Tank einsetzen.",
+  "errorLong.water_box_empty": "Wassertank leer \u2013 bitte auff\xFCllen.",
+  "errorLong.box_full": "Filter feucht oder verstopft \u2013 pr\xFCfen, ob der Filter trocken ist oder gereinigt werden muss.",
+  "errorLong.brush": "Hauptb\xFCrste verwickelt \u2013 B\xFCrste herausnehmen, Borsten und Lager reinigen.",
+  "errorLong.side_brush": "Seitenb\xFCrste verwickelt \u2013 abnehmen und reinigen.",
+  "errorLong.fan": "Filter feucht oder verstopft \u2013 pr\xFCfen, ob der Filter trocken ist oder gereinigt werden muss.",
+  "errorLong.left_wheel_motor": "Roboter steckt fest oder das linke Rad ist blockiert \u2013 R\xE4der pr\xFCfen und an neuer Stelle starten.",
+  "errorLong.right_wheel_motor": "Roboter steckt fest oder das rechte Rad ist blockiert \u2013 R\xE4der pr\xFCfen und an neuer Stelle starten.",
+  "errorLong.turn_suffocate": "Roboter steckt fest und kann nicht drehen \u2013 Umgebung freir\xE4umen.",
+  "errorLong.forward_suffocate": "Roboter steckt fest und kann nicht vorw\xE4rts \u2013 Umgebung freir\xE4umen.",
+  "errorLong.charger_get": "Station nicht gefunden \u2013 pr\xFCfen, ob das Stromkabel richtig steckt.",
+  "errorLong.battery_low": "Akku schwach \u2013 bitte laden.",
+  "errorLong.charge_fault": "Ladefehler \u2013 Ladekontakte von Roboter und Station mit einem trockenen Tuch abwischen.",
+  "errorLong.battery_percentage": "Fehler beim Akkustand.",
+  "errorLong.heart": "Interner Fehler \u2013 Roboter neu starten.",
+  "errorLong.camera_occlusion": "Sensor der Bildpositionierung verdeckt \u2013 bitte reinigen.",
+  "errorLong.move": "Bewegungssensor gest\xF6rt \u2013 Roboter neu starten.",
+  "errorLong.flow_shielding": "Optischer Sensor verdeckt \u2013 abwischen und neu starten.",
+  "errorLong.infrared_shielding": "Infrarotsensor verdeckt \u2013 Roboter neu starten.",
+  "errorLong.charge_no_electric": "Ladestation ohne Strom \u2013 pr\xFCfen, ob das Stromkabel richtig steckt.",
+  "errorLong.battery_fault": "Akkutemperatur au\xDFerhalb des Bereichs \u2013 warten, bis sie wieder normal ist.",
+  "errorLong.fan_speed_error": "L\xFCfterdrehzahl-Sensor gest\xF6rt \u2013 Roboter neu starten.",
+  "errorLong.left_wheell_speed": "Linkes Rad blockiert \u2013 R\xE4der pr\xFCfen und an neuer Stelle starten.",
+  "errorLong.right_wheell_speed": "Rechtes Rad blockiert \u2013 R\xE4der pr\xFCfen und an neuer Stelle starten.",
+  "errorLong.bmi055_acce": "Beschleunigungssensor gest\xF6rt \u2013 Roboter neu starten.",
+  "errorLong.bmi055_gyro": "Gyroskop gest\xF6rt \u2013 Roboter neu starten.",
+  "errorLong.xv7001": "Gyroskop gest\xF6rt \u2013 Roboter neu starten.",
+  "errorLong.left_magnet": "Magnetsensor links gest\xF6rt \u2013 Roboter neu starten.",
+  "errorLong.right_magnet": "Magnetsensor rechts gest\xF6rt \u2013 Roboter neu starten.",
+  "errorLong.flow_error": "Flusssensor gest\xF6rt \u2013 Roboter neu starten.",
+  "errorLong.infrared_fault": "Infrarot gest\xF6rt \u2013 Roboter neu starten.",
+  "errorLong.camera_fault": "Kamera gest\xF6rt \u2013 Roboter neu starten.",
+  "errorLong.strong_magnet": "Starkes Magnetfeld erkannt \u2013 nicht direkt an der virtuellen Wand starten.",
+  "errorLong.water_pump": "Wasserpumpe gest\xF6rt \u2013 Roboter neu starten.",
+  "errorLong.rtc": "Uhr (RTC) gest\xF6rt \u2013 Roboter neu starten.",
+  "errorLong.auto_key_trig": "Interner Fehler \u2013 Roboter neu starten.",
+  "errorLong.p3v3": "Interner Fehler \u2013 Roboter neu starten.",
+  "errorLong.camera_idle": "Interner Fehler \u2013 Roboter neu starten.",
+  "errorLong.blocked": "Reinigungsweg blockiert oder Roboter steckt fest \u2013 T\xFCren \xF6ffnen, Hindernisse oder Sperrzone im Weg r\xE4umen.",
+  "errorLong.lds_error": "Laser-Abstandssensor gest\xF6rt \u2013 auf Fremdk\xF6rper pr\xFCfen.",
+  "errorLong.lds_bumper": "Sto\xDFsensor des Laserturms klemmt \u2013 pr\xFCfen.",
+  "errorLong.filter_blocked": "Filter feucht oder verstopft \u2013 pr\xFCfen, ob der Filter trocken ist oder gereinigt werden muss.",
+  "errorLong.edge": "Kantensensor gest\xF6rt \u2013 pr\xFCfen und reinigen.",
+  "errorLong.carpet": "Teppich beim Wischen erkannt \u2013 Roboter an eine andere Stelle setzen und neu starten.",
+  "errorLong.laser": "3D-Hindernissensor gest\xF6rt \u2013 Sensor reinigen.",
+  "errorLong.ultrasonic": "Ultraschallsensor gest\xF6rt \u2013 Roboter neu starten.",
+  "errorLong.no_go_zone": "Sperrzone oder virtuelle Wand erkannt \u2013 Roboter aus dem Bereich setzen und neu starten.",
+  "errorLong.route": "Zielbereich nicht erreichbar \u2013 T\xFCren \xF6ffnen, Hindernisse r\xE4umen oder Sperrzone im Weg l\xF6schen.",
+  "errorLong.restricted": "Roboter steht in einer Sperrzone \u2013 aus dem Bereich setzen.",
+  "errorLong.remove_mop": "Wischen fertig \u2013 Mopp abnehmen und reinigen.",
+  "errorLong.mop_removed": "Mopp-Pad w\xE4hrend der Reinigung abgefallen \u2013 vor dem Weiterfahren anbringen.",
+  "errorLong.mop_pad_stop_rotate": "Mopp-Pad dreht sich nicht \u2013 bitte pr\xFCfen.",
+  "errorLong.mop_install_failed": "Mopp-Pad automatisch anbringen fehlgeschlagen \u2013 von Hand anbringen.",
+  "errorLong.low_battery_turn_off": "Akku leer \u2013 Roboter schaltet gleich ab.",
+  "errorLong.dirty_tank_not_installed": "Schmutzwassertank im Roboter fehlt \u2013 richtig einsetzen und Lauf starten.",
+  "errorLong.robot_in_hidden_room": "Roboter steht in einem ausgeblendeten Bereich \u2013 an passende Stelle setzen und neu versuchen.",
+  "errorLong.lds_failed_to_lift": "Laserturm l\xE4sst sich nicht anheben \u2013 Umgebung freir\xE4umen und Roboter in einen offenen Bereich setzen.",
+  "errorLong.robot_stuck": "Roboter steckt fest oder kann sich nicht positionieren \u2013 in einen offenen Bereich setzen und fortsetzen.",
+  "errorLong.slippery_floor": "Rutschiger Boden \u2013 Roboter kommt nicht \xFCber das Hindernis; warten oder Wasser um den Roboter aufwischen.",
+  "errorLong.unknown": "Unbekannte Meldung des Roboters.",
+  "errorLong.check_mop_install": "Mopp-Halterung pr\xFCfen \u2013 ist der Mopp richtig eingesetzt?",
+  "errorLong.dirty_water_tank_full": "Schmutzwassertank im Roboter zu voll oder verschmutzt \u2013 leeren und reinigen.",
+  "errorLong.retractable_leg_stuck": "Ausfahrbare Beine verwickelt \u2013 pr\xFCfen.",
+  "errorLong.internal_error": "Interner Fehler \u2013 Roboter neu starten.",
+  "errorLong.robot_stuck_on_tables": "Steckt zwischen Tischen und St\xFChlen fest \u2013 in einen offenen Bereich setzen und neu starten.",
+  "errorLong.robot_stuck_on_passage": "Steckt in einem engen Durchgang fest \u2013 in einen offenen Bereich setzen; Durchgang als Sperrzone eintragen.",
+  "errorLong.robot_stuck_on_threshold": "Steckt an einer Stufe oder Schwelle fest \u2013 in einen offenen Bereich setzen; Schwelle als Sperrzone eintragen.",
+  "errorLong.robot_stuck_on_low_lying_area": "Steckt unter einem niedrigen M\xF6bel fest \u2013 in einen offenen Bereich setzen; Bereich als Sperrzone eintragen.",
+  "errorLong.robot_stuck_on_ramp": "Absturzgef\xE4hrdete Rampe auf dem Weg erkannt \u2013 passierbare Schwellen einstellen, wenn keine Rampe da ist.",
+  "errorLong.robot_stuck_on_obstacle": "Hindernis auf dem Weg \u2013 r\xE4umen und Lauf neu starten.",
+  "errorLong.robot_stuck_on_pet": "Person oder Haustier auf dem Weg \u2013 beim Neustart den Weg freihalten.",
+  "errorLong.robot_stuck_on_slippery_surface": "Steckt fest wegen Rutschens \u2013 Hauptreifen reinigen.",
+  "errorLong.robot_stuck_on_carpet": "Rutscht auf dem Teppich \u2013 vom Teppich setzen und neu starten; Teppich als Sperrzone eintragen.",
+  "errorLong.bin_full": "Staubbeutel voll oder Luftkanal verstopft \u2013 pr\xFCfen.",
+  "errorLong.bin_open": "Deckel der Absaugstation offen oder Staubbeutel fehlt \u2013 pr\xFCfen.",
+  "errorLong.water_tank": "Frischwassertank nicht eingesetzt \u2013 einsetzen.",
+  "errorLong.dirty_water_tank": "Schmutzwassertank voll oder nicht eingesetzt \u2013 pr\xFCfen.",
+  "errorLong.water_tank_dry": "Zu wenig Wasser im Frischwassertank \u2013 nachf\xFCllen, sonst f\xE4hrt der Roboter nicht zur Mopp-W\xE4sche.",
+  "errorLong.dirty_water_tank_blocked": "Schmutzwassertank verstopft \u2013 Roboter neu starten.",
+  "errorLong.dirty_water_tank_pump": "Pumpe des Schmutzwassertanks gest\xF6rt \u2013 Roboter neu starten.",
+  "errorLong.mop_pad": "Waschbrett nicht richtig eingesetzt \u2013 Roboter kann nicht zur Waschstation; Waschbrett und Verschl\xFCsse pr\xFCfen.",
+  "errorLong.wet_mop_pad": "Wasserstand im Waschbrett abnormal \u2013 Waschbrett rechtzeitig reinigen, sonst droht Verstopfung.",
+  "errorLong.clean_mop_pad": "Reinigung fertig \u2013 Waschbrett des Mopps rechtzeitig reinigen, sonst Flecken und Geruch.",
+  "errorLong.clean_tank_level": "Frischwassertank bald leer \u2013 pr\xFCfen und nachf\xFCllen.",
+  "errorLong.station_disconnected": "Station ohne Strom \u2013 Stromversorgung und Netzstecker der Station pr\xFCfen.",
+  "errorLong.dirty_tank_level": "Schmutzwassertank zu voll \u2013 pr\xFCfen und leeren.",
+  "errorLong.washboard_level": "Wasserstand im Waschbrett zu hoch \u2013 Schmutzwassertank und Waschbrett reinigen.",
+  "errorLong.no_mop_in_station": "Mopp nicht in der Station \u2013 in die Station legen oder am Roboter anbringen.",
+  "errorLong.dust_bag_full": "Staubbeutel pr\xFCfen und wechseln. Absaug\xF6ffnungen von Staubbox und Station regelm\xE4\xDFig reinigen.",
+  "errorLong.self_test_failed": "Selbsttest fehlgeschlagen \u2013 kein Wasser im Frischwassertank des Wassermoduls.",
+  "errorLong.washboard_not_working": "Waschbrett arbeitet nicht \u2013 auf Verwicklung pr\xFCfen und reinigen.",
+  "errorLong.drainage_failed": "Abpumpen des Schmutzwassers gest\xF6rt \u2013 Kundendienst kontaktieren.",
+  "errorLong.mop_not_detected": "Mopp nicht erkannt \u2013 anbringen und Lauf fortsetzen.",
+  "errorLong.mop_holder_error": "Mopp-Halter in der Station falsch \u2013 Anzahl und Lage pr\xFCfen.",
+  "errorLong.dock_error": "Stationsfehler \u2013 Klappe ganz schlie\xDFen und Mopps richtig einlegen.",
+  "errorLong.wash_failed": "Mopp-W\xE4sche fehlgeschlagen \u2013 Station pr\xFCfen, Mopp von Hand anbringen.",
+  "errorLong.robot_stuck_on_curtain": "Steckt im Vorhang fest \u2013 Roboter wegsetzen und neu starten; Bereich als Sperrzone eintragen.",
+  "errorLong.edge_mop_stop_rotate": "Kanten-Mopp dreht sich nicht \u2013 pr\xFCfen, ob der Roboter auf Teppich steht.",
+  "errorLong.edge_mop_detached": "Kanten-Mopp abgefallen \u2013 vor dem Weiterfahren anbringen.",
+  "errorLong.chassis_lift_malfunction": "Fahrwerkshub defekt \u2013 Lauf neu starten; bleibt es, Kundendienst kontaktieren.",
+  "errorLong.mop_cover_error": "Mopp-Abdeckung gest\xF6rt \u2013 Rollen-Mopp und Abdeckung reinigen, Roboter flach hinstellen und fortsetzen.",
+  "errorLong.roller_mop_error": "Rollen-Mopp gest\xF6rt \u2013 Rollen-Mopp und Abdeckung reinigen, Roboter flach hinstellen und fortsetzen.",
+  "errorLong.robotic_arm_stopped": "Roboterarm gestoppt \u2013 Stationsknopf und Arm-Knopf gedr\xFCckt halten, um zur\xFCckzusetzen.",
+  "errorLong.onboard_water_tank_empty": "Wassertank im Roboter leer \u2013 bitte nachf\xFCllen.",
+  "errorLong.onboard_dirty_water_tank_full": "Schmutzwasserbox im Roboter voll \u2013 herausnehmen und leeren, oder zur Mopp-W\xE4sche in die Station.",
+  "errorLong.mop_not_installed": "Mopp nicht eingesetzt \u2013 vor dem Start pr\xFCfen, ob der Rollen-Mopp richtig sitzt.",
+  "errorLong.fluffing_roller_error": "Aufplusterrolle gest\xF6rt \u2013 Roboter umdrehen, Rolle entriegeln und reinigen.",
+  "errorLong.blocked_by_obstacle": "Von einem Hindernis blockiert \u2013 vor dem Roboter r\xE4umen.",
+  "errorLong.return_to_charge_failed": "R\xFCckkehr zur Station fehlgeschlagen \u2013 Rampe und Stromversorgung der Station pr\xFCfen.",
+  "errorLong.drainage_outlet_filter": "Abwasserfilter des Roboters verstopft \u2013 reinigen, damit das Wasser flie\xDFt.",
+  "errorLong.main_wheels_error": "Hauptrad-Fehler \u2013 Reinigung pausiert; am Roboter oder in der App fortsetzen.",
+  "errorLong.clean_water_tank_empty": "Frischwassertank leer \u2013 nachf\xFCllen.",
+  "errorLong.dust_box_missing": "Staubbox nicht eingesetzt.",
+  "errorLong.wheels_stuck": "Rad blockiert \u2013 R\xE4der pr\xFCfen.",
+  "errorLong.brush_stuck": "B\xFCrste blockiert \u2013 B\xFCrste pr\xFCfen und reinigen.",
+  "errorLong.low_battery": "Akku leer \u2013 bitte laden.",
+  "errorLong.detergent_empty": "Reinigungsmittel leer \u2013 nachf\xFCllen.",
+  "errorLong.water_tank_missing": "Wassertank nicht eingesetzt.",
+  "errorLong.clean_water_tank_missing": "Frischwassertank nicht eingesetzt.",
+  "errorLong.dirty_water_tank_missing": "Abwassertank nicht eingesetzt."
 };
+
+// src/i18n/t.ts
+var TABLE = de;
+function fill(raw, params) {
+  return params ? raw.replace(/\{(\w+)\}/g, (m2, k2) => k2 in params ? String(params[k2]) : m2) : raw;
+}
+function t3(key, params) {
+  return fill(TABLE[key] ?? key, params);
+}
+function tx(key, params) {
+  return fill(TABLE[key] ?? key, params);
+}
+function lookup(prefix, value) {
+  return TABLE[`${prefix}.${value}`];
+}
+
+// src/domain/rooms.ts
+var ROOM_TYPE_EN = [
+  [1, "Living Room", "mdi:sofa-outline"],
+  [2, "Primary Bedroom", "mdi:bed-king-outline"],
+  [3, "Study", "mdi:bookshelf"],
+  [4, "Kitchen", "mdi:chef-hat"],
+  [5, "Dining Hall", "mdi:silverware-fork-knife"],
+  [6, "Bathroom", "mdi:shower"],
+  [7, "Balcony", "mdi:balcony"],
+  [8, "Corridor", "mdi:foot-print"],
+  [9, "Utility Room", "mdi:archive-outline"],
+  [10, "Closet", "mdi:hanger"],
+  [11, "Meeting Room", "mdi:presentation"],
+  [12, "Office", "mdi:monitor"],
+  [13, "Fitness Area", "mdi:dumbbell"],
+  [14, "Recreation Area", "mdi:gamepad-variant-outline"],
+  [15, "Secondary Bedroom", "mdi:bed-single-outline"]
+];
+var ROOM_TYPES = Object.fromEntries(
+  ROOM_TYPE_EN.map(([id, en, icon]) => [id, { name: tx(`roomtype.${id}`), en, icon }])
+);
 var ICON_BY_KEYWORD = [
   [/\b(wc|toilet|gäste-?wc|gaeste-?wc)\b/i, "mdi:toilet"],
   [/bad|bath|dusche|shower/i, "mdi:shower"],
@@ -889,6 +1566,7 @@ function shortName(name) {
 }
 function roomsFromMap(rooms, deutsch = false, namesDe = {}) {
   if (!rooms || typeof rooms !== "object") return [];
+  const translate = typeof namesDe === "function" ? namesDe : (raw) => namesDe[raw];
   const out = [];
   for (const [key, r4] of Object.entries(rooms)) {
     if (!r4 || typeof r4 !== "object") continue;
@@ -902,8 +1580,8 @@ function roomsFromMap(rooms, deutsch = false, namesDe = {}) {
       name = (deutsch ? typed.name : typed.en) + (suffix ? ` ${suffix}` : "");
       icon = typed.icon;
     } else {
-      const raw = String(r4.custom_name ?? r4.name ?? "").trim() || `Raum ${id}`;
-      name = deutsch ? namesDe[raw] ?? raw : raw;
+      const raw = String(r4.custom_name ?? r4.name ?? "").trim() || t3("room.fallback", { n: id });
+      name = deutsch ? translate(raw) ?? raw : raw;
       icon = roomIcon(name, r4.icon);
     }
     out.push({ id, name, short: shortName(name), icon, order: typeof r4.order === "number" ? r4.order : id, typed: !!typed });
@@ -912,67 +1590,12 @@ function roomsFromMap(rooms, deutsch = false, namesDe = {}) {
 }
 var roomById = (rooms, id) => rooms.find((r4) => r4.id === id);
 
-// src/config.ts
-var NAV = [
-  { key: "start", label: "\xDCbersicht", icon: "mdi:home-outline", page: "start", tab: true },
-  { key: "reinigen", label: "Karte", icon: "mdi:map-outline", page: "reinigen", tab: true },
-  { key: "rooms", label: "R\xE4ume", icon: "mdi:view-grid-outline", overlay: "rooms", tab: false },
-  { key: "planer", label: "Planer", icon: "mdi:calendar-outline", page: "planer", tab: true },
-  { key: "protokoll", label: "Verlauf", icon: "mdi:format-list-bulleted", page: "protokoll", tab: true },
-  { key: "prognose", label: "Prognose", icon: "mdi:chart-line", page: "prognose", onlyWhen: "prognose", tab: true },
-  { key: "einstellungen", label: "Einstellungen", icon: "mdi:cog-outline", page: "einstellungen", tab: true }
-];
-var ROOMS_DE = { Bathroom: "Bad", "Primary Bedroom": "Schlafzimmer", WC: "WC", Corridor: "Flur", Study: "B\xFCro", Kitchen: "K\xFCche", "Living Room": "Wohnzimmer" };
-var STATUS_DE = {
-  sleeping: "schl\xE4ft",
-  charging: "l\xE4dt",
-  cleaning: "reinigt",
-  sweeping: "saugt",
-  mopping: "wischt",
-  sweeping_and_mopping: "saugt und wischt",
-  returning: "f\xE4hrt zur Station",
-  paused: "pausiert",
-  idle: "bereit",
-  docked: "angedockt",
-  washing: "Mopp-W\xE4sche",
-  drying: "trocknet",
-  auto_emptying: "saugt ab",
-  error: "Fehler",
-  charging_completed: "voll geladen",
-  segment_cleaning: "reinigt R\xE4ume",
-  zone_cleaning: "reinigt Zone",
-  spot_cleaning: "reinigt Punkt",
-  cruising: "f\xE4hrt"
-};
-var ERR_DE = {
-  clean_mop_pad: "Mopp reinigen",
-  dust_bag_full: "Staubbeutel voll",
-  clean_water_tank_empty: "Frischwasser leer",
-  dirty_water_tank_full: "Abwasser voll",
-  dust_box_missing: "Staubbox fehlt",
-  mop_pad_stop_rotate: "Mopp blockiert",
-  wheels_stuck: "Rad blockiert",
-  brush_stuck: "B\xFCrste blockiert",
-  low_battery: "Akku leer",
-  station_disconnected: "Station getrennt",
-  detergent_empty: "Reinigungsmittel leer",
-  water_tank_missing: "Wassertank fehlt",
-  clean_water_tank_missing: "Frischwassertank fehlt",
-  dirty_water_tank_missing: "Abwassertank fehlt"
-};
-var APP_SCENES = [
-  { id: 32, name: "Eingang reinigen", sub: "Flur \xB7 Saugen + Wischen \xB7 2\xD7", icon: "mdi:door-open" },
-  { id: 33, name: "Bad Saugen/Wischen", sub: "Bad \xB7 1\xD7", icon: "mdi:shower" },
-  { id: 34, name: "Wischen nach dem Saugen", sub: "Ganze Wohnung \xB7 nur Wischen", icon: "mdi:water" }
-];
-
 // src/ha/profile.ts
-var OPTION_DE = { mopping_after_sweeping: "Wischen nach Saugen", quick: "Schnell", off: "Aus", on: "An" };
 var humanize = (v2) => v2.replace(/_/g, " ").replace(/^\w/, (c4) => c4.toUpperCase());
 function optionLabel(key, value) {
   if (key === "wdh") return value.replace(/x$/i, "");
   const table = ROOM_VALUE_CODES.RV_HA[key];
-  return table[value] ?? OPTION_DE[value] ?? humanize(value);
+  return table[value] ?? lookup("option", value) ?? humanize(value);
 }
 var optionsOf = (s4, id, key) => {
   const e4 = s4[id];
@@ -995,7 +1618,7 @@ function roomsFromSelects(s4) {
     if (!m2) continue;
     const n4 = parseInt(m2[1], 10);
     const fn = cleanName(s4[id]?.attributes.friendly_name);
-    const name = fn.replace(new RegExp(`^${deviceName().replace(/[.*+?^${}()|[\\]\\\\]/g, "\\\\$&")}\\s*`, "i"), "").replace(/cleaning mode/i, "").trim() || `Raum ${n4}`;
+    const name = fn.replace(new RegExp(`^${deviceName().replace(/[.*+?^${}()|[\\]\\\\]/g, "\\\\$&")}\\s*`, "i"), "").replace(/cleaning mode/i, "").trim() || t3("room.fallback", { n: n4 });
     out.push({ id: n4, name, short: shortName(name), icon: roomIcon(name), order: n4, typed: false });
   }
   return out.sort((a3, b3) => a3.order - b3.order || a3.id - b3.id);
@@ -1008,7 +1631,7 @@ var fallbackSelectIds = (s4) => {
 };
 function roomsOf(s4) {
   const deutsch = s4[ENTITIES.raumnamen]?.state === "Deutsch";
-  const fromMap = roomsFromMap(s4[ENTITIES.map]?.attributes.rooms, deutsch, ROOMS_DE);
+  const fromMap = roomsFromMap(s4[ENTITIES.map]?.attributes.rooms, deutsch, (raw) => lookup("room", raw));
   return fromMap.length ? fromMap : roomsFromSelects(s4);
 }
 function profileIds(s4) {
@@ -1041,7 +1664,7 @@ var readProfile = memoizeSelector(
 
 // src/domain/raumwerte.ts
 var { RV } = ROOM_VALUE_CODES;
-function lookup(table, code) {
+function lookup2(table, code) {
   return code !== void 0 && Object.prototype.hasOwnProperty.call(table, code) ? table[code] : void 0;
 }
 function inverse(table) {
@@ -1057,10 +1680,10 @@ function parseRaum(s4) {
     const n4 = parseInt(id, 10);
     if (!(n4 >= 1)) return;
     out[n4] = {
-      modus: lookup(RV.modus, f3[0]) ?? "Saugen",
-      saug: lookup(RV.saug, f3[1]) ?? "Standard",
-      wasser: lookup(RV.wasser, f3[2]) ?? null,
-      route: lookup(RV.route, f3[3]) ?? null,
+      modus: lookup2(RV.modus, f3[0]) ?? "Saugen",
+      saug: lookup2(RV.saug, f3[1]) ?? "Standard",
+      wasser: lookup2(RV.wasser, f3[2]) ?? null,
+      route: lookup2(RV.route, f3[3]) ?? null,
       wdh: /^[123]$/.test(f3[4] ?? "") ? f3[4] : "1"
     };
   });
@@ -1080,7 +1703,7 @@ function encodeRaum(o5) {
 // src/ha/api.ts
 var INTERVAL_STEPS = [5, 10, 15, 20, 30, 60];
 var roundInterval = (v2) => INTERVAL_STEPS.reduce((a3, b3) => Math.abs(b3 - v2) < Math.abs(a3 - v2) ? b3 : a3, INTERVAL_STEPS[0]);
-var inverse2 = (t3) => Object.fromEntries(Object.entries(t3).map(([k2, v2]) => [v2, k2]));
+var inverse2 = (t4) => Object.fromEntries(Object.entries(t4).map(([k2, v2]) => [v2, k2]));
 var RV_HA_INV = { modus: inverse2(ROOM_VALUE_CODES.RV_HA.modus), saug: inverse2(ROOM_VALUE_CODES.RV_HA.saug), wasser: inverse2(ROOM_VALUE_CODES.RV_HA.wasser), route: inverse2(ROOM_VALUE_CODES.RV_HA.route) };
 var DxApi = class {
   constructor(getHass) {
@@ -1224,26 +1847,26 @@ var DxApi = class {
 var ok = (key, icon, label) => ({ key, icon, label, level: "ok", text: label });
 function setupChecks(i5) {
   const out = [];
-  out.push(i5.robot ? ok("robot", "mdi:robot-vacuum", `Roboter erkannt: ${i5.robot.name}`) : { key: "robot", icon: "mdi:robot-vacuum", label: "Roboter", level: "error", text: "Kein Dreame-Roboter gefunden \u2013 Integration einrichten oder \u201Erobot:\u201C in der Kartenkonfiguration setzen", action: { kind: "ha-path", path: "/config/integrations" } });
-  out.push(i5.missingPackage.length ? { key: "package", icon: "mdi:package-variant", label: "Paket", level: "error", text: `${i5.missingPackage.length} Helfer des Pakets fehlen \u2013 Paket heidi.yaml und Automationen pr\xFCfen`, action: { kind: "page", page: "einstellungen" } } : ok("package", "mdi:package-variant", "Paket vollst\xE4ndig"));
-  if (i5.robot) out.push(i5.missingRobot.length ? { key: "entities", icon: "mdi:format-list-checks", label: "Roboter-Entit\xE4ten", level: "warn", text: `${i5.missingRobot.length} Entit\xE4ten des Roboters fehlen oder sind deaktiviert`, action: { kind: "page", page: "einstellungen" } } : ok("entities", "mdi:format-list-checks", "Roboter-Entit\xE4ten vollst\xE4ndig"));
-  if (i5.robot) out.push(i5.hasMapData ? ok("mapdata", "mdi:map-check", "Datenkarte aktiv") : { key: "mapdata", icon: "mdi:map-check", label: "Datenkarte", level: "warn", text: "Datenkarte nicht aktiviert \u2013 R\xE4ume in der Heidi-Karte fehlen (Entit\xE4t \u201ECurrent Map Data\u201C in der Dreame-Integration einschalten)", action: { kind: "ha-path", path: "/config/integrations/integration/dreame_vacuum" } });
+  out.push(i5.robot ? ok("robot", "mdi:robot-vacuum", t3("setup.robot.ok", { name: i5.robot.name })) : { key: "robot", icon: "mdi:robot-vacuum", label: t3("setup.robot.label"), level: "error", text: t3("setup.robot.error"), action: { kind: "ha-path", path: "/config/integrations" } });
+  out.push(i5.missingPackage.length ? { key: "package", icon: "mdi:package-variant", label: t3("setup.package.label"), level: "error", text: t3("setup.package.error", { n: i5.missingPackage.length }), action: { kind: "page", page: "einstellungen" } } : ok("package", "mdi:package-variant", t3("setup.package.ok")));
+  if (i5.robot) out.push(i5.missingRobot.length ? { key: "entities", icon: "mdi:format-list-checks", label: t3("setup.entities.label"), level: "warn", text: t3("setup.entities.warn", { n: i5.missingRobot.length }), action: { kind: "page", page: "einstellungen" } } : ok("entities", "mdi:format-list-checks", t3("setup.entities.ok")));
+  if (i5.robot) out.push(i5.hasMapData ? ok("mapdata", "mdi:map-check", t3("setup.mapdata.ok")) : { key: "mapdata", icon: "mdi:map-check", label: t3("setup.mapdata.label"), level: "warn", text: t3("setup.mapdata.warn"), action: { kind: "ha-path", path: "/config/integrations/integration/dreame_vacuum" } });
   if (i5.robot && i5.customizedCleaning !== null) {
     const off = i5.customizedCleaning === "off" && !i5.running;
-    out.push(off ? { key: "customized", icon: "mdi:tune-variant", label: "Angepasste Reinigung", level: "warn", text: "Angepasste Reinigung ist aus \u2013 Raumwerte je Raum wirken nicht", action: { kind: "more-info", entity: i5.ids.customizedCleaning } } : ok("customized", "mdi:tune-variant", "Angepasste Reinigung an"));
+    out.push(off ? { key: "customized", icon: "mdi:tune-variant", label: t3("setup.customized.label"), level: "warn", text: t3("setup.customized.warn"), action: { kind: "more-info", entity: i5.ids.customizedCleaning } } : ok("customized", "mdi:tune-variant", t3("setup.customized.ok")));
   }
   if (i5.robot && i5.rooms.length) {
-    const known2 = new Set(Object.values(ROOM_TYPES).flatMap((t3) => [t3.name.toLowerCase(), t3.en.toLowerCase()]));
+    const known2 = new Set(Object.values(ROOM_TYPES).flatMap((r4) => [r4.name.toLowerCase(), r4.en.toLowerCase()]));
     const custom = i5.rooms.filter((r4) => !r4.typed && known2.has(r4.name.trim().toLowerCase()));
-    out.push(custom.length ? { key: "roomtypes", icon: "mdi:tag-outline", label: "Raumtypen", level: "warn", text: `${custom.map((r4) => r4.name).join(", ")}: benutzerdefiniert, obwohl die App den Standardtyp kennt \u2013 f\xFCr die Sprachsteuerung in der App \u201ERaum umbenennen\u201C den Typ w\xE4hlen`, action: { kind: "more-info", entity: i5.ids.roomName(custom[0].id) } } : ok("roomtypes", "mdi:tag-outline", "Raumtypen passen"));
+    out.push(custom.length ? { key: "roomtypes", icon: "mdi:tag-outline", label: t3("setup.roomtypes.label"), level: "warn", text: t3("setup.roomtypes.warn", { rooms: custom.map((r4) => r4.name).join(", ") }), action: { kind: "more-info", entity: i5.ids.roomName(custom[0].id) } } : ok("roomtypes", "mdi:tag-outline", t3("setup.roomtypes.ok")));
   }
   if (i5.robot && i5.mapping) {
     const open = i5.mapping.segments.filter((s4) => !i5.mapping.assigned.has(s4.id));
-    out.push(open.length ? { key: "areas", icon: "mdi:home-map-marker", label: "R\xE4ume \u2194 Bereiche", level: "error", text: `${open.length === 1 ? "Ein Raum ist" : open.length + " R\xE4ume sind"} keinem HA-Bereich zugeordnet: ${open.map((s4) => s4.name).join(", ")}`, action: { kind: "vacuum-areas", entity: i5.robot.vac, hint: "Reinigung \u2192 Nach Bereich \u2192 Konfigurieren" } } : ok("areas", "mdi:home-map-marker", "Alle R\xE4ume einem HA-Bereich zugeordnet"));
+    out.push(open.length ? { key: "areas", icon: "mdi:home-map-marker", label: t3("setup.areas.label"), level: "error", text: t3("setup.areas.error", { who: open.length === 1 ? t3("setup.areas.one") : t3("setup.areas.many", { n: open.length }), rooms: open.map((s4) => s4.name).join(", ") }), action: { kind: "vacuum-areas", entity: i5.robot.vac, hint: t3("setup.areas.hint") } } : ok("areas", "mdi:home-map-marker", t3("setup.areas.ok")));
   }
   if (i5.repairs) {
     const mine = i5.repairs.filter((r4) => r4.domain === "dreame_vacuum" || r4.translation_key === "segments_changed" || r4.domain === "vacuum");
-    out.push(mine.length ? { key: "repairs", icon: "mdi:wrench-outline", label: "Reparaturen", level: "error", text: `${mine.length} offene ${mine.length === 1 ? "Reparatur" : "Reparaturen"} in HA (${mine.map((r4) => r4.translation_key ?? r4.issue_id).join(", ")})`, action: { kind: "ha-path", path: "/config/repairs" } } : ok("repairs", "mdi:wrench-outline", "Keine offenen Reparaturen"));
+    out.push(mine.length ? { key: "repairs", icon: "mdi:wrench-outline", label: t3("setup.repairs.label"), level: "error", text: t3("setup.repairs.error", { n: mine.length, what: mine.length === 1 ? t3("setup.repairs.one") : t3("setup.repairs.many"), list: mine.map((r4) => r4.translation_key ?? r4.issue_id).join(", ") }), action: { kind: "ha-path", path: "/config/repairs" } } : ok("repairs", "mdi:wrench-outline", t3("setup.repairs.ok")));
   }
   return out;
 }
@@ -1379,44 +2002,37 @@ function loadSetupData(hass, vac, force = false) {
 }
 
 // src/domain/status.ts
-var TASK_DE = {
-  room_cleaning: "Reinigt R\xE4ume",
-  zone_cleaning: "Reinigt Zone",
-  spot_cleaning: "Reinigt Punkt",
-  cleaning: "Reinigt",
-  cruising: "F\xE4hrt",
-  mapping: "Erstellt Karte",
-  fast_mapping: "Erstellt Karte"
-};
 var EMPTY = ["unknown", "unavailable", ""];
 var cap = (s4) => s4.replace(/^./, (c4) => c4.toUpperCase());
 var B2 = (service, icon, label, primary = false) => ({ service, icon, label, primary });
+var statusText = (status) => lookup("status", status) ?? status.replace(/_/g, " ");
+var errorText = (code) => lookup("error", code) ?? code.replace(/_/g, " ");
 function heroButtons(vac) {
   switch (vac) {
     case "cleaning":
-      return [B2("pause", "mdi:pause", "Pause", true), B2("stop", "mdi:stop", "Stopp"), B2("return_to_base", "mdi:home-import-outline", "Station")];
+      return [B2("pause", "mdi:pause", t3("button.pause"), true), B2("stop", "mdi:stop", t3("button.stop")), B2("return_to_base", "mdi:home-import-outline", t3("button.station"))];
     case "paused":
-      return [B2("start", "mdi:play", "Weiter", true), B2("stop", "mdi:stop", "Stopp"), B2("return_to_base", "mdi:home-import-outline", "Station")];
+      return [B2("start", "mdi:play", t3("button.resume"), true), B2("stop", "mdi:stop", t3("button.stop")), B2("return_to_base", "mdi:home-import-outline", t3("button.station"))];
     case "returning":
-      return [B2("pause", "mdi:pause", "Pause", true), B2("stop", "mdi:stop", "Stopp"), B2("locate", "mdi:map-marker", "Orten")];
+      return [B2("pause", "mdi:pause", t3("button.pause"), true), B2("stop", "mdi:stop", t3("button.stop")), B2("locate", "mdi:map-marker", t3("button.locate"))];
     case "docked":
-      return [B2("start", "mdi:play", "Start", true), B2("locate", "mdi:map-marker", "Orten")];
+      return [B2("start", "mdi:play", t3("button.start"), true), B2("locate", "mdi:map-marker", t3("button.locate"))];
     default:
-      return [B2("start", "mdi:play", "Start", true), B2("return_to_base", "mdi:home-import-outline", "Station"), B2("locate", "mdi:map-marker", "Orten")];
+      return [B2("start", "mdi:play", t3("button.start"), true), B2("return_to_base", "mdi:home-import-outline", t3("button.station")), B2("locate", "mdi:map-marker", t3("button.locate"))];
   }
 }
 function heroModel(i5) {
   const phaseOk = !EMPTY.includes(i5.phase);
-  const statusTxt = phaseOk ? i5.phase : cap(STATUS_DE[i5.status] ?? i5.status.replace(/_/g, " "));
+  const statusTxt = phaseOk ? i5.phase : cap(statusText(i5.status));
   const auto = i5.autoLauf ? i5.autoLetzterPlan : "";
-  const job = auto && !EMPTY.includes(auto) ? auto : TASK_DE[i5.task] ?? "Reinigt";
+  const job = auto && !EMPTY.includes(auto) ? auto : lookup("task", i5.task) ?? t3("task.default");
   let big = statusTxt, sub = "";
-  if (i5.vac === "error") big = "Fehler";
+  if (i5.vac === "error") big = t3("head.error");
   else if (i5.vac === "paused") {
-    big = "Pausiert";
+    big = t3("head.paused");
     sub = job;
   } else if (i5.vac === "returning") {
-    big = "F\xE4hrt zur Station";
+    big = t3("head.returning");
     sub = phaseOk && i5.phase !== big ? i5.phase : "";
   } else if (i5.vac === "cleaning") {
     big = job;
@@ -1424,23 +2040,24 @@ function heroModel(i5) {
   }
   if (sub === big) sub = "";
   const dot = i5.vac === "cleaning" ? "accent" : i5.vac === "returning" ? "warning" : i5.vac === "error" ? "danger" : "positive";
-  const errorChip = i5.error !== "no_error" && i5.error !== "unavailable" ? { text: ERR_DE[i5.error] ?? i5.error.replace(/_/g, " "), level: i5.hasError ? "danger" : "warning" } : null;
-  const roomChip = i5.room !== "\u2013" && i5.vac === "cleaning" && !phaseOk ? i5.room : null;
+  const errorChip = i5.error !== "no_error" && i5.error !== "unavailable" ? { text: errorText(i5.error), level: i5.hasError ? "danger" : "warning" } : null;
+  const roomChip = i5.room !== t3("common.dash") && i5.vac === "cleaning" && !phaseOk ? i5.room : null;
   const dnd = `${(i5.dndStart || "").slice(0, 5)}\u2013${(i5.dndEnd || "").slice(0, 5)}`;
   return { big, sub, dot, buttons: heroButtons(i5.vac), errorChip, roomChip, dnd, phaseOk };
 }
 
 // src/domain/labels.ts
 var LOCALE = "de-AT";
+var DASH = t3("common.dash");
 function fmtDate(iso, now = /* @__PURE__ */ new Date()) {
   const d3 = iso instanceof Date ? iso : new Date(iso);
-  if (isNaN(d3.getTime())) return "\u2013";
+  if (isNaN(d3.getTime())) return DASH;
   const same = d3.toDateString() === now.toDateString();
-  return (same ? "heute" : d3.toLocaleDateString(LOCALE, { day: "2-digit", month: "2-digit" })) + " " + d3.toLocaleTimeString(LOCALE, { hour: "2-digit", minute: "2-digit" });
+  return (same ? t3("label.today") : d3.toLocaleDateString(LOCALE, { day: "2-digit", month: "2-digit" })) + " " + d3.toLocaleTimeString(LOCALE, { hour: "2-digit", minute: "2-digit" });
 }
 function roomName(raw, deutsch) {
-  if (!raw || ["unknown", "unavailable"].includes(raw)) return "\u2013";
-  return deutsch ? ROOMS_DE[raw] ?? raw : raw;
+  if (!raw || ["unknown", "unavailable"].includes(raw)) return DASH;
+  return deutsch ? lookup("room", raw) ?? raw : raw;
 }
 
 // src/ha/selectors.ts
@@ -1524,13 +2141,13 @@ function makeReadPlan(n4) {
   const id = (f3) => planEntity(n4, f3);
   return memoizeSelector(() => planIds(n4), (s4) => {
     const sel = (f3) => st(s4, id(f3));
-    const tx = (f3) => txt(s4, id(f3));
-    const mask = tx("tage").padEnd(7, "0").slice(0, 7);
+    const tx2 = (f3) => txt(s4, id(f3));
+    const mask = tx2("tage").padEnd(7, "0").slice(0, 7);
     return {
       n: n4,
-      name: tx("name"),
+      name: tx2("name"),
       aktiv: on(s4, id("aktiv")),
-      raeume: [...new Set(tx("raeume").split(",").map((x2) => parseInt(x2, 10)).filter((x2) => x2 >= 1 && x2 <= 7))],
+      raeume: [...new Set(tx2("raeume").split(",").map((x2) => parseInt(x2, 10)).filter((x2) => x2 >= 1 && x2 <= 7))],
       modus: sel("modus"),
       saug: sel("saugstufe"),
       wasser: sel("wasser"),
@@ -1538,14 +2155,14 @@ function makeReadPlan(n4) {
       wdh: sel("wiederholungen"),
       tage: [...mask].map((c4) => c4 === "1"),
       zeit: (txt(s4, id("zeit")) || "09:30").slice(0, 5),
-      personen: tx("personen").split(",").map((x2) => x2.trim()).filter(Boolean),
+      personen: tx2("personen").split(",").map((x2) => x2.trim()).filter(Boolean),
       ho: sel("homeoffice"),
       hoSaug: sel("ho_saug"),
       hoWdh: sel("ho_wdh"),
       schnell: on(s4, id("schnell")),
       spSaug: sel("sp_saug"),
       spWdh: sel("sp_wdh"),
-      raum: parseRaum(tx("raumwerte")),
+      raum: parseRaum(tx2("raumwerte")),
       entities: Object.fromEntries(PLAN_FIELDS.map((f3) => [f3, id(f3)]))
     };
   });
@@ -1660,10 +2277,10 @@ var readPrognose = memoizeSelector(() => [E2.prognose, E2.prognoseAktiv, E2.abwe
     wochen: num(s4, E2.prognoseWochen, 8),
     mindesttage: num(s4, E2.prognoseMindesttage, 14),
     schalter: [
-      { id: E2.abweichungHeute, label: "Abweichung heute", sub: "Urlaub, Feiertag", on: on(s4, E2.abweichungHeute) },
-      { id: E2.progHerbert, label: "Herbert einbeziehen", sub: "GPS + WLAN", on: on(s4, E2.progHerbert) },
-      { id: E2.progNicole, label: "Nicole einbeziehen", sub: "WLAN", on: on(s4, E2.progNicole) },
-      { id: E2.progNina, label: "Nina einbeziehen", sub: "WLAN", on: on(s4, E2.progNina) }
+      { id: E2.abweichungHeute, label: t3("prognose.deviation"), sub: t3("prognose.deviationSub"), on: on(s4, E2.abweichungHeute) },
+      { id: E2.progHerbert, label: t3("prognose.include", { name: PERSONS[0].name }), sub: t3("prognose.gpsWlan"), on: on(s4, E2.progHerbert) },
+      { id: E2.progNicole, label: t3("prognose.include", { name: PERSONS[1].name }), sub: t3("prognose.wlan"), on: on(s4, E2.progNicole) },
+      { id: E2.progNina, label: t3("prognose.include", { name: PERSONS[2].name }), sub: t3("prognose.wlan"), on: on(s4, E2.progNina) }
     ]
   };
 });
@@ -1683,16 +2300,16 @@ var readAutomatik = memoizeSelector(() => [E2.automatik, E2.autoStatus, E2.arbei
     minAkku: num(s4, E2.minAkku, 30),
     beiHeimkehr: txt(s4, E2.beiHeimkehr),
     beiHeimkehrOptions: opts(s4, E2.beiHeimkehr),
-    letzterPlan: txt(s4, E2.autoLetzterPlan) || "\u2013",
-    letzteAutoReinigung: !letzte || EMPTY2.includes(letzte) || letzte.startsWith("2000") ? "noch nie" : letzte
+    letzterPlan: txt(s4, E2.autoLetzterPlan) || t3("common.dash"),
+    letzteAutoReinigung: !letzte || EMPTY2.includes(letzte) || letzte.startsWith("2000") ? t3("automatik.never") : letzte
   };
 });
 var CONSUMABLES = () => [
-  ["Hauptb\xFCrste", E2.mainBrushLeft, E2.resetMainBrush],
-  ["Seitenb\xFCrste", E2.sideBrushLeft, E2.resetSideBrush],
-  ["Filter", E2.filterLeft, E2.resetFilter],
-  ["Sensoren", E2.sensorDirtyLeft, E2.resetSensor],
-  ["R\xE4der", E2.wheelDirtyLeft, E2.resetWheel]
+  [t3("consumable.mainBrush"), E2.mainBrushLeft, E2.resetMainBrush],
+  [t3("consumable.sideBrush"), E2.sideBrushLeft, E2.resetSideBrush],
+  [t3("consumable.filter"), E2.filterLeft, E2.resetFilter],
+  [t3("consumable.sensor"), E2.sensorDirtyLeft, E2.resetSensor],
+  [t3("consumable.wheel"), E2.wheelDirtyLeft, E2.resetWheel]
 ];
 var readConsumables = memoizeSelector(() => CONSUMABLES().flatMap(([, s4, b3]) => [s4, b3]), (s4) => CONSUMABLES().map(([name, sensor, reset]) => {
   const pct = num(s4, sensor, 0);
@@ -1702,19 +2319,19 @@ var readStation = memoizeSelector(() => [E2.dustBagStatus, E2.cleanWaterTankStat
   const inst = (id) => st(s4, id) === "installed";
   const lowWater = st(s4, E2.lowWaterWarning) !== "no_warning";
   const tiles = [
-    { key: "beutel", label: "Beutel", value: inst(E2.dustBagStatus) ? "OK" : "Pr\xFCfen", warn: !inst(E2.dustBagStatus) },
-    { key: "frisch", label: "Frisch", value: lowWater ? "Leer" : inst(E2.cleanWaterTankStatus) ? "OK" : "Fehlt", warn: lowWater || !inst(E2.cleanWaterTankStatus) },
-    { key: "abwasser", label: "Abwasser", value: inst(E2.dirtyWaterTankStatus) ? "OK" : "Voll", warn: !inst(E2.dirtyWaterTankStatus) },
-    { key: "mittel", label: "Mittel", value: inst(E2.detergentStatus) ? "OK" : "Leer", warn: !inst(E2.detergentStatus) }
+    { key: "beutel", label: t3("station.bag"), value: inst(E2.dustBagStatus) ? t3("station.ok") : t3("station.check"), warn: !inst(E2.dustBagStatus) },
+    { key: "frisch", label: t3("station.fresh"), value: lowWater ? t3("station.empty") : inst(E2.cleanWaterTankStatus) ? t3("station.ok") : t3("station.missing"), warn: lowWater || !inst(E2.cleanWaterTankStatus) },
+    { key: "abwasser", label: t3("station.dirty"), value: inst(E2.dirtyWaterTankStatus) ? t3("station.ok") : t3("station.full"), warn: !inst(E2.dirtyWaterTankStatus) },
+    { key: "mittel", label: t3("station.detergent"), value: inst(E2.detergentStatus) ? t3("station.ok") : t3("station.empty"), warn: !inst(E2.detergentStatus) }
   ];
   return {
     tiles,
-    ok: tiles.every((t3) => !t3.warn),
+    ok: tiles.every((x2) => !x2.warn),
     buttons: [
-      { entity: E2.startAutoEmpty, label: "Absaugen", confirm: null },
-      { entity: E2.selfClean, label: "Mopp", confirm: null },
-      { entity: E2.manualDrying, label: "Trocknen", confirm: null },
-      { entity: E2.baseStationCleaning, label: "Station", confirm: "Reinigung der Station starten?" }
+      { entity: E2.startAutoEmpty, label: t3("station.autoEmpty"), confirm: null },
+      { entity: E2.selfClean, label: t3("station.mop"), confirm: null },
+      { entity: E2.manualDrying, label: t3("station.dry"), confirm: null },
+      { entity: E2.baseStationCleaning, label: t3("station.clean"), confirm: t3("station.cleanConfirm") }
     ]
   };
 });
@@ -1733,17 +2350,17 @@ var readSettings = memoizeSelector(() => [E2.dark, E2.karte, E2.mapRotation, E2.
     rotation: { id: E2.mapRotation, value: st(s4, E2.mapRotation), options: rotOpts, labels: rotOpts.map((x2) => x2 + "\xB0") },
     raumnamen: { id: E2.raumnamen, value: st(s4, E2.raumnamen), options: opts(s4, E2.raumnamen, ["Original", "Deutsch"]), labels: opts(s4, E2.raumnamen, ["Original", "Deutsch"]) },
     schalter: [
-      { id: E2.automatik, label: "Automatik", sub: "", on: on(s4, E2.automatik) },
-      { id: E2.planerBereich, label: "Planer anzeigen", sub: "", on: on(s4, E2.planerBereich) },
-      { id: E2.prognoseAktiv, label: "Prognose", sub: "Lernende Anwesenheit, eigene Seite", on: on(s4, E2.prognoseAktiv) },
-      { id: E2.ninaZaehlt, label: "Nina z\xE4hlt f\xFCr Anwesenheit", sub: "", on: on(s4, E2.ninaZaehlt) }
+      { id: E2.automatik, label: t3("settings.automatik"), sub: "", on: on(s4, E2.automatik) },
+      { id: E2.planerBereich, label: t3("settings.planer"), sub: "", on: on(s4, E2.planerBereich) },
+      { id: E2.prognoseAktiv, label: t3("settings.prognose"), sub: t3("settings.prognoseSub"), on: on(s4, E2.prognoseAktiv) },
+      { id: E2.ninaZaehlt, label: t3("settings.nina"), sub: "", on: on(s4, E2.ninaZaehlt) }
     ],
     prognose: [
-      rng(s4, E2.prognoseIntervall, "Protokoll-Intervall", " min", "Wie oft die Anwesenheit gespeichert wird", 5, 60, 5),
-      rng(s4, E2.prognoseAufloesung, "Aufl\xF6sung", " min", "Rasterbreite der Heatmap und Prognose", 15, 60, 15),
-      rng(s4, E2.prognoseWochen, "Lernzeitraum", " Wochen", "\xC4ltere Daten werden verworfen", 2, 12, 1),
-      rng(s4, E2.prognoseHalbwert, "Gewichtung", " Tage", "Halbwertszeit \u2013 so alt z\xE4hlt ein Tag nur noch halb", 7, 60, 1),
-      rng(s4, E2.prognoseMindesttage, "Aktiv ab", " Tagen", "Erst dann nutzt die Automatik die Prognose", 3, 28, 1)
+      rng(s4, E2.prognoseIntervall, t3("settings.interval"), t3("settings.unitMin"), t3("settings.intervalSub"), 5, 60, 5),
+      rng(s4, E2.prognoseAufloesung, t3("settings.resolution"), t3("settings.unitMin"), t3("settings.resolutionSub"), 15, 60, 15),
+      rng(s4, E2.prognoseWochen, t3("settings.weeks"), t3("settings.unitWeeks"), t3("settings.weeksSub"), 2, 12, 1),
+      rng(s4, E2.prognoseHalbwert, t3("settings.halflife"), t3("settings.unitDays"), t3("settings.halflifeSub"), 7, 60, 1),
+      rng(s4, E2.prognoseMindesttage, t3("settings.minDays"), t3("settings.unitDaysFrom"), t3("settings.minDaysSub"), 3, 28, 1)
     ],
     version: ""
   };
@@ -1751,8 +2368,8 @@ var readSettings = memoizeSelector(() => [E2.dark, E2.karte, E2.mapRotation, E2.
 var readRobotSettings = memoizeSelector(() => [E2.carpetCleaning, E2.waterTemperature, E2.dryingTime, E2.autoEmptyMode, E2.selfCleanFrequency, E2.cleangenius, E2.selfCleanArea, E2.volume, E2.dndStart, E2.dndEnd], (s4) => {
   const sel = (id, label) => ({ id, label, value: st(s4, id), options: opts(s4, id) });
   return {
-    selects: [sel(E2.carpetCleaning, "Teppich"), sel(E2.waterTemperature, "Wassertemperatur"), sel(E2.dryingTime, "Trocknung"), sel(E2.autoEmptyMode, "Absaugen"), sel(E2.selfCleanFrequency, "Mopp-W\xE4sche"), sel(E2.cleangenius, "CleanGenius")],
-    numbers: [rng(s4, E2.selfCleanArea, "Mopp-W\xE4sche nach", " m\xB2", "", 0, 100, 1), rng(s4, E2.volume, "Lautst\xE4rke", " %", "", 0, 100, 1)],
+    selects: [sel(E2.carpetCleaning, t3("robotsettings.carpet")), sel(E2.waterTemperature, t3("robotsettings.waterTemp")), sel(E2.dryingTime, t3("robotsettings.drying")), sel(E2.autoEmptyMode, t3("robotsettings.autoEmpty")), sel(E2.selfCleanFrequency, t3("robotsettings.selfClean")), sel(E2.cleangenius, t3("robotsettings.cleangenius"))],
+    numbers: [rng(s4, E2.selfCleanArea, t3("robotsettings.selfCleanArea"), t3("robotsettings.unitM2"), "", 0, 100, 1), rng(s4, E2.volume, t3("robotsettings.volume"), t3("robotsettings.unitPct"), "", 0, 100, 1)],
     dndStart: txt(s4, E2.dndStart).slice(0, 5),
     dndEnd: txt(s4, E2.dndEnd).slice(0, 5),
     dndStartId: E2.dndStart,
@@ -1800,8 +2417,8 @@ var readDiagnostics = memoizeSelector((s4) => [...profileIds(s4), ...allContract
   const ids = allContractIds(roomIds);
   const group = (name, list) => ({ name, total: list.length, missing: list.filter((id) => !s4[id]), unavailable: list.filter((id) => s4[id] && EMPTY2.includes(s4[id].state)) });
   const robotSet = new Set(robotIds(roomIds));
-  const robot = group(`Roboter (${deviceName() || "nicht erkannt"})`, ids.filter((id) => robotSet.has(id)));
-  const paket = group("Paket (Helfer, Sensoren)", ids.filter((id) => !robotSet.has(id)));
+  const robot = group(t3("diag.robot", { name: deviceName() || t3("diag.robotUnknown") }), ids.filter((id) => robotSet.has(id)));
+  const paket = group(t3("diag.package"), ids.filter((id) => !robotSet.has(id)));
   return { total: ids.length, missing: [...robot.missing, ...paket.missing], unavailable: [...robot.unavailable, ...paket.unavailable], groups: [robot, paket] };
 });
 var ALL_SELECTORS = {
@@ -1825,32 +2442,28 @@ var ALL_SELECTORS = {
 // src/pages.ts
 var PAGES = ["start", "reinigen", "planer", "protokoll", "prognose", "einstellungen"];
 var PAGE_TITLE = {
-  start: { title: "", sub: "\xDCbersicht" },
-  reinigen: { title: "Karte", sub: "R\xE4ume, Zone oder Punkt reinigen \xB7 Hinfahren \xB7 Sperrzonen" },
-  planer: { title: "Planer", sub: "Vier Eintr\xE4ge \xB7 Automatik entscheidet voll, schnell oder warten" },
-  protokoll: { title: "Verlauf", sub: "Reinigungsprotokoll der App \xB7 Zeitleiste je Lauf \xB7 Lernwerte" },
-  prognose: { title: "Prognose", sub: "Lernende Anwesenheit \xB7 Grundlage f\xFCr Start, Schnellprogramm und R\xFCckkehr" },
-  einstellungen: { title: "Einstellungen", sub: "Darstellung, Funktionen, Prognose, Roboter, Diagnose" }
+  start: { title: "", sub: t3("page.start.sub") },
+  reinigen: { title: t3("page.reinigen.title"), sub: t3("page.reinigen.sub") },
+  planer: { title: t3("page.planer.title"), sub: t3("page.planer.sub") },
+  protokoll: { title: t3("page.protokoll.title"), sub: t3("page.protokoll.sub") },
+  prognose: { title: t3("page.prognose.title"), sub: t3("page.prognose.sub") },
+  einstellungen: { title: t3("page.einstellungen.title"), sub: t3("page.einstellungen.sub") }
 };
-var PAGE_PARTS = {
-  reinigen: ["dx-map-card full (4.3)", "App-Szenen", "St\xFChle am Boden", "R\xE4ume (Roboter-Werte) \u2192 dx-rooms-dialog (4.6)"],
-  planer: ["dx-planer (4.4)", "dx-planer-editor + dx-clock-picker (4.5)", "Automatik-Regeln", "dx-estimate-dialog (4.8)"],
-  protokoll: ["dx-history (4.7)", "Lernwerte-Tabelle"],
-  prognose: ["dx-prognose-view (4.10)"],
-  einstellungen: ["dx-settings-panel (4.11)", "dx-robot-settings (4.7)", "Diagnose", "Version"]
-};
+var PAGE_PARTS = Object.fromEntries(
+  PAGES.filter((p3) => p3 !== "start").map((p3) => [p3, tx(`page.parts.${p3}`).split("|")])
+);
 var START_SLOTS = [
   { slot: "hero", title: "", span: "span3", part: "dx-hero", task: "4.1" },
-  { slot: "map", title: "Live-Karte", span: "span6", part: "dx-map-card compact", task: "4.3" },
-  { slot: "automatik", title: "Automatik", span: "", part: "dx-automatik", task: "4.9" },
-  { slot: "auftrag", title: "Aktueller Auftrag", span: "", part: "dx-auftrag", task: "4.1" },
-  { slot: "heute", title: "Heute", span: "", part: "dx-heute", task: "4.10" },
-  { slot: "planer", title: "Planer", span: "span3", part: "dx-planer compact", task: "4.4" },
-  { slot: "consumables", title: "Verschlei\xDF", span: "span3", part: "dx-consumables", task: "4.9" },
-  { slot: "station", title: "Station", span: "span3", part: "dx-station", task: "4.9" },
-  { slot: "stats", title: "Statistik", span: "span3", part: "dx-stats", task: "4.7" },
-  { slot: "quickstart", title: "Schnellstart \u2013 R\xE4ume ausw\xE4hlen", span: "span7", part: "dx-quickstart", task: "4.3" },
-  { slot: "history", title: "Letzte L\xE4ufe", span: "span5", part: "dx-history compact", task: "4.7" }
+  { slot: "map", title: t3("slot.map"), span: "span6", part: "dx-map-card compact", task: "4.3" },
+  { slot: "automatik", title: t3("slot.automatik"), span: "", part: "dx-automatik", task: "4.9" },
+  { slot: "auftrag", title: t3("slot.auftrag"), span: "", part: "dx-auftrag", task: "4.1" },
+  { slot: "heute", title: t3("slot.heute"), span: "", part: "dx-heute", task: "4.10" },
+  { slot: "planer", title: t3("slot.planer"), span: "span3", part: "dx-planer compact", task: "4.4" },
+  { slot: "consumables", title: t3("slot.consumables"), span: "span3", part: "dx-consumables", task: "4.9" },
+  { slot: "station", title: t3("slot.station"), span: "span3", part: "dx-station", task: "4.9" },
+  { slot: "stats", title: t3("slot.stats"), span: "span3", part: "dx-stats", task: "4.7" },
+  { slot: "quickstart", title: t3("slot.quickstart"), span: "span7", part: "dx-quickstart", task: "4.3" },
+  { slot: "history", title: t3("slot.history"), span: "span5", part: "dx-history compact", task: "4.7" }
 ];
 var startSlot = (slot) => START_SLOTS.find((s4) => s4.slot === slot);
 function toPage(value) {
@@ -2199,7 +2812,23 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.28";
+var VERSION = "2.0.0-alpha.29";
+
+// src/config.ts
+var NAV = [
+  { key: "start", label: t3("nav.start"), icon: "mdi:home-outline", page: "start", tab: true },
+  { key: "reinigen", label: t3("nav.reinigen"), icon: "mdi:map-outline", page: "reinigen", tab: true },
+  { key: "rooms", label: t3("nav.rooms"), icon: "mdi:view-grid-outline", overlay: "rooms", tab: false },
+  { key: "planer", label: t3("nav.planer"), icon: "mdi:calendar-outline", page: "planer", tab: true },
+  { key: "protokoll", label: t3("nav.protokoll"), icon: "mdi:format-list-bulleted", page: "protokoll", tab: true },
+  { key: "prognose", label: t3("nav.prognose"), icon: "mdi:chart-line", page: "prognose", onlyWhen: "prognose", tab: true },
+  { key: "einstellungen", label: t3("nav.einstellungen"), icon: "mdi:cog-outline", page: "einstellungen", tab: true }
+];
+var APP_SCENES = [
+  { id: 32, name: t3("scene.32.name"), sub: t3("scene.32.sub"), icon: "mdi:door-open" },
+  { id: 33, name: t3("scene.33.name"), sub: t3("scene.33.sub"), icon: "mdi:shower" },
+  { id: 34, name: t3("scene.34.name"), sub: t3("scene.34.sub"), icon: "mdi:water" }
+];
 
 // src/shared/robot-svg.ts
 var robotSvg = w`<svg viewBox="0 0 200 200" class="robotpic" aria-hidden="true">
@@ -2291,14 +2920,14 @@ var DxNav = class extends i4 {
   render() {
     const es = this.entries;
     return b2`
-      <nav class="side" aria-label="Seitenleiste">
+      <nav class="side" aria-label=${t3("nav.sidebar")}>
         <div class="inner">
-          <div class="brand"><span class="logo"></span><div><div class="t">${deviceName() || "Roboter"}</div><div class="s">Dein Saugroboter</div></div></div>
+          <div class="brand"><span class="logo"></span><div><div class="t">${deviceName() || t3("common.robot")}</div><div class="s">${t3("nav.brandSub")}</div></div></div>
           <div class="navlist">${es.map((e4) => this.item(e4))}</div>
-          <div class="foot">${robotSvg}<div class="m">Dreame X60 Ultra</div><div class="version">dreame_x60 v${this.version}</div></div>
+          <div class="foot">${robotSvg}<div class="m">${t3("nav.model")}</div><div class="version">dreame_x60 v${this.version}</div></div>
         </div>
       </nav>
-      <nav class="tabbar" aria-label="Tab-Leiste">${es.filter((e4) => e4.tab).slice(0, TAB_MAX).map((e4) => this.item(e4))}</nav>`;
+      <nav class="tabbar" aria-label=${t3("nav.tabbar")}>${es.filter((e4) => e4.tab).slice(0, TAB_MAX).map((e4) => this.item(e4))}</nav>`;
   }
 };
 if (!customElements.get(NAV_ELEMENT)) customElements.define(NAV_ELEMENT, DxNav);
@@ -2331,12 +2960,12 @@ function stripModel(r4, roomValues, rooms) {
   const restTxt = rest.map((id) => shortOf(rooms, id)).filter(Boolean).join(" \u2192 ");
   const first = order.length ? shortOf(rooms, order[0]) : void 0;
   if (r4.vac === "cleaning" && r4.cleanedArea === 0) {
-    return { kind: "startpunkt", roomId: room.id, icon: "mdi:map-marker-path", head: "F\xE4hrt zum Startpunkt", right: first ? `zu ${first}` : "", chips: [] };
+    return { kind: "startpunkt", roomId: room.id, icon: "mdi:map-marker-path", head: t3("strip.startpoint"), right: first ? t3("strip.to", { rooms: first }) : "", chips: [] };
   }
   if (r4.activeSegments.length && !r4.activeSegments.includes(room.id)) {
-    return { kind: "durchfahrt", roomId: room.id, icon: room.icon, head: `F\xE4hrt durch ${room.short}`, right: restTxt ? `zu ${restTxt}` : "", chips: [] };
+    return { kind: "durchfahrt", roomId: room.id, icon: room.icon, head: t3("strip.through", { room: room.short }), right: restTxt ? t3("strip.to", { rooms: restTxt }) : "", chips: [] };
   }
-  return { kind: "jetzt", roomId: room.id, icon: room.icon, head: `Jetzt: ${room.short}`, right: restTxt ? `danach ${restTxt}` : "letzter Raum", chips: roomValueChips(v2) };
+  return { kind: "jetzt", roomId: room.id, icon: room.icon, head: t3("strip.now", { room: room.short }), right: restTxt ? t3("strip.then", { rooms: restTxt }) : t3("strip.lastRoom"), chips: roomValueChips(v2) };
 }
 
 // src/styles/controls.ts
@@ -2477,21 +3106,22 @@ var DxHero = class extends i4 {
   /** Drei Werte: im Lauf die des aktuellen Raums, sonst der gemeinsame Wert aller Räume („–“ bei Abweichung oder unavailable). */
   params(strip) {
     const rooms = this.rooms;
+    const dash = t3("common.dash");
     const cur = strip && rooms ? rooms.rooms[strip.roomId] : null;
-    if (cur) return [cur.modus, cur.saug, cur.modus !== "Saugen" && cur.wasser ? cur.wasser : "\u2013"];
+    if (cur) return [cur.modus, cur.saug, cur.modus !== "Saugen" && cur.wasser ? cur.wasser : dash];
     const vals = rooms ? Object.values(rooms.rooms).filter((v2) => v2 !== null) : [];
     const common = (pick) => {
-      if (!vals.length) return "\u2013";
+      if (!vals.length) return dash;
       const first = pick(vals[0]);
-      return first !== null && vals.every((v2) => pick(v2) === first) ? first : "\u2013";
+      return first !== null && vals.every((v2) => pick(v2) === first) ? first : dash;
     };
     return [common((v2) => v2.modus), common((v2) => v2.saug), common((v2) => v2.modus !== "Saugen" && v2.wasser ? v2.wasser : null)];
   }
   /** Stationszeile aus den Attributen docked/washing/drying/charging – nicht aus dem Hauptzustand (der bleibt bei der Mopp-Wäsche „cleaning“). */
   stationText(r4) {
-    if (r4.docked) return [r4.washing ? "Mopp-W\xE4sche" : r4.drying ? "trocknet" : "angedockt", r4.charging ? "l\xE4dt" : null].filter(Boolean).join(" \xB7 ");
-    if (r4.running) return "unterwegs";
-    return STATUS_DE[r4.vac] ?? r4.vac;
+    if (r4.docked) return [r4.washing ? t3("hero.washing") : r4.drying ? t3("hero.drying") : t3("hero.docked"), r4.charging ? t3("hero.charging") : null].filter(Boolean).join(" \xB7 ");
+    if (r4.running) return t3("hero.away");
+    return statusText(r4.vac);
   }
   render() {
     const r4 = this.robot;
@@ -2503,25 +3133,25 @@ var DxHero = class extends i4 {
     return b2`
       <div class="robot">
         <div>
-          <div class="name">${deviceName() || "Roboter"}</div>
-          <button class="st big ${DOT_CLASS[h3.dot]}" title="Status" @click=${() => moreInfo(this, r4.moreInfo.vac)}><i></i><span class="bigtext">${h3.big}</span></button>
+          <div class="name">${deviceName() || t3("common.robot")}</div>
+          <button class="st big ${DOT_CLASS[h3.dot]}" title=${t3("hero.status")} @click=${() => moreInfo(this, r4.moreInfo.vac)}><i></i><span class="bigtext">${h3.big}</span></button>
           ${h3.sub ? b2`<div class="hint sub">${h3.sub}</div>` : A}
         </div>
-        <div class="station"><div class="lbl">Station</div><div>${this.stationText(r4)}</div></div>
+        <div class="station"><div class="lbl">${t3("hero.station")}</div><div>${this.stationText(r4)}</div></div>
         ${robotSvg}
-        <button class="batt" title="Akku" @click=${() => moreInfo(this, r4.moreInfo.battery)}>
-          <div class="kv"><span class="v">${r4.battery}<span class="u"> %</span></span></div><div class="lbl">Akku</div>
-          <div class="battrow"><div class="battbar ${battCls}" style="--p:${r4.battery}"><i></i></div>${r4.charging ? b2`<ha-icon class="bolt" icon="mdi:flash" title="lädt"></ha-icon>` : A}</div>
+        <button class="batt" title=${t3("hero.battery")} @click=${() => moreInfo(this, r4.moreInfo.battery)}>
+          <div class="kv"><span class="v">${r4.battery}<span class="u"> %</span></span></div><div class="lbl">${t3("hero.battery")}</div>
+          <div class="battrow"><div class="battbar ${battCls}" style="--p:${r4.battery}"><i></i></div>${r4.charging ? b2`<ha-icon class="bolt" icon="mdi:flash" title=${t3("hero.charging")}></ha-icon>` : A}</div>
         </button>
       </div>
       ${h3.roomChip || h3.errorChip ? b2`<div class="chips">${h3.roomChip ? b2`<span class="chip on"><ha-icon icon="mdi:floor-plan"></ha-icon>${h3.roomChip}</span>` : A}${h3.errorChip ? b2`<button class="chip ${h3.errorChip.level === "danger" ? "bad" : "warn"}" @click=${() => moreInfo(this, r4.moreInfo.error)}><ha-icon icon=${h3.errorChip.level === "danger" ? "mdi:alert" : "mdi:information-outline"}></ha-icon>${h3.errorChip.text}</button>` : A}</div>` : A}
       <div class="params">
-        <button class="param" title="Reinigungsmodus" @click=${this.openRooms}><ha-icon icon="mdi:broom"></ha-icon><b>${modus}</b><span>Modus</span></button>
-        <button class="param" title="Saugleistung" @click=${this.openRooms}><ha-icon icon="mdi:fan"></ha-icon><b>${saug}</b><span>Saugstufe</span></button>
-        <button class="param" title="Wassermenge" @click=${this.openRooms}><ha-icon icon="mdi:water"></ha-icon><b>${wasser}</b><span>Wasser</span></button>
+        <button class="param" title=${t3("hero.modeTitle")} @click=${this.openRooms}><ha-icon icon="mdi:broom"></ha-icon><b>${modus}</b><span>${t3("hero.mode")}</span></button>
+        <button class="param" title=${t3("hero.suctionTitle")} @click=${this.openRooms}><ha-icon icon="mdi:fan"></ha-icon><b>${saug}</b><span>${t3("hero.suction")}</span></button>
+        <button class="param" title=${t3("hero.waterTitle")} @click=${this.openRooms}><ha-icon icon="mdi:water"></ha-icon><b>${wasser}</b><span>${t3("hero.water")}</span></button>
       </div>
       <div class="ctl">${h3.buttons.map((b3) => b2`<button class="btn ${b3.primary ? "primary" : ""}" data-svc=${b3.service} @click=${() => this.api?.vacuum(b3.service)}><ha-icon icon=${b3.icon}></ha-icon>${b3.label}</button>`)}</div>
-      ${strip ? b2`<button class="note strip" title="Räume einstellen" @click=${this.openRooms}><ha-icon icon=${strip.icon}></ha-icon><div><b>${strip.head}</b> <small>${strip.right}${strip.chips.length ? b2` · ` : A}${strip.chips.map((c4) => b2`<span class="chip k">${c4.icons.map((i5) => b2`<ha-icon icon=${i5}></ha-icon>`)}${c4.text}</span>`)}</small></div><ha-icon icon="mdi:chevron-right"></ha-icon></button>` : A}
+      ${strip ? b2`<button class="note strip" title=${t3("hero.roomsTitle")} @click=${this.openRooms}><ha-icon icon=${strip.icon}></ha-icon><div><b>${strip.head}</b> <small>${strip.right}${strip.chips.length ? b2` · ` : A}${strip.chips.map((c4) => b2`<span class="chip k">${c4.icons.map((i5) => b2`<ha-icon icon=${i5}></ha-icon>`)}${c4.text}</span>`)}</small></div><ha-icon icon="mdi:chevron-right"></ha-icon></button>` : A}
     `;
   }
 };
@@ -2558,14 +3188,15 @@ var DxAuftrag = class extends i4 {
     const next = nextId !== void 0 ? roomById(rl, nextId) : void 0;
     const nextVals = next && this.rooms ? this.rooms.rooms[next.id] : null;
     const short = (id) => roomById(rl, id)?.short ?? String(id);
+    const dash = t3("common.dash");
     return b2`
-      <div class="hd"><h2>Aktueller Auftrag</h2><span class="st pill ${DOT_CLASS2[r4.hero.dot]}"><i></i>${r4.hero.big}</span></div>
+      <div class="hd"><h2>${t3("auftrag.title")}</h2><span class="st pill ${DOT_CLASS2[r4.hero.dot]}"><i></i>${r4.hero.big}</span></div>
       <div>
-        <div class="lbl route">${total ? order.map((id, i5) => b2`${i5 ? " \u2192 " : ""}${i5 === cur ? b2`<b>${short(id)}</b>` : short(id)}`) : r4.room !== "\u2013" ? b2`<b>${r4.room}</b>` : "R\xE4ume \u2013"}</div>
-        <div class="kv"><span class="v">${r4.cleaningTime}<span class="u"> min</span></span><span class="u">· ${r4.cleanedArea} m²</span></div>
+        <div class="lbl route">${total ? order.map((id, i5) => b2`${i5 ? " \u2192 " : ""}${i5 === cur ? b2`<b>${short(id)}</b>` : short(id)}`) : r4.room !== dash ? b2`<b>${r4.room}</b>` : t3("auftrag.noRooms")}</div>
+        <div class="kv"><span class="v">${r4.cleaningTime}<span class="u"> ${t3("unit.min")}</span></span><span class="u">· ${r4.cleanedArea} ${t3("unit.m2")}</span></div>
       </div>
-      ${total ? b2`<div><div class="meter two"><span class="n">Räume</span><span class="p">${done} / ${total}</span></div><div class="bar" style="--p:${pct}"><i></i></div></div>` : A}
-      ${next ? b2`<div class="row next"><div><div class="s">${startpunkt ? "Erster Raum" : "N\xE4chster Raum"}</div><div class="t">${next.short}</div></div>${nextVals ? b2`<span class="tag">${nextVals.modus}</span>` : A}</div>` : total ? b2`<div class="row next"><div><div class="s">Letzter Raum</div><div class="t">${cur >= 0 ? short(order[cur]) : "\u2013"}</div></div></div>` : A}
+      ${total ? b2`<div><div class="meter two"><span class="n">${t3("auftrag.rooms")}</span><span class="p">${done} / ${total}</span></div><div class="bar" style="--p:${pct}"><i></i></div></div>` : A}
+      ${next ? b2`<div class="row next"><div><div class="s">${startpunkt ? t3("auftrag.first") : t3("auftrag.next")}</div><div class="t">${next.short}</div></div>${nextVals ? b2`<span class="tag">${nextVals.modus}</span>` : A}</div>` : total ? b2`<div class="row next"><div><div class="s">${t3("auftrag.last")}</div><div class="t">${cur >= 0 ? short(order[cur]) : dash}</div></div></div>` : A}
     `;
   }
 };
@@ -2596,8 +3227,8 @@ var DxDialog = class extends i4 {
     this.sub = "";
     this.text = "";
     this.subText = "";
-    this.okLabel = "OK";
-    this.cancelLabel = "Abbrechen";
+    this.okLabel = t3("common.ok");
+    this.cancelLabel = t3("common.cancel");
     this.danger = false;
     this.wide = false;
     this.back = false;
@@ -2725,7 +3356,7 @@ var DxDialog = class extends i4 {
     }
     return b2`<div class="scrim" @click=${this.close}></div>
       <div class="dlg ${this.wide ? "wide" : ""} ${sheet}" role="dialog" aria-modal="true" aria-labelledby="h" tabindex="-1">
-        <h2 id="h">${this.back ? b2`<button class="iconbtn backbtn" aria-label="Zurück" @click=${this.goBack}><ha-icon icon="mdi:chevron-left"></ha-icon></button>` : A}<span class="t">${this.heading}</span>${this.sub ? b2`<span class="m">${this.sub}</span>` : A}<button class="iconbtn close" aria-label="Schließen" @click=${this.close}><ha-icon icon="mdi:close"></ha-icon></button></h2>
+        <h2 id="h">${this.back ? b2`<button class="iconbtn backbtn" aria-label=${t3("common.back")} @click=${this.goBack}><ha-icon icon="mdi:chevron-left"></ha-icon></button>` : A}<span class="t">${this.heading}</span>${this.sub ? b2`<span class="m">${this.sub}</span>` : A}<button class="iconbtn close" aria-label=${t3("common.close")} @click=${this.close}><ha-icon icon="mdi:close"></ha-icon></button></h2>
         <div class="body"><slot></slot></div>
         <div class="foot ${this._hasFoot ? "" : "empty"}"><slot name="foot" @slotchange=${this.onFootSlot}></slot></div>
       </div>`;
@@ -2735,26 +3366,26 @@ if (!customElements.get(DIALOG_ELEMENT)) customElements.define(DIALOG_ELEMENT, D
 
 // src/ha/map-config.ts
 var MAP_MODES = {
-  raeume: { label: "R\xE4ume", hint: "Auswahl per Kachel oder Tipp in die Raumfl\xE4che" },
-  zone: { label: "Zone", hint: "Rechteck auf der Karte aufziehen (bis zu 5), dann \u25B6 in der Karte" },
-  punkt: { label: "Punkt", hint: "Punkt auf der Karte antippen, dann \u25B6 in der Karte" },
-  goto: { label: "Hinfahren", hint: "Punkt auf der Karte antippen \u2192 der Roboter f\xE4hrt hin und wartet" }
+  raeume: { label: t3("mapmode.raeume"), hint: t3("mapmode.raeume.hint") },
+  zone: { label: t3("mapmode.zone"), hint: t3("mapmode.zone.hint") },
+  punkt: { label: t3("mapmode.punkt"), hint: t3("mapmode.punkt.hint") },
+  goto: { label: t3("mapmode.goto"), hint: t3("mapmode.goto.hint") }
 };
 function modeEntry(mode, rooms) {
   switch (mode) {
     case "raeume":
       return {
         template: "vacuum_clean_segment",
-        name: "R\xE4ume",
+        name: MAP_MODES.raeume.label,
         icon: "mdi:floor-plan",
         predefined_selections: rooms.map((r4) => ({ id: r4.id, outline: r4.outline, label: { text: r4.name, x: r4.x, y: r4.y, offset_y: 35 }, icon: { name: r4.icon, x: r4.x, y: r4.y } }))
       };
     case "zone":
-      return { template: "vacuum_clean_zone", name: "Zone", icon: "mdi:select-drag", max_selections: 5 };
+      return { template: "vacuum_clean_zone", name: MAP_MODES.zone.label, icon: "mdi:select-drag", max_selections: 5 };
     case "punkt":
-      return { template: "vacuum_clean_point", name: "Punkt", icon: "mdi:map-marker-radius" };
+      return { template: "vacuum_clean_point", name: MAP_MODES.punkt.label, icon: "mdi:map-marker-radius" };
     case "goto":
-      return { template: "vacuum_goto", name: "Hinfahren", icon: "mdi:map-marker" };
+      return { template: "vacuum_goto", name: MAP_MODES.goto.label, icon: "mdi:map-marker" };
   }
 }
 var hasModes = (kind) => kind === "Xiaomi-Karte";
@@ -2874,11 +3505,11 @@ function segmentOutline(md, seg, toTarget) {
   for (const [x2, y3, n4] of seg.runs) for (let i5 = 0; i5 < n4; i5++) inSeg.add(x2 + i5 + y3 * K);
   const has = (x2, y3) => inSeg.has(x2 + y3 * K);
   const edges = /* @__PURE__ */ new Map();
-  const add = (fx, fy, tx, ty) => {
+  const add = (fx, fy, tx2, ty) => {
     const k2 = fx + fy * K;
     const l3 = edges.get(k2);
-    if (l3) l3.push(tx + ty * K);
-    else edges.set(k2, [tx + ty * K]);
+    if (l3) l3.push(tx2 + ty * K);
+    else edges.set(k2, [tx2 + ty * K]);
   };
   for (const [x0, y3, n4] of seg.runs) for (let x2 = x0; x2 < x0 + n4; x2++) {
     if (!has(x2, y3 - 1)) add(x2, y3, x2 + 1, y3);
@@ -3087,13 +3718,13 @@ var DxHeidiMap = class extends i4 {
     const paths = ready ? this.paths(md, calib) : [];
     return b2`
       <div class="wrap">
-        <img src=${m2?.entityPicture ?? ""} alt="Karte" @load=${this.onImgLoad}>
+        <img src=${m2?.entityPicture ?? ""} alt=${t3("map.alt")} @load=${this.onImgLoad}>
         ${ready ? w`<svg viewBox="0 0 ${size.w} ${size.h}" preserveAspectRatio="none">
           ${paths.map((p3) => w`<path class="room ${this.selected.has(p3.id) ? "sel" : ""} ${cur === p3.id ? "cur" : ""}" data-room=${p3.id} d=${p3.d} @click=${() => this.tap(p3.id)}><title>${p3.name}</title></path>`)}
         </svg>` : A}
         ${paths.filter((p3) => this.selected.has(p3.id)).map((p3) => b2`<span class="badge" data-room=${p3.id} style="left:${(p3.cx / size.w * 100).toFixed(2)}%;top:${(p3.cy / size.h * 100).toFixed(2)}%">${order.indexOf(p3.id) + 1}</span>`)}
-        ${!m2?.mapData ? b2`<div class="hint">Datenkarte fehlt – <code>${ENTITIES.mapData}</code> in der Dreame-Integration aktivieren</div>` : !md && this._loadedVersion ? b2`<div class="hint">Kartenpaket wird geladen …</div>` : A}
-        ${m2?.mapData && !calib ? b2`<div class="hint">Keine Kalibrierpunkte – Räume können nicht eingezeichnet werden</div>` : A}
+        ${!m2?.mapData ? b2`<div class="hint">${t3("map.noMapData", { entity: ENTITIES.mapData })}</div>` : !md && this._loadedVersion ? b2`<div class="hint">${t3("map.loading")}</div>` : A}
+        ${m2?.mapData && !calib ? b2`<div class="hint">${t3("map.noCalib")}</div>` : A}
       </div>`;
   }
 };
@@ -3122,11 +3753,11 @@ function selectedRooms(sel, order) {
 }
 function selectionLabel(sel, order) {
   const n4 = sel.size;
-  if (n4 && n4 === order.length) return "Ganze Wohnung";
-  return `${n4} ${n4 === 1 ? "Raum" : "R\xE4ume"}`;
+  if (n4 && n4 === order.length) return t3("rooms.whole");
+  return n4 === 1 ? t3("rooms.one", { n: n4 }) : t3("rooms.many", { n: n4 });
 }
 function confirmText(sel, order) {
-  return `Jetzt reinigen: ${selectedRooms(sel, order).map((r4) => r4.short).join(", ")}?`;
+  return t3("rooms.confirm", { list: selectedRooms(sel, order).map((r4) => r4.short).join(", ") });
 }
 function segmentsOf(sel, order) {
   return selectedRooms(sel, order).map((r4) => r4.id);
@@ -3233,14 +3864,14 @@ var DxMapCard = class extends i4 {
       if (this._pending === key) return;
       this._pending = key;
       try {
-        if (!window.loadCardHelpers) throw new Error("loadCardHelpers fehlt");
+        if (!window.loadCardHelpers) throw new Error(t3("map.helpersMissing"));
         const helpers = await window.loadCardHelpers();
         const cfg = this.variant === "compact" ? pictureConfig() : buildMapConfig(this.map.karte, this.dark, this._mode, this.map.roomShapes);
         el = helpers.createCardElement(cfg);
         mapElements.set(key, el);
         this._error = null;
       } catch (e4) {
-        this._error = `Karte konnte nicht geladen werden: ${String(e4?.message ?? e4)}`;
+        this._error = t3("map.loadError", { error: String(e4?.message ?? e4) });
         return;
       } finally {
         this._pending = null;
@@ -3268,14 +3899,14 @@ var DxMapCard = class extends i4 {
     const segments = segmentsOf(this._sel, order);
     if (!segments.length) return;
     askConfirm(this, confirmText(this._sel, order), () => {
-      void this.api?.startRooms(segments).then(() => emit(this, EVENTS.toast, `Gestartet: ${selectionLabel(this._sel, order)}`), (e4) => emit(this, EVENTS.toast, `Start fehlgeschlagen: ${String(e4?.message ?? e4)}`));
+      void this.api?.startRooms(segments).then(() => emit(this, EVENTS.toast, t3("rooms.started", { what: selectionLabel(this._sel, order) })), (e4) => emit(this, EVENTS.toast, t3("rooms.failed", { error: String(e4?.message ?? e4) })));
       this._sel = /* @__PURE__ */ new Set();
     });
   }
   runAll() {
-    askConfirm(this, "Ganze Wohnung reinigen?", () => {
+    askConfirm(this, t3("map.allConfirm"), () => {
       void this.api?.vacuum("start");
-      emit(this, EVENTS.toast, "Gestartet: ganze Wohnung");
+      emit(this, EVENTS.toast, t3("rooms.started", { what: t3("map.allStarted") }));
     });
   }
   // ───────── Rendern ─────────
@@ -3284,26 +3915,26 @@ var DxMapCard = class extends i4 {
     const r4 = this.robot;
     if (r4 && (r4.vac === "cleaning" || r4.vac === "paused") && !r4.docked) {
       const rest = runOrder(r4).rest.map((id) => roomById(this.map?.roomOrder ?? [], id)?.short).filter(Boolean).join(", ");
-      return b2`<b>Live-Karte</b> · ${r4.room !== "\u2013" ? r4.room : "unterwegs"} · ${r4.cleanedArea} m²${rest ? b2` · noch ${rest}` : A}`;
+      return b2`<b>${t3("map.live")}</b> · ${r4.room !== t3("common.dash") ? r4.room : t3("map.capAway")} · ${r4.cleanedArea} ${t3("unit.m2")}${rest ? b2` · ${t3("map.capRest", { rest })}` : A}`;
     }
     const last = this.history?.entries[0];
-    return b2`<b>Karte</b> · ${deviceName() || "Roboter"} in der Station${last ? b2` · letzter Lauf ${fmtDate(last.ts * 1e3)}` : A}`;
+    return b2`<b>${t3("map.title")}</b> · ${t3("map.capStation", { name: deviceName() || t3("common.robot") })}${last ? b2` · ${t3("map.capLast", { time: fmtDate(last.ts * 1e3) })}` : A}`;
   }
   renderCompact() {
     return b2`
       <div class="tabs">
-        <button class="on"><ha-icon icon="mdi:map-outline"></ha-icon>Live-Karte</button>
-        <button data-nav="reinigen" @click=${this.goReinigen}><ha-icon icon="mdi:view-grid-outline"></ha-icon>Räume</button>
-        <button data-open="zones" @click=${this.openZones}><ha-icon icon="mdi:cancel"></ha-icon>Sperrzonen</button>
-        <button data-nav="protokoll" @click=${() => emit(this, EVENTS.navigate, { page: "protokoll" })}><ha-icon icon="mdi:history"></ha-icon>Reinigungsverlauf</button>
+        <button class="on"><ha-icon icon="mdi:map-outline"></ha-icon>${t3("map.live")}</button>
+        <button data-nav="reinigen" @click=${this.goReinigen}><ha-icon icon="mdi:view-grid-outline"></ha-icon>${t3("map.rooms")}</button>
+        <button data-open="zones" @click=${this.openZones}><ha-icon icon="mdi:cancel"></ha-icon>${t3("map.zones")}</button>
+        <button data-nav="protokoll" @click=${() => emit(this, EVENTS.navigate, { page: "protokoll" })}><ha-icon icon="mdi:history"></ha-icon>${t3("map.history")}</button>
       </div>
-      <div class="map tap" title="Zur Karte">
+      <div class="map tap" title=${t3("map.toMap")}>
         <div class="slot"></div>
         <div class="catch" @click=${this.goReinigen}></div>
-        <div class="mtools"><button class="btn sm" @click=${this.goReinigen}><ha-icon icon="mdi:map-outline"></ha-icon>Karte öffnen</button></div>
+        <div class="mtools"><button class="btn sm" @click=${this.goReinigen}><ha-icon icon="mdi:map-outline"></ha-icon>${t3("map.open")}</button></div>
       </div>
       ${this._error ? b2`<div class="err">${this._error}</div>` : A}
-      <div class="mapcap">${this.caption()}<span class="r">antippen für Räume, Zone, Punkt, Sperrzonen</span></div>`;
+      <div class="mapcap">${this.caption()}<span class="r">${t3("map.tapHint")}</span></div>`;
   }
   renderFull() {
     const m2 = this.map;
@@ -3314,7 +3945,7 @@ var DxMapCard = class extends i4 {
     const sel = this._sel;
     const sm = m2?.selectedMap ?? null;
     return b2`
-      <div class="hd"><h2><ha-icon icon="mdi:map-outline"></ha-icon>Karte</h2>
+      <div class="hd"><h2><ha-icon icon="mdi:map-outline"></ha-icon>${t3("map.title")}</h2>
         ${sm ? b2`<span class="seg2 maps">${sm.options.map((o5) => b2`<button class=${o5 === sm.value ? "on" : ""} data-map=${o5} @click=${() => void this.api?.selectOption(sm.id, o5)}>${o5}</button>`)}</span>` : b2`<span class="r">${kind}</span>`}
       </div>
       <div class="map">
@@ -3322,21 +3953,21 @@ var DxMapCard = class extends i4 {
       this._sel = toggleRoom(this._sel, e4.detail.id);
     }}></dx-heidi-map>` : b2`<div class="slot"></div>`}
         ${modes ? b2`<div class="mtools">
-          <button class="btn sm ${this._mode === "goto" ? "on" : ""}" data-act="goto" @click=${() => this.setMode(this._mode === "goto" ? "raeume" : "goto")}><ha-icon icon="mdi:map-marker"></ha-icon>Hinfahren</button>
-          <button class="btn sm" data-open="zones" @click=${this.openZones}><ha-icon icon="mdi:cancel"></ha-icon>Sperrzonen</button>
+          <button class="btn sm ${this._mode === "goto" ? "on" : ""}" data-act="goto" @click=${() => this.setMode(this._mode === "goto" ? "raeume" : "goto")}><ha-icon icon="mdi:map-marker"></ha-icon>${t3("map.goto")}</button>
+          <button class="btn sm" data-open="zones" @click=${this.openZones}><ha-icon icon="mdi:cancel"></ha-icon>${t3("map.zones")}</button>
         </div>` : A}
       </div>
       ${this._error ? b2`<div class="err">${this._error}</div>` : A}
       <div class="mapmodes">
-        ${modes ? b2`<div class="seg2 modes">${["raeume", "zone", "punkt"].map((k2) => b2`<button data-mode=${k2} class=${this._mode === k2 ? "on" : ""} @click=${() => this.setMode(k2)}>${MAP_MODES[k2].label}</button>`)}</div>` : b2`<button class="btn sm" data-open="zones" @click=${this.openZones}><ha-icon icon="mdi:cancel"></ha-icon>Sperrzonen</button>`}
-        <span class="hint">${modes ? MAP_MODES[this._mode].hint : heidi ? "R\xE4ume in der Karte oder \xFCber die Kacheln antippen, dann \u201Ereinigen\u201C" : "R\xE4ume antippen, dann \u201Ereinigen\u201C"}</span>
-        <button class="btn primary sm" data-act="all" @click=${this.runAll}><ha-icon icon="mdi:play"></ha-icon>Alles</button>
+        ${modes ? b2`<div class="seg2 modes">${["raeume", "zone", "punkt"].map((k2) => b2`<button data-mode=${k2} class=${this._mode === k2 ? "on" : ""} @click=${() => this.setMode(k2)}>${MAP_MODES[k2].label}</button>`)}</div>` : b2`<button class="btn sm" data-open="zones" @click=${this.openZones}><ha-icon icon="mdi:cancel"></ha-icon>${t3("map.zones")}</button>`}
+        <span class="hint">${modes ? MAP_MODES[this._mode].hint : heidi ? t3("map.hintHeidi") : t3("map.hintPlain")}</span>
+        <button class="btn primary sm" data-act="all" @click=${this.runAll}><ha-icon icon="mdi:play"></ha-icon>${t3("map.all")}</button>
       </div>
       ${!modes || this._mode === "raeume" ? b2`
         <div class="rooms">${order.map((r4) => b2`<button class=${sel.has(r4.id) ? "sel" : ""} data-room=${r4.id} @click=${() => {
       this._sel = toggleRoom(this._sel, r4.id);
     }}><ha-icon icon=${r4.icon}></ha-icon>${r4.short}</button>`)}</div>
-        ${sel.size ? b2`<div class="runbar"><button class="btn primary" data-act="run" @click=${this.runRooms}><ha-icon icon="mdi:play"></ha-icon>${selectionLabel(sel, order)} reinigen</button><button class="btn icon" aria-label="Auswahl aufheben" @click=${() => {
+        ${sel.size ? b2`<div class="runbar"><button class="btn primary" data-act="run" @click=${this.runRooms}><ha-icon icon="mdi:play"></ha-icon>${t3("rooms.run", { sel: selectionLabel(sel, order) })}</button><button class="btn icon" aria-label=${t3("rooms.clear")} @click=${() => {
       this._sel = /* @__PURE__ */ new Set();
     }}><ha-icon icon="mdi:close"></ha-icon></button></div>` : A}
       ` : A}`;
@@ -3379,25 +4010,25 @@ var DxQuickstart = class extends i4 {
     const segments = segmentsOf(this._sel, this.roomOrder);
     if (!segments.length) return;
     askConfirm(this, confirmText(this._sel, this.roomOrder), () => {
-      void this.api?.startRooms(segments).then(() => emit(this, EVENTS.toast, `Gestartet: ${selectionLabel(this._sel, this.roomOrder)}`), (e4) => emit(this, EVENTS.toast, `Start fehlgeschlagen: ${String(e4?.message ?? e4)}`));
+      void this.api?.startRooms(segments).then(() => emit(this, EVENTS.toast, t3("rooms.started", { what: selectionLabel(this._sel, this.roomOrder) })), (e4) => emit(this, EVENTS.toast, t3("rooms.failed", { error: String(e4?.message ?? e4) })));
       this._sel = /* @__PURE__ */ new Set();
     });
   }
   render() {
     const sel = this._sel, order = this.roomOrder;
     return b2`
-      <div class="hd"><h2><ha-icon icon="mdi:view-grid-outline"></ha-icon>Schnellstart – Räume auswählen</h2><span class="r">${sel.size ? `${sel.size} gew\xE4hlt` : "Mehrfachauswahl"}</span></div>
+      <div class="hd"><h2><ha-icon icon="mdi:view-grid-outline"></ha-icon>${t3("quickstart.title")}</h2><span class="r">${sel.size ? t3("quickstart.selected", { n: sel.size }) : t3("quickstart.multi")}</span></div>
       <div class="qs">
         <button class=${sel.size && sel.size === order.length ? "sel" : ""} data-room="all" @click=${() => {
       this._sel = toggleAll(this._sel, order);
-    }}><ha-icon icon="mdi:home-outline"></ha-icon>Alles</button>
+    }}><ha-icon icon="mdi:home-outline"></ha-icon>${t3("quickstart.all")}</button>
         ${order.map((r4) => b2`<button class=${sel.has(r4.id) ? "sel" : ""} data-room=${r4.id} @click=${() => {
       this._sel = toggleRoom(this._sel, r4.id);
     }}><ha-icon icon=${r4.icon}></ha-icon>${r4.short}</button>`)}
       </div>
-      ${sel.size ? b2`<div class="runbar"><button class="btn primary" @click=${this.run}><ha-icon icon="mdi:play"></ha-icon>${selectionLabel(sel, order)} reinigen</button><button class="btn icon" aria-label="Auswahl aufheben" title="Auswahl aufheben" @click=${() => {
+      ${sel.size ? b2`<div class="runbar"><button class="btn primary" @click=${this.run}><ha-icon icon="mdi:play"></ha-icon>${t3("rooms.run", { sel: selectionLabel(sel, order) })}</button><button class="btn icon" aria-label=${t3("rooms.clear")} title=${t3("rooms.clear")} @click=${() => {
       this._sel = /* @__PURE__ */ new Set();
-    }}><ha-icon icon="mdi:close"></ha-icon></button></div>` : b2`<div class="hint">Räume antippen, dann „reinigen“ – ${deviceName() || "der Roboter"} fährt mit den Roboter-Werten je Raum.</div>`}
+    }}><ha-icon icon="mdi:close"></ha-icon></button></div>` : b2`<div class="hint">${t3("quickstart.hint", { name: deviceName() || t3("quickstart.robotFallback") })}</div>`}
     `;
   }
 };
@@ -3406,7 +4037,7 @@ if (!customElements.get(QUICKSTART_ELEMENT)) customElements.define(QUICKSTART_EL
 // src/dreame-x60-panel.ts
 var ELEMENT = "dreame-x60-panel";
 var TOAST_MS = 1900;
-var GREETING = (h3) => h3 < 11 ? "Guten Morgen" : h3 < 18 ? "Guten Tag" : "Guten Abend";
+var GREETING = (h3) => h3 < 11 ? t3("topbar.morning") : h3 < 18 ? t3("topbar.day") : t3("topbar.evening");
 var UNSET = Symbol("unset");
 var DreameX60Panel = class extends i4 {
   constructor() {
@@ -3531,7 +4162,7 @@ var DreameX60Panel = class extends i4 {
   }
   // ───────── HA-Schnittstelle der Karte ─────────
   setConfig(config) {
-    if (!config || typeof config !== "object") throw new Error("dreame-x60-panel: Konfiguration fehlt");
+    if (!config || typeof config !== "object") throw new Error(t3("card.noConfig"));
     this._config = { ...config, page: toPage(config.page) };
   }
   getCardSize() {
@@ -3598,23 +4229,23 @@ var DreameX60Panel = class extends i4 {
     let title, sub;
     if (page === "start") {
       const name = (this.hass?.user?.name ?? "").trim();
-      const robotName = deviceName() || "Roboter";
-      title = robot.running && !robot.docked ? `${robotName} ist unterwegs` : robot.running ? `${robotName} ist in der Station` : `${GREETING(now.getHours())}${name ? ", " + name : ""}!`;
+      const robotName = deviceName() || t3("common.robot");
+      title = robot.running && !robot.docked ? t3("topbar.away", { name: robotName }) : robot.running ? t3("topbar.inStation", { name: robotName }) : `${GREETING(now.getHours())}${name ? ", " + name : ""}!`;
       sub = robot.hero.sub ? `${robot.hero.big} \xB7 ${robot.hero.sub}` : robot.hero.big;
     } else {
       ({ title, sub } = PAGE_TITLE[page]);
-      title ||= deviceName() || "Roboter";
+      title ||= deviceName() || t3("common.robot");
     }
     const home = robot.persons.filter((p3) => p3.known && p3.home).map((p3) => p3.name);
     return b2`
       <div class="topbar">
-        ${page !== "start" ? b2`<button class="back" @click=${() => navigate("start")}><ha-icon icon="mdi:chevron-left"></ha-icon>Übersicht</button>` : A}
+        ${page !== "start" ? b2`<button class="back" @click=${() => navigate("start")}><ha-icon icon="mdi:chevron-left"></ha-icon>${t3("topbar.back")}</button>` : A}
         <div><h1>${title}</h1><div class="sub">${sub}</div></div>
         <div class="meta">
           ${this.renderSetupIcons(robot)}
           <div class="mi time"><ha-icon icon="mdi:clock-outline"></ha-icon><div><b>${now.toLocaleTimeString("de-AT", { hour: "2-digit", minute: "2-digit" })}</b><small>${now.toLocaleDateString("de-AT", { weekday: "long", day: "numeric", month: "short", year: "numeric" })}</small></div></div>
-          <div class="mi home"><ha-icon icon="mdi:home-outline"></ha-icon><div><b>${home.length ? "Zu Hause" : "Niemand zu Hause"}<span class="dot ${home.length ? "on" : ""}"></span></b><small>${home.length ? home.join(" \xB7 ") + " anwesend" : "alle unterwegs"}</small></div></div>
-          <div class="mi dnd"><ha-icon icon="mdi:weather-night"></ha-icon><div><b>${robot.hero.dnd}</b><small>Nicht stören</small></div></div>
+          <div class="mi home"><ha-icon icon="mdi:home-outline"></ha-icon><div><b>${home.length ? t3("topbar.home") : t3("topbar.nobody")}<span class="dot ${home.length ? "on" : ""}"></span></b><small>${home.length ? t3("topbar.present", { names: home.join(" \xB7 ") }) : t3("topbar.allAway")}</small></div></div>
+          <div class="mi dnd"><ha-icon icon="mdi:weather-night"></ha-icon><div><b>${robot.hero.dnd}</b><small>${t3("topbar.dnd")}</small></div></div>
         </div>
       </div>`;
   }
@@ -3629,7 +4260,7 @@ var DreameX60Panel = class extends i4 {
     if (a3.kind === "more-info") moreInfo(this, a3.entity);
     else if (a3.kind === "vacuum-areas") {
       void openVacuumSegmentMapping(this, a3.entity).then((r4) => {
-        if (r4 === "fallback") this.toast(`Im Dialog: ${a3.hint}`);
+        if (r4 === "fallback") this.toast(t3("topbar.inDialog", { hint: a3.hint }));
       });
     } else if (a3.kind === "page") navigate(a3.page);
     else navigateHa(a3.path);
@@ -3637,27 +4268,28 @@ var DreameX60Panel = class extends i4 {
   /** Bento-Übersicht (Bauplan 4.0): Bausteine, wo sie schon existieren (4.1 dx-hero, dx-auftrag), sonst Platzhalter mit einer Vorschau der Sichten. */
   renderStart(s4, robot) {
     const entities = Object.keys(s4).length;
+    const dash = t3("common.dash");
     const plans = readPlans(s4);
     const prog = readPrognose(s4);
     const hist = readHistory(s4);
     const map = readMap(s4);
     const rooms = readAllRoomValues(s4);
     const lines = {
-      map: [entities ? `${entities} Entit\xE4ten verbunden` : "keine Zustandsdaten", `Kartendarstellung: ${map.karte} \xB7 Kalibrierung: ${Array.isArray(map.calibrationPoints) ? map.calibrationPoints.length + " Punkte" : "fehlt"}`],
-      automatik: [`Automatik: ${readAutomatik(s4).status || "\u2013"}`],
-      heute: [`Heutiger Eintrag: ${plans.heuteName || "\u2013"}${plans.heuteZeit ? " \xB7 " + plans.heuteZeit : ""}`, prog.aktiv ? `Freies Fenster ${prog.freiesFenster} \xB7 R\xFCckkehr ${prog.rueckkehr}` : "Prognose aus"],
-      planer: plans.plans.slice(0, 3).map((x2) => `${x2.n} ${x2.name || "\u2013"} \xB7 ${x2.aktiv ? "aktiv" : "inaktiv"} \xB7 ${x2.zeit}`),
+      map: [entities ? t3("preview.entities", { n: entities }) : t3("preview.noStates"), t3("preview.map", { karte: map.karte, calib: Array.isArray(map.calibrationPoints) ? t3("preview.calibPoints", { n: map.calibrationPoints.length }) : t3("common.missing") })],
+      automatik: [t3("preview.automatik", { status: readAutomatik(s4).status || dash })],
+      heute: [t3("preview.today", { name: (plans.heuteName || dash) + (plans.heuteZeit ? " \xB7 " + plans.heuteZeit : "") }), prog.aktiv ? t3("preview.prognose", { window: prog.freiesFenster, back: prog.rueckkehr }) : t3("preview.prognoseOff")],
+      planer: plans.plans.slice(0, 3).map((x2) => `${x2.n} ${x2.name || dash} \xB7 ${x2.aktiv ? t3("common.active") : t3("common.inactive")} \xB7 ${x2.zeit}`),
       consumables: [readConsumables(s4).map((c4) => `${c4.name} ${c4.pct} %`).join(", ")],
       station: [readStation(s4).tiles.map((x2) => `${x2.label} ${x2.value}`).join(", ")],
-      stats: [`${hist.count} L\xE4ufe \xB7 ${hist.totalArea} m\xB2 \xB7 ${hist.totalTime} min`],
-      quickstart: [`R\xE4ume: ${map.roomOrder.map((r4) => r4.short).join(", ") || "keine (Karte fehlt)"}`],
-      history: [`${hist.entries.length} Eintr\xE4ge${hist.stale ? " \xB7 letzter Stand" : ""}`]
+      stats: [t3("preview.stats", { runs: hist.count, area: hist.totalArea, time: hist.totalTime })],
+      quickstart: [t3("preview.rooms", { list: map.roomOrder.map((r4) => r4.short).join(", ") || t3("preview.noRooms") })],
+      history: [t3("preview.entries", { n: hist.entries.length }) + (hist.stale ? t3("preview.stale") : "")]
     };
     const box = (sl) => b2`
       <section class="b ${sl.span}" data-slot=${sl.slot}>
-        <div class="hd"><h2>${sl.title || deviceName() || "Roboter"}</h2><span class="r">${sl.part}</span></div>
+        <div class="hd"><h2>${sl.title || deviceName() || t3("common.robot")}</h2><span class="r">${sl.part}</span></div>
         ${(lines[sl.slot] ?? []).map((l3) => b2`<div class="hint preview">${l3}</div>`)}
-        <div class="hint">Platzhalter – entsteht in Aufgabe ${sl.task}.</div>
+        <div class="hint">${t3("preview.placeholder", { task: sl.task })}</div>
       </section>`;
     const rest = START_SLOTS.filter((sl) => !["hero", "map", "automatik", "auftrag", "heute", "quickstart"].includes(sl.slot));
     const dark = readSettings(s4).dark;
@@ -3682,21 +4314,21 @@ var DreameX60Panel = class extends i4 {
         <dx-map-card class="b span8" data-slot="map-full" variant="full" .hass=${this.hass} .map=${map} .robot=${robot} .history=${hist} .api=${this.api} ?dark=${dark}></dx-map-card>
         <div class="span4 stack">
           <section class="b" data-slot="scenes">
-            <div class="hd"><h2><ha-icon icon="mdi:flash-outline"></ha-icon>Dreame-App-Szenen</h2></div>
-            <div class="plan">${APP_SCENES.map((sc) => b2`<div class="pr"><div class="ic"><ha-icon icon=${sc.icon}></ha-icon></div><div><div class="n">${sc.name}</div><div class="s">${sc.sub}</div></div><span class="tag">App</span>
-              <div class="acts"><button class="ib go" data-scene=${sc.id} aria-label="Starten" title="Starten" @click=${() => askConfirm(this, `\u201E${sc.name}\u201C starten?`, () => {
+            <div class="hd"><h2><ha-icon icon="mdi:flash-outline"></ha-icon>${t3("reinigen.scenes")}</h2></div>
+            <div class="plan">${APP_SCENES.map((sc) => b2`<div class="pr"><div class="ic"><ha-icon icon=${sc.icon}></ha-icon></div><div><div class="n">${sc.name}</div><div class="s">${sc.sub}</div></div><span class="tag">${t3("reinigen.app")}</span>
+              <div class="acts"><button class="ib go" data-scene=${sc.id} aria-label=${t3("common.start")} title=${t3("common.start")} @click=${() => askConfirm(this, t3("reinigen.sceneConfirm", { name: sc.name }), () => {
       void this.api.runScene(sc.id);
-      this.toast(`Gestartet: ${sc.name}`);
+      this.toast(t3("rooms.started", { what: sc.name }));
     })}><ha-icon icon="mdi:play"></ha-icon></button></div></div>`)}</div>
           </section>
           <section class="b" data-slot="chairs">
-            <div class="crow"><div class="ic ${map.chairs ? "on" : ""}"><ha-icon icon="mdi:chair-rolling"></ha-icon></div><div><div class="t">Stühle am Boden</div><div class="s">Setzt eine Sperrzone um den Esstisch</div></div>
-              <button class="sw ${map.chairs ? "on" : ""}" role="switch" aria-checked=${map.chairs ? "true" : "false"} aria-label="Stühle am Boden" data-toggle="chairs" @click=${() => void this.api.toggle(map.chairsId)}></button></div>
+            <div class="crow"><div class="ic ${map.chairs ? "on" : ""}"><ha-icon icon="mdi:chair-rolling"></ha-icon></div><div><div class="t">${t3("reinigen.chairs")}</div><div class="s">${t3("reinigen.chairsSub")}</div></div>
+              <button class="sw ${map.chairs ? "on" : ""}" role="switch" aria-checked=${map.chairs ? "true" : "false"} aria-label=${t3("reinigen.chairs")} data-toggle="chairs" @click=${() => void this.api.toggle(map.chairsId)}></button></div>
           </section>
           <section class="b" data-slot="rooms">
-            <div class="hd"><h2><ha-icon icon="mdi:view-grid-outline"></ha-icon>Räume (Roboter-Werte)</h2></div>
-            <div class="hint">Modus, Saugstufe, Wasser, Route und Wiederholungen je Raum, wie in der Dreame-App. Änderungen gelten sofort.</div>
-            <button class="btn" data-open="rooms" style="align-self:flex-start" @click=${() => this.openOverlay({ kind: "rooms", mode: "robot" })}><ha-icon icon="mdi:view-grid-outline"></ha-icon>Räume einstellen …</button>
+            <div class="hd"><h2><ha-icon icon="mdi:view-grid-outline"></ha-icon>${t3("reinigen.roomsTitle")}</h2></div>
+            <div class="hint">${t3("reinigen.roomsHint")}</div>
+            <button class="btn" data-open="rooms" style="align-self:flex-start" @click=${() => this.openOverlay({ kind: "rooms", mode: "robot" })}><ha-icon icon="mdi:view-grid-outline"></ha-icon>${t3("reinigen.roomsOpen")}</button>
           </section>
         </div>
       </div>`;
@@ -3704,39 +4336,40 @@ var DreameX60Panel = class extends i4 {
   /** Unterseiten: bis zur jeweiligen Karte in Phase 4 ein Platzhalter mit einer Vorschau der Sichten, damit die Verdrahtung sichtbar ist. */
   renderPage(page, s4) {
     const preview = [];
+    const dash = t3("common.dash");
     if (page === "reinigen") {
       const m2 = readMap(s4);
-      preview.push(`Kartendarstellung: ${m2.karte} \xB7 St\xFChle am Boden: ${m2.chairs ? "an" : "aus"} \xB7 Kalibrierung: ${Array.isArray(m2.calibrationPoints) ? m2.calibrationPoints.length + " Punkte" : "fehlt"}`);
+      preview.push(t3("preview.mapPage", { karte: m2.karte, chairs: m2.chairs ? t3("common.on") : t3("common.off"), calib: Array.isArray(m2.calibrationPoints) ? t3("preview.calibPoints", { n: m2.calibrationPoints.length }) : t3("common.missing") }));
     }
     if (page === "planer") {
       const p3 = readPlans(s4);
-      preview.push(...p3.plans.map((x2) => `${x2.n} ${x2.name || "\u2013"} \xB7 ${x2.aktiv ? "aktiv" : "inaktiv"} \xB7 ${x2.raeume.length} R\xE4ume \xB7 ${x2.zeit}`));
-      preview.push(`Lernwerte: ${readLearn(s4) ? "vorhanden" : "keine"}`);
+      preview.push(...p3.plans.map((x2) => t3("preview.plan", { n: x2.n, name: x2.name || dash, state: x2.aktiv ? t3("common.active") : t3("common.inactive"), rooms: x2.raeume.length, time: x2.zeit })));
+      preview.push(t3("preview.learn", { state: readLearn(s4) ? t3("common.present") : t3("common.none") }));
     }
     if (page === "protokoll") {
       const h3 = readHistory(s4);
-      preview.push(`${h3.entries.length} Eintr\xE4ge \xB7 ${h3.count} L\xE4ufe \xB7 ${h3.totalArea} m\xB2 \xB7 ${h3.totalTime} min${h3.stale ? " \xB7 letzter Stand" : ""}`);
+      preview.push(t3("preview.history", { entries: h3.entries.length, runs: h3.count, area: h3.totalArea, time: h3.totalTime, stale: h3.stale ? t3("preview.stale") : "" }));
     }
     if (page === "prognose") {
       const p3 = readPrognose(s4);
-      preview.push(p3.aktiv ? `${p3.state} \xB7 ${p3.tage} Tage \xB7 frei ${p3.freiesFenster} \xB7 R\xFCckkehr ${p3.rueckkehr}` : "Prognose aus");
+      preview.push(p3.aktiv ? t3("preview.prognosePage", { state: p3.state, days: p3.tage, window: p3.freiesFenster, back: p3.rueckkehr }) : t3("preview.prognoseOff"));
     }
     if (page === "einstellungen") {
       const d3 = readDiagnostics(s4);
       const r4 = readRobotSettings(s4);
-      preview.push(`Karte ${readSettings(s4).karte.value} \xB7 Diagnose: ${d3.missing.length} fehlend, ${d3.unavailable.length} unavailable von ${d3.total}`);
-      preview.push(`Roboter: ${r4.selects.map((x2) => `${x2.label} ${x2.value}`).join(", ")} \xB7 DND ${r4.dndStart}\u2013${r4.dndEnd}`);
+      preview.push(t3("preview.settings", { karte: readSettings(s4).karte.value, missing: d3.missing.length, unavailable: d3.unavailable.length, total: d3.total }));
+      preview.push(t3("preview.robot", { list: r4.selects.map((x2) => `${x2.label} ${x2.value}`).join(", "), start: r4.dndStart, end: r4.dndEnd }));
     }
     const entities = Object.keys(s4).length;
     return b2`
       <div class="bento">
         <section class="b span12">
-          <div class="hd"><h2>Seite „${page}“</h2><span class="r">${entities ? `${entities} Entit\xE4ten verbunden` : "keine Zustandsdaten"}</span></div>
-          <div class="lbl">Hier entstehen</div>
+          <div class="hd"><h2>${t3("preview.pageTitle", { page })}</h2><span class="r">${entities ? t3("preview.entities", { n: entities }) : t3("preview.noStates")}</span></div>
+          <div class="lbl">${t3("preview.parts")}</div>
           <ul class="hint list">${PAGE_PARTS[page].map((p3) => b2`<li>${p3}</li>`)}</ul>
-          <div class="lbl">Sichten (Vorschau aus den Selektoren)</div>
+          <div class="lbl">${t3("preview.views")}</div>
           <ul class="hint list preview">${preview.map((p3) => b2`<li>${p3}</li>`)}</ul>
-          <div class="hint">Platzhalter aus Aufgabe 3.3 – Optik nach Mockup <code>dreame_x60/mockups/bento.html</code>.</div>
+          <div class="hint">${t3("preview.mockup")} <code>dreame_x60/mockups/bento.html</code>.</div>
         </section>
       </div>`;
   }
@@ -3745,20 +4378,20 @@ var DreameX60Panel = class extends i4 {
     const o5 = this._overlay;
     if (!o5) return A;
     if (o5.kind === "confirm") {
-      return b2`<dx-dialog class="overlay" data-kind="confirm" variant="confirm" .text=${o5.text} .subText=${o5.sub ?? ""} .okLabel=${o5.okLabel ?? "OK"} ?danger=${!!o5.danger}></dx-dialog>`;
+      return b2`<dx-dialog class="overlay" data-kind="confirm" variant="confirm" .text=${o5.text} .subText=${o5.sub ?? ""} .okLabel=${o5.okLabel ?? t3("common.ok")} ?danger=${!!o5.danger}></dx-dialog>`;
     }
     const hasBack = "back" in o5 && !!o5.back;
-    return b2`<dx-dialog class="overlay" data-kind=${o5.kind} heading=${"Overlay \u201E" + o5.kind + "\u201C"} ?back=${hasBack}>
-        <div class="hint">Platzhalter – der Inhalt dieses Dialogs entsteht mit seinem Baustein in Phase 4.</div>
-        ${hasBack ? b2`<button slot="foot" class="btn" @click=${() => this.backOverlay()}>Zurück</button>` : A}
-        <button slot="foot" class="btn primary" @click=${() => this.closeOverlay()}>Schließen</button>
+    return b2`<dx-dialog class="overlay" data-kind=${o5.kind} heading=${tx("dialog.overlay", { kind: o5.kind })} ?back=${hasBack}>
+        <div class="hint">${t3("dialog.placeholder")}</div>
+        ${hasBack ? b2`<button slot="foot" class="btn" @click=${() => this.backOverlay()}>${t3("common.back")}</button>` : A}
+        <button slot="foot" class="btn primary" @click=${() => this.closeOverlay()}>${t3("common.close")}</button>
       </dx-dialog>`;
   }
 };
 if (!customElements.get(ELEMENT)) customElements.define(ELEMENT, DreameX60Panel);
 window.customCards = window.customCards ?? [];
 if (!window.customCards.some((c4) => c4.type === ELEMENT)) {
-  window.customCards.push({ type: ELEMENT, name: "Heidi (dreame_x60)", description: "Heidi-Karte v2 \u2013 \xDCbersicht und Unterseiten des Saugroboters", preview: false });
+  window.customCards.push({ type: ELEMENT, name: t3("card.name"), description: t3("card.description"), preview: false });
 }
 console.info(`%c dreame_x60 %c v${VERSION} `, "background:#0b1015;color:#58b7f6;font-weight:600", "background:#0b1015;color:#e7edf3");
 export {

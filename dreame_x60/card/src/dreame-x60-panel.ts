@@ -33,6 +33,7 @@ import './components/dx-dialog';
 import './components/dx-map-card';
 import './components/dx-quickstart';
 import { APP_SCENES } from './config';
+import { t, tx } from './i18n/t';
 import { askConfirm } from './shared/overlay';
 import { controls } from './styles/controls';
 
@@ -43,7 +44,7 @@ export type { Page };
 /** Anzeigedauer des Toasts in ms (wie v1). */
 const TOAST_MS = 1900;
 /** Tagesgruß der Übersicht: bis 11 Uhr Morgen, bis 18 Uhr Tag, danach Abend. */
-const GREETING = (h: number): string => (h < 11 ? 'Guten Morgen' : h < 18 ? 'Guten Tag' : 'Guten Abend');
+const GREETING = (h: number): string => (h < 11 ? t('topbar.morning') : h < 18 ? t('topbar.day') : t('topbar.evening'));
 
 /** Marke „noch nie gesehen“ für den Vergleich von hass.entities (auch `undefined` ist ein gültiger erster Wert). */
 const UNSET: unknown = Symbol('unset');
@@ -167,7 +168,7 @@ export class DreameX60Panel extends LitElement {
 
   // ───────── HA-Schnittstelle der Karte ─────────
   setConfig(config: PanelConfig | null | undefined): void {
-    if (!config || typeof config !== 'object') throw new Error('dreame-x60-panel: Konfiguration fehlt');
+    if (!config || typeof config !== 'object') throw new Error(t('card.noConfig'));
     this._config = { ...config, page: toPage(config.page) };
   }
 
@@ -226,23 +227,23 @@ export class DreameX60Panel extends LitElement {
     if (page === 'start') {
       const name = (this.hass?.user?.name ?? '').trim();
       // In der Station (Mopp-Wäsche/Trocknen nach dem Lauf) ist der Hauptzustand noch „cleaning“ – dann nicht „unterwegs“
-      const robotName = deviceName() || 'Roboter';
-      title = robot.running && !robot.docked ? `${robotName} ist unterwegs` : robot.running ? `${robotName} ist in der Station` : `${GREETING(now.getHours())}${name ? ', ' + name : ''}!`;
+      const robotName = deviceName() || t('common.robot');
+      title = robot.running && !robot.docked ? t('topbar.away', { name: robotName }) : robot.running ? t('topbar.inStation', { name: robotName }) : `${GREETING(now.getHours())}${name ? ', ' + name : ''}!`;
       sub = robot.hero.sub ? `${robot.hero.big} · ${robot.hero.sub}` : robot.hero.big;
     } else {
       ({ title, sub } = PAGE_TITLE[page]);
-      title ||= deviceName() || 'Roboter';
+      title ||= deviceName() || t('common.robot');
     }
     const home = robot.persons.filter((p) => p.known && p.home).map((p) => p.name);
     return html`
       <div class="topbar">
-        ${page !== 'start' ? html`<button class="back" @click=${() => navigate('start')}><ha-icon icon="mdi:chevron-left"></ha-icon>Übersicht</button>` : nothing}
+        ${page !== 'start' ? html`<button class="back" @click=${() => navigate('start')}><ha-icon icon="mdi:chevron-left"></ha-icon>${t('topbar.back')}</button>` : nothing}
         <div><h1>${title}</h1><div class="sub">${sub}</div></div>
         <div class="meta">
           ${this.renderSetupIcons(robot)}
           <div class="mi time"><ha-icon icon="mdi:clock-outline"></ha-icon><div><b>${now.toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' })}</b><small>${now.toLocaleDateString('de-AT', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' })}</small></div></div>
-          <div class="mi home"><ha-icon icon="mdi:home-outline"></ha-icon><div><b>${home.length ? 'Zu Hause' : 'Niemand zu Hause'}<span class="dot ${home.length ? 'on' : ''}"></span></b><small>${home.length ? home.join(' · ') + ' anwesend' : 'alle unterwegs'}</small></div></div>
-          <div class="mi dnd"><ha-icon icon="mdi:weather-night"></ha-icon><div><b>${robot.hero.dnd}</b><small>Nicht stören</small></div></div>
+          <div class="mi home"><ha-icon icon="mdi:home-outline"></ha-icon><div><b>${home.length ? t('topbar.home') : t('topbar.nobody')}<span class="dot ${home.length ? 'on' : ''}"></span></b><small>${home.length ? t('topbar.present', { names: home.join(' · ') }) : t('topbar.allAway')}</small></div></div>
+          <div class="mi dnd"><ha-icon icon="mdi:weather-night"></ha-icon><div><b>${robot.hero.dnd}</b><small>${t('topbar.dnd')}</small></div></div>
         </div>
       </div>`;
   }
@@ -257,7 +258,7 @@ export class DreameX60Panel extends LitElement {
   private runSetupAction(a: SetupAction | undefined): void {
     if (!a) return;
     if (a.kind === 'more-info') moreInfo(this, a.entity);
-    else if (a.kind === 'vacuum-areas') { void openVacuumSegmentMapping(this, a.entity).then((r) => { if (r === 'fallback') this.toast(`Im Dialog: ${a.hint}`); }); }
+    else if (a.kind === 'vacuum-areas') { void openVacuumSegmentMapping(this, a.entity).then((r) => { if (r === 'fallback') this.toast(t('topbar.inDialog', { hint: a.hint })); }); }
     else if (a.kind === 'page') navigate(a.page);
     else navigateHa(a.path);
   }
@@ -265,23 +266,24 @@ export class DreameX60Panel extends LitElement {
   /** Bento-Übersicht (Bauplan 4.0): Bausteine, wo sie schon existieren (4.1 dx-hero, dx-auftrag), sonst Platzhalter mit einer Vorschau der Sichten. */
   private renderStart(s: HomeAssistant['states'], robot: RobotView): TemplateResult {
     const entities = Object.keys(s).length;
+    const dash = t('common.dash');
     const plans = readPlans(s); const prog = readPrognose(s); const hist = readHistory(s); const map = readMap(s); const rooms = readAllRoomValues(s);
     const lines: Record<string, string[]> = {
-      map: [entities ? `${entities} Entitäten verbunden` : 'keine Zustandsdaten', `Kartendarstellung: ${map.karte} · Kalibrierung: ${Array.isArray(map.calibrationPoints) ? map.calibrationPoints.length + ' Punkte' : 'fehlt'}`],
-      automatik: [`Automatik: ${readAutomatik(s).status || '–'}`],
-      heute: [`Heutiger Eintrag: ${plans.heuteName || '–'}${plans.heuteZeit ? ' · ' + plans.heuteZeit : ''}`, prog.aktiv ? `Freies Fenster ${prog.freiesFenster} · Rückkehr ${prog.rueckkehr}` : 'Prognose aus'],
-      planer: plans.plans.slice(0, 3).map((x) => `${x.n} ${x.name || '–'} · ${x.aktiv ? 'aktiv' : 'inaktiv'} · ${x.zeit}`),
+      map: [entities ? t('preview.entities', { n: entities }) : t('preview.noStates'), t('preview.map', { karte: map.karte, calib: Array.isArray(map.calibrationPoints) ? t('preview.calibPoints', { n: map.calibrationPoints.length }) : t('common.missing') })],
+      automatik: [t('preview.automatik', { status: readAutomatik(s).status || dash })],
+      heute: [t('preview.today', { name: (plans.heuteName || dash) + (plans.heuteZeit ? ' · ' + plans.heuteZeit : '') }), prog.aktiv ? t('preview.prognose', { window: prog.freiesFenster, back: prog.rueckkehr }) : t('preview.prognoseOff')],
+      planer: plans.plans.slice(0, 3).map((x) => `${x.n} ${x.name || dash} · ${x.aktiv ? t('common.active') : t('common.inactive')} · ${x.zeit}`),
       consumables: [readConsumables(s).map((c) => `${c.name} ${c.pct} %`).join(', ')],
       station: [readStation(s).tiles.map((x) => `${x.label} ${x.value}`).join(', ')],
-      stats: [`${hist.count} Läufe · ${hist.totalArea} m² · ${hist.totalTime} min`],
-      quickstart: [`Räume: ${map.roomOrder.map((r) => r.short).join(', ') || 'keine (Karte fehlt)'}`],
-      history: [`${hist.entries.length} Einträge${hist.stale ? ' · letzter Stand' : ''}`],
+      stats: [t('preview.stats', { runs: hist.count, area: hist.totalArea, time: hist.totalTime })],
+      quickstart: [t('preview.rooms', { list: map.roomOrder.map((r) => r.short).join(', ') || t('preview.noRooms') })],
+      history: [t('preview.entries', { n: hist.entries.length }) + (hist.stale ? t('preview.stale') : '')],
     };
     const box = (sl: StartSlot): TemplateResult => html`
       <section class="b ${sl.span}" data-slot=${sl.slot}>
-        <div class="hd"><h2>${sl.title || deviceName() || 'Roboter'}</h2><span class="r">${sl.part}</span></div>
+        <div class="hd"><h2>${sl.title || deviceName() || t('common.robot')}</h2><span class="r">${sl.part}</span></div>
         ${(lines[sl.slot] ?? []).map((l) => html`<div class="hint preview">${l}</div>`)}
-        <div class="hint">Platzhalter – entsteht in Aufgabe ${sl.task}.</div>
+        <div class="hint">${t('preview.placeholder', { task: sl.task })}</div>
       </section>`;
     const rest = START_SLOTS.filter((sl) => !['hero', 'map', 'automatik', 'auftrag', 'heute', 'quickstart'].includes(sl.slot));
     const dark = readSettings(s).dark;
@@ -305,18 +307,18 @@ export class DreameX60Panel extends LitElement {
         <dx-map-card class="b span8" data-slot="map-full" variant="full" .hass=${this.hass} .map=${map} .robot=${robot} .history=${hist} .api=${this.api} ?dark=${dark}></dx-map-card>
         <div class="span4 stack">
           <section class="b" data-slot="scenes">
-            <div class="hd"><h2><ha-icon icon="mdi:flash-outline"></ha-icon>Dreame-App-Szenen</h2></div>
-            <div class="plan">${APP_SCENES.map((sc) => html`<div class="pr"><div class="ic"><ha-icon icon=${sc.icon}></ha-icon></div><div><div class="n">${sc.name}</div><div class="s">${sc.sub}</div></div><span class="tag">App</span>
-              <div class="acts"><button class="ib go" data-scene=${sc.id} aria-label="Starten" title="Starten" @click=${() => askConfirm(this, `„${sc.name}“ starten?`, () => { void this.api.runScene(sc.id); this.toast(`Gestartet: ${sc.name}`); })}><ha-icon icon="mdi:play"></ha-icon></button></div></div>`)}</div>
+            <div class="hd"><h2><ha-icon icon="mdi:flash-outline"></ha-icon>${t('reinigen.scenes')}</h2></div>
+            <div class="plan">${APP_SCENES.map((sc) => html`<div class="pr"><div class="ic"><ha-icon icon=${sc.icon}></ha-icon></div><div><div class="n">${sc.name}</div><div class="s">${sc.sub}</div></div><span class="tag">${t('reinigen.app')}</span>
+              <div class="acts"><button class="ib go" data-scene=${sc.id} aria-label=${t('common.start')} title=${t('common.start')} @click=${() => askConfirm(this, t('reinigen.sceneConfirm', { name: sc.name }), () => { void this.api.runScene(sc.id); this.toast(t('rooms.started', { what: sc.name })); })}><ha-icon icon="mdi:play"></ha-icon></button></div></div>`)}</div>
           </section>
           <section class="b" data-slot="chairs">
-            <div class="crow"><div class="ic ${map.chairs ? 'on' : ''}"><ha-icon icon="mdi:chair-rolling"></ha-icon></div><div><div class="t">Stühle am Boden</div><div class="s">Setzt eine Sperrzone um den Esstisch</div></div>
-              <button class="sw ${map.chairs ? 'on' : ''}" role="switch" aria-checked=${map.chairs ? 'true' : 'false'} aria-label="Stühle am Boden" data-toggle="chairs" @click=${() => void this.api.toggle(map.chairsId)}></button></div>
+            <div class="crow"><div class="ic ${map.chairs ? 'on' : ''}"><ha-icon icon="mdi:chair-rolling"></ha-icon></div><div><div class="t">${t('reinigen.chairs')}</div><div class="s">${t('reinigen.chairsSub')}</div></div>
+              <button class="sw ${map.chairs ? 'on' : ''}" role="switch" aria-checked=${map.chairs ? 'true' : 'false'} aria-label=${t('reinigen.chairs')} data-toggle="chairs" @click=${() => void this.api.toggle(map.chairsId)}></button></div>
           </section>
           <section class="b" data-slot="rooms">
-            <div class="hd"><h2><ha-icon icon="mdi:view-grid-outline"></ha-icon>Räume (Roboter-Werte)</h2></div>
-            <div class="hint">Modus, Saugstufe, Wasser, Route und Wiederholungen je Raum, wie in der Dreame-App. Änderungen gelten sofort.</div>
-            <button class="btn" data-open="rooms" style="align-self:flex-start" @click=${() => this.openOverlay({ kind: 'rooms', mode: 'robot' })}><ha-icon icon="mdi:view-grid-outline"></ha-icon>Räume einstellen …</button>
+            <div class="hd"><h2><ha-icon icon="mdi:view-grid-outline"></ha-icon>${t('reinigen.roomsTitle')}</h2></div>
+            <div class="hint">${t('reinigen.roomsHint')}</div>
+            <button class="btn" data-open="rooms" style="align-self:flex-start" @click=${() => this.openOverlay({ kind: 'rooms', mode: 'robot' })}><ha-icon icon="mdi:view-grid-outline"></ha-icon>${t('reinigen.roomsOpen')}</button>
           </section>
         </div>
       </div>`;
@@ -325,21 +327,22 @@ export class DreameX60Panel extends LitElement {
   /** Unterseiten: bis zur jeweiligen Karte in Phase 4 ein Platzhalter mit einer Vorschau der Sichten, damit die Verdrahtung sichtbar ist. */
   private renderPage(page: Exclude<Page, 'start'>, s: HomeAssistant['states']): TemplateResult {
     const preview: string[] = [];
-    if (page === 'reinigen') { const m = readMap(s); preview.push(`Kartendarstellung: ${m.karte} · Stühle am Boden: ${m.chairs ? 'an' : 'aus'} · Kalibrierung: ${Array.isArray(m.calibrationPoints) ? m.calibrationPoints.length + ' Punkte' : 'fehlt'}`); }
-    if (page === 'planer') { const p = readPlans(s); preview.push(...p.plans.map((x) => `${x.n} ${x.name || '–'} · ${x.aktiv ? 'aktiv' : 'inaktiv'} · ${x.raeume.length} Räume · ${x.zeit}`)); preview.push(`Lernwerte: ${readLearn(s) ? 'vorhanden' : 'keine'}`); }
-    if (page === 'protokoll') { const h = readHistory(s); preview.push(`${h.entries.length} Einträge · ${h.count} Läufe · ${h.totalArea} m² · ${h.totalTime} min${h.stale ? ' · letzter Stand' : ''}`); }
-    if (page === 'prognose') { const p = readPrognose(s); preview.push(p.aktiv ? `${p.state} · ${p.tage} Tage · frei ${p.freiesFenster} · Rückkehr ${p.rueckkehr}` : 'Prognose aus'); }
-    if (page === 'einstellungen') { const d = readDiagnostics(s); const r = readRobotSettings(s); preview.push(`Karte ${readSettings(s).karte.value} · Diagnose: ${d.missing.length} fehlend, ${d.unavailable.length} unavailable von ${d.total}`); preview.push(`Roboter: ${r.selects.map((x) => `${x.label} ${x.value}`).join(', ')} · DND ${r.dndStart}–${r.dndEnd}`); }
+    const dash = t('common.dash');
+    if (page === 'reinigen') { const m = readMap(s); preview.push(t('preview.mapPage', { karte: m.karte, chairs: m.chairs ? t('common.on') : t('common.off'), calib: Array.isArray(m.calibrationPoints) ? t('preview.calibPoints', { n: m.calibrationPoints.length }) : t('common.missing') })); }
+    if (page === 'planer') { const p = readPlans(s); preview.push(...p.plans.map((x) => t('preview.plan', { n: x.n, name: x.name || dash, state: x.aktiv ? t('common.active') : t('common.inactive'), rooms: x.raeume.length, time: x.zeit }))); preview.push(t('preview.learn', { state: readLearn(s) ? t('common.present') : t('common.none') })); }
+    if (page === 'protokoll') { const h = readHistory(s); preview.push(t('preview.history', { entries: h.entries.length, runs: h.count, area: h.totalArea, time: h.totalTime, stale: h.stale ? t('preview.stale') : '' })); }
+    if (page === 'prognose') { const p = readPrognose(s); preview.push(p.aktiv ? t('preview.prognosePage', { state: p.state, days: p.tage, window: p.freiesFenster, back: p.rueckkehr }) : t('preview.prognoseOff')); }
+    if (page === 'einstellungen') { const d = readDiagnostics(s); const r = readRobotSettings(s); preview.push(t('preview.settings', { karte: readSettings(s).karte.value, missing: d.missing.length, unavailable: d.unavailable.length, total: d.total })); preview.push(t('preview.robot', { list: r.selects.map((x) => `${x.label} ${x.value}`).join(', '), start: r.dndStart, end: r.dndEnd })); }
     const entities = Object.keys(s).length;
     return html`
       <div class="bento">
         <section class="b span12">
-          <div class="hd"><h2>Seite „${page}“</h2><span class="r">${entities ? `${entities} Entitäten verbunden` : 'keine Zustandsdaten'}</span></div>
-          <div class="lbl">Hier entstehen</div>
+          <div class="hd"><h2>${t('preview.pageTitle', { page })}</h2><span class="r">${entities ? t('preview.entities', { n: entities }) : t('preview.noStates')}</span></div>
+          <div class="lbl">${t('preview.parts')}</div>
           <ul class="hint list">${PAGE_PARTS[page].map((p) => html`<li>${p}</li>`)}</ul>
-          <div class="lbl">Sichten (Vorschau aus den Selektoren)</div>
+          <div class="lbl">${t('preview.views')}</div>
           <ul class="hint list preview">${preview.map((p) => html`<li>${p}</li>`)}</ul>
-          <div class="hint">Platzhalter aus Aufgabe 3.3 – Optik nach Mockup <code>dreame_x60/mockups/bento.html</code>.</div>
+          <div class="hint">${t('preview.mockup')} <code>dreame_x60/mockups/bento.html</code>.</div>
         </section>
       </div>`;
   }
@@ -349,13 +352,13 @@ export class DreameX60Panel extends LitElement {
     const o = this._overlay;
     if (!o) return nothing;
     if (o.kind === 'confirm') {
-      return html`<dx-dialog class="overlay" data-kind="confirm" variant="confirm" .text=${o.text} .subText=${o.sub ?? ''} .okLabel=${o.okLabel ?? 'OK'} ?danger=${!!o.danger}></dx-dialog>`;
+      return html`<dx-dialog class="overlay" data-kind="confirm" variant="confirm" .text=${o.text} .subText=${o.sub ?? ''} .okLabel=${o.okLabel ?? t('common.ok')} ?danger=${!!o.danger}></dx-dialog>`;
     }
     const hasBack = 'back' in o && !!o.back;
-    return html`<dx-dialog class="overlay" data-kind=${o.kind} heading=${'Overlay „' + o.kind + '“'} ?back=${hasBack}>
-        <div class="hint">Platzhalter – der Inhalt dieses Dialogs entsteht mit seinem Baustein in Phase 4.</div>
-        ${hasBack ? html`<button slot="foot" class="btn" @click=${() => this.backOverlay()}>Zurück</button>` : nothing}
-        <button slot="foot" class="btn primary" @click=${() => this.closeOverlay()}>Schließen</button>
+    return html`<dx-dialog class="overlay" data-kind=${o.kind} heading=${tx('dialog.overlay', { kind: o.kind })} ?back=${hasBack}>
+        <div class="hint">${t('dialog.placeholder')}</div>
+        ${hasBack ? html`<button slot="foot" class="btn" @click=${() => this.backOverlay()}>${t('common.back')}</button>` : nothing}
+        <button slot="foot" class="btn primary" @click=${() => this.closeOverlay()}>${t('common.close')}</button>
       </dx-dialog>`;
   }
 }
@@ -368,7 +371,7 @@ declare global {
 }
 window.customCards = window.customCards ?? [];
 if (!window.customCards.some((c) => c.type === ELEMENT)) {
-  window.customCards.push({ type: ELEMENT, name: 'Heidi (dreame_x60)', description: 'Heidi-Karte v2 – Übersicht und Unterseiten des Saugroboters', preview: false });
+  window.customCards.push({ type: ELEMENT, name: t('card.name'), description: t('card.description'), preview: false });
 }
 
 console.info(`%c dreame_x60 %c v${VERSION} `, 'background:#0b1015;color:#58b7f6;font-weight:600', 'background:#0b1015;color:#e7edf3');

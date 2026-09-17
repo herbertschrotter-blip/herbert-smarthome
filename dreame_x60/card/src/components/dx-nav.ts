@@ -10,6 +10,7 @@ import { EVENTS, emit } from '../shared/overlay';
 import type { Overlay } from '../shared/overlay';
 import { robotSvg } from '../shared/robot-svg';
 import { deviceName } from '../ha/device';
+import { t } from '../i18n/t';
 
 export const NAV_ELEMENT = 'dx-nav';
 /** Höchstens so viele Einträge in der Tab-Leiste (Mockup). */
@@ -95,14 +96,14 @@ export class DxNav extends LitElement {
   override render(): TemplateResult {
     const es = this.entries;
     return html`
-      <nav class="side" aria-label="Seitenleiste">
+      <nav class="side" aria-label=${t('nav.sidebar')}>
         <div class="inner">
-          <div class="brand"><span class="logo"></span><div><div class="t">${deviceName() || 'Roboter'}</div><div class="s">Dein Saugroboter</div></div></div>
+          <div class="brand"><span class="logo"></span><div><div class="t">${deviceName() || t('common.robot')}</div><div class="s">${t('nav.brandSub')}</div></div></div>
           <div class="navlist">${es.map((e) => this.item(e))}</div>
-          <div class="foot">${robotSvg}<div class="m">Dreame X60 Ultra</div><div class="version">dreame_x60 v${this.version}</div></div>
+          <div class="foot">${robotSvg}<div class="m">${t('nav.model')}</div><div class="version">dreame_x60 v${this.version}</div></div>
         </div>
       </nav>
-      <nav class="tabbar" aria-label="Tab-Leiste">${es.filter((e) => e.tab).slice(0, TAB_MAX).map((e) => this.item(e))}</nav>`;
+      <nav class="tabbar" aria-label=${t('nav.tabbar')}>${es.filter((e) => e.tab).slice(0, TAB_MAX).map((e) => this.item(e))}</nav>`;
   }
 }
 

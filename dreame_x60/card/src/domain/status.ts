@@ -1,5 +1,6 @@
 // Kopf-Texte und -Knöpfe (Bauplan 2.5, Regeln Abschnitt 6): reine Funktion aus dem Roboterzustand, 1:1 wie v1 _hero.
-import { ERR_DE, STATUS_DE } from '../config';
+// Texte aus src/i18n/de.ts (4.14): status.* (STATUS_DE), task.* (TASK), error.* (ERR_DE), head.*, button.*.
+import { lookup, t } from '../i18n/t';
 
 export interface HeroInput {
   /** vacuum.heidi state */
@@ -44,44 +45,44 @@ export interface HeroModel {
   phaseOk: boolean;
 }
 
-/** Auftragsart aus sensor.heidi_task_status (wie v1 TASK). */
-export const TASK_DE: Record<string, string> = {
-  room_cleaning: 'Reinigt Räume', zone_cleaning: 'Reinigt Zone', spot_cleaning: 'Reinigt Punkt', cleaning: 'Reinigt',
-  cruising: 'Fährt', mapping: 'Erstellt Karte', fast_mapping: 'Erstellt Karte',
-};
-
 const EMPTY = ['unknown', 'unavailable', ''];
 const cap = (s: string): string => s.replace(/^./, (c) => c.toUpperCase());
 
 const B = (service: VacuumService, icon: string, label: string, primary = false): HeroButton => ({ service, icon, label, primary });
 
+/** Status des Roboters als Text (wie v1 STATUS_DE); unbekannte Werte lesbar gemacht. */
+export const statusText = (status: string): string => lookup('status', status) ?? status.replace(/_/g, ' ');
+
+/** Text zum Fehler-/Hinweiscode (wie v1 ERR_DE, ergänzt um alle Codes der Integration); unbekannte Codes lesbar gemacht. */
+export const errorText = (code: string): string => lookup('error', code) ?? code.replace(/_/g, ' ');
+
 /** Knöpfe je Zustand (Reihenfolge fest, Regel „Texte, Knopfreihenfolge nicht ändern“). */
 export function heroButtons(vac: string): HeroButton[] {
   switch (vac) {
-    case 'cleaning': return [B('pause', 'mdi:pause', 'Pause', true), B('stop', 'mdi:stop', 'Stopp'), B('return_to_base', 'mdi:home-import-outline', 'Station')];
-    case 'paused': return [B('start', 'mdi:play', 'Weiter', true), B('stop', 'mdi:stop', 'Stopp'), B('return_to_base', 'mdi:home-import-outline', 'Station')];
-    case 'returning': return [B('pause', 'mdi:pause', 'Pause', true), B('stop', 'mdi:stop', 'Stopp'), B('locate', 'mdi:map-marker', 'Orten')];
-    case 'docked': return [B('start', 'mdi:play', 'Start', true), B('locate', 'mdi:map-marker', 'Orten')];
-    default: return [B('start', 'mdi:play', 'Start', true), B('return_to_base', 'mdi:home-import-outline', 'Station'), B('locate', 'mdi:map-marker', 'Orten')];
+    case 'cleaning': return [B('pause', 'mdi:pause', t('button.pause'), true), B('stop', 'mdi:stop', t('button.stop')), B('return_to_base', 'mdi:home-import-outline', t('button.station'))];
+    case 'paused': return [B('start', 'mdi:play', t('button.resume'), true), B('stop', 'mdi:stop', t('button.stop')), B('return_to_base', 'mdi:home-import-outline', t('button.station'))];
+    case 'returning': return [B('pause', 'mdi:pause', t('button.pause'), true), B('stop', 'mdi:stop', t('button.stop')), B('locate', 'mdi:map-marker', t('button.locate'))];
+    case 'docked': return [B('start', 'mdi:play', t('button.start'), true), B('locate', 'mdi:map-marker', t('button.locate'))];
+    default: return [B('start', 'mdi:play', t('button.start'), true), B('return_to_base', 'mdi:home-import-outline', t('button.station')), B('locate', 'mdi:map-marker', t('button.locate'))];
   }
 }
 
 export function heroModel(i: HeroInput): HeroModel {
   const phaseOk = !EMPTY.includes(i.phase);
-  const statusTxt = phaseOk ? i.phase : cap((STATUS_DE[i.status] ?? i.status.replace(/_/g, ' ')));
+  const statusTxt = phaseOk ? i.phase : cap(statusText(i.status));
   const auto = i.autoLauf ? i.autoLetzterPlan : '';
-  const job = auto && !EMPTY.includes(auto) ? auto : (TASK_DE[i.task] ?? 'Reinigt');
+  const job = auto && !EMPTY.includes(auto) ? auto : (lookup('task', i.task) ?? t('task.default'));
   let big = statusTxt, sub = '';
-  if (i.vac === 'error') big = 'Fehler';
-  else if (i.vac === 'paused') { big = 'Pausiert'; sub = job; }
-  else if (i.vac === 'returning') { big = 'Fährt zur Station'; sub = phaseOk && i.phase !== big ? i.phase : ''; }
+  if (i.vac === 'error') big = t('head.error');
+  else if (i.vac === 'paused') { big = t('head.paused'); sub = job; }
+  else if (i.vac === 'returning') { big = t('head.returning'); sub = phaseOk && i.phase !== big ? i.phase : ''; }
   else if (i.vac === 'cleaning') { big = job; sub = phaseOk ? i.phase : ''; }
   if (sub === big) sub = '';
   const dot: DotLevel = i.vac === 'cleaning' ? 'accent' : i.vac === 'returning' ? 'warning' : i.vac === 'error' ? 'danger' : 'positive';
   const errorChip = i.error !== 'no_error' && i.error !== 'unavailable'
-    ? { text: ERR_DE[i.error] ?? i.error.replace(/_/g, ' '), level: i.hasError ? 'danger' as const : 'warning' as const }
+    ? { text: errorText(i.error), level: i.hasError ? 'danger' as const : 'warning' as const }
     : null;
-  const roomChip = i.room !== '–' && i.vac === 'cleaning' && !phaseOk ? i.room : null;
+  const roomChip = i.room !== t('common.dash') && i.vac === 'cleaning' && !phaseOk ? i.room : null;
   const dnd = `${(i.dndStart || '').slice(0, 5)}–${(i.dndEnd || '').slice(0, 5)}`;
   return { big, sub, dot, buttons: heroButtons(i.vac), errorChip, roomChip, dnd, phaseOk };
 }

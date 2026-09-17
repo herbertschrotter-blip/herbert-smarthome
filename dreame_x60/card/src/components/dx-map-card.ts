@@ -19,6 +19,7 @@ import type { Overlay } from '../shared/overlay';
 import { confirmText, segmentsOf, selectionLabel, toggleRoom } from '../shared/rooms';
 import { controls } from '../styles/controls';
 import { deviceName } from '../ha/device';
+import { t } from '../i18n/t';
 
 export const MAP_ELEMENT = 'dx-map-card';
 export type MapVariant = 'full' | 'compact';
@@ -127,14 +128,14 @@ export class DxMapCard extends LitElement {
       if (this._pending === key) return;
       this._pending = key;
       try {
-        if (!window.loadCardHelpers) throw new Error('loadCardHelpers fehlt');
+        if (!window.loadCardHelpers) throw new Error(t('map.helpersMissing'));
         const helpers = await window.loadCardHelpers();
         const cfg = this.variant === 'compact' ? pictureConfig() : buildMapConfig(this.map.karte, this.dark, this._mode, this.map.roomShapes);
         el = helpers.createCardElement(cfg) as CardEl;
         mapElements.set(key, el);
         this._error = null;
       } catch (e) {
-        this._error = `Karte konnte nicht geladen werden: ${String((e as Error)?.message ?? e)}`;
+        this._error = t('map.loadError', { error: String((e as Error)?.message ?? e) });
         return;
       } finally {
         this._pending = null;
@@ -155,13 +156,13 @@ export class DxMapCard extends LitElement {
     const segments = segmentsOf(this._sel, order);
     if (!segments.length) return;
     askConfirm(this, confirmText(this._sel, order), () => {
-      void this.api?.startRooms(segments).then(() => emit(this, EVENTS.toast, `Gestartet: ${selectionLabel(this._sel, order)}`), (e: unknown) => emit(this, EVENTS.toast, `Start fehlgeschlagen: ${String((e as Error)?.message ?? e)}`));
+      void this.api?.startRooms(segments).then(() => emit(this, EVENTS.toast, t('rooms.started', { what: selectionLabel(this._sel, order) })), (e: unknown) => emit(this, EVENTS.toast, t('rooms.failed', { error: String((e as Error)?.message ?? e) })));
       this._sel = new Set();
     });
   }
 
   private runAll(): void {
-    askConfirm(this, 'Ganze Wohnung reinigen?', () => { void this.api?.vacuum('start'); emit(this, EVENTS.toast, 'Gestartet: ganze Wohnung'); });
+    askConfirm(this, t('map.allConfirm'), () => { void this.api?.vacuum('start'); emit(this, EVENTS.toast, t('rooms.started', { what: t('map.allStarted') })); });
   }
 
   // ───────── Rendern ─────────
@@ -170,27 +171,27 @@ export class DxMapCard extends LitElement {
     const r = this.robot;
     if (r && (r.vac === 'cleaning' || r.vac === 'paused') && !r.docked) {
       const rest = runOrder(r).rest.map((id) => roomById(this.map?.roomOrder ?? [], id)?.short).filter(Boolean).join(', ');
-      return html`<b>Live-Karte</b> · ${r.room !== '–' ? r.room : 'unterwegs'} · ${r.cleanedArea} m²${rest ? html` · noch ${rest}` : nothing}`;
+      return html`<b>${t('map.live')}</b> · ${r.room !== t('common.dash') ? r.room : t('map.capAway')} · ${r.cleanedArea} ${t('unit.m2')}${rest ? html` · ${t('map.capRest', { rest })}` : nothing}`;
     }
     const last = this.history?.entries[0];
-    return html`<b>Karte</b> · ${deviceName() || 'Roboter'} in der Station${last ? html` · letzter Lauf ${fmtDate(last.ts * 1000)}` : nothing}`;
+    return html`<b>${t('map.title')}</b> · ${t('map.capStation', { name: deviceName() || t('common.robot') })}${last ? html` · ${t('map.capLast', { time: fmtDate(last.ts * 1000) })}` : nothing}`;
   }
 
   private renderCompact(): TemplateResult {
     return html`
       <div class="tabs">
-        <button class="on"><ha-icon icon="mdi:map-outline"></ha-icon>Live-Karte</button>
-        <button data-nav="reinigen" @click=${this.goReinigen}><ha-icon icon="mdi:view-grid-outline"></ha-icon>Räume</button>
-        <button data-open="zones" @click=${this.openZones}><ha-icon icon="mdi:cancel"></ha-icon>Sperrzonen</button>
-        <button data-nav="protokoll" @click=${() => emit(this, EVENTS.navigate, { page: 'protokoll' })}><ha-icon icon="mdi:history"></ha-icon>Reinigungsverlauf</button>
+        <button class="on"><ha-icon icon="mdi:map-outline"></ha-icon>${t('map.live')}</button>
+        <button data-nav="reinigen" @click=${this.goReinigen}><ha-icon icon="mdi:view-grid-outline"></ha-icon>${t('map.rooms')}</button>
+        <button data-open="zones" @click=${this.openZones}><ha-icon icon="mdi:cancel"></ha-icon>${t('map.zones')}</button>
+        <button data-nav="protokoll" @click=${() => emit(this, EVENTS.navigate, { page: 'protokoll' })}><ha-icon icon="mdi:history"></ha-icon>${t('map.history')}</button>
       </div>
-      <div class="map tap" title="Zur Karte">
+      <div class="map tap" title=${t('map.toMap')}>
         <div class="slot"></div>
         <div class="catch" @click=${this.goReinigen}></div>
-        <div class="mtools"><button class="btn sm" @click=${this.goReinigen}><ha-icon icon="mdi:map-outline"></ha-icon>Karte öffnen</button></div>
+        <div class="mtools"><button class="btn sm" @click=${this.goReinigen}><ha-icon icon="mdi:map-outline"></ha-icon>${t('map.open')}</button></div>
       </div>
       ${this._error ? html`<div class="err">${this._error}</div>` : nothing}
-      <div class="mapcap">${this.caption()}<span class="r">antippen für Räume, Zone, Punkt, Sperrzonen</span></div>`;
+      <div class="mapcap">${this.caption()}<span class="r">${t('map.tapHint')}</span></div>`;
   }
 
   private renderFull(): TemplateResult {
@@ -202,7 +203,7 @@ export class DxMapCard extends LitElement {
     const sel = this._sel;
     const sm = m?.selectedMap ?? null;
     return html`
-      <div class="hd"><h2><ha-icon icon="mdi:map-outline"></ha-icon>Karte</h2>
+      <div class="hd"><h2><ha-icon icon="mdi:map-outline"></ha-icon>${t('map.title')}</h2>
         ${sm ? html`<span class="seg2 maps">${sm.options.map((o) => html`<button class=${o === sm.value ? 'on' : ''} data-map=${o} @click=${() => void this.api?.selectOption(sm.id, o)}>${o}</button>`)}</span>` : html`<span class="r">${kind}</span>`}
       </div>
       <div class="map">
@@ -210,21 +211,21 @@ export class DxMapCard extends LitElement {
           ? html`<dx-heidi-map .map=${m} .robot=${this.robot} .selected=${sel} @dx-room-tap=${(e: CustomEvent<{ id: number }>) => { this._sel = toggleRoom(this._sel, e.detail.id); }}></dx-heidi-map>`
           : html`<div class="slot"></div>`}
         ${modes ? html`<div class="mtools">
-          <button class="btn sm ${this._mode === 'goto' ? 'on' : ''}" data-act="goto" @click=${() => this.setMode(this._mode === 'goto' ? 'raeume' : 'goto')}><ha-icon icon="mdi:map-marker"></ha-icon>Hinfahren</button>
-          <button class="btn sm" data-open="zones" @click=${this.openZones}><ha-icon icon="mdi:cancel"></ha-icon>Sperrzonen</button>
+          <button class="btn sm ${this._mode === 'goto' ? 'on' : ''}" data-act="goto" @click=${() => this.setMode(this._mode === 'goto' ? 'raeume' : 'goto')}><ha-icon icon="mdi:map-marker"></ha-icon>${t('map.goto')}</button>
+          <button class="btn sm" data-open="zones" @click=${this.openZones}><ha-icon icon="mdi:cancel"></ha-icon>${t('map.zones')}</button>
         </div>` : nothing}
       </div>
       ${this._error ? html`<div class="err">${this._error}</div>` : nothing}
       <div class="mapmodes">
         ${modes
           ? html`<div class="seg2 modes">${(['raeume', 'zone', 'punkt'] as const).map((k) => html`<button data-mode=${k} class=${this._mode === k ? 'on' : ''} @click=${() => this.setMode(k)}>${MAP_MODES[k].label}</button>`)}</div>`
-          : html`<button class="btn sm" data-open="zones" @click=${this.openZones}><ha-icon icon="mdi:cancel"></ha-icon>Sperrzonen</button>` /* Dreame-App/Nur Bild: die Karte hat eine eigene Knopfzeile, unser Knopf steht darunter */}
-        <span class="hint">${modes ? MAP_MODES[this._mode].hint : heidi ? 'Räume in der Karte oder über die Kacheln antippen, dann „reinigen“' : 'Räume antippen, dann „reinigen“'}</span>
-        <button class="btn primary sm" data-act="all" @click=${this.runAll}><ha-icon icon="mdi:play"></ha-icon>Alles</button>
+          : html`<button class="btn sm" data-open="zones" @click=${this.openZones}><ha-icon icon="mdi:cancel"></ha-icon>${t('map.zones')}</button>` /* Dreame-App/Nur Bild: die Karte hat eine eigene Knopfzeile, unser Knopf steht darunter */}
+        <span class="hint">${modes ? MAP_MODES[this._mode].hint : heidi ? t('map.hintHeidi') : t('map.hintPlain')}</span>
+        <button class="btn primary sm" data-act="all" @click=${this.runAll}><ha-icon icon="mdi:play"></ha-icon>${t('map.all')}</button>
       </div>
       ${!modes || this._mode === 'raeume' ? html`
         <div class="rooms">${order.map((r) => html`<button class=${sel.has(r.id) ? 'sel' : ''} data-room=${r.id} @click=${() => { this._sel = toggleRoom(this._sel, r.id); }}><ha-icon icon=${r.icon}></ha-icon>${r.short}</button>`)}</div>
-        ${sel.size ? html`<div class="runbar"><button class="btn primary" data-act="run" @click=${this.runRooms}><ha-icon icon="mdi:play"></ha-icon>${selectionLabel(sel, order)} reinigen</button><button class="btn icon" aria-label="Auswahl aufheben" @click=${() => { this._sel = new Set(); }}><ha-icon icon="mdi:close"></ha-icon></button></div>` : nothing}
+        ${sel.size ? html`<div class="runbar"><button class="btn primary" data-act="run" @click=${this.runRooms}><ha-icon icon="mdi:play"></ha-icon>${t('rooms.run', { sel: selectionLabel(sel, order) })}</button><button class="btn icon" aria-label=${t('rooms.clear')} @click=${() => { this._sel = new Set(); }}><ha-icon icon="mdi:close"></ha-icon></button></div>` : nothing}
       ` : nothing}`;
   }
 

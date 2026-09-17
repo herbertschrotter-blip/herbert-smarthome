@@ -9,7 +9,7 @@ import { memoizeSelector, sameValue } from './memo-selector';
 import type { Selector } from './memo-selector';
 import { roomIcon, roomsFromMap, shortName } from '../domain/rooms';
 import type { RoomInfo } from '../domain/rooms';
-import { ROOMS_DE } from '../config';
+import { lookup, t } from '../i18n/t';
 
 export interface Option { value: string; label: string }
 export type OptionKey = 'modus' | 'saug' | 'wasser' | 'route' | 'wdh';
@@ -24,14 +24,13 @@ export interface Profile {
   has: (key: RobotKey) => boolean;
 }
 
-/** Deutsche Beschriftungen über die v1-Zuordnung hinaus (unbekannte Werte werden lesbar gemacht, nie verworfen). */
-const OPTION_DE: Record<string, string> = { mopping_after_sweeping: 'Wischen nach Saugen', quick: 'Schnell', off: 'Aus', on: 'An' };
+/** Deutsche Beschriftungen über die v1-Zuordnung hinaus (Texte option.*); unbekannte Werte werden lesbar gemacht, nie verworfen. */
 const humanize = (v: string): string => v.replace(/_/g, ' ').replace(/^\w/, (c) => c.toUpperCase());
 
 export function optionLabel(key: OptionKey, value: string): string {
   if (key === 'wdh') return value.replace(/x$/i, '');
   const table = ROOM_VALUE_CODES.RV_HA[key] as Record<string, string>;
-  return table[value] ?? OPTION_DE[value] ?? humanize(value);
+  return table[value] ?? lookup('option', value) ?? humanize(value);
 }
 
 const optionsOf = (s: States, id: string, key: OptionKey): Option[] => {
@@ -64,7 +63,7 @@ function roomsFromSelects(s: States): RoomInfo[] {
     const m = re.exec(id); if (!m) continue;
     const n = parseInt(m[1]!, 10);
     const fn = cleanName(s[id]?.attributes.friendly_name);
-    const name = fn.replace(new RegExp(`^${deviceName().replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')}\\s*`, 'i'), '').replace(/cleaning mode/i, '').trim() || `Raum ${n}`;
+    const name = fn.replace(new RegExp(`^${deviceName().replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')}\\s*`, 'i'), '').replace(/cleaning mode/i, '').trim() || t('room.fallback', { n });
     out.push({ id: n, name, short: shortName(name), icon: roomIcon(name), order: n, typed: false });
   }
   return out.sort((a, b) => a.order - b.order || a.id - b.id);
@@ -73,7 +72,7 @@ const fallbackSelectIds = (s: States): string[] => { const p = devicePrefix(); i
 
 function roomsOf(s: States): RoomInfo[] {
   const deutsch = s[E.raumnamen]?.state === 'Deutsch';
-  const fromMap = roomsFromMap(s[E.map]?.attributes.rooms as Record<string, never> | undefined, deutsch, ROOMS_DE);
+  const fromMap = roomsFromMap(s[E.map]?.attributes.rooms as Record<string, never> | undefined, deutsch, (raw) => lookup('room', raw));
   return fromMap.length ? fromMap : roomsFromSelects(s);
 }
 

@@ -12,7 +12,8 @@ import type { RoomInfo } from '../domain/rooms';
 import type { DotLevel } from '../domain/status';
 import { stripModel } from '../domain/strip';
 import type { StripModel } from '../domain/strip';
-import { STATUS_DE } from '../config';
+import { statusText } from '../domain/status';
+import { t } from '../i18n/t';
 import { EVENTS, emit, moreInfo } from '../shared/overlay';
 import type { Overlay } from '../shared/overlay';
 import { robotSvg } from '../shared/robot-svg';
@@ -74,22 +75,23 @@ export class DxHero extends LitElement {
   /** Drei Werte: im Lauf die des aktuellen Raums, sonst der gemeinsame Wert aller Räume („–“ bei Abweichung oder unavailable). */
   private params(strip: StripModel | null): [string, string, string] {
     const rooms = this.rooms;
+    const dash = t('common.dash');
     const cur = strip && rooms ? rooms.rooms[strip.roomId] : null;
-    if (cur) return [cur.modus, cur.saug, cur.modus !== 'Saugen' && cur.wasser ? cur.wasser : '–'];
+    if (cur) return [cur.modus, cur.saug, cur.modus !== 'Saugen' && cur.wasser ? cur.wasser : dash];
     const vals = rooms ? Object.values(rooms.rooms).filter((v) => v !== null) : [];
     const common = (pick: (v: NonNullable<typeof vals[number]>) => string | null): string => {
-      if (!vals.length) return '–';
+      if (!vals.length) return dash;
       const first = pick(vals[0]!);
-      return first !== null && vals.every((v) => pick(v) === first) ? first : '–';
+      return first !== null && vals.every((v) => pick(v) === first) ? first : dash;
     };
     return [common((v) => v.modus), common((v) => v.saug), common((v) => (v.modus !== 'Saugen' && v.wasser ? v.wasser : null))];
   }
 
   /** Stationszeile aus den Attributen docked/washing/drying/charging – nicht aus dem Hauptzustand (der bleibt bei der Mopp-Wäsche „cleaning“). */
   private stationText(r: RobotView): string {
-    if (r.docked) return [r.washing ? 'Mopp-Wäsche' : r.drying ? 'trocknet' : 'angedockt', r.charging ? 'lädt' : null].filter(Boolean).join(' · ');
-    if (r.running) return 'unterwegs';
-    return STATUS_DE[r.vac] ?? r.vac;
+    if (r.docked) return [r.washing ? t('hero.washing') : r.drying ? t('hero.drying') : t('hero.docked'), r.charging ? t('hero.charging') : null].filter(Boolean).join(' · ');
+    if (r.running) return t('hero.away');
+    return statusText(r.vac);
   }
 
   override render(): TemplateResult {
@@ -102,25 +104,25 @@ export class DxHero extends LitElement {
     return html`
       <div class="robot">
         <div>
-          <div class="name">${deviceName() || 'Roboter'}</div>
-          <button class="st big ${DOT_CLASS[h.dot]}" title="Status" @click=${() => moreInfo(this, r.moreInfo.vac)}><i></i><span class="bigtext">${h.big}</span></button>
+          <div class="name">${deviceName() || t('common.robot')}</div>
+          <button class="st big ${DOT_CLASS[h.dot]}" title=${t('hero.status')} @click=${() => moreInfo(this, r.moreInfo.vac)}><i></i><span class="bigtext">${h.big}</span></button>
           ${h.sub ? html`<div class="hint sub">${h.sub}</div>` : nothing}
         </div>
-        <div class="station"><div class="lbl">Station</div><div>${this.stationText(r)}</div></div>
+        <div class="station"><div class="lbl">${t('hero.station')}</div><div>${this.stationText(r)}</div></div>
         ${robotSvg}
-        <button class="batt" title="Akku" @click=${() => moreInfo(this, r.moreInfo.battery)}>
-          <div class="kv"><span class="v">${r.battery}<span class="u"> %</span></span></div><div class="lbl">Akku</div>
-          <div class="battrow"><div class="battbar ${battCls}" style="--p:${r.battery}"><i></i></div>${r.charging ? html`<ha-icon class="bolt" icon="mdi:flash" title="lädt"></ha-icon>` : nothing}</div>
+        <button class="batt" title=${t('hero.battery')} @click=${() => moreInfo(this, r.moreInfo.battery)}>
+          <div class="kv"><span class="v">${r.battery}<span class="u"> %</span></span></div><div class="lbl">${t('hero.battery')}</div>
+          <div class="battrow"><div class="battbar ${battCls}" style="--p:${r.battery}"><i></i></div>${r.charging ? html`<ha-icon class="bolt" icon="mdi:flash" title=${t('hero.charging')}></ha-icon>` : nothing}</div>
         </button>
       </div>
       ${h.roomChip || h.errorChip ? html`<div class="chips">${h.roomChip ? html`<span class="chip on"><ha-icon icon="mdi:floor-plan"></ha-icon>${h.roomChip}</span>` : nothing}${h.errorChip ? html`<button class="chip ${h.errorChip.level === 'danger' ? 'bad' : 'warn'}" @click=${() => moreInfo(this, r.moreInfo.error)}><ha-icon icon=${h.errorChip.level === 'danger' ? 'mdi:alert' : 'mdi:information-outline'}></ha-icon>${h.errorChip.text}</button>` : nothing}</div>` : nothing}
       <div class="params">
-        <button class="param" title="Reinigungsmodus" @click=${this.openRooms}><ha-icon icon="mdi:broom"></ha-icon><b>${modus}</b><span>Modus</span></button>
-        <button class="param" title="Saugleistung" @click=${this.openRooms}><ha-icon icon="mdi:fan"></ha-icon><b>${saug}</b><span>Saugstufe</span></button>
-        <button class="param" title="Wassermenge" @click=${this.openRooms}><ha-icon icon="mdi:water"></ha-icon><b>${wasser}</b><span>Wasser</span></button>
+        <button class="param" title=${t('hero.modeTitle')} @click=${this.openRooms}><ha-icon icon="mdi:broom"></ha-icon><b>${modus}</b><span>${t('hero.mode')}</span></button>
+        <button class="param" title=${t('hero.suctionTitle')} @click=${this.openRooms}><ha-icon icon="mdi:fan"></ha-icon><b>${saug}</b><span>${t('hero.suction')}</span></button>
+        <button class="param" title=${t('hero.waterTitle')} @click=${this.openRooms}><ha-icon icon="mdi:water"></ha-icon><b>${wasser}</b><span>${t('hero.water')}</span></button>
       </div>
       <div class="ctl">${h.buttons.map((b) => html`<button class="btn ${b.primary ? 'primary' : ''}" data-svc=${b.service} @click=${() => this.api?.vacuum(b.service)}><ha-icon icon=${b.icon}></ha-icon>${b.label}</button>`)}</div>
-      ${strip ? html`<button class="note strip" title="Räume einstellen" @click=${this.openRooms}><ha-icon icon=${strip.icon}></ha-icon><div><b>${strip.head}</b> <small>${strip.right}${strip.chips.length ? html` · ` : nothing}${strip.chips.map((c) => html`<span class="chip k">${c.icons.map((i) => html`<ha-icon icon=${i}></ha-icon>`)}${c.text}</span>`)}</small></div><ha-icon icon="mdi:chevron-right"></ha-icon></button>` : nothing}
+      ${strip ? html`<button class="note strip" title=${t('hero.roomsTitle')} @click=${this.openRooms}><ha-icon icon=${strip.icon}></ha-icon><div><b>${strip.head}</b> <small>${strip.right}${strip.chips.length ? html` · ` : nothing}${strip.chips.map((c) => html`<span class="chip k">${c.icons.map((i) => html`<ha-icon icon=${i}></ha-icon>`)}${c.text}</span>`)}</small></div><ha-icon icon="mdi:chevron-right"></ha-icon></button>` : nothing}
     `;
   }
 }

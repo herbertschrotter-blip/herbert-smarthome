@@ -1,19 +1,20 @@
 // Konfigurationen der eingebetteten Kartenkarten (Bauplan 4.3, Abschnitt 6 `_mountMap`): Dreame-App und Nur Bild 1:1 wie v1,
 // Xiaomi-Karte mit genau einem `map_modes`-Eintrag je Modus (PD-004), Räume/Umrisse aus den Kartendaten (nicht von Hand).
-// Liegt in der HA-Schicht, weil hier Entitäts-IDs aus dem Vertrag eingesetzt werden (Regel 1).
+// Liegt in der HA-Schicht, weil hier Entitäts-IDs aus dem Vertrag eingesetzt werden (Regel 1). Texte aus src/i18n (mapmode.*).
 import { ENTITIES } from './contract';
 import type { RoomShape } from './selectors';
 import { deviceName } from './device';
+import { t } from '../i18n/t';
 
 export type MapModeKey = 'raeume' | 'zone' | 'punkt' | 'goto';
 export type MapConfig = Record<string, unknown>;
 
 /** Modi der Seite Reinigen: Beschriftung des Umschalters und Hinweiszeile. */
 export const MAP_MODES: Record<MapModeKey, { label: string; hint: string }> = {
-  raeume: { label: 'Räume', hint: 'Auswahl per Kachel oder Tipp in die Raumfläche' },
-  zone: { label: 'Zone', hint: 'Rechteck auf der Karte aufziehen (bis zu 5), dann ▶ in der Karte' },
-  punkt: { label: 'Punkt', hint: 'Punkt auf der Karte antippen, dann ▶ in der Karte' },
-  goto: { label: 'Hinfahren', hint: 'Punkt auf der Karte antippen → der Roboter fährt hin und wartet' },
+  raeume: { label: t('mapmode.raeume'), hint: t('mapmode.raeume.hint') },
+  zone: { label: t('mapmode.zone'), hint: t('mapmode.zone.hint') },
+  punkt: { label: t('mapmode.punkt'), hint: t('mapmode.punkt.hint') },
+  goto: { label: t('mapmode.goto'), hint: t('mapmode.goto.hint') },
 };
 
 /** Genau ein map_modes-Eintrag je Modus; Räume mit Umriss, Beschriftung und Symbol aus den Kartendaten. */
@@ -21,12 +22,12 @@ export function modeEntry(mode: MapModeKey, rooms: readonly RoomShape[]): MapCon
   switch (mode) {
     case 'raeume':
       return {
-        template: 'vacuum_clean_segment', name: 'Räume', icon: 'mdi:floor-plan',
+        template: 'vacuum_clean_segment', name: MAP_MODES.raeume.label, icon: 'mdi:floor-plan',
         predefined_selections: rooms.map((r) => ({ id: r.id, outline: r.outline, label: { text: r.name, x: r.x, y: r.y, offset_y: 35 }, icon: { name: r.icon, x: r.x, y: r.y } })),
       };
-    case 'zone': return { template: 'vacuum_clean_zone', name: 'Zone', icon: 'mdi:select-drag', max_selections: 5 };
-    case 'punkt': return { template: 'vacuum_clean_point', name: 'Punkt', icon: 'mdi:map-marker-radius' };
-    case 'goto': return { template: 'vacuum_goto', name: 'Hinfahren', icon: 'mdi:map-marker' };
+    case 'zone': return { template: 'vacuum_clean_zone', name: MAP_MODES.zone.label, icon: 'mdi:select-drag', max_selections: 5 };
+    case 'punkt': return { template: 'vacuum_clean_point', name: MAP_MODES.punkt.label, icon: 'mdi:map-marker-radius' };
+    case 'goto': return { template: 'vacuum_goto', name: MAP_MODES.goto.label, icon: 'mdi:map-marker' };
   }
 }
 

@@ -1,7 +1,8 @@
 // Streifen im Kopf und Reihenfolge des laufenden Auftrags (Bauplan 4.1, Regeln Abschnitt 6 `_strip`): reine Funktionen,
 // 1:1 wie v1 1.6.2. Nur cleaning/paused; Reihenfolge = input_text.heidi_lauf_reihenfolge, wenn sie genau die
-// active_segments enthält, sonst cleaning_sequence ∩ active_segments.
+// active_segments enthält, sonst cleaning_sequence ∩ active_segments. Texte aus src/i18n (strip.*).
 import type { RoomId } from '../ha/contract';
+import { t } from '../i18n/t';
 import type { RoomValues } from './raumwerte';
 import { roomById } from './rooms';
 import type { RoomInfo } from './rooms';
@@ -45,6 +46,7 @@ export interface StripModel {
 }
 
 const shortOf = (rooms: readonly RoomInfo[], id: number): string | undefined => roomById(rooms, id)?.short;
+/** Saugstufen-Symbol nach Optionswert des Roboters (Werte aus dem Vertrag RV_HA). */
 const FAN_ICON: Record<string, string> = { Leise: 'mdi:fan-speed-1', Standard: 'mdi:fan-speed-2', Stark: 'mdi:fan-speed-3', Turbo: 'mdi:fan' };
 const modusIcons = (modus: string): string[] => (modus === 'Saugen' ? ['mdi:broom'] : modus === 'Nur Wischen' ? ['mdi:water'] : ['mdi:broom', 'mdi:water']);
 
@@ -67,12 +69,12 @@ export function stripModel(r: RunInput, roomValues: (id: RoomId) => RoomValues |
   const restTxt = rest.map((id) => shortOf(rooms, id)).filter(Boolean).join(' → ');
   const first = order.length ? shortOf(rooms, order[0]!) : undefined;
   if (r.vac === 'cleaning' && r.cleanedArea === 0) {
-    return { kind: 'startpunkt', roomId: room.id, icon: 'mdi:map-marker-path', head: 'Fährt zum Startpunkt', right: first ? `zu ${first}` : '', chips: [] };
+    return { kind: 'startpunkt', roomId: room.id, icon: 'mdi:map-marker-path', head: t('strip.startpoint'), right: first ? t('strip.to', { rooms: first }) : '', chips: [] };
   }
   if (r.activeSegments.length && !r.activeSegments.includes(room.id)) {
-    return { kind: 'durchfahrt', roomId: room.id, icon: room.icon, head: `Fährt durch ${room.short}`, right: restTxt ? `zu ${restTxt}` : '', chips: [] };
+    return { kind: 'durchfahrt', roomId: room.id, icon: room.icon, head: t('strip.through', { room: room.short }), right: restTxt ? t('strip.to', { rooms: restTxt }) : '', chips: [] };
   }
-  return { kind: 'jetzt', roomId: room.id, icon: room.icon, head: `Jetzt: ${room.short}`, right: restTxt ? `danach ${restTxt}` : 'letzter Raum', chips: roomValueChips(v) };
+  return { kind: 'jetzt', roomId: room.id, icon: room.icon, head: t('strip.now', { room: room.short }), right: restTxt ? t('strip.then', { rooms: restTxt }) : t('strip.lastRoom'), chips: roomValueChips(v) };
 }
 
 /** Textform wie v1 (`.strip` textContent, Leerraum normalisiert) – für Paritätstests. */

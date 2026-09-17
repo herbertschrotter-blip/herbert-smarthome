@@ -1,7 +1,8 @@
 // Räume aus den Kartendaten des Roboters (Geräteprofil Stufe 2, Herbert 15.09.: „2, 6 oder 20 Räume, eine oder mehrere
 // Karten – das Dashboard soll immer funktionieren“). Reine Funktionen: Attribut `rooms` der Karten-Kamera → Liste der
 // sichtbaren Räume in App-Reihenfolge, Kurzname und Symbol nach Standardregel (später Menü, Post-2.0).
-// Keine Entitäts-IDs, keine feste Raumliste mehr (v1: ROOMS 7..1).
+// Keine Entitäts-IDs, keine feste Raumliste mehr (v1: ROOMS 7..1). Deutsche Namen der Raumtypen aus src/i18n (roomtype.*).
+import { t, tx } from '../i18n/t';
 
 export interface RoomInfo {
   id: number;
@@ -32,23 +33,15 @@ export interface MapRoomAttr {
  * und Symbol. Das ist das Wörterbuch der App, keine Raumliste – welche Räume es gibt, sagt weiterhin die Karte.
  * Standardtypen erkennt auch die Sprachsteuerung (Herbert, 15.09.); benutzerdefinierte Namen nicht.
  */
-export const ROOM_TYPES: Record<number, { name: string; en: string; icon: string }> = {
-  1: { name: 'Wohnzimmer', en: 'Living Room', icon: 'mdi:sofa-outline' },
-  2: { name: 'Schlafzimmer', en: 'Primary Bedroom', icon: 'mdi:bed-king-outline' },
-  3: { name: 'Arbeitszimmer', en: 'Study', icon: 'mdi:bookshelf' },
-  4: { name: 'Küche', en: 'Kitchen', icon: 'mdi:chef-hat' },
-  5: { name: 'Esszimmer', en: 'Dining Hall', icon: 'mdi:silverware-fork-knife' },
-  6: { name: 'Bad', en: 'Bathroom', icon: 'mdi:shower' },
-  7: { name: 'Balkon', en: 'Balcony', icon: 'mdi:balcony' },
-  8: { name: 'Flur', en: 'Corridor', icon: 'mdi:foot-print' },
-  9: { name: 'Allzweckraum', en: 'Utility Room', icon: 'mdi:archive-outline' },
-  10: { name: 'Garderobe', en: 'Closet', icon: 'mdi:hanger' },
-  11: { name: 'Salon', en: 'Meeting Room', icon: 'mdi:presentation' },
-  12: { name: 'Büro', en: 'Office', icon: 'mdi:monitor' },
-  13: { name: 'Fitnessbereich', en: 'Fitness Area', icon: 'mdi:dumbbell' },
-  14: { name: 'Freizeitbereich', en: 'Recreation Area', icon: 'mdi:gamepad-variant-outline' },
-  15: { name: 'Nebenzimmer', en: 'Secondary Bedroom', icon: 'mdi:bed-single-outline' },
-};
+const ROOM_TYPE_EN: readonly (readonly [number, string, string])[] = [
+  [1, 'Living Room', 'mdi:sofa-outline'], [2, 'Primary Bedroom', 'mdi:bed-king-outline'], [3, 'Study', 'mdi:bookshelf'], [4, 'Kitchen', 'mdi:chef-hat'],
+  [5, 'Dining Hall', 'mdi:silverware-fork-knife'], [6, 'Bathroom', 'mdi:shower'], [7, 'Balcony', 'mdi:balcony'], [8, 'Corridor', 'mdi:foot-print'],
+  [9, 'Utility Room', 'mdi:archive-outline'], [10, 'Closet', 'mdi:hanger'], [11, 'Meeting Room', 'mdi:presentation'], [12, 'Office', 'mdi:monitor'],
+  [13, 'Fitness Area', 'mdi:dumbbell'], [14, 'Recreation Area', 'mdi:gamepad-variant-outline'], [15, 'Secondary Bedroom', 'mdi:bed-single-outline'],
+];
+export const ROOM_TYPES: Record<number, { name: string; en: string; icon: string }> = Object.fromEntries(
+  ROOM_TYPE_EN.map(([id, en, icon]) => [id, { name: tx(`roomtype.${id}`), en, icon }]),
+);
 
 /** Symbol nach Stichwort im Namen (deutsch und englisch); sonst Symbol der Integration, sonst Grundriss. */
 const ICON_BY_KEYWORD: [RegExp, string][] = [
@@ -91,10 +84,11 @@ export function shortName(name: string): string {
 
 /**
  * Sichtbare Räume der Karte in App-Reihenfolge. `deutsch` + `namesDe` übersetzen englische Integrationsnamen
- * (input_select …_raumnamen = Deutsch, Tabelle ROOMS_DE). Räume ohne gültige ID oder mit visibility „Hidden“ entfallen.
+ * (input_select …_raumnamen = Deutsch; Tabelle oder Nachschlagefunktion, Texte room.*). Räume ohne gültige ID oder mit visibility „Hidden“ entfallen.
  */
-export function roomsFromMap(rooms: Record<string, MapRoomAttr | undefined> | null | undefined, deutsch = false, namesDe: Record<string, string> = {}): RoomInfo[] {
+export function roomsFromMap(rooms: Record<string, MapRoomAttr | undefined> | null | undefined, deutsch = false, namesDe: Record<string, string> | ((raw: string) => string | undefined) = {}): RoomInfo[] {
   if (!rooms || typeof rooms !== 'object') return [];
+  const translate = typeof namesDe === 'function' ? namesDe : (raw: string): string | undefined => namesDe[raw];
   const out: RoomInfo[] = [];
   for (const [key, r] of Object.entries(rooms)) {
     if (!r || typeof r !== 'object') continue;
@@ -109,8 +103,8 @@ export function roomsFromMap(rooms: Record<string, MapRoomAttr | undefined> | nu
       name = (deutsch ? typed.name : typed.en) + (suffix ? ` ${suffix}` : '');
       icon = typed.icon;
     } else {
-      const raw = String(r.custom_name ?? r.name ?? '').trim() || `Raum ${id}`;
-      name = deutsch ? (namesDe[raw] ?? raw) : raw;
+      const raw = String(r.custom_name ?? r.name ?? '').trim() || t('room.fallback', { n: id });
+      name = deutsch ? (translate(raw) ?? raw) : raw;
       icon = roomIcon(name, r.icon);
     }
     out.push({ id, name, short: shortName(name), icon, order: typeof r.order === 'number' ? r.order : id, typed: !!typed });

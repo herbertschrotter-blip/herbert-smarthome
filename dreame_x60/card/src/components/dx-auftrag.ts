@@ -8,6 +8,7 @@ import type { DotLevel } from '../domain/status';
 import { runOrder } from '../domain/strip';
 import { roomById } from '../domain/rooms';
 import type { RoomInfo } from '../domain/rooms';
+import { t } from '../i18n/t';
 import { controls } from '../styles/controls';
 
 export const AUFTRAG_ELEMENT = 'dx-auftrag';
@@ -45,16 +46,17 @@ export class DxAuftrag extends LitElement {
     const next = nextId !== undefined ? roomById(rl, nextId) : undefined;
     const nextVals = next && this.rooms ? this.rooms.rooms[next.id] : null;
     const short = (id: number): string => roomById(rl, id)?.short ?? String(id);
+    const dash = t('common.dash');
     return html`
-      <div class="hd"><h2>Aktueller Auftrag</h2><span class="st pill ${DOT_CLASS[r.hero.dot]}"><i></i>${r.hero.big}</span></div>
+      <div class="hd"><h2>${t('auftrag.title')}</h2><span class="st pill ${DOT_CLASS[r.hero.dot]}"><i></i>${r.hero.big}</span></div>
       <div>
-        <div class="lbl route">${total ? order.map((id, i) => html`${i ? ' → ' : ''}${i === cur ? html`<b>${short(id)}</b>` : short(id)}`) : (r.room !== '–' ? html`<b>${r.room}</b>` : 'Räume –')}</div>
-        <div class="kv"><span class="v">${r.cleaningTime}<span class="u"> min</span></span><span class="u">· ${r.cleanedArea} m²</span></div>
+        <div class="lbl route">${total ? order.map((id, i) => html`${i ? ' → ' : ''}${i === cur ? html`<b>${short(id)}</b>` : short(id)}`) : (r.room !== dash ? html`<b>${r.room}</b>` : t('auftrag.noRooms'))}</div>
+        <div class="kv"><span class="v">${r.cleaningTime}<span class="u"> ${t('unit.min')}</span></span><span class="u">· ${r.cleanedArea} ${t('unit.m2')}</span></div>
       </div>
-      ${total ? html`<div><div class="meter two"><span class="n">Räume</span><span class="p">${done} / ${total}</span></div><div class="bar" style="--p:${pct}"><i></i></div></div>` : nothing}
+      ${total ? html`<div><div class="meter two"><span class="n">${t('auftrag.rooms')}</span><span class="p">${done} / ${total}</span></div><div class="bar" style="--p:${pct}"><i></i></div></div>` : nothing}
       ${next
-        ? html`<div class="row next"><div><div class="s">${startpunkt ? 'Erster Raum' : 'Nächster Raum'}</div><div class="t">${next.short}</div></div>${nextVals ? html`<span class="tag">${nextVals.modus}</span>` : nothing}</div>`
-        : (total ? html`<div class="row next"><div><div class="s">Letzter Raum</div><div class="t">${cur >= 0 ? short(order[cur]!) : '–'}</div></div></div>` : nothing)}
+        ? html`<div class="row next"><div><div class="s">${startpunkt ? t('auftrag.first') : t('auftrag.next')}</div><div class="t">${next.short}</div></div>${nextVals ? html`<span class="tag">${nextVals.modus}</span>` : nothing}</div>`
+        : (total ? html`<div class="row next"><div><div class="s">${t('auftrag.last')}</div><div class="t">${cur >= 0 ? short(order[cur]!) : dash}</div></div></div>` : nothing)}
     `;
   }
 }

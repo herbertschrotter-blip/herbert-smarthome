@@ -7,6 +7,7 @@ import { LitElement, html, css, nothing } from 'lit';
 import type { TemplateResult } from 'lit';
 import { EVENTS, emit } from '../shared/overlay';
 import { controls } from '../styles/controls';
+import { t } from '../i18n/t';
 
 export const DIALOG_ELEMENT = 'dx-dialog';
 export type DialogVariant = 'modal' | 'sheet' | 'confirm';
@@ -104,8 +105,8 @@ export class DxDialog extends LitElement {
     this.sub = '';
     this.text = '';
     this.subText = '';
-    this.okLabel = 'OK';
-    this.cancelLabel = 'Abbrechen';
+    this.okLabel = t('common.ok');
+    this.cancelLabel = t('common.cancel');
     this.danger = false;
     this.wide = false;
     this.back = false;
@@ -174,7 +175,7 @@ export class DxDialog extends LitElement {
     }
     return html`<div class="scrim" @click=${this.close}></div>
       <div class="dlg ${this.wide ? 'wide' : ''} ${sheet}" role="dialog" aria-modal="true" aria-labelledby="h" tabindex="-1">
-        <h2 id="h">${this.back ? html`<button class="iconbtn backbtn" aria-label="Zurück" @click=${this.goBack}><ha-icon icon="mdi:chevron-left"></ha-icon></button>` : nothing}<span class="t">${this.heading}</span>${this.sub ? html`<span class="m">${this.sub}</span>` : nothing}<button class="iconbtn close" aria-label="Schließen" @click=${this.close}><ha-icon icon="mdi:close"></ha-icon></button></h2>
+        <h2 id="h">${this.back ? html`<button class="iconbtn backbtn" aria-label=${t('common.back')} @click=${this.goBack}><ha-icon icon="mdi:chevron-left"></ha-icon></button>` : nothing}<span class="t">${this.heading}</span>${this.sub ? html`<span class="m">${this.sub}</span>` : nothing}<button class="iconbtn close" aria-label=${t('common.close')} @click=${this.close}><ha-icon icon="mdi:close"></ha-icon></button></h2>
         <div class="body"><slot></slot></div>
         <div class="foot ${this._hasFoot ? '' : 'empty'}"><slot name="foot" @slotchange=${this.onFootSlot}></slot></div>
       </div>`;

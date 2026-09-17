@@ -14,6 +14,7 @@ import type { MapData } from '../domain/mapdata';
 import { loadMapData } from '../ha/mapdata-loader';
 import { emit } from '../shared/overlay';
 import { ENTITIES } from '../ha/contract';
+import { t } from '../i18n/t';
 
 export const HEIDI_MAP_ELEMENT = 'dx-heidi-map';
 /** Ereignis beim Tipp auf einen Raum: detail { id } */
@@ -95,13 +96,13 @@ export class DxHeidiMap extends LitElement {
     const paths = ready ? this.paths(md!, calib!) : [];
     return html`
       <div class="wrap">
-        <img src=${m?.entityPicture ?? ''} alt="Karte" @load=${this.onImgLoad}>
+        <img src=${m?.entityPicture ?? ''} alt=${t('map.alt')} @load=${this.onImgLoad}>
         ${ready ? svg`<svg viewBox="0 0 ${size!.w} ${size!.h}" preserveAspectRatio="none">
           ${paths.map((p) => svg`<path class="room ${this.selected.has(p.id) ? 'sel' : ''} ${cur === p.id ? 'cur' : ''}" data-room=${p.id} d=${p.d} @click=${() => this.tap(p.id)}><title>${p.name}</title></path>`)}
         </svg>` : nothing}
         ${paths.filter((p) => this.selected.has(p.id)).map((p) => html`<span class="badge" data-room=${p.id} style="left:${((p.cx / size!.w) * 100).toFixed(2)}%;top:${((p.cy / size!.h) * 100).toFixed(2)}%">${order.indexOf(p.id) + 1}</span>`)}
-        ${!m?.mapData ? html`<div class="hint">Datenkarte fehlt – <code>${ENTITIES.mapData}</code> in der Dreame-Integration aktivieren</div>` : (!md && this._loadedVersion ? html`<div class="hint">Kartenpaket wird geladen …</div>` : nothing)}
-        ${m?.mapData && !calib ? html`<div class="hint">Keine Kalibrierpunkte – Räume können nicht eingezeichnet werden</div>` : nothing}
+        ${!m?.mapData ? html`<div class="hint">${t('map.noMapData', { entity: ENTITIES.mapData })}</div>` : (!md && this._loadedVersion ? html`<div class="hint">${t('map.loading')}</div>` : nothing)}
+        ${m?.mapData && !calib ? html`<div class="hint">${t('map.noCalib')}</div>` : nothing}
       </div>`;
   }
 }

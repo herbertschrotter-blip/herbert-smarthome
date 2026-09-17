@@ -8,6 +8,7 @@ import { setupProblems } from '../domain/setup';
 import { EVENTS, emit, moreInfo } from '../shared/overlay';
 import { navigateHa } from '../shared/navigate';
 import { controls } from '../styles/controls';
+import { t } from '../i18n/t';
 
 export const SETUP_ELEMENT = 'dx-setup';
 
@@ -49,11 +50,11 @@ export class DxSetup extends LitElement {
     const problems = setupProblems(this.checks);
     if (!problems.length) return html``;
     const errors = problems.filter((p) => p.level === 'error').length, warns = problems.length - errors;
-    const sum = [errors ? `${errors} ${errors === 1 ? 'Problem' : 'Probleme'}` : '', warns ? `${warns} ${warns === 1 ? 'Hinweis' : 'Hinweise'}` : ''].filter(Boolean).join(', ');
+    const sum = [errors ? `${errors} ${errors === 1 ? t('setup.problem') : t('setup.problems')}` : '', warns ? `${warns} ${warns === 1 ? t('setup.hint') : t('setup.hints')}` : ''].filter(Boolean).join(', ');
     return html`
       <div class="bar ${errors ? 'error' : 'warn'}" role="status">
         <div class="icons">
-          <span class="t">Einrichtung</span>
+          <span class="t">${t('setup.title')}</span>
           ${this.checks.map((c) => html`<button class="ic ${c.level}" data-check=${c.key} title=${c.text} aria-label=${c.text} @click=${() => this.go(c.action)}><ha-icon icon=${c.icon}></ha-icon></button>`)}
           <span class="sum">${sum}</span>
         </div>
@@ -61,8 +62,8 @@ export class DxSetup extends LitElement {
           ${problems.map((p) => html`
             <div class="row" data-problem=${p.key}>
               <span class="ic ${p.level}"><ha-icon icon=${p.icon}></ha-icon></span>
-              <div class="tx"><b>${p.label}</b>${p.text}${(p.action?.kind === 'more-info' || p.action?.kind === 'vacuum-areas') && p.action.hint ? html`<div class="hint">Dort: ${p.action.hint}</div>` : nothing}</div>
-              ${p.action ? html`<button class="btn sm" data-go=${p.key} @click=${() => this.go(p.action)}><ha-icon icon="mdi:arrow-right"></ha-icon>Öffnen</button>` : nothing}
+              <div class="tx"><b>${p.label}</b>${p.text}${(p.action?.kind === 'more-info' || p.action?.kind === 'vacuum-areas') && p.action.hint ? html`<div class="hint">${t('setup.there', { hint: p.action.hint })}</div>` : nothing}</div>
+              ${p.action ? html`<button class="btn sm" data-go=${p.key} @click=${() => this.go(p.action)}><ha-icon icon="mdi:arrow-right"></ha-icon>${t('common.open')}</button>` : nothing}
             </div>`)}
         </div>
       </div>`;

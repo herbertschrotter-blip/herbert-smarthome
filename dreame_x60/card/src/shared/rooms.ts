@@ -1,6 +1,7 @@
 // Raumauswahl für Karte (Modus Räume) und Schnellstart (Bauplan 4.3): dieselbe Logik an beiden Stellen, kein doppelter Code.
-// Reine Hilfsfunktionen ohne Entitäten; die Reihenfolge der Räume kommt als Parameter (später dynamisch, Post-2.0).
+// Reine Hilfsfunktionen ohne Entitäten; die Reihenfolge der Räume kommt als Parameter (später dynamisch, Post-2.0). Texte aus src/i18n (rooms.*).
 import type { RoomInfo } from '../config';
+import { t } from '../i18n/t';
 
 /** Raum an/abwählen; liefert ein neues Set (Lit erkennt die Änderung an der neuen Referenz). */
 export function toggleRoom(sel: ReadonlySet<number>, id: number): Set<number> {
@@ -24,13 +25,13 @@ export function selectedRooms(sel: ReadonlySet<number>, order: readonly RoomInfo
 /** Beschriftung der Startleiste: „Ganze Wohnung“, „1 Raum“, „3 Räume“. */
 export function selectionLabel(sel: ReadonlySet<number>, order: readonly RoomInfo[]): string {
   const n = sel.size;
-  if (n && n === order.length) return 'Ganze Wohnung';
-  return `${n} ${n === 1 ? 'Raum' : 'Räume'}`;
+  if (n && n === order.length) return t('rooms.whole');
+  return n === 1 ? t('rooms.one', { n }) : t('rooms.many', { n });
 }
 
 /** Text der Bestätigung: „Jetzt reinigen: Wohnz., Küche?“ */
 export function confirmText(sel: ReadonlySet<number>, order: readonly RoomInfo[]): string {
-  return `Jetzt reinigen: ${selectedRooms(sel, order).map((r) => r.short).join(', ')}?`;
+  return t('rooms.confirm', { list: selectedRooms(sel, order).map((r) => r.short).join(', ') });
 }
 
 /** Segmente für vacuum_clean_segment in Reihenfolge der Auswahl. */
