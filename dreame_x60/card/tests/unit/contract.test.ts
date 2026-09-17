@@ -22,6 +22,7 @@ const SECTION4: string[] = [
   ...['reset_main_brush', 'reset_side_brush', 'reset_filter', 'reset_sensor', 'reset_wheel'].map((s) => `button.heidi_${s}`),
   ...['dust_bag_status', 'clean_water_tank_status', 'dirty_water_tank_status', 'detergent_status', 'low_water_warning', 'auto_empty_status', 'self_wash_base_status'].map((s) => `sensor.heidi_${s}`),
   ...['start_auto_empty', 'self_clean', 'manual_drying', 'base_station_cleaning'].map((s) => `button.heidi_${s}`),
+  'button.heidi_clear_warning', // Warnung quittieren (PD-015, 17.09.)
   'switch.heidi_customized_cleaning',
   ...['cleaning_mode', 'suction_level', 'mop_pad_humidity', 'cleaning_route'].map((s) => `select.heidi_${s}`), // globale Selects (Optionslisten, Geräteprofil Stufe 2)
   ...['carpet_cleaning', 'water_temperature', 'drying_time', 'auto_empty_mode', 'self_clean_frequency', 'cleangenius', 'map_rotation'].map((s) => `select.heidi_${s}`),

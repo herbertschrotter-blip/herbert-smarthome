@@ -36,8 +36,10 @@ export interface HeroModel {
   /** Farbe des Statuspunkts: cleaning → accent, returning → warning, error → danger, sonst positive */
   dot: DotLevel;
   buttons: HeroButton[];
-  /** Hinweis-/Fehler-Chip: `danger` bei has_error, sonst `warning`; null bei no_error/unavailable */
+  /** Hinweis-/Fehler-Chip: `danger` bei has_error, sonst `warning`; null bei no_error/unavailable. `text` = Kurztext (höchstens zwei Wörter) */
   errorChip: { text: string; level: 'danger' | 'warning' } | null;
+  /** Langtext zum Chip (Tooltip / Detail, PD-015); leer ohne Chip oder ohne Eintrag */
+  errorLong: string;
   /** Raum-Chip nur beim Reinigen ohne gültige Phase */
   roomChip: string | null;
   /** „HH:MM–HH:MM“ */
@@ -82,7 +84,8 @@ export function heroModel(i: HeroInput): HeroModel {
   const errorChip = i.error !== 'no_error' && i.error !== 'unavailable'
     ? { text: errorText(i.error), level: i.hasError ? 'danger' as const : 'warning' as const }
     : null;
+  const errorLong = errorChip ? (lookup('errorLong', i.error) ?? '') : '';
   const roomChip = i.room !== t('common.dash') && i.vac === 'cleaning' && !phaseOk ? i.room : null;
   const dnd = `${(i.dndStart || '').slice(0, 5)}–${(i.dndEnd || '').slice(0, 5)}`;
-  return { big, sub, dot, buttons: heroButtons(i.vac), errorChip, roomChip, dnd, phaseOk };
+  return { big, sub, dot, buttons: heroButtons(i.vac), errorChip, errorLong, roomChip, dnd, phaseOk };
 }

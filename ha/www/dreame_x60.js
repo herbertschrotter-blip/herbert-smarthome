@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.29 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.30 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -610,6 +610,8 @@ var ROBOT_FEATURES = {
   map: ["camera", "map"],
   selectedMap: ["select", "selected_map"],
   // Kartenwahl (4.3), nur wenn verfügbar
+  clearWarning: ["button", "clear_warning"],
+  // Warnung quittieren (PD-015, 17.09.): nur verfügbar, solange eine Warnung ansteht
   mapData: ["camera", "map_data"],
   // Datenkarte (4.3b, Heidi-Karte): Valetudo-Kartenpaket im PNG-Chunk
   status: ["sensor", "status"],
@@ -928,6 +930,7 @@ var de = {
   "hero.water": "Wasser",
   "hero.waterTitle": "Wassermenge",
   "hero.roomsTitle": "R\xE4ume einstellen",
+  "hero.ackTitle": "Warnung quittieren",
   // ── Auftrag-Kachel (dx-auftrag) ──
   "auftrag.title": "Aktueller Auftrag",
   "auftrag.rooms": "R\xE4ume",
@@ -2041,9 +2044,10 @@ function heroModel(i5) {
   if (sub === big) sub = "";
   const dot = i5.vac === "cleaning" ? "accent" : i5.vac === "returning" ? "warning" : i5.vac === "error" ? "danger" : "positive";
   const errorChip = i5.error !== "no_error" && i5.error !== "unavailable" ? { text: errorText(i5.error), level: i5.hasError ? "danger" : "warning" } : null;
+  const errorLong = errorChip ? lookup("errorLong", i5.error) ?? "" : "";
   const roomChip = i5.room !== t3("common.dash") && i5.vac === "cleaning" && !phaseOk ? i5.room : null;
   const dnd = `${(i5.dndStart || "").slice(0, 5)}\u2013${(i5.dndEnd || "").slice(0, 5)}`;
-  return { big, sub, dot, buttons: heroButtons(i5.vac), errorChip, roomChip, dnd, phaseOk };
+  return { big, sub, dot, buttons: heroButtons(i5.vac), errorChip, errorLong, roomChip, dnd, phaseOk };
 }
 
 // src/domain/labels.ts
@@ -2084,7 +2088,7 @@ var available = (s4, id) => {
   return !!e4 && !EMPTY2.includes(e4.state);
 };
 var VAC_ATTRS = ["has_error", "current_segment", "active_segments", "cleaning_sequence", "cleaned_area", "charging", "docked", "mop_pad", "paused", "washing", "drying", "returning_to_wash", "mapping", "cruising"];
-var ROBOT_IDS = () => [E2.vac, E2.status, E2.error, E2.taskStatus, E2.battery, E2.currentRoom, E2.cleanedArea, E2.cleaningTime, E2.phase, E2.autoLauf, E2.autoLetzterPlan, E2.laufReihenfolge, E2.dndStart, E2.dndEnd, E2.raumnamen, E2.ninaZaehlt, ...PERSONS.map((p3) => p3.id)];
+var ROBOT_IDS = () => [E2.vac, E2.status, E2.error, E2.taskStatus, E2.battery, E2.currentRoom, E2.cleanedArea, E2.cleaningTime, E2.phase, E2.autoLauf, E2.autoLetzterPlan, E2.laufReihenfolge, E2.dndStart, E2.dndEnd, E2.raumnamen, E2.ninaZaehlt, E2.clearWarning, ...PERSONS.map((p3) => p3.id)];
 var intList = (v2) => Array.isArray(v2) ? v2.map((x2) => parseInt(String(x2), 10)).filter((x2) => !isNaN(x2)) : [];
 var readRobot = memoizeSelector(ROBOT_IDS, (s4) => {
   const vac = st(s4, E2.vac);
@@ -2132,7 +2136,9 @@ var readRobot = memoizeSelector(ROBOT_IDS, (s4) => {
     deutsch,
     persons,
     hero,
-    moreInfo: { vac: E2.vac, battery: E2.battery, error: E2.error }
+    moreInfo: { vac: E2.vac, battery: E2.battery, error: E2.error },
+    // Knopf-Entitäten haben als Zustand den letzten Druck oder „unknown“ (nie gedrückt) – nur „unavailable“ heißt gesperrt
+    warning: { clearable: !!ent(s4, E2.clearWarning) && st(s4, E2.clearWarning) !== "unavailable", id: E2.clearWarning }
   };
 }, () => ({ [E2.vac]: stateAndAttributes(VAC_ATTRS) }));
 var PLAN_FIELDS = ["name", "raeume", "tage", "personen", "raumwerte", "modus", "saugstufe", "wasser", "route", "wiederholungen", "homeoffice", "ho_saug", "ho_wdh", "sp_saug", "sp_wdh", "aktiv", "schnell", "zeit"];
@@ -2812,7 +2818,7 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.29";
+var VERSION = "2.0.0-alpha.30";
 
 // src/config.ts
 var NAV = [
@@ -3057,6 +3063,44 @@ var controls = i`
   @media (hover: none) { .btn:hover, button.chip:hover, button.note:hover { background: var(--dx-surface-raised); } }
 `;
 
+// src/shared/dx-tip.ts
+var TIP_ELEMENT = "dx-tip";
+var DxTip = class extends i4 {
+  static {
+    this.styles = i`
+    :host { display: inline-block; position: relative; max-width: 100%; }
+    .tip { position: absolute; left: 0; top: calc(100% + 6px); z-index: 5; width: max-content; max-width: min(280px, 80vw); padding: 8px 10px;
+      border-radius: var(--dx-radius-sm); background: var(--dx-surface-active); border: 1px solid var(--dx-border-strong); color: var(--dx-text);
+      font: 400 12px/1.4 var(--dx-font); white-space: normal; box-shadow: var(--dx-shadow-float); pointer-events: none; }
+    .tip::before { content: ''; position: absolute; left: 14px; top: -11px; border: 5px solid transparent; border-bottom-color: var(--dx-border-strong); }
+  `;
+  }
+  static {
+    this.properties = { text: { type: String }, _open: { state: true } };
+  }
+  constructor() {
+    super();
+    this.text = "";
+    this._open = false;
+    this.addEventListener("mouseenter", () => {
+      this._open = true;
+    });
+    this.addEventListener("mouseleave", () => {
+      this._open = false;
+    });
+    this.addEventListener("focusin", () => {
+      this._open = true;
+    });
+    this.addEventListener("focusout", () => {
+      this._open = false;
+    });
+  }
+  render() {
+    return b2`<slot></slot>${this._open && this.text ? b2`<div class="tip" role="tooltip">${this.text}</div>` : A}`;
+  }
+};
+if (!customElements.get(TIP_ELEMENT)) customElements.define(TIP_ELEMENT, DxTip);
+
 // src/components/dx-hero.ts
 var HERO_ELEMENT = "dx-hero";
 var BATT_BAD_PCT = 20;
@@ -3089,6 +3133,14 @@ var DxHero = class extends i4 {
     .strip small { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-top: 2px; }
     .strip .chip { gap: 4px; }
     .strip > ha-icon:last-child { margin-left: auto; color: var(--dx-text-muted); align-self: center; }
+    /* Hinweis-Chip (PD-015): Kurztext, Langtext beim Verweilen (dx-tip), bei Warnung ein ✕ zum Quittieren */
+    .chips { overflow: visible; }
+    .chip.msg { cursor: pointer; max-width: 100%; }
+    .chip.msg .txt { display: inline-flex; align-items: center; gap: 6px; overflow: hidden; text-overflow: ellipsis; }
+    .chip.msg.ack { padding-right: 4px; }
+    .chip.msg .x { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; margin-left: 2px; color: var(--dx-warning); border: 1px solid rgba(242, 181, 68, 0.45); background: transparent; flex: none; }
+    .chip.msg .x ha-icon { --mdc-icon-size: 12px; width: 12px; height: 12px; color: var(--dx-warning); }
+    .chip.msg .x:hover { background: rgba(242, 181, 68, 0.25); }
     @container content (max-width: 640px) { .robotpic { max-width: 170px; } }
   `];
   }
@@ -3123,6 +3175,24 @@ var DxHero = class extends i4 {
     if (r4.running) return t3("hero.away");
     return statusText(r4.vac);
   }
+  /**
+   * Hinweis-Chip (PD-015): gelb = Warnung, rot = Fehler; Kurztext im Chip, Langtext beim Verweilen (dx-tip), Antippen →
+   * more-info (auch am Handy). Nur bei einer Warnung und verfügbarem Knopf ein ✕, das `button.press` auf clear_warning ruft.
+   */
+  msgChip(r4, chip, long) {
+    const ack = chip.level === "warning" && r4.warning.clearable;
+    const open = () => moreInfo(this, r4.moreInfo.error);
+    return b2`<dx-tip .text=${long}><span class="chip msg ${chip.level === "danger" ? "bad" : "warn"} ${ack ? "ack" : ""}" role="button" tabindex="0" data-chip="error" @click=${open} @keydown=${(e4) => {
+      if (e4.key === "Enter" || e4.key === " ") {
+        e4.preventDefault();
+        open();
+      }
+    }}>
+      <span class="txt"><ha-icon icon=${chip.level === "danger" ? "mdi:alert" : "mdi:information-outline"}></ha-icon>${chip.text}</span>${ack ? b2`<button class="x" data-ack aria-label=${t3("hero.ackTitle")} title=${t3("hero.ackTitle")} @click=${(e4) => {
+      e4.stopPropagation();
+      void this.api?.press(r4.warning.id);
+    }}><ha-icon icon="mdi:close"></ha-icon></button>` : A}</span></dx-tip>`;
+  }
   render() {
     const r4 = this.robot;
     if (!r4) return b2``;
@@ -3144,7 +3214,7 @@ var DxHero = class extends i4 {
           <div class="battrow"><div class="battbar ${battCls}" style="--p:${r4.battery}"><i></i></div>${r4.charging ? b2`<ha-icon class="bolt" icon="mdi:flash" title=${t3("hero.charging")}></ha-icon>` : A}</div>
         </button>
       </div>
-      ${h3.roomChip || h3.errorChip ? b2`<div class="chips">${h3.roomChip ? b2`<span class="chip on"><ha-icon icon="mdi:floor-plan"></ha-icon>${h3.roomChip}</span>` : A}${h3.errorChip ? b2`<button class="chip ${h3.errorChip.level === "danger" ? "bad" : "warn"}" @click=${() => moreInfo(this, r4.moreInfo.error)}><ha-icon icon=${h3.errorChip.level === "danger" ? "mdi:alert" : "mdi:information-outline"}></ha-icon>${h3.errorChip.text}</button>` : A}</div>` : A}
+      ${h3.roomChip || h3.errorChip ? b2`<div class="chips">${h3.roomChip ? b2`<span class="chip on"><ha-icon icon="mdi:floor-plan"></ha-icon>${h3.roomChip}</span>` : A}${h3.errorChip ? this.msgChip(r4, h3.errorChip, h3.errorLong) : A}</div>` : A}
       <div class="params">
         <button class="param" title=${t3("hero.modeTitle")} @click=${this.openRooms}><ha-icon icon="mdi:broom"></ha-icon><b>${modus}</b><span>${t3("hero.mode")}</span></button>
         <button class="param" title=${t3("hero.suctionTitle")} @click=${this.openRooms}><ha-icon icon="mdi:fan"></ha-icon><b>${saug}</b><span>${t3("hero.suction")}</span></button>

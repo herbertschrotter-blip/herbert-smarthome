@@ -87,6 +87,12 @@ test('Tabelle aus test-timeline.js', () => {
   assert.deepEqual(heroModel({ ...base, error: 'brush_stuck', hasError: true }).errorChip, { text: 'Bürste blockiert', level: 'danger' });
   assert.deepEqual(heroModel({ ...base, error: 'clean_mop_pad' }).errorChip, { text: 'Mopp reinigen', level: 'warning' });
   assert.equal(heroModel({ ...base, error: 'unavailable' }).errorChip, null);
+  // PD-015: Kurztext (höchstens zwei Wörter) im Chip, Langtext daneben; unbekannter Code lesbar, ohne Langtext
+  assert.deepEqual(heroModel({ ...base, error: 'dust_bag_full' }).errorChip, { text: 'Staubbeutel voll', level: 'warning' });
+  assert.match(heroModel({ ...base, error: 'dust_bag_full' }).errorLong, /^Staubbeutel prüfen/);
+  assert.equal(heroModel({ ...base, error: 'water_tank_dry' }).errorChip?.text, 'Frischwasser leer');
+  assert.deepEqual([heroModel({ ...base, error: 'strange_thing_happened' }).errorChip?.text, heroModel({ ...base, error: 'strange_thing_happened' }).errorLong], ['strange thing happened', '']);
+  assert.equal(heroModel(base).errorLong, '');
   assert.equal(heroModel({ ...base, vac: 'cleaning' }).dot, 'accent');
   assert.equal(heroModel({ ...base, vac: 'returning' }).dot, 'warning');
   assert.equal(heroModel({ ...base, vac: 'error' }).dot, 'danger');

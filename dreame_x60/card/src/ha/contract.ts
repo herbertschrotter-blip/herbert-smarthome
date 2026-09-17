@@ -21,6 +21,7 @@ export const ROBOT_FEATURES = {
   vac: ['vacuum', ''],
   map: ['camera', 'map'],
   selectedMap: ['select', 'selected_map'], // Kartenwahl (4.3), nur wenn verfügbar
+  clearWarning: ['button', 'clear_warning'], // Warnung quittieren (PD-015, 17.09.): nur verfügbar, solange eine Warnung ansteht
   mapData: ['camera', 'map_data'], // Datenkarte (4.3b, Heidi-Karte): Valetudo-Kartenpaket im PNG-Chunk
   status: ['sensor', 'status'],
   error: ['sensor', 'error'],

@@ -19,6 +19,7 @@ import type { Overlay } from '../shared/overlay';
 import { robotSvg } from '../shared/robot-svg';
 import { controls } from '../styles/controls';
 import { deviceName } from '../ha/device';
+import '../shared/dx-tip';
 
 export const HERO_ELEMENT = 'dx-hero';
 
@@ -53,6 +54,14 @@ export class DxHero extends LitElement {
     .strip small { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-top: 2px; }
     .strip .chip { gap: 4px; }
     .strip > ha-icon:last-child { margin-left: auto; color: var(--dx-text-muted); align-self: center; }
+    /* Hinweis-Chip (PD-015): Kurztext, Langtext beim Verweilen (dx-tip), bei Warnung ein ✕ zum Quittieren */
+    .chips { overflow: visible; }
+    .chip.msg { cursor: pointer; max-width: 100%; }
+    .chip.msg .txt { display: inline-flex; align-items: center; gap: 6px; overflow: hidden; text-overflow: ellipsis; }
+    .chip.msg.ack { padding-right: 4px; }
+    .chip.msg .x { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; margin-left: 2px; color: var(--dx-warning); border: 1px solid rgba(242, 181, 68, 0.45); background: transparent; flex: none; }
+    .chip.msg .x ha-icon { --mdc-icon-size: 12px; width: 12px; height: 12px; color: var(--dx-warning); }
+    .chip.msg .x:hover { background: rgba(242, 181, 68, 0.25); }
     @container content (max-width: 640px) { .robotpic { max-width: 170px; } }
   `];
 
@@ -94,6 +103,17 @@ export class DxHero extends LitElement {
     return statusText(r.vac);
   }
 
+  /**
+   * Hinweis-Chip (PD-015): gelb = Warnung, rot = Fehler; Kurztext im Chip, Langtext beim Verweilen (dx-tip), Antippen →
+   * more-info (auch am Handy). Nur bei einer Warnung und verfügbarem Knopf ein ✕, das `button.press` auf clear_warning ruft.
+   */
+  private msgChip(r: RobotView, chip: NonNullable<RobotView['hero']['errorChip']>, long: string): TemplateResult {
+    const ack = chip.level === 'warning' && r.warning.clearable;
+    const open = (): void => moreInfo(this, r.moreInfo.error);
+    return html`<dx-tip .text=${long}><span class="chip msg ${chip.level === 'danger' ? 'bad' : 'warn'} ${ack ? 'ack' : ''}" role="button" tabindex="0" data-chip="error" @click=${open} @keydown=${(e: KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } }}>
+      <span class="txt"><ha-icon icon=${chip.level === 'danger' ? 'mdi:alert' : 'mdi:information-outline'}></ha-icon>${chip.text}</span>${ack ? html`<button class="x" data-ack aria-label=${t('hero.ackTitle')} title=${t('hero.ackTitle')} @click=${(e: Event) => { e.stopPropagation(); void this.api?.press(r.warning.id); }}><ha-icon icon="mdi:close"></ha-icon></button>` : nothing}</span></dx-tip>`;
+  }
+
   override render(): TemplateResult {
     const r = this.robot;
     if (!r) return html``;
@@ -115,7 +135,7 @@ export class DxHero extends LitElement {
           <div class="battrow"><div class="battbar ${battCls}" style="--p:${r.battery}"><i></i></div>${r.charging ? html`<ha-icon class="bolt" icon="mdi:flash" title=${t('hero.charging')}></ha-icon>` : nothing}</div>
         </button>
       </div>
-      ${h.roomChip || h.errorChip ? html`<div class="chips">${h.roomChip ? html`<span class="chip on"><ha-icon icon="mdi:floor-plan"></ha-icon>${h.roomChip}</span>` : nothing}${h.errorChip ? html`<button class="chip ${h.errorChip.level === 'danger' ? 'bad' : 'warn'}" @click=${() => moreInfo(this, r.moreInfo.error)}><ha-icon icon=${h.errorChip.level === 'danger' ? 'mdi:alert' : 'mdi:information-outline'}></ha-icon>${h.errorChip.text}</button>` : nothing}</div>` : nothing}
+      ${h.roomChip || h.errorChip ? html`<div class="chips">${h.roomChip ? html`<span class="chip on"><ha-icon icon="mdi:floor-plan"></ha-icon>${h.roomChip}</span>` : nothing}${h.errorChip ? this.msgChip(r, h.errorChip, h.errorLong) : nothing}</div>` : nothing}
       <div class="params">
         <button class="param" title=${t('hero.modeTitle')} @click=${this.openRooms}><ha-icon icon="mdi:broom"></ha-icon><b>${modus}</b><span>${t('hero.mode')}</span></button>
         <button class="param" title=${t('hero.suctionTitle')} @click=${this.openRooms}><ha-icon icon="mdi:fan"></ha-icon><b>${saug}</b><span>${t('hero.suction')}</span></button>

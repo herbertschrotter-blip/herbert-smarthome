@@ -99,6 +99,7 @@ export const de = {
   'hero.water': 'Wasser',
   'hero.waterTitle': 'Wassermenge',
   'hero.roomsTitle': 'Räume einstellen',
+  'hero.ackTitle': 'Warnung quittieren',
 
   // ── Auftrag-Kachel (dx-auftrag) ──
   'auftrag.title': 'Aktueller Auftrag',

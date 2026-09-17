@@ -142,6 +142,49 @@ await setStates(docked);
   await setStates(docked);
 }
 
+// ── PD-015: Warnung = gelber Chip mit Kurztext, Langtext im Tooltip und ✕ (button.press auf clear_warning); Fehler rot ohne ✕ ──
+{
+  const readChip = () => page.evaluate(() => {
+    const h = document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-hero').shadowRoot;
+    const c = h.querySelector('.chips .chip.msg');
+    return c ? { text: c.querySelector('.txt').textContent.replace(/\s+/g, ' ').trim(), warn: c.classList.contains('warn'), bad: c.classList.contains('bad'), x: !!c.querySelector('.x'), tip: c.closest('dx-tip')?.text ?? null } : null;
+  });
+  const withError = (code, hasError, buttonState) => {
+    const s = { ...docked };
+    s['sensor.heidi_error'] = { ...s['sensor.heidi_error'], state: code };
+    s['vacuum.heidi'] = { ...s['vacuum.heidi'], attributes: { ...s['vacuum.heidi'].attributes, has_error: hasError } };
+    s['button.heidi_clear_warning'] = { ...s['button.heidi_clear_warning'], state: buttonState };
+    return s;
+  };
+  await setStates(withError('dust_bag_full', false, 'unknown')); // Warnung ansteht → Knopf verfügbar (Zustand = letzter Druck oder unknown)
+  let c = await readChip();
+  H.checkEqual('Warnung: gelber Chip mit Kurztext (zwei Wörter) und ✕', c && { text: c.text, warn: c.warn, x: c.x }, { text: 'Staubbeutel voll', warn: true, x: true });
+  H.check('Langtext im Tooltip (dx-tip)', !!c && typeof c.tip === 'string' && c.tip.startsWith('Staubbeutel prüfen'), c && c.tip);
+  await page.evaluate(() => { window._calls.length = 0; });
+  await page.evaluate(() => document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-hero').shadowRoot.querySelector('.chips .chip.msg .x').click());
+  await page.waitForTimeout(40);
+  H.checkEqual('✕ → genau ein button.press auf button.heidi_clear_warning', await page.evaluate(() => window._calls), [['button', 'press', { entity_id: 'button.heidi_clear_warning' }]]);
+  const hover = await page.evaluate(async () => {
+    const h = document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-hero').shadowRoot;
+    const tip = h.querySelector('dx-tip');
+    tip.dispatchEvent(new Event('mouseenter'));
+    await new Promise((r) => setTimeout(r, 30));
+    const shown = tip.shadowRoot.querySelector('.tip')?.textContent ?? null;
+    tip.dispatchEvent(new Event('mouseleave'));
+    await new Promise((r) => setTimeout(r, 30));
+    return { shown, hidden: !tip.shadowRoot.querySelector('.tip') };
+  });
+  H.check('Verweilen zeigt den Langtext, Verlassen blendet ihn aus', hover.shown && hover.shown.startsWith('Staubbeutel prüfen') && hover.hidden, hover);
+  await setStates(withError('dust_bag_full', false, 'unavailable'));
+  c = await readChip();
+  H.check('Warnung, aber Knopf unavailable → kein ✕', !!c && c.warn && !c.x, c);
+  await setStates(withError('robot_stuck_on_threshold', true, 'unavailable'));
+  c = await readChip();
+  H.checkEqual('Fehler: roter Chip mit Kurztext, kein ✕', c && { text: c.text, bad: c.bad, x: c.x }, { text: 'Steckt fest', bad: true, x: false });
+  H.check('Fehler-Langtext im Tooltip', !!c && typeof c.tip === 'string' && c.tip.startsWith('Steckt an einer Stufe'), c && c.tip);
+  await setStates(docked);
+}
+
 // ── Render-Ruhe: 20 irrelevante Ticks → 0 Renderaufrufe; relevanter Tick → 1 ──
 {
   await page.evaluate(() => {
