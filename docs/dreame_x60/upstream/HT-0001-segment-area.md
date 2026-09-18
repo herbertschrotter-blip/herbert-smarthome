@@ -1,7 +1,8 @@
 # Fehlerbericht für Tasshack/dreame-vacuum – HT-0001 (Stand 18.09.2026)
 
-Fertiger Text für ein GitHub-Issue bei <https://github.com/Tasshack/dreame-vacuum/issues>. **Abschicken macht Herbert**
-(oder Claude nur nach ausdrücklichem OK). Vorher dort kurz suchen, ob es den Bericht schon gibt (`Segment area AttributeError`).
+Fertiger Text für ein GitHub-Issue bei <https://github.com/Tasshack/dreame-vacuum/issues>. **Nicht abgeschickt (18.09.2026):** Herbert kann dort
+kein Issue anlegen (vom Repo-Betreiber gesperrt), der Zugriff über das GitHub-Token ist ebenfalls abgelehnt – Herbert lässt es. Der Text bleibt liegen, falls
+Issues wieder offen sind. Suche am 18.09.: kein Bericht mit dieser Fehlermeldung vorhanden (`Segment area AttributeError`).
 Herkunft: Ticket HT-0001, ClickUp DX-070, Bauplan Abschnitt 10 (18.09.2026).
 
 ---
@@ -18,6 +19,7 @@ robot position and path do not update any more.
 
 On one day (debug log from 07:35 to 22:24): 7 successful `Render frame` lines vs. 110 `Map render Failed`.
 After making the room visible again in the app: 26 successful renders in a 60 s run, 0 failures.
+With the one-line fix below and the room hidden again: 17 successful renders, 0 failures.
 
 **Log**
 

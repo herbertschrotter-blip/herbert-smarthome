@@ -95,7 +95,7 @@ Nicht gefahrene Einstellungen werden aus demselben Modus × Saugstufen-Faktor (0
 ## Örtliche Korrektur an der Dreame-Integration (HT-0001, 18.09.2026)
 `H:\custom_components\dreame_vacuum\dreame\types.py`, `Segment.__init__`: Zeile `self.area = None  # HT-0001` – ohne sie bricht das Neuzeichnen
 des Kartenbilds ab, sobald es einen Raum ohne Koordinaten gibt (versteckter Raum 8). Ein HACS-Update überschreibt die Zeile:
-danach `.\tools\check-dreame-patch.ps1` (Exit 1 = fehlt, Anleitung in der Ausgabe). Fehlerbericht: `docs/dreame_x60/upstream/`.
+danach `.\tools\check-dreame-patch.ps1` (Exit 1 = fehlt, Anleitung in der Ausgabe). Fehlerbericht: `docs/dreame_x60/upstream/` (nicht abgeschickt, Issues bei Tasshack gesperrt, 18.09.2026).
 
 ## Diagnose-Protokoll (ha/prognose/diag.py, Bauplan F.1, seit 18.09.2026)
 Automation `heidi_diagnose_protokoll` (Ereignisse `state_changed`, `call_service`, `automation_triggered`,
