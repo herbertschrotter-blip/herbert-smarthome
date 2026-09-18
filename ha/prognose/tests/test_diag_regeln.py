@@ -107,6 +107,14 @@ class AnzeigeRegeln(unittest.TestCase):
         self.assertEqual(funde(START + wasch + [karte(30, zustand="docked", station="waescht")], "A8"), [])
         self.assertEqual(funde(START + wasch + [karte(30, zustand="docked")], "A8"), [])  # Baustein fehlt noch → Regel bleibt still
 
+    def test_a8_absaugen_nur_bei_active(self):
+        # HT-0007: der Absaug-Sensor kennt idle, active, not_performed – nur active heißt „saugt ab“
+        nicht = [z(2, "sensor.heidi_auto_empty_status", "idle", "not_performed")]
+        self.assertEqual(funde(START + nicht + [karte(30, zustand="docked", station="ruhe")], "A8"), [])
+        self.assertEqual(len(funde(START + nicht + [karte(30, zustand="docked", station="saugt_ab")], "A8")), 1)
+        aktiv = [z(2, "sensor.heidi_auto_empty_status", "idle", "active")]
+        self.assertEqual(funde(START + aktiv + [karte(30, zustand="docked", station="saugt_ab")], "A8"), [])
+
     def test_a9_warnung_ohne_chip(self):
         warn = [z(2, "sensor.heidi_error", "no_error", "dust_bag_full")]
         self.assertEqual(len(funde(START + warn + [karte(30, zustand="docked", hinweis="")], "A9")), 1)

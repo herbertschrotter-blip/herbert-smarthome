@@ -169,7 +169,7 @@ def pruefe_anzeige(w, t, m):
         out.append(("A6", "hinweis", "laden", "Lade-Anzeige passt nicht: Karte %s, Roboter %s" % (x["laden"], laden), "Gemeldet um %s." % ts[11:19]))
     if "station" in x:
         wahr = "waescht" if w.attr(vac, "washing") else "trocknet" if w.attr(vac, "drying") else \
-            "saugt_ab" if w.zustand(w.e("sensor", "auto_empty_status")) not in ("idle",) + LEER else "ruhe"
+            "saugt_ab" if w.zustand(w.e("sensor", "auto_empty_status")) == "active" else "ruhe"  # not_performed ist Ruhe (HT-0007)
         if x["station"] != wahr and w.stabil(vac + "#washing", t) and w.stabil(vac + "#drying", t) and w.stabil(w.e("sensor", "auto_empty_status"), t):
             out.append(("A8", "hinweis", "station", "Station passt nicht: Karte „%s“, Station „%s“" % (x["station"], wahr), "Gemeldet um %s." % ts[11:19]))
     err = w.zustand(w.e("sensor", "error"))

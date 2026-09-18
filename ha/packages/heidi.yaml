@@ -348,7 +348,7 @@ template:
           {% elif s == 'paused' or a.get('paused') %}Pausiert
           {% elif a.get('washing') %}{{ 'Wäscht Mopp vor dem Start' if laeuft and (a.get('cleaned_area',0) | int(0)) == 0 else 'Wäscht Mopp zwischendurch' if laeuft else 'Wäscht Mopp nach dem Lauf' }}
           {% elif a.get('drying') %}Trocknet Mopp
-          {% elif states('sensor.heidi_auto_empty_status') not in ['idle','unknown','unavailable'] %}Saugt Staub ab
+          {% elif states('sensor.heidi_auto_empty_status') == 'active' %}Saugt Staub ab
           {% elif a.get('returning_to_wash') %}Fährt zum Mopp-Waschen
           {% elif s == 'returning' %}Fährt zur Station
           {% elif s == 'cleaning' and (a.get('cleaned_area', 0) | int(0)) == 0 %}{% set act = a.get('active_segments') or [] %}{% set order = (a.get('cleaning_sequence') or []) | select('in', act) | list %}{% set ziel = states('select.heidi_room_' ~ order[0] ~ '_name') if order else '' %}Fährt zum Startpunkt{{ ' · ' ~ ziel if ziel not in ['', 'unknown', 'unavailable'] else '' }}
