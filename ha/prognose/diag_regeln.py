@@ -63,6 +63,17 @@ def liste(v):
         return []
 
 
+def texte(v):
+    """Liste von Texten; die Automation liefert Listen als Text ("['start', 'locate']") – HT-0004."""
+    if isinstance(v, (list, tuple)):
+        return [str(x) for x in v]
+    try:
+        r = ast.literal_eval(str(v))
+        return [str(x) for x in r] if isinstance(r, (list, tuple)) else [str(v)]
+    except Exception:
+        return [str(v)]
+
+
 def norm(v):
     """'Sweeping and mopping' (Attribut) und 'sweeping_and_mopping' (Select) vergleichbar machen."""
     return re.sub(r"[\s-]+", "_", str(v or "").strip().lower())
@@ -121,9 +132,9 @@ def pruefe_anzeige(w, t, m):
         if zs in RUN and phase not in LEER and w.stabil(w.e("sensor", "phase"), t) and "kopf" in x and phase not in (x.get("kopf"), x.get("schritt")):
             out.append(("A1", "hinweis", "schritt", "Arbeitsschritt passt nicht: Karte „%s“, Roboter „%s“" % (x.get("schritt") or x.get("kopf"), phase),
                         "Die Karte zeigte um %s „%s · %s“, der Arbeitsschritt des Roboters war „%s“." % (ts[11:19], x.get("kopf"), x.get("schritt"), phase)))
-        if "knoepfe" in x and list(x["knoepfe"]) != KNOEPFE.get(zs, KNOEPFE_SONST):
+        if "knoepfe" in x and texte(x["knoepfe"]) != KNOEPFE.get(zs, KNOEPFE_SONST):
             out.append(("A5", "fehler", "knoepfe", "Knöpfe passen nicht zum Zustand „%s“" % zs,
-                        "Die Karte zeigte die Knöpfe %s, zum Zustand „%s“ gehören %s." % (list(x["knoepfe"]), zs, KNOEPFE.get(zs, KNOEPFE_SONST))))
+                        "Die Karte zeigte die Knöpfe %s, zum Zustand „%s“ gehören %s." % (texte(x["knoepfe"]), zs, KNOEPFE.get(zs, KNOEPFE_SONST))))
         if x.get("fortschritt") is not None and zs not in RUN:
             out.append(("A7", "hinweis", "fortschritt", "Karte zeigt „Fortschritt %s %%“, der Roboter ist „%s“" % (x.get("fortschritt"), zs),
                         "Fortschritt gehört nur in einen Lauf (PD-016). Sensor %s = %s." % (w.e("sensor", "cleaning_progress"), w.zustand(w.e("sensor", "cleaning_progress")))))

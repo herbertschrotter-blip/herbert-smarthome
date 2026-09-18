@@ -87,6 +87,9 @@ class AnzeigeRegeln(unittest.TestCase):
     def test_a5_knoepfe(self):
         self.assertEqual(len(funde(LAUF + [karte(30, zustand="cleaning", knoepfe=["start", "locate"])], "A5")), 1)
         self.assertEqual(funde(LAUF + [karte(30, zustand="cleaning", knoepfe=["pause", "stop", "return_to_base"])], "A5"), [])
+        # HT-0004: die Automation liefert Listen als Text – gleiche Knöpfe dürfen dann kein Fund sein
+        self.assertEqual(funde(START + [karte(30, zustand="docked", knoepfe="['start', 'locate']")], "A5"), [])
+        self.assertEqual(len(funde(START + [karte(30, zustand="docked", knoepfe="['pause', 'stop']")], "A5")), 1)
 
     def test_a6_akku_und_laden(self):
         laden = [z(2, VAC, "docked", "docked", {"charging": [None, True]})]
