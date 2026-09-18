@@ -30,7 +30,7 @@ Cowork-Sitzungen (was gebaut wurde, warum, bekannte Stolpersteine, offene Punkte
   `docs/dreame_x60/BAUPLAN.md` (Statusliste = Wahrheit), Begründungen `docs/dreame_x60/ARCHITEKTUR-REVIEW.md`.
   Arbeit nur auf Branch `dreame_x60`; `main` bleibt das, was auf `H:` läuft.
 - `tools/ha.ps1` (API), `tools/deploy.ps1` (Kopieren nach H:\ + Kartenversion hochzählen),
-  `tools/ha-ws.js` (WebSocket-API für Personen/Entitäts-Register; JSON-Argumente über Git Bash),
+  `tools/ha-ws.js` (WebSocket-API für Personen/Entitäts-Register; JSON-Argumente über Git Bash), `tools/ticket.ps1` (Tickets HT-NNNN, Ticket-Profil),
   `tools/diag.js` (Auswertung des Diagnose-Protokolls und Tickets `--tickets` aus `H:\prognose\diag\`, Bauplan F.1/F.2; Beschreibung in
   `heidi/CLAUDE.md`). Das HA-Log gibt es nicht mehr als Datei: `.\tools\ha.ps1 get "hassio/core/logs?lines=300"`.
 - Entitäts-IDs mit Umlaut im Namen: HA macht ö→o, ü→u (`heidi_nicht_storen`, nicht `_stoeren`).
@@ -59,11 +59,22 @@ Commit-Format in allen Projekten: `[vX.Y.Z] Modul, Typ: Kurztitel` (Skill git-co
 ## Tracker-Profil
 Für den Skill tracker (projektneutral): Projektkennung statt Memory-Eintrag.
 - Projekt: heidi
-- Skill-Repo (OneDrive-relativ): Dokumente\02 Arbeit\05 Vorlagen - Scripte\00_claude-skills-bpm
+- Skill-Repo (OneDrive-relativ): Dokumente\02 Arbeit\05 Vorlagen - Scripte\00_claude-skills-bpm (OneDrive liegt auf diesem PC unter `D:\OneDrive` – Benutzer-Umgebungsvariable `OneDrive`)
 - Projekt-Config: projects/heidi/ (Liste, Status-Werte, Nummernschema, Custom Fields wie BPM, Chat-Anker)
 - ClickUp: Space Smart Home 1200660000001609, Liste dreame_x60 – Bauplan 1200660000004100
 - Status-Übergänge: tracker start → in development; tracker done → testing (Abnahme auf shipped macht Herbert)
 - Nummernschema: `DX-NNN | KÜRZEL | Kurztitel` (Kürzel KARTE/BACKEND/DOKU/TOOLS wie Commit-Profil); Kurztitel beginnt mit der Bauplan-Nummer (z. B. 4.3e) oder „Post-2.0:“; Phasen sind Parents ohne Nummer. **Nächste freie Nummer: DX-070** (nach jedem tracker neu +1)
+
+## Ticket-Profil
+Für den Skill ticket (projektneutral). Tickets = Meldungen aus der Karte („Fehler melden“) und Auffälligkeiten der Auswertung (Bauplan F.2).
+- Präfix: `HT-NNNN` (Heidi-Ticket); Ablage `/config/prognose/diag/tickets.json` auf dem Pi (nie ins Repo, nie direkt bearbeiten)
+- Befehle (einziger Schreibweg, Dienst `shell_command.heidi_ticket`): `.\tools\ticket.ps1 liste [alle]` · `zeige <nr>` (Ticket als Text mit gesicherten Beweisen) · `status <nr> <status> [-Dx DX-NNN] [-Commit <hash>] [-Version <ver>]` · `notiz <nr> "<text>"` · `verwerfen <nr> "<grund>"` · `auswertung` (sonst alle 10 min)
+- Status: `neu → angenommen → in_arbeit → geloest → geschlossen`, daneben `verworfen`; ein gelöstes Ticket öffnet sich selbst neu, wenn der Fund wieder auftritt
+- Pflichtangaben: angenommen → `-Dx`; geloest → `-Commit` (+ `-Version`); verworfen → Grund; geschlossen erst nach Herberts Prüfung
+- Aufgaben: über tracker (`DX-NNN | KÜRZEL | HT-NNNN: Kurztitel`), Ticket-Text in die Beschreibung, Akzeptanz = Fund tritt nicht mehr auf + neuer Test; Commit-Kurztitel beginnt mit der Ticketnummer
+- Beweise nachlesen: `node tools\diag.js --tag <Tag> --von <HH:MM> --bis <HH:MM> --debug`; Seite „Dev“ der Karte (nur Admin)
+- Regeln der Auswertung: `ha/prognose/diag_regeln.py` (23 Regeln, Schwellen als Konstanten), Tests `ha/prognose/tests/test_diag_regeln.py`; liegt die Ursache in einer Regel, wird die Regel mit Gegenprobe korrigiert
+- Doku: Befund und Entscheidung → `docs/dreame_x60/BAUPLAN.md` Abschnitt 10 (Aufgabe = Ticketnummer), Stand → `docs/HANDOFF.md` 3e/4
 
 ## Code-Profil
 Für den Skill code-erstellen (projektneutral).
