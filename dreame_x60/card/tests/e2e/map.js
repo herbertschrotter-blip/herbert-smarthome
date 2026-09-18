@@ -11,7 +11,7 @@ const docked = H.loadFixture();
 const withKarte = (kind, extra = {}) => ({ ...docked, 'input_select.heidi_kartendarstellung': { ...docked['input_select.heidi_kartendarstellung'], state: kind }, ...extra });
 const q = (page, sel) => page.evaluate((s) => { const root = document.querySelector('dreame-x60-panel').shadowRoot; const mc = root.querySelector('dx-map-card'); return !!(mc && mc.shadowRoot.querySelector(s)); }, sel);
 const click = (page, sel) => page.evaluate((s) => { document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-map-card').shadowRoot.querySelector(s).click(); }, sel);
-const cards = (page) => page.evaluate(() => window._cards.map((c) => ({ type: c.type, modes: c.map_modes ? c.map_modes.map((m) => m.template || m.name) : null, title: c.title, tiles: c.tiles, icons: c.icons, sel: c.map_modes && c.map_modes[0].predefined_selections })));
+const cards = (page) => page.evaluate(() => window._cards.map((c) => ({ type: c.type, view: c.camera_view, modes: c.map_modes ? c.map_modes.map((m) => m.template || m.name) : null, title: c.title, tiles: c.tiles, icons: c.icons, sel: c.map_modes && c.map_modes[0].predefined_selections })));
 const slotEl = (page) => page.evaluate(() => { const s = document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-map-card').shadowRoot.querySelector('.slot'); const el = s.firstChild; if (!window._mapEls) window._mapEls = []; let i = window._mapEls.indexOf(el); if (i < 0) { window._mapEls.push(el); i = window._mapEls.length - 1; } return { idx: i, type: el && el.cfg && el.cfg.type }; });
 const confirmOk = (page) => page.evaluate(() => { const d = document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-dialog'); if (!d) return false; d.shadowRoot.querySelector('.alert .ok').click(); return true; });
 const tick = (page, ms = 80) => page.waitForTimeout(ms);
@@ -135,7 +135,7 @@ const tick = (page, ms = 80) => page.waitForTimeout(ms);
   const { page, errs } = await H.mount(b, { page: 'start', viewport: { width: 1400, height: 1400 } });
   await tick(page, 200);
   const c = await cards(page);
-  H.check('compact: Kamerabild (picture-entity), genau eine Karte', c.length === 1 && c[0].type === 'picture-entity', c);
+  H.check('compact: Kamerabild (picture-entity) in der Live-Ansicht (DX-071), genau eine Karte', c.length === 1 && c[0].type === 'picture-entity' && c[0].view === 'live', c);
   const cap = await page.evaluate(() => document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-map-card').shadowRoot.querySelector('.mapcap').textContent.replace(/\s+/g, ' ').trim());
   H.check('compact: Bildunterschrift „Karte · Heidi in der Station · letzter Lauf …“', /^Karte · Heidi in der Station · letzter Lauf /.test(cap), cap);
   const nav = await page.evaluate(() => new Promise((resolve) => {

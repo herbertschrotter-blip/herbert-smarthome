@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.35 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.36 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -3060,7 +3060,7 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.35";
+var VERSION = "2.0.0-alpha.36";
 
 // src/config.ts
 var NAV = [
@@ -3692,7 +3692,7 @@ function buildMapConfig(kind, dark, mode, rooms) {
   return pictureConfig();
 }
 function pictureConfig() {
-  return { type: "picture-entity", entity: ENTITIES.map, camera_image: ENTITIES.map, show_name: false, show_state: false };
+  return { type: "picture-entity", entity: ENTITIES.map, camera_image: ENTITIES.map, camera_view: "live", show_name: false, show_state: false };
 }
 
 // src/domain/calibration.ts
