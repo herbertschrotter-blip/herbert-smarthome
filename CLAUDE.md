@@ -31,7 +31,7 @@ Cowork-Sitzungen (was gebaut wurde, warum, bekannte Stolpersteine, offene Punkte
   Arbeit nur auf Branch `dreame_x60`; `main` bleibt das, was auf `H:` läuft.
 - `tools/ha.ps1` (API), `tools/deploy.ps1` (Kopieren nach H:\ + Kartenversion hochzählen),
   `tools/ha-ws.js` (WebSocket-API für Personen/Entitäts-Register; JSON-Argumente über Git Bash),
-  `tools/diag.js` (Auswertung des Diagnose-Protokolls aus `H:\prognose\diag\`, Bauplan F.1; Beschreibung in
+  `tools/diag.js` (Auswertung des Diagnose-Protokolls und Tickets `--tickets` aus `H:\prognose\diag\`, Bauplan F.1/F.2; Beschreibung in
   `heidi/CLAUDE.md`). Das HA-Log gibt es nicht mehr als Datei: `.\tools\ha.ps1 get "hassio/core/logs?lines=300"`.
 - Entitäts-IDs mit Umlaut im Namen: HA macht ö→o, ü→u (`heidi_nicht_storen`, nicht `_stoeren`).
   Vor dem Referenzieren die echte ID per `ha.ps1 get states/<id>` prüfen.

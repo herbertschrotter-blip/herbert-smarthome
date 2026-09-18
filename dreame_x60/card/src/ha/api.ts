@@ -1,14 +1,16 @@
 // Schreibzugriffe (Bauplan 3.2): einzige Stelle, die hass.callService/callApi aufruft. Dienste und Payloads wie v1
 // (Abschnitt 6). Mehrteilige Schreibvorgänge melden Teilfehler (Regel 20) statt still zu scheitern.
-import { ENTITIES, HA_OPTIONS, ROOM_VALUE_CODES, SERVICES, eventPath, historyPath, planEntity, roomEntity } from './contract';
+import { ENTITIES, HA_EVENTS, HA_OPTIONS, ROOM_VALUE_CODES, SERVICES, eventPath, historyPath, planEntity, roomEntity } from './contract';
 import { readProfile } from './profile';
 import type { PlanNumber, RoomId, RoomValueKey } from './contract';
 import type { HomeAssistant } from './types';
+import { t } from '../i18n/t';
 import { encodeRaum } from '../domain/raumwerte';
 import type { RoomValuesInput } from '../domain/raumwerte';
 import type { VacuumService } from '../domain/status';
 import type { Variante } from '../domain/estimate';
 import type { HistoryResponse } from '../domain/timeline';
+import type { DiagZeile, Ticket, TicketKurz, TicketZaehler } from '../domain/diag';
 
 /** Ergebnis eines mehrteiligen Schreibvorgangs. */
 export interface WriteResult { ok: boolean; fehlgeschlagen: string[]; grund?: string }
@@ -176,6 +178,54 @@ export class DxApi {
     try { await h.callApi('POST', eventPath(type), data); return true; } catch { return false; }
   }
 
+  // ───────── Diagnose und Tickets (F.2, PD-018) ─────────
+  /** Dienst mit Antwort: shell_command liefert {stdout, returncode}; stdout ist JSON. Wirft bei Fehlern (Regel 20: die Oberfläche zeigt sie). */
+  private async respond<T>(svc: { domain: string; service: string }, args?: Record<string, unknown>): Promise<T> {
+    const h = this.hass();
+    if (!h.callWS) throw new Error(t('api.noWs'));
+    const data = args ? { args: toBase64(JSON.stringify(args)) } : {};
+    const r = await h.callWS<{ response?: { stdout?: string; returncode?: number; stderr?: string } }>({ type: 'call_service', domain: svc.domain, service: svc.service, service_data: data, return_response: true });
+    const out = r?.response?.stdout ?? '';
+    if (r?.response?.returncode || !out) throw new Error(r?.response?.stderr || t('api.noAnswer'));
+    return JSON.parse(out) as T;
+  }
+
+  /** Letzte Zeilen des Protokolls (neueste zuletzt); `vor` = nur Zeilen vor diesem Zeitstempel („Ältere laden“). */
+  diagTail(n: number, vor?: string): Promise<{ zeilen: DiagZeile[]; aelter: boolean }> {
+    return this.respond(SERVICES.diagTail, vor ? { n, vor } : { n });
+  }
+
+  diagStatus(): Promise<{ dateien: { datei?: string; bytes?: number; zeilen_heute?: number }[]; letzte: string }> {
+    return this.respond(SERVICES.diagStatus);
+  }
+
+  private async ticketCmd<T>(args: Record<string, unknown>): Promise<T> {
+    const r = await this.respond<{ ok: boolean; fehler?: string } & T>(SERVICES.ticket, args);
+    if (!r.ok) throw new Error(r.fehler || t('api.ticketError'));
+    return r;
+  }
+
+  tickets(welche: 'offen' | 'geloest' | 'alle' = 'alle'): Promise<{ tickets: TicketKurz[]; zaehler: TicketZaehler }> {
+    return this.ticketCmd({ cmd: 'liste', welche });
+  }
+
+  ticket(nr: string): Promise<{ ticket: Ticket; text: string }> {
+    return this.ticketCmd({ cmd: 'zeige', nr });
+  }
+
+  ticketVerwerfen(nr: string, grund: string): Promise<{ ticket: Ticket }> {
+    return this.ticketCmd({ cmd: 'verwerfen', nr, grund, wer: this.getHass()?.user?.name ?? '' });
+  }
+
+  ticketNotiz(nr: string, text: string): Promise<{ ticket: Ticket }> {
+    return this.ticketCmd({ cmd: 'notiz', nr, text, wer: this.getHass()?.user?.name ?? '' });
+  }
+
+  /** „Fehler melden“: Ereignis an HA, das Backend legt daraus ein Ticket an. Liefert false, wenn nicht gesendet (kein Admin, Fehler). */
+  reportProblem(text: string, stichworte: string[], kontext: Record<string, unknown>): Promise<boolean> {
+    return this.fireEvent(HA_EVENTS.meldung, { ...kontext, text, stichworte });
+  }
+
   // ───────── Lesen über die REST-API ─────────
   /** Historie der Phase (Paket) und des Roboters im Fenster (Sekunden). */
   history(startSec: number, endSec: number): Promise<HistoryResponse> {
@@ -183,6 +233,13 @@ export class DxApi {
     if (!h.callApi) return Promise.resolve([]);
     return h.callApi<HistoryResponse>('GET', historyPath(new Date(startSec * 1000).toISOString(), new Date(endSec * 1000).toISOString()));
   }
+}
+
+/** UTF-8-sicheres base64 (Umlaute in Meldungen). */
+export function toBase64(text: string): string {
+  let bin = '';
+  for (const b of new TextEncoder().encode(text)) bin += String.fromCharCode(b);
+  return btoa(bin);
 }
 
 /** Optionsstrings, die die API akzeptiert (für Editor-Validierung). */

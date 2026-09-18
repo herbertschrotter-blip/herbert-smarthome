@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.32 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.33 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -759,6 +759,10 @@ var SERVICES = {
   appSzene: { domain: "script", service: "heidi_app_szene" },
   // { shortcut_id }
   prognoseReset: { domain: "shell_command", service: "heidi_prognose_reset" },
+  // Diagnose (F.2, PD-018): Dienste mit Antwort, args = base64 eines JSON-Objekts; heidi_ticket ist der einzige Schreibweg der Tickets
+  diagTail: { domain: "shell_command", service: "heidi_diag_tail" },
+  diagStatus: { domain: "shell_command", service: "heidi_diag_status" },
+  ticket: { domain: "shell_command", service: "heidi_ticket" },
   press: { domain: "button", service: "press" },
   selectOption: { domain: "select", service: "select_option" },
   inputSelectOption: { domain: "input_select", service: "select_option" },
@@ -772,7 +776,7 @@ var SERVICES = {
 function historyPath(startIso, endIso) {
   return `history/period/${startIso}?filter_entity_id=${ENTITIES.phase},${ENTITIES.vac}&end_time=${encodeURIComponent(endIso)}&minimal_response&no_attributes`;
 }
-var HA_EVENTS = { anzeige: "dreame_x60_anzeige" };
+var HA_EVENTS = { anzeige: "dreame_x60_anzeige", meldung: "dreame_x60_meldung" };
 var eventPath = (type) => `events/${type}`;
 function robotIds(roomIds = []) {
   const ids = Object.keys(ROBOT_FEATURES).map((k2) => ENTITIES[k2]);
@@ -872,6 +876,7 @@ var de = {
   "nav.protokoll": "Verlauf",
   "nav.prognose": "Prognose",
   "nav.einstellungen": "Einstellungen",
+  "nav.dev": "Dev",
   "nav.brandSub": "Dein Saugroboter",
   "nav.model": "Dreame X60 Ultra",
   "nav.sidebar": "Seitenleiste",
@@ -889,6 +894,104 @@ var de = {
   "page.einstellungen.title": "Einstellungen",
   "page.einstellungen.sub": "Darstellung, Funktionen, Prognose, Roboter, Diagnose",
   // Platzhalter je Unterseite: welche Bausteine hier laut Bauplan Abschnitt 7 entstehen (verschwinden mit den Modulen)
+  "page.dev.title": "Dev",
+  "page.dev.sub": "Diagnose-Protokoll \u2013 was war wann, und wer hat es ausgel\xF6st",
+  // ── Seite Dev, Tickets, Fehler melden (F.2b, PD-018) ──
+  "dev.log.title": "Protokoll",
+  "dev.log.running": "l\xE4uft \xB7 letzte Zeile vor {sek} s",
+  "dev.log.empty": "noch keine Zeilen",
+  "dev.log.error": "Protokoll nicht lesbar: {text}",
+  "dev.log.lines": "Zeilen heute \xB7 {kb} KB",
+  "dev.log.l1": "Zust\xE4nde",
+  "dev.log.l2": "Debuglog",
+  "dev.log.l3": "Kartenanzeige",
+  "dev.log.keep": "Aufbewahrung 30 Tage (Debuglog 14) \xB7 Auswertung alle 10 Minuten",
+  "dev.starts.title": "Starts heute",
+  "dev.starts.row": "{zeit} \xB7 Start",
+  "dev.starts.noCall": "kein HA-Aufruf in den 90 s davor",
+  "dev.starts.none": "Heute noch kein Start.",
+  "dev.starts.hint": "extern = Dreame-App, Knopf am Roboter oder App-Zeitplan",
+  "dev.quelle.benutzer": "Benutzer",
+  "dev.quelle.automation": "Automation",
+  "dev.quelle.system": "System",
+  "dev.quelle.extern": "extern",
+  "dev.src.card": "Karte \xB7 {seite}",
+  "dev.src.report": "Meldung \xB7 {wer}",
+  "dev.src.user": "Benutzer {wer}",
+  "dev.src.auto": "Automation {name}",
+  "dev.src.autoPlain": "Automation",
+  "dev.src.system": "System (Zeit)",
+  "dev.src.extern": "extern",
+  "dev.row.call": "Dienst {dienst}",
+  "dev.row.shows": "zeigt",
+  "dev.row.page": "Seite {seite}",
+  "dev.tickets.title": "Tickets",
+  "dev.tickets.new": "neu",
+  "dev.tickets.working": "in Arbeit",
+  "dev.tickets.solved": "gel\xF6st",
+  "dev.tickets.flow": "neu \u2192 angenommen (DX-\u2026) \u2192 in Arbeit \u2192 gel\xF6st \u2192 geschlossen \xB7 verworfen",
+  "dev.tickets.hint": "Bearbeiten in Claude Code: ticket HT-NNNN \u2013 einzeln, mit dir zusammen, nichts automatisch.",
+  "dev.tickets.none": "Keine Tickets in dieser Ansicht.",
+  "dev.tickets.fromReport": "Meldung",
+  "dev.tickets.fromRule": "Auswertung \xB7 Regel {regel}",
+  "dev.tickets.count": "{n}\xD7 \xB7 zuletzt {zeit}",
+  "dev.tickets.again": "{n}\xD7 wieder aufgetreten",
+  "dev.tfilter.offen": "Offen",
+  "dev.tfilter.geloest": "Gel\xF6st",
+  "dev.tfilter.alle": "Alle",
+  "dev.status.neu": "neu",
+  "dev.status.angenommen": "angenommen",
+  "dev.status.in_arbeit": "in Arbeit",
+  "dev.status.geloest": "gel\xF6st",
+  "dev.status.geschlossen": "geschlossen",
+  "dev.status.verworfen": "verworfen",
+  "dev.rules.title": "Alle Regeln der Auswertung (23) \u2013 was automatisch bemerkt wird",
+  "dev.rules.a.title": "Anzeige gegen Roboter",
+  "dev.rules.a.items": "Kopf / Arbeitsschritt \u2260 Roboter l\xE4nger als 10 s|Werte-Kn\xF6pfe Modus, Saugstufe, Wasser \u2260 g\xFCltige Werte des Laufs|angek\xFCndigte Reihenfolge \u2260 gefahrene R\xE4ume|Raum-Chip / \u201EJetzt\u201C \u2260 aktueller Raum|Kn\xF6pfe passen nicht zum Zustand|Akku oder Lade-Blitz \u2260 Roboter|Fortschritt au\xDFerhalb eines Laufs|Station: Karte \u201EBereit\u201C, w\xE4hrend gewaschen, getrocknet oder abgesaugt wird (ab Modul C)|Warnung des Roboters ohne Chip|Karte bekommt keine Daten mehr",
+  "dev.rules.b.title": "Bedienung und Planer",
+  "dev.rules.b.items": "Knopf / Dienstaufruf ohne Wirkung in 30 s|gew\xE4hlte R\xE4ume \u2260 Auftrag des Roboters|Planer sagt \u201Estartet\u201C, aber kein Start|Lauf fertig, \u201Eheute erledigt\u201C nicht gesetzt|Start zur falschen Uhrzeit oder obwohl eine \u201Est\xF6rt\u201C-Person zu Hause ist|Raum-Werte nach dem Lauf nicht wiederhergestellt|\u201EAngepasste Reinigung\u201C bleibt nach dem Lauf aus|gesch\xE4tzte Dauer weicht mehr als 30 % ab (ab 4.8)",
+  "dev.rules.t.title": "Roboter und Technik",
+  "dev.rules.t.items": "Start ohne HA-Ausl\xF6ser (App, Knopf, App-Zeitplan) \u2013 nur Info|Warnung oder Fehler des Roboters|Roboter l\xE4nger als 10 min nicht erreichbar|Fehler / Traceback der Dreame-Integration|L\xFCcke im Protokoll",
+  "dev.rules.app": "Nicht automatisch pr\xFCfbar: was die Dreame-App selbst anzeigt \u2013 daf\xFCr ist der Knopf \u201EFehler melden\u201C.",
+  "dev.tl.title": "Zeitleiste",
+  "dev.tl.sub": "{n} Zeilen \xB7 neueste oben",
+  "dev.tl.search": "Entit\xE4t oder Text, z. B. vacuum.heidi",
+  "dev.tl.live": "Live",
+  "dev.tl.older": "\xC4ltere laden",
+  "dev.tl.hint": "Je Abruf {n} Zeilen \xFCber einen Dienst mit Antwort \u2013 keine Datei im \xF6ffentlichen Ordner.",
+  "dev.filter.all": "Alles",
+  "dev.filter.robot": "Roboter",
+  "dev.filter.call": "Dienste",
+  "dev.filter.auto": "Automationen",
+  "dev.filter.card": "Anzeige",
+  "dev.filter.report": "Meldungen",
+  "api.noWs": "Keine WebSocket-Verbindung zu Home Assistant",
+  "api.noAnswer": "Keine Antwort vom Dienst",
+  "api.ticketError": "Der Ticket-Dienst meldet einen Fehler",
+  "report.title": "Fehler melden",
+  "report.intro": "Setzt eine Marke ins Protokoll \u2013 genau jetzt \u2013 und legt ein Ticket an. So finden wir die Stelle sp\xE4ter sofort.",
+  "report.quick": "Anzeige stimmt nicht|Roboter reagiert nicht|Planer|Karte / R\xE4ume",
+  "report.placeholder": "Was stimmt nicht? (kurz, z. B. \u201EKopf zeigt Bereit, Heidi f\xE4hrt aber\u201C)",
+  "report.sends": "Wird mitgeschickt: Seite, Kartenversion, was die Karte gerade zeigt, Zustand des Roboters, dein Benutzer.",
+  "report.send": "Senden",
+  "report.empty": "Bitte kurz beschreiben oder ein Stichwort w\xE4hlen.",
+  "report.failed": "Senden hat nicht geklappt (nur Admin-Benutzer d\xFCrfen melden). Bitte noch einmal versuchen.",
+  "report.sent": "Gemeldet \u2013 das Ticket wird angelegt",
+  "report.sentNr": "Ticket {nr} angelegt \u2013 Marke steht im Protokoll",
+  "ticket.title": "Ticket",
+  "ticket.loading": "Ticket wird geladen \u2026",
+  "ticket.intro": "Gesicherte Beweise (bleiben erhalten, auch wenn das Protokoll gel\xF6scht wird). In Claude Code: ticket {nr}",
+  "ticket.clickup": "ClickUp {dx}",
+  "ticket.noClickup": "ClickUp: noch keine Aufgabe",
+  "ticket.input": "Notiz \u2013 oder der Grund, warum es kein Fehler ist",
+  "ticket.needText": "Bitte zuerst einen Text eingeben.",
+  "ticket.reject": "Verwerfen \u2013 kein Fehler",
+  "ticket.rejected": "Ticket {nr} verworfen",
+  "ticket.note": "Notiz speichern",
+  "ticket.noted": "Notiz gespeichert",
+  "ticket.copy": "Kopieren",
+  "ticket.copied": "Ticket {nr} kopiert \u2013 in Claude einf\xFCgen",
+  "ticket.copyFailed": "Kopieren nicht m\xF6glich \u2013 Text bitte markieren.",
   "page.parts.reinigen": "dx-map-card full (4.3)|App-Szenen|St\xFChle am Boden|R\xE4ume (Roboter-Werte) \u2192 dx-rooms-dialog (4.6)",
   "page.parts.planer": "dx-planer (4.4)|dx-planer-editor + dx-clock-picker (4.5)|Automatik-Regeln|dx-estimate-dialog (4.8)",
   "page.parts.protokoll": "dx-history (4.7)|Lernwerte-Tabelle",
@@ -1856,6 +1959,45 @@ var DxApi = class {
       return false;
     }
   }
+  // ───────── Diagnose und Tickets (F.2, PD-018) ─────────
+  /** Dienst mit Antwort: shell_command liefert {stdout, returncode}; stdout ist JSON. Wirft bei Fehlern (Regel 20: die Oberfläche zeigt sie). */
+  async respond(svc, args) {
+    const h3 = this.hass();
+    if (!h3.callWS) throw new Error(t3("api.noWs"));
+    const data = args ? { args: toBase64(JSON.stringify(args)) } : {};
+    const r4 = await h3.callWS({ type: "call_service", domain: svc.domain, service: svc.service, service_data: data, return_response: true });
+    const out = r4?.response?.stdout ?? "";
+    if (r4?.response?.returncode || !out) throw new Error(r4?.response?.stderr || t3("api.noAnswer"));
+    return JSON.parse(out);
+  }
+  /** Letzte Zeilen des Protokolls (neueste zuletzt); `vor` = nur Zeilen vor diesem Zeitstempel („Ältere laden“). */
+  diagTail(n4, vor) {
+    return this.respond(SERVICES.diagTail, vor ? { n: n4, vor } : { n: n4 });
+  }
+  diagStatus() {
+    return this.respond(SERVICES.diagStatus);
+  }
+  async ticketCmd(args) {
+    const r4 = await this.respond(SERVICES.ticket, args);
+    if (!r4.ok) throw new Error(r4.fehler || t3("api.ticketError"));
+    return r4;
+  }
+  tickets(welche = "alle") {
+    return this.ticketCmd({ cmd: "liste", welche });
+  }
+  ticket(nr) {
+    return this.ticketCmd({ cmd: "zeige", nr });
+  }
+  ticketVerwerfen(nr, grund) {
+    return this.ticketCmd({ cmd: "verwerfen", nr, grund, wer: this.getHass()?.user?.name ?? "" });
+  }
+  ticketNotiz(nr, text) {
+    return this.ticketCmd({ cmd: "notiz", nr, text, wer: this.getHass()?.user?.name ?? "" });
+  }
+  /** „Fehler melden“: Ereignis an HA, das Backend legt daraus ein Ticket an. Liefert false, wenn nicht gesendet (kein Admin, Fehler). */
+  reportProblem(text, stichworte, kontext) {
+    return this.fireEvent(HA_EVENTS.meldung, { ...kontext, text, stichworte });
+  }
   // ───────── Lesen über die REST-API ─────────
   /** Historie der Phase (Paket) und des Roboters im Fenster (Sekunden). */
   history(startSec, endSec) {
@@ -1864,21 +2006,77 @@ var DxApi = class {
     return h3.callApi("GET", historyPath(new Date(startSec * 1e3).toISOString(), new Date(endSec * 1e3).toISOString()));
   }
 };
+function toBase64(text) {
+  let bin = "";
+  for (const b3 of new TextEncoder().encode(text)) bin += String.fromCharCode(b3);
+  return btoa(bin);
+}
+
+// src/domain/strip.ts
+function runOrder(r4) {
+  const active = r4.activeSegments;
+  const memo = r4.laufReihenfolge.filter((x2) => active.includes(x2));
+  const order = memo.length === active.length ? memo : r4.cleaningSequence.filter((id) => active.includes(id));
+  const idx = r4.currentSegment === null ? -1 : order.indexOf(r4.currentSegment);
+  return { order, idx, rest: idx >= 0 ? order.slice(idx + 1) : order };
+}
+var shortOf = (rooms, id) => roomById(rooms, id)?.short;
+var FAN_ICON = { Leise: "mdi:fan-speed-1", Standard: "mdi:fan-speed-2", Stark: "mdi:fan-speed-3", Turbo: "mdi:fan" };
+var modusIcons = (modus) => modus === "Saugen" ? ["mdi:broom"] : modus === "Nur Wischen" ? ["mdi:water"] : ["mdi:broom", "mdi:water"];
+function roomValueChips(v2) {
+  const chips = [{ icons: modusIcons(v2.modus), text: v2.modus }, { icons: [FAN_ICON[v2.saug] ?? "mdi:fan"], text: v2.saug }];
+  if (v2.modus !== "Saugen" && v2.wasser) chips.push({ icons: ["mdi:water-percent"], text: v2.wasser });
+  if (v2.modus === "Nur Wischen" && v2.route) chips.push({ icons: ["mdi:routes"], text: v2.route });
+  chips.push({ icons: ["mdi:repeat"], text: `${v2.wdh}\xD7` });
+  return chips;
+}
+function stripModel(r4, roomValues, rooms) {
+  if (!["cleaning", "paused"].includes(r4.vac)) return null;
+  const seg = r4.currentSegment;
+  const room = seg === null ? void 0 : roomById(rooms, seg);
+  const v2 = room ? roomValues(room.id) : null;
+  if (!room || !v2) return null;
+  const { order, rest } = runOrder(r4);
+  const restTxt = rest.map((id) => shortOf(rooms, id)).filter(Boolean).join(" \u2192 ");
+  const first = order.length ? shortOf(rooms, order[0]) : void 0;
+  if (r4.vac === "cleaning" && r4.cleanedArea === 0) {
+    return { kind: "startpunkt", roomId: room.id, icon: "mdi:map-marker-path", head: t3("strip.startpoint"), right: first ? t3("strip.to", { rooms: first }) : "", chips: [] };
+  }
+  if (r4.activeSegments.length && !r4.activeSegments.includes(room.id)) {
+    return { kind: "durchfahrt", roomId: room.id, icon: room.icon, head: t3("strip.through", { room: room.short }), right: restTxt ? t3("strip.to", { rooms: restTxt }) : "", chips: [] };
+  }
+  return { kind: "jetzt", roomId: room.id, icon: room.icon, head: t3("strip.now", { room: room.short }), right: restTxt ? t3("strip.then", { rooms: restTxt }) : t3("strip.lastRoom"), chips: roomValueChips(v2) };
+}
 
 // src/domain/anzeige.ts
-function anzeigeSnapshot(r4) {
+var haWert = (tab, anzeige) => anzeige ? Object.entries(tab).find(([, text]) => text === anzeige)?.[0] ?? null : null;
+function anzeigeSnapshot(r4, roomValues = () => null, rooms = [], tab) {
+  const unterwegs = ["cleaning", "paused"].includes(r4.vac) && !r4.docked;
+  const strip = unterwegs ? stripModel(r4, roomValues, rooms) : null;
+  const cur = strip ? roomValues(strip.roomId) : null;
   return {
     kopf: r4.hero.big,
     schritt: r4.hero.sub,
     hinweis: r4.hero.errorChip?.text ?? "",
     akku: r4.battery,
     fortschritt: r4.progress === null ? null : Math.round(r4.progress),
-    zustand: r4.vac
+    zustand: r4.vac,
+    knoepfe: r4.hero.buttons.map((b3) => b3.service),
+    laden: r4.charging,
+    modus_ha: cur && tab ? haWert(tab.modus, cur.modus) : null,
+    saug_ha: cur && tab ? haWert(tab.saug, cur.saug) : null,
+    wasser_ha: cur && tab && cur.modus !== "Saugen" ? haWert(tab.wasser, cur.wasser) : null,
+    jetzt: strip?.kind === "jetzt" ? strip.roomId : null,
+    reihenfolge: unterwegs ? runOrder(r4).order : []
   };
 }
+var gleich = (a3, b3) => Array.isArray(a3) || Array.isArray(b3) ? JSON.stringify(a3) === JSON.stringify(b3) : a3 === b3;
 function anzeigeDiff(prev, next) {
   const keys = Object.keys(next);
-  return prev ? keys.filter((k2) => prev[k2] !== next[k2]) : keys;
+  return prev ? keys.filter((k2) => !gleich(prev[k2], next[k2])) : keys;
+}
+function anzeigeWerte(s4) {
+  return Object.fromEntries(Object.entries(s4).filter(([k2, v2]) => k2 === "fortschritt" || v2 !== null && !(Array.isArray(v2) && !v2.length && k2 !== "knoepfe")));
 }
 
 // src/domain/setup.ts
@@ -2212,11 +2410,11 @@ function makeReadPlan(n4) {
 var PLAN_SELECTORS = { 1: makeReadPlan(1), 2: makeReadPlan(2), 3: makeReadPlan(3), 4: makeReadPlan(4) };
 var readPlans = memoizeSelector(() => [...PLAN_NUMBERS.flatMap(planIds), E2.heutePlan, E2.planerBereich], (s4) => {
   const slot = parseInt(st(s4, E2.heutePlan), 10);
-  const heute = PLAN_NUMBERS.includes(slot) ? slot : null;
+  const heute2 = PLAN_NUMBERS.includes(slot) ? slot : null;
   const stoerer = attr(s4, E2.heutePlan, "stoerer");
   return {
     plans: PLAN_NUMBERS.map((n4) => PLAN_SELECTORS[n4](s4)),
-    heute,
+    heute: heute2,
     heuteName: String(attr(s4, E2.heutePlan, "name") ?? ""),
     heuteZeit: String(attr(s4, E2.heutePlan, "zeit") ?? ""),
     heuteErledigt: attr(s4, E2.heutePlan, "erledigt") === true,
@@ -2482,17 +2680,18 @@ var ALL_SELECTORS = {
 };
 
 // src/pages.ts
-var PAGES = ["start", "reinigen", "planer", "protokoll", "prognose", "einstellungen"];
+var PAGES = ["start", "reinigen", "planer", "protokoll", "prognose", "einstellungen", "dev"];
 var PAGE_TITLE = {
   start: { title: "", sub: t3("page.start.sub") },
   reinigen: { title: t3("page.reinigen.title"), sub: t3("page.reinigen.sub") },
   planer: { title: t3("page.planer.title"), sub: t3("page.planer.sub") },
   protokoll: { title: t3("page.protokoll.title"), sub: t3("page.protokoll.sub") },
   prognose: { title: t3("page.prognose.title"), sub: t3("page.prognose.sub") },
-  einstellungen: { title: t3("page.einstellungen.title"), sub: t3("page.einstellungen.sub") }
+  einstellungen: { title: t3("page.einstellungen.title"), sub: t3("page.einstellungen.sub") },
+  dev: { title: t3("page.dev.title"), sub: t3("page.dev.sub") }
 };
 var PAGE_PARTS = Object.fromEntries(
-  PAGES.filter((p3) => p3 !== "start").map((p3) => [p3, tx(`page.parts.${p3}`).split("|")])
+  PAGES.filter((p3) => p3 !== "start" && p3 !== "dev").map((p3) => [p3, tx(`page.parts.${p3}`).split("|")])
 );
 var START_SLOTS = [
   { slot: "hero", title: "", span: "span3", part: "dx-hero", task: "4.1" },
@@ -2709,6 +2908,10 @@ var base = i`
   /* Einrichtungsprüfung (PD-014): nur die Symbole mit Befund zwischen Titel und Uhr; rot pulsiert; Klick springt zur Stelle */
   .topbar .setupicons { display: flex; align-items: center; gap: 8px; padding-right: 6px; } /* rechtsbündig, direkt links neben der Uhr */
   .topbar .si { width: 36px; height: 36px; border-radius: 50%; display: inline-grid; place-items: center; border: 1px solid transparent; cursor: pointer; padding: 0; }
+  /* „Fehler melden“ (F.2b, PD-018): links neben der Uhr, nur für Admin-Benutzer */
+  .topbar .report { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border-radius: 999px; background: var(--dx-warning-soft); border: 1px solid rgba(242, 181, 68, 0.5); color: var(--dx-warning); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; align-self: center; }
+  .topbar .report:hover { background: rgba(242, 181, 68, 0.25); }
+  .topbar .report ha-icon { --mdc-icon-size: 16px; width: 16px; height: 16px; }
   .topbar .si ha-icon { --mdc-icon-size: 20px; width: 20px; height: 20px; }
   .topbar .si.warn { background: color-mix(in srgb, var(--dx-warning) 22%, transparent); color: var(--dx-warning); border-color: var(--dx-warning); }
   .topbar .si.error { background: color-mix(in srgb, var(--dx-danger) 24%, transparent); color: var(--dx-danger); border-color: var(--dx-danger); animation: dx-setup-pulse 1.6s ease-in-out infinite; }
@@ -2815,6 +3018,7 @@ var base = i`
     .topbar h1 { font-size: 22px; }
     /* Handy: Uhr/Zuhause/Nicht stören ausblenden, die Symbole der Einrichtungsprüfung bleiben (rechts neben dem Titel) */
     .topbar .meta .mi { display: none; }
+    .topbar .report > span { display: none; } .topbar .report { padding: 0 10px; }
     .topbar .meta { gap: 0; }
   }
 
@@ -2854,7 +3058,7 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.32";
+var VERSION = "2.0.0-alpha.33";
 
 // src/config.ts
 var NAV = [
@@ -2864,7 +3068,9 @@ var NAV = [
   { key: "planer", label: t3("nav.planer"), icon: "mdi:calendar-outline", page: "planer", tab: true },
   { key: "protokoll", label: t3("nav.protokoll"), icon: "mdi:format-list-bulleted", page: "protokoll", tab: true },
   { key: "prognose", label: t3("nav.prognose"), icon: "mdi:chart-line", page: "prognose", onlyWhen: "prognose", tab: true },
-  { key: "einstellungen", label: t3("nav.einstellungen"), icon: "mdi:cog-outline", page: "einstellungen", tab: true }
+  { key: "einstellungen", label: t3("nav.einstellungen"), icon: "mdi:cog-outline", page: "einstellungen", tab: true },
+  { key: "dev", label: t3("nav.dev"), icon: "mdi:code-tags", page: "dev", onlyWhen: "admin", tab: true }
+  // F.2b: auch in der Tab-Leiste (Herbert, 18.09.)
 ];
 var APP_SCENES = [
   { id: 32, name: t3("scene.32.name"), sub: t3("scene.32.sub"), icon: "mdi:door-open" },
@@ -2885,7 +3091,7 @@ var robotSvg = w`<svg viewBox="0 0 200 200" class="robotpic" aria-hidden="true">
 
 // src/components/dx-nav.ts
 var NAV_ELEMENT = "dx-nav";
-var TAB_MAX = 6;
+var TAB_MAX = 7;
 var DxNav = class extends i4 {
   static {
     // Keine eigenen Tokens: die --dx-*-Variablen kommen von der Shell (auch :host(.light)).
@@ -2927,7 +3133,8 @@ var DxNav = class extends i4 {
       .tabbar { grid-area: tab; display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); position: sticky; bottom: 0; z-index: 20;
         background: color-mix(in srgb, var(--dx-bg-elevated) 92%, transparent); backdrop-filter: blur(10px); border-top: 1px solid var(--dx-border);
         padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); }
-      .tabbar button { display: grid; justify-items: center; align-content: center; gap: 3px; height: 50px; border-radius: var(--dx-radius-sm); color: var(--dx-text-muted); font-size: 10px; font-weight: 500; }
+      .tabbar button span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .tabbar button { min-width: 0; display: grid; justify-items: center; align-content: center; gap: 3px; height: 50px; border-radius: var(--dx-radius-sm); color: var(--dx-text-muted); font-size: 10px; font-weight: 500; }
       .tabbar button[aria-current] { color: var(--dx-accent); background: var(--dx-accent-soft); }
     }
     @media (hover: none) { .navlist button:hover { background: transparent; } }
@@ -2937,6 +3144,7 @@ var DxNav = class extends i4 {
     this.properties = {
       page: { type: String },
       prognoseAktiv: { type: Boolean, attribute: "prognose-aktiv" },
+      admin: { type: Boolean },
       version: { type: String }
     };
   }
@@ -2944,11 +3152,12 @@ var DxNav = class extends i4 {
     super();
     this.page = "start";
     this.prognoseAktiv = false;
+    this.admin = false;
     this.version = "";
   }
   /** Sichtbare Einträge: Prognose nur bei aktiver Prognose. */
   get entries() {
-    return NAV.filter((e4) => e4.onlyWhen !== "prognose" || this.prognoseAktiv);
+    return NAV.filter((e4) => (e4.onlyWhen !== "prognose" || this.prognoseAktiv) && (e4.onlyWhen !== "admin" || this.admin));
   }
   pick(e4) {
     if (e4.overlay === "rooms") emit(this, EVENTS.openOverlay, { kind: "rooms", mode: "robot" });
@@ -2973,42 +3182,6 @@ var DxNav = class extends i4 {
   }
 };
 if (!customElements.get(NAV_ELEMENT)) customElements.define(NAV_ELEMENT, DxNav);
-
-// src/domain/strip.ts
-function runOrder(r4) {
-  const active = r4.activeSegments;
-  const memo = r4.laufReihenfolge.filter((x2) => active.includes(x2));
-  const order = memo.length === active.length ? memo : r4.cleaningSequence.filter((id) => active.includes(id));
-  const idx = r4.currentSegment === null ? -1 : order.indexOf(r4.currentSegment);
-  return { order, idx, rest: idx >= 0 ? order.slice(idx + 1) : order };
-}
-var shortOf = (rooms, id) => roomById(rooms, id)?.short;
-var FAN_ICON = { Leise: "mdi:fan-speed-1", Standard: "mdi:fan-speed-2", Stark: "mdi:fan-speed-3", Turbo: "mdi:fan" };
-var modusIcons = (modus) => modus === "Saugen" ? ["mdi:broom"] : modus === "Nur Wischen" ? ["mdi:water"] : ["mdi:broom", "mdi:water"];
-function roomValueChips(v2) {
-  const chips = [{ icons: modusIcons(v2.modus), text: v2.modus }, { icons: [FAN_ICON[v2.saug] ?? "mdi:fan"], text: v2.saug }];
-  if (v2.modus !== "Saugen" && v2.wasser) chips.push({ icons: ["mdi:water-percent"], text: v2.wasser });
-  if (v2.modus === "Nur Wischen" && v2.route) chips.push({ icons: ["mdi:routes"], text: v2.route });
-  chips.push({ icons: ["mdi:repeat"], text: `${v2.wdh}\xD7` });
-  return chips;
-}
-function stripModel(r4, roomValues, rooms) {
-  if (!["cleaning", "paused"].includes(r4.vac)) return null;
-  const seg = r4.currentSegment;
-  const room = seg === null ? void 0 : roomById(rooms, seg);
-  const v2 = room ? roomValues(room.id) : null;
-  if (!room || !v2) return null;
-  const { order, rest } = runOrder(r4);
-  const restTxt = rest.map((id) => shortOf(rooms, id)).filter(Boolean).join(" \u2192 ");
-  const first = order.length ? shortOf(rooms, order[0]) : void 0;
-  if (r4.vac === "cleaning" && r4.cleanedArea === 0) {
-    return { kind: "startpunkt", roomId: room.id, icon: "mdi:map-marker-path", head: t3("strip.startpoint"), right: first ? t3("strip.to", { rooms: first }) : "", chips: [] };
-  }
-  if (r4.activeSegments.length && !r4.activeSegments.includes(room.id)) {
-    return { kind: "durchfahrt", roomId: room.id, icon: room.icon, head: t3("strip.through", { room: room.short }), right: restTxt ? t3("strip.to", { rooms: restTxt }) : "", chips: [] };
-  }
-  return { kind: "jetzt", roomId: room.id, icon: room.icon, head: t3("strip.now", { room: room.short }), right: restTxt ? t3("strip.then", { rooms: restTxt }) : t3("strip.lastRoom"), chips: roomValueChips(v2) };
-}
 
 // src/styles/controls.ts
 var controls = i`
@@ -4140,11 +4313,478 @@ var DxQuickstart = class extends i4 {
 };
 if (!customElements.get(QUICKSTART_ELEMENT)) customElements.define(QUICKSTART_ELEMENT, DxQuickstart);
 
+// src/domain/diag.ts
+var TICKET_OFFEN = ["neu", "angenommen", "in_arbeit"];
+function zeilenGruppe(z2) {
+  if (z2.art === "dienst") return "call";
+  if (z2.art === "automation" || z2.art === "skript") return "auto";
+  if (z2.art === "anzeige") return "card";
+  if (z2.art === "meldung") return "report";
+  return "robot";
+}
+var zeigbar = (z2) => !(z2.art === "anzeige" && (z2.puls || z2.ende) && !(z2.geaendert ?? []).length);
+function quelleText(z2) {
+  if (z2.art === "anzeige") return t3("dev.src.card", { seite: z2.seite ?? "" });
+  if (z2.art === "meldung") return t3("dev.src.report", { wer: z2.wer ?? "" });
+  if (z2.quelle === "benutzer") return t3("dev.src.user", { wer: z2.wer ?? "" });
+  if (z2.quelle === "automation") return z2.durch ? t3("dev.src.auto", { name: z2.durch }) : t3("dev.src.autoPlain");
+  return z2.quelle === "system" ? t3("dev.src.system") : t3("dev.src.extern");
+}
+function zeilenText(z2) {
+  if (z2.art === "zustand") {
+    const attr2 = Object.entries(z2.attr ?? {}).map(([k2, v2]) => `${k2}: ${String(v2[0])} \u2192 ${String(v2[1])}`).join("; ");
+    const wechsel = z2.alt === z2.neu ? "" : `${z2.alt ?? ""} \u2192 ${z2.neu ?? ""}`;
+    return { haupt: z2.ent ?? "", rest: [wechsel, attr2 ? `{${attr2}}` : ""].filter(Boolean).join("  ") };
+  }
+  if (z2.art === "dienst") return { haupt: t3("dev.row.call", { dienst: z2.dienst ?? "" }), rest: String(z2.daten?.entity_id ?? "") };
+  if (z2.art === "anzeige") {
+    const w2 = z2.werte ?? {};
+    return { haupt: t3("dev.row.shows"), rest: (z2.geaendert ?? []).map((k2) => `${k2}: ${String(w2[k2] ?? "\u2013")}`).join("; ") };
+  }
+  if (z2.art === "meldung") return { haupt: `${z2.ticket ?? ""} \u201E${z2.text ?? ""}\u201C`.trim(), rest: z2.seite ? t3("dev.row.page", { seite: z2.seite }) : "" };
+  return { haupt: z2.name ?? z2.ent ?? "", rest: z2.ausloeser ?? "" };
+}
+var RUN = ["cleaning", "paused", "returning"];
+var START_FENSTER_S = 90;
+var START_DIENST = /^(vacuum\.start|dreame_vacuum\.vacuum_clean_|script\.\w*(plan_starten|reinigung|app_szene))/;
+function starts(zeilen, tag) {
+  const out = [];
+  zeilen.forEach((z2, i5) => {
+    if (z2.art !== "zustand" || !z2.ts.startsWith(tag) || !(z2.ent ?? "").startsWith("vacuum.") || z2.neu !== "cleaning" || RUN.includes(z2.alt ?? "")) return;
+    const t0 = Date.parse(z2.ts);
+    let ruf;
+    for (let k2 = i5 - 1; k2 >= 0 && !ruf; k2--) {
+      const c4 = zeilen[k2];
+      if (t0 - Date.parse(c4.ts) > START_FENSTER_S * 1e3) break;
+      if (c4.art === "dienst" && START_DIENST.test(c4.dienst ?? "")) ruf = c4;
+    }
+    const q = z2.quelle !== "extern" || !ruf ? z2 : ruf;
+    out.push({ ts: z2.ts, quelle: q.quelle ?? "extern", wer: q.wer || q.durch || "", dienst: ruf?.dienst ?? "" });
+  });
+  return out;
+}
+
+// src/components/dx-dev.ts
+var DEV_ELEMENT = "dx-dev";
+var DEV_TAIL = 200;
+var DEV_LIVE_MS = 1e4;
+var FILTER = ["all", "robot", "call", "auto", "card", "report"];
+var TFILTER = ["offen", "geloest", "alle"];
+var SRC_CLASS = (z2) => z2.art === "anzeige" ? "card" : z2.art === "meldung" ? "rep" : z2.quelle === "benutzer" ? "user" : z2.quelle === "automation" ? "auto" : z2.quelle === "extern" ? "ext" : "sys";
+var STATUS_CHIP = { neu: "warn", angenommen: "acc", in_arbeit: "acc", geloest: "on", geschlossen: "on", verworfen: "dim" };
+var zeilenKey = (z2) => z2.ts + z2.art + (z2.ent ?? z2.dienst ?? z2.client ?? "");
+var heute = () => {
+  const d3 = /* @__PURE__ */ new Date();
+  const p3 = (n4) => String(n4).padStart(2, "0");
+  return `${d3.getFullYear()}-${p3(d3.getMonth() + 1)}-${p3(d3.getDate())}`;
+};
+var DxDev = class extends i4 {
+  constructor() {
+    super();
+    this._timer = null;
+    this._zeilen = [];
+    this._aelter = false;
+    this._tickets = [];
+    this._zaehler = { neu: 0, in_arbeit: 0, geloest: 0 };
+    this._status = { bytes: 0, zeilen: 0 };
+    this._filter = "all";
+    this._tfilter = "offen";
+    this._suche = "";
+    this._live = true;
+    this._offen = "";
+    this._fehler = "";
+    this._geladen = 0;
+  }
+  static {
+    this.styles = [controls, i`
+    :host { display: block; min-width: 0; }
+    .grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--dx-space-4); }
+    .b { background: var(--dx-surface); border: 1px solid var(--dx-border); border-radius: var(--dx-radius-lg); padding: var(--dx-space-4); min-width: 0; display: flex; flex-direction: column; gap: var(--dx-space-3); }
+    .c4 { grid-column: span 4; } .c12 { grid-column: span 12; }
+    .lbl { display: flex; align-items: center; gap: 8px; } .lbl .r { margin-left: auto; text-transform: none; letter-spacing: 0; font-weight: 500; color: var(--dx-text-faint); }
+    .live i { animation: pulse 1.6s var(--dx-ease) infinite; } @keyframes pulse { 50% { opacity: 0.35; } }
+    .kv3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .kv3 div { background: var(--dx-surface-raised); border: 1px solid var(--dx-border); border-radius: var(--dx-radius-md); padding: 8px 10px; }
+    .kv3 b { display: block; font-size: 22px; font-weight: 600; line-height: 1.1; } .kv3 span { font-size: 11px; color: var(--dx-text-muted); }
+    .flow { font-size: 11px; color: var(--dx-text-faint); }
+    .row.link { cursor: pointer; } .row.link:hover .t { color: var(--dx-accent); }
+    .row .s.wrap { white-space: normal; }
+    .sev { width: 10px; height: 10px; border-radius: 50%; flex: none; background: var(--dx-accent); }
+    .sev.fehler { background: var(--dx-danger); } .sev.hinweis { background: var(--dx-warning); }
+    .row .sev + div { flex: 1; min-width: 0; }
+    .nr { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--dx-accent); margin-right: 4px; }
+    .seg2 { display: inline-flex; background: var(--dx-bg); border: 1px solid var(--dx-border); border-radius: var(--dx-radius-md); padding: 3px; gap: 2px; max-width: 100%; flex-wrap: wrap; }
+    .seg2 button { height: 34px; padding: 0 12px; border-radius: 7px; font-size: 13px; font-weight: 500; color: var(--dx-text-muted); white-space: nowrap; background: none; border: 0; cursor: pointer; }
+    .seg2 button[aria-pressed='true'] { background: var(--dx-surface-active); color: var(--dx-text); box-shadow: inset 0 0 0 1px rgba(88, 183, 246, 0.5); }
+    .tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .search { height: 40px; min-width: 160px; flex: 1; padding: 0 12px; border-radius: var(--dx-radius-md); background: var(--dx-bg); border: 1px solid var(--dx-border); color: var(--dx-text); font: inherit; }
+    .btn.live[aria-pressed='true'] { border-color: rgba(57, 217, 138, 0.45); color: var(--dx-positive); }
+    .tl { display: grid; font-variant-numeric: tabular-nums; }
+    .ev { display: grid; grid-template-columns: 92px 170px minmax(0, 1fr); gap: 10px; align-items: baseline; padding: 7px 8px; border-top: 1px solid var(--dx-border); border-radius: 6px; cursor: pointer; }
+    .ev:hover { background: var(--dx-surface-raised); }
+    .ev .ts { color: var(--dx-text-muted); font-size: 12px; } .ev .src { font-size: 11px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .src.user { color: var(--dx-accent); } .src.auto { color: var(--dx-positive); } .src.ext { color: var(--dx-warning); } .src.sys, .src.card { color: var(--dx-text-muted); }
+    .ev .tx { font-size: 13px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .ev .tx .k { color: var(--dx-text-muted); }
+    .ev.open .tx { white-space: normal; } .ev.card .tx { color: var(--dx-text-muted); } .ev.card .tx b { color: var(--dx-text); }
+    .ev .more { grid-column: 2 / -1; font-family: ui-monospace, Consolas, monospace; font-size: 11px; color: var(--dx-text-muted); background: var(--dx-bg); border: 1px solid var(--dx-border); border-radius: var(--dx-radius-sm); padding: 8px; white-space: pre-wrap; word-break: break-all; }
+    .ev.rep { background: var(--dx-warning-soft); border: 1px solid rgba(242, 181, 68, 0.5); margin: 4px 0; } .ev.rep .src, .ev.rep .tx b { color: var(--dx-warning); }
+    .ev.flash { animation: flash 1.2s var(--dx-ease); } @keyframes flash { from { background: var(--dx-accent-soft); } }
+    details { border-top: 1px solid var(--dx-border); padding-top: 10px; font-size: 12px; color: var(--dx-text-muted); }
+    summary { cursor: pointer; font-weight: 600; color: var(--dx-text); min-height: 32px; display: flex; align-items: center; }
+    .rgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 8px; }
+    .rgrid b { color: var(--dx-text); } .rgrid ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 4px; line-height: 1.4; }
+    .err { color: var(--dx-danger); font-size: 13px; }
+    @container content (max-width: 760px) {
+      .c4 { grid-column: span 12; }
+      .ev { grid-template-columns: 62px minmax(0, 1fr); row-gap: 2px; }
+      .ev .src { grid-column: 2; grid-row: 1; } .ev .tx { grid-column: 2; white-space: normal; } .ev .more { grid-column: 1 / -1; }
+      .row.find { flex-wrap: wrap; }
+    }
+  `];
+  }
+  static {
+    this.properties = {
+      api: { attribute: false },
+      _zeilen: { state: true },
+      _aelter: { state: true },
+      _tickets: { state: true },
+      _zaehler: { state: true },
+      _status: { state: true },
+      _filter: { state: true },
+      _tfilter: { state: true },
+      _suche: { state: true },
+      _live: { state: true },
+      _offen: { state: true },
+      _fehler: { state: true },
+      _geladen: { state: true }
+    };
+  }
+  connectedCallback() {
+    super.connectedCallback();
+    void this.load();
+    this._timer = setInterval(() => {
+      if (this._live) void this.load();
+    }, DEV_LIVE_MS);
+  }
+  disconnectedCallback() {
+    if (this._timer) {
+      clearInterval(this._timer);
+      this._timer = null;
+    }
+    super.disconnectedCallback();
+  }
+  /** Alles neu holen (Zeitleiste, Tickets, Dateigrößen). Bereits nachgeladene ältere Zeilen bleiben erhalten. */
+  async load() {
+    const api = this.api;
+    if (!api) return;
+    try {
+      const [tail, tk, st2] = await Promise.all([api.diagTail(DEV_TAIL), api.tickets("alle"), api.diagStatus()]);
+      const first = tail.zeilen[0]?.ts ?? "";
+      const alt = this._zeilen.filter((z2) => z2.ts < first);
+      this._zeilen = [...alt, ...tail.zeilen];
+      if (!alt.length) this._aelter = tail.aelter;
+      this._tickets = tk.tickets;
+      this._zaehler = tk.zaehler;
+      const tag = heute();
+      this._status = { bytes: st2.dateien.find((d3) => d3.datei === `heidi_diag-${tag}.jsonl`)?.bytes ?? 0, zeilen: st2.dateien.find((d3) => d3.zeilen_heute !== void 0)?.zeilen_heute ?? 0 };
+      this._fehler = "";
+      this._geladen = Date.now();
+    } catch (e4) {
+      this._fehler = e4 instanceof Error ? e4.message : String(e4);
+    }
+  }
+  async older() {
+    const api = this.api, first = this._zeilen[0]?.ts;
+    if (!api || !first) return;
+    try {
+      const r4 = await api.diagTail(DEV_TAIL, first);
+      const da = new Set(this._zeilen.map(zeilenKey));
+      this._zeilen = [...r4.zeilen.filter((z2) => !da.has(zeilenKey(z2))), ...this._zeilen];
+      this._aelter = r4.aelter;
+    } catch (e4) {
+      this._fehler = e4 instanceof Error ? e4.message : String(e4);
+    }
+  }
+  /** Zur Zeile mit diesem Zeitstempel (oder der nächsten danach) springen und sie kurz hervorheben. */
+  jump(ts) {
+    this._filter = "all";
+    this._suche = "";
+    void this.updateComplete.then(() => {
+      const rows = [...this.renderRoot.querySelectorAll(".ev") ?? []];
+      const el = rows.reverse().find((r4) => (r4.dataset.ts ?? "") >= ts.slice(0, 19)) ?? rows[0];
+      if (!el) return;
+      el.scrollIntoView({ block: "center", behavior: "smooth" });
+      el.classList.remove("flash");
+      void el.offsetWidth;
+      el.classList.add("flash");
+    });
+  }
+  openTicket(nr) {
+    emit(this, EVENTS.openOverlay, { kind: "ticket", nr });
+  }
+  sichtbar() {
+    const q = this._suche.trim().toLowerCase();
+    return this._zeilen.filter((z2) => zeigbar(z2) && (this._filter === "all" || zeilenGruppe(z2) === this._filter) && (!q || JSON.stringify(z2).toLowerCase().includes(q))).reverse();
+  }
+  render() {
+    const tag = heute();
+    const st2 = starts(this._zeilen, tag);
+    const last = this._zeilen.at(-1);
+    const sek = last ? Math.max(0, Math.round((Date.now() - Date.parse(last.ts)) / 1e3)) : null;
+    const tks = this._tickets.filter((k2) => this._tfilter === "alle" || this._tfilter === "offen" === TICKET_OFFEN.includes(k2.status));
+    const rows = this.sichtbar();
+    return b2`
+      <div class="grid">
+        <section class="b c4" data-tile="log">
+          <div class="lbl">${t3("dev.log.title")}</div>
+          ${this._fehler ? b2`<div class="err" role="alert">${t3("dev.log.error", { text: this._fehler })}</div>` : b2`<div class="st good ${this._live ? "live" : ""}"><i></i>${sek === null ? t3("dev.log.empty") : t3("dev.log.running", { sek })}</div>`}
+          <div class="kv"><span class="v">${this._status.zeilen}</span><span class="u">${t3("dev.log.lines", { kb: Math.round(this._status.bytes / 1024) })}</span></div>
+          <div class="chips"><span class="chip on">${t3("dev.log.l1")}</span><span class="chip on">${t3("dev.log.l2")}</span><span class="chip on">${t3("dev.log.l3")}</span></div>
+          <div class="hint">${t3("dev.log.keep")}</div>
+        </section>
+
+        <section class="b c4" data-tile="starts">
+          <div class="lbl">${t3("dev.starts.title")} <span class="r">${st2.length}</span></div>
+          <div class="list">${st2.length ? [...st2].reverse().map((s4) => b2`
+            <div class="row link" data-start=${s4.ts} @click=${() => this.jump(s4.ts)}>
+              <div><div class="t">${t3("dev.starts.row", { zeit: s4.ts.slice(11, 16) })}</div><div class="s">${s4.dienst || t3("dev.starts.noCall")}</div></div>
+              <span class="chip ${s4.quelle === "benutzer" ? "acc" : s4.quelle === "automation" ? "on" : "warn"}">${s4.quelle === "extern" ? t3("dev.src.extern") : s4.wer || tx(`dev.quelle.${s4.quelle}`)}</span>
+            </div>`) : b2`<div class="hint">${t3("dev.starts.none")}</div>`}</div>
+          <div class="hint">${t3("dev.starts.hint")}</div>
+        </section>
+
+        <section class="b c4" data-tile="counts">
+          <div class="lbl">${t3("dev.tickets.title")}</div>
+          <div class="kv3"><div><b data-count="neu">${this._zaehler.neu}</b><span>${t3("dev.tickets.new")}</span></div><div><b>${this._zaehler.in_arbeit}</b><span>${t3("dev.tickets.working")}</span></div><div><b>${this._zaehler.geloest}</b><span>${t3("dev.tickets.solved")}</span></div></div>
+          <div class="flow">${t3("dev.tickets.flow")}</div>
+          <div class="hint">${t3("dev.tickets.hint")}</div>
+        </section>
+
+        <section class="b c12" data-tile="tickets">
+          <div class="lbl">${t3("dev.tickets.title")}
+            <span class="seg2" role="group">${TFILTER.map((f3) => b2`<button data-tf=${f3} aria-pressed=${this._tfilter === f3 ? "true" : "false"} @click=${() => {
+      this._tfilter = f3;
+    }}>${tx(`dev.tfilter.${f3}`)}</button>`)}</span>
+          </div>
+          <div class="list">${tks.length ? tks.map((k2) => b2`
+            <div class="row link find" data-ticket=${k2.nr} @click=${() => this.jump(k2.zuletzt)}>
+              <span class="sev ${k2.schwere}"></span>
+              <div><div class="t"><span class="nr">${k2.nr}</span>${k2.titel}</div>
+                <div class="s wrap">${k2.quelle === "meldung" ? t3("dev.tickets.fromReport") : t3("dev.tickets.fromRule", { regel: k2.regel })} · ${t3("dev.tickets.count", { n: k2.anzahl, zeit: k2.zuletzt.slice(0, 16).replace("T", " ") })}${k2.wieder ? " \xB7 " + t3("dev.tickets.again", { n: k2.wieder }) : ""}${k2.dx ? " \xB7 " + k2.dx : ""}</div></div>
+              <span class="chip ${STATUS_CHIP[k2.status] ?? ""}">${tx(`dev.status.${k2.status}`)}</span>
+              <button class="btn sm" data-open=${k2.nr} @click=${(e4) => {
+      e4.stopPropagation();
+      this.openTicket(k2.nr);
+    }}>${t3("common.open")}</button>
+            </div>`) : b2`<div class="hint">${t3("dev.tickets.none")}</div>`}</div>
+          <details>
+            <summary>${t3("dev.rules.title")}</summary>
+            <div class="rgrid">${["a", "b", "t"].map((g2) => b2`<div><b>${tx(`dev.rules.${g2}.title`)}</b><ul>${tx(`dev.rules.${g2}.items`).split("|").map((r4) => b2`<li>${r4}</li>`)}</ul></div>`)}</div>
+            <div class="hint">${t3("dev.rules.app")}</div>
+          </details>
+        </section>
+
+        <section class="b c12" data-tile="timeline">
+          <div class="lbl">${t3("dev.tl.title")} <span class="r">${t3("dev.tl.sub", { n: rows.length })}</span></div>
+          <div class="tools">
+            <span class="seg2" role="group">${FILTER.map((f3) => b2`<button data-f=${f3} aria-pressed=${this._filter === f3 ? "true" : "false"} @click=${() => {
+      this._filter = f3;
+    }}>${tx(`dev.filter.${f3}`)}</button>`)}</span>
+            <input class="search" type="search" .value=${this._suche} placeholder=${t3("dev.tl.search")} aria-label=${t3("dev.tl.search")} @input=${(e4) => {
+      this._suche = e4.target.value;
+    }}>
+            <button class="btn sm live" data-live aria-pressed=${this._live ? "true" : "false"} @click=${() => {
+      this._live = !this._live;
+      if (this._live) void this.load();
+    }}><ha-icon icon="mdi:access-point"></ha-icon>${t3("dev.tl.live")}</button>
+          </div>
+          <div class="tl">${rows.map((z2) => {
+      const x2 = zeilenText(z2);
+      const key = zeilenKey(z2);
+      const open = this._offen === key;
+      return b2`
+            <div class="ev ${SRC_CLASS(z2)} ${open ? "open" : ""}" data-ts=${z2.ts.slice(0, 19)} data-k=${zeilenGruppe(z2)} @click=${() => {
+        this._offen = open ? "" : key;
+      }}>
+              <span class="ts">${z2.ts.slice(11, 23)}</span><span class="src ${SRC_CLASS(z2)}">${quelleText(z2)}</span>
+              <span class="tx"><b>${x2.haupt}</b> <span class="k">${x2.rest}</span></span>
+              ${open ? b2`<div class="more">${JSON.stringify(z2)}</div>` : A}
+            </div>`;
+    })}</div>
+          <div class="tools">${this._aelter ? b2`<button class="btn sm" data-older @click=${() => void this.older()}>${t3("dev.tl.older")}</button>` : A}<span class="hint">${t3("dev.tl.hint", { n: DEV_TAIL })}</span></div>
+        </section>
+      </div>`;
+  }
+};
+if (!customElements.get(DEV_ELEMENT)) customElements.define(DEV_ELEMENT, DxDev);
+
+// src/components/dx-report.ts
+var REPORT_ELEMENT = "dx-report";
+var REPORT_LOOKUP_MS = 1500;
+var DxReport = class extends i4 {
+  static {
+    this.styles = [controls, i`
+    :host { display: grid; gap: var(--dx-space-3); }
+    textarea { width: 100%; min-height: 96px; resize: vertical; padding: 10px 12px; border-radius: var(--dx-radius-md); background: var(--dx-bg); border: 1px solid var(--dx-border); color: var(--dx-text); font: inherit; box-sizing: border-box; }
+    .chip { cursor: pointer; height: 32px; font-size: 12px; }
+    .chip[aria-pressed='true'] { border-color: rgba(88, 183, 246, 0.5); background: var(--dx-accent-soft); color: var(--dx-accent); }
+    .foot { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+    .err { color: var(--dx-danger); font-size: 13px; }
+  `];
+  }
+  static {
+    this.properties = { api: { attribute: false }, kontext: { attribute: false }, _text: { state: true }, _wahl: { state: true }, _fehler: { state: true }, _busy: { state: true } };
+  }
+  constructor() {
+    super();
+    this.kontext = {};
+    this._text = "";
+    this._wahl = [];
+    this._fehler = "";
+    this._busy = false;
+  }
+  toggle(w2) {
+    this._wahl = this._wahl.includes(w2) ? this._wahl.filter((x2) => x2 !== w2) : [...this._wahl, w2];
+  }
+  async send() {
+    const text = this._text.trim();
+    if (!text && !this._wahl.length) {
+      this._fehler = t3("report.empty");
+      return;
+    }
+    this._busy = true;
+    this._fehler = "";
+    const ok2 = await (this.api?.reportProblem(text, this._wahl, this.kontext) ?? Promise.resolve(false));
+    if (!ok2) {
+      this._busy = false;
+      this._fehler = t3("report.failed");
+      return;
+    }
+    await new Promise((r4) => setTimeout(r4, REPORT_LOOKUP_MS));
+    let nr = "";
+    try {
+      nr = (await this.api.tickets("offen")).tickets.find((k2) => k2.quelle === "meldung")?.nr ?? "";
+    } catch {
+      nr = "";
+    }
+    emit(this, EVENTS.toast, nr ? t3("report.sentNr", { nr }) : t3("report.sent"));
+    emit(this, EVENTS.close);
+  }
+  render() {
+    return b2`
+      <div class="hint">${t3("report.intro")}</div>
+      <div class="chips">${t3("report.quick").split("|").map((w2) => b2`<button class="chip" data-q aria-pressed=${this._wahl.includes(w2) ? "true" : "false"} @click=${() => this.toggle(w2)}>${w2}</button>`)}</div>
+      <textarea .value=${this._text} placeholder=${t3("report.placeholder")} aria-label=${t3("report.placeholder")} @input=${(e4) => {
+      this._text = e4.target.value;
+    }}></textarea>
+      <div class="hint">${t3("report.sends")}</div>
+      ${this._fehler ? b2`<div class="err" role="alert">${this._fehler}</div>` : A}
+      <div class="foot">
+        <button class="btn" data-cancel @click=${() => emit(this, EVENTS.close)}>${t3("common.cancel")}</button>
+        <button class="btn primary" data-send ?disabled=${this._busy} @click=${() => void this.send()}>${t3("report.send")}</button>
+      </div>`;
+  }
+};
+if (!customElements.get(REPORT_ELEMENT)) customElements.define(REPORT_ELEMENT, DxReport);
+
+// src/components/dx-ticket.ts
+var TICKET_ELEMENT = "dx-ticket";
+var STATUS_CHIP2 = { neu: "warn", angenommen: "acc", in_arbeit: "acc", geloest: "on", geschlossen: "on", verworfen: "dim" };
+var DxTicket = class extends i4 {
+  static {
+    this.styles = [controls, i`
+    :host { display: grid; gap: var(--dx-space-3); min-width: 0; }
+    h3 { margin: 0; font-size: 17px; line-height: 1.3; } .nr { color: var(--dx-accent); font-variant-numeric: tabular-nums; margin-right: 6px; }
+    pre { font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; max-height: 380px; overflow: auto; background: var(--dx-bg); border: 1px solid var(--dx-border); border-radius: var(--dx-radius-md); padding: 12px; margin: 0; }
+    textarea { width: 100%; min-height: 56px; resize: vertical; padding: 8px 12px; border-radius: var(--dx-radius-md); background: var(--dx-bg); border: 1px solid var(--dx-border); color: var(--dx-text); font: inherit; box-sizing: border-box; }
+    .foot { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; } .foot .btn:first-child { margin-right: auto; }
+    .err { color: var(--dx-danger); font-size: 13px; }
+    @container content (max-width: 640px) { .foot .btn { flex: 1 1 40%; margin-right: 0 !important; } pre { max-height: 280px; font-size: 10.5px; } }
+  `];
+  }
+  static {
+    this.properties = { api: { attribute: false }, nr: { type: String }, _t: { state: true }, _text: { state: true }, _eingabe: { state: true }, _fehler: { state: true } };
+  }
+  constructor() {
+    super();
+    this.nr = "";
+    this._t = null;
+    this._text = "";
+    this._eingabe = "";
+    this._fehler = "";
+  }
+  connectedCallback() {
+    super.connectedCallback();
+    void this.load();
+  }
+  async load() {
+    try {
+      const r4 = await this.api.ticket(this.nr);
+      this._t = r4.ticket;
+      this._text = r4.text;
+      this._fehler = "";
+    } catch (e4) {
+      this._fehler = e4 instanceof Error ? e4.message : String(e4);
+    }
+  }
+  async act(fn, okText) {
+    const text = this._eingabe.trim();
+    if (!text) {
+      this._fehler = t3("ticket.needText");
+      return;
+    }
+    try {
+      await fn(this.api, text);
+      this._eingabe = "";
+      emit(this, EVENTS.toast, okText);
+      await this.load();
+    } catch (e4) {
+      this._fehler = e4 instanceof Error ? e4.message : String(e4);
+    }
+  }
+  async copy() {
+    try {
+      await navigator.clipboard.writeText(this._text);
+      emit(this, EVENTS.toast, t3("ticket.copied", { nr: this.nr }));
+    } catch {
+      this._fehler = t3("ticket.copyFailed");
+    }
+  }
+  render() {
+    const k2 = this._t;
+    if (!k2) return b2`${this._fehler ? b2`<div class="err" role="alert">${this._fehler}</div>` : b2`<div class="hint">${t3("ticket.loading")}</div>`}`;
+    const offen = ["neu", "angenommen", "in_arbeit"].includes(k2.status);
+    return b2`
+      <h3><span class="nr">${k2.nr}</span>${k2.titel}</h3>
+      <div class="chips">
+        <span class="chip ${STATUS_CHIP2[k2.status] ?? ""}" data-status>${tx(`dev.status.${k2.status}`)}</span>
+        <span class="chip">${k2.quelle === "meldung" ? t3("dev.tickets.fromReport") : t3("dev.tickets.fromRule", { regel: k2.regel })}</span>
+        <span class="chip">${t3("dev.tickets.count", { n: k2.anzahl, zeit: k2.zuletzt.slice(0, 16).replace("T", " ") })}</span>
+        <span class="chip dim">${k2.dx ? t3("ticket.clickup", { dx: k2.dx }) : t3("ticket.noClickup")}</span>
+      </div>
+      <div class="hint">${t3("ticket.intro", { nr: k2.nr })}</div>
+      <pre>${this._text}</pre>
+      <textarea .value=${this._eingabe} placeholder=${t3("ticket.input")} aria-label=${t3("ticket.input")} @input=${(e4) => {
+      this._eingabe = e4.target.value;
+    }}></textarea>
+      ${this._fehler ? b2`<div class="err" role="alert">${this._fehler}</div>` : A}
+      <div class="foot">
+        ${offen ? b2`<button class="btn" data-reject @click=${() => void this.act((a3, x2) => a3.ticketVerwerfen(k2.nr, x2), t3("ticket.rejected", { nr: k2.nr }))}>${t3("ticket.reject")}</button>` : b2`<span></span>`}
+        <button class="btn" data-note @click=${() => void this.act((a3, x2) => a3.ticketNotiz(k2.nr, x2), t3("ticket.noted"))}>${t3("ticket.note")}</button>
+        <button class="btn" data-copy @click=${() => void this.copy()}><ha-icon icon="mdi:content-copy"></ha-icon>${t3("ticket.copy")}</button>
+        <button class="btn primary" data-close @click=${() => emit(this, EVENTS.close)}>${t3("common.close")}</button>
+      </div>`;
+  }
+};
+if (!customElements.get(TICKET_ELEMENT)) customElements.define(TICKET_ELEMENT, DxTicket);
+
 // src/dreame-x60-panel.ts
 var ELEMENT = "dreame-x60-panel";
 var TOAST_MS = 1900;
 var GREETING = (h3) => h3 < 11 ? t3("topbar.morning") : h3 < 18 ? t3("topbar.day") : t3("topbar.evening");
 var ANZEIGE_MIN_MS = 1e3;
+var ANZEIGE_PULS_MS = 3e4;
+var WERTE_TAB = { modus: ROOM_VALUE_CODES.RV_HA.modus, saug: ROOM_VALUE_CODES.RV_HA.saug, wasser: ROOM_VALUE_CODES.RV_HA.wasser };
 var CLIENT = Math.random().toString(36).slice(2, 6);
 var UNSET = Symbol("unset");
 var DreameX60Panel = class extends i4 {
@@ -4162,6 +4802,8 @@ var DreameX60Panel = class extends i4 {
     this._anzeige = null;
     this._anzeigeAt = 0;
     this._anzeigeTimer = null;
+    this._pulsTimer = null;
+    this._onHide = () => this.sendAnzeige({ ende: true });
     this._clockTimer = null;
     this._onKey = (e4) => {
       if (e4.key === "Escape" && this._overlay) this.closeOverlay();
@@ -4253,10 +4895,20 @@ var DreameX60Panel = class extends i4 {
   connectedCallback() {
     super.connectedCallback();
     window.addEventListener("keydown", this._onKey);
+    window.addEventListener("pagehide", this._onHide);
+    this._pulsTimer = setInterval(() => {
+      if (this._config.diagnose && this._anzeige) this.sendAnzeige({ puls: true });
+    }, ANZEIGE_PULS_MS);
     this.tickClock();
   }
   disconnectedCallback() {
     window.removeEventListener("keydown", this._onKey);
+    window.removeEventListener("pagehide", this._onHide);
+    if (this._pulsTimer) {
+      clearInterval(this._pulsTimer);
+      this._pulsTimer = null;
+    }
+    if (this._config.diagnose && this._anzeige) this.sendAnzeige({ ende: true });
     if (this._clockTimer) {
       clearTimeout(this._clockTimer);
       this._clockTimer = null;
@@ -4284,7 +4936,8 @@ var DreameX60Panel = class extends i4 {
    *  je ANZEIGE_MIN_MS, Änderungen dazwischen gehen gesammelt mit der nächsten Meldung. Nur mit `diagnose: true`. */
   reportAnzeige() {
     if (!this.hass || this._anzeigeTimer) return;
-    const next = anzeigeSnapshot(readRobot(this.hass.states));
+    const next = this.snapshot();
+    if (!next) return;
     const geaendert = anzeigeDiff(this._anzeige, next);
     if (!geaendert.length) return;
     const wait = this._anzeigeAt + ANZEIGE_MIN_MS - Date.now();
@@ -4297,7 +4950,22 @@ var DreameX60Panel = class extends i4 {
     }
     this._anzeige = next;
     this._anzeigeAt = Date.now();
-    void this.api.fireEvent(HA_EVENTS.anzeige, { seite: this.page, version: VERSION, client: CLIENT, geaendert, werte: next });
+    this.sendAnzeige({ geaendert });
+  }
+  snapshot() {
+    const s4 = this.hass?.states;
+    if (!s4) return null;
+    const rooms = readAllRoomValues(s4);
+    return anzeigeSnapshot(readRobot(s4), (id) => rooms.rooms[id] ?? null, readProfile(s4).rooms, WERTE_TAB);
+  }
+  /** Kontext jeder Meldung der Karte: Seite, Version, Fenster, alle sichtbaren Werte. */
+  anzeigeKontext() {
+    const snap = this._anzeige ?? this.snapshot();
+    return { seite: this.page, version: VERSION, client: CLIENT, werte: snap ? anzeigeWerte(snap) : {} };
+  }
+  sendAnzeige(extra) {
+    if (!this._config.diagnose) return;
+    void this.api.fireEvent(HA_EVENTS.anzeige, { ...this.anzeigeKontext(), geaendert: extra.geaendert ?? [], ...extra.puls ? { puls: true } : {}, ...extra.ende ? { ende: true } : {} });
   }
   // ───────── HA-Schnittstelle der Karte ─────────
   setConfig(config) {
@@ -4347,14 +5015,15 @@ var DreameX60Panel = class extends i4 {
     const s4 = this.hass?.states ?? {};
     const settings = readSettings(s4);
     this.classList.toggle("light", !settings.dark);
-    const page = this.page;
+    const admin = !!this.hass?.user?.is_admin;
+    const page = this.page === "dev" && !admin ? "start" : this.page;
     const robot = readRobot(s4);
     return b2`
       <div class="root"><div class="app">
-        <dx-nav .page=${page} .prognoseAktiv=${readPrognose(s4).aktiv} .version=${VERSION}></dx-nav>
+        <dx-nav .page=${page} .prognoseAktiv=${readPrognose(s4).aktiv} .admin=${admin} .version=${VERSION}></dx-nav>
         <main class="content page" data-page=${page}>
           ${this.renderTopbar(page, robot)}
-          ${page === "start" ? this.renderStart(s4, robot) : page === "reinigen" ? this.renderReinigen(s4, robot) : this.renderPage(page, s4)}
+          ${page === "start" ? this.renderStart(s4, robot) : page === "reinigen" ? this.renderReinigen(s4, robot) : page === "dev" ? b2`<dx-dev .api=${this.api}></dx-dev>` : this.renderPage(page, s4)}
         </main>
       </div></div>
       ${this.renderOverlay()}
@@ -4382,6 +5051,7 @@ var DreameX60Panel = class extends i4 {
         <div><h1>${title}</h1><div class="sub">${sub}</div></div>
         <div class="meta">
           ${this.renderSetupIcons(robot)}
+          ${this.hass?.user?.is_admin ? b2`<button class="report" data-report title=${t3("report.title")} aria-label=${t3("report.title")} @click=${() => this.openOverlay({ kind: "report" })}><ha-icon icon="mdi:bug-outline"></ha-icon><span>${t3("report.title")}</span></button>` : A}
           <div class="mi time"><ha-icon icon="mdi:clock-outline"></ha-icon><div><b>${now.toLocaleTimeString("de-AT", { hour: "2-digit", minute: "2-digit" })}</b><small>${now.toLocaleDateString("de-AT", { weekday: "long", day: "numeric", month: "short", year: "numeric" })}</small></div></div>
           <div class="mi home"><ha-icon icon="mdi:home-outline"></ha-icon><div><b>${home.length ? t3("topbar.home") : t3("topbar.nobody")}<span class="dot ${home.length ? "on" : ""}"></span></b><small>${home.length ? t3("topbar.present", { names: home.join(" \xB7 ") }) : t3("topbar.allAway")}</small></div></div>
           <div class="mi dnd"><ha-icon icon="mdi:weather-night"></ha-icon><div><b>${robot.hero.dnd}</b><small>${t3("topbar.dnd")}</small></div></div>
@@ -4519,6 +5189,8 @@ var DreameX60Panel = class extends i4 {
     if (o5.kind === "confirm") {
       return b2`<dx-dialog class="overlay" data-kind="confirm" variant="confirm" .text=${o5.text} .subText=${o5.sub ?? ""} .okLabel=${o5.okLabel ?? t3("common.ok")} ?danger=${!!o5.danger}></dx-dialog>`;
     }
+    if (o5.kind === "report") return b2`<dx-dialog class="overlay" data-kind="report" heading=${t3("report.title")}><dx-report .api=${this.api} .kontext=${this.anzeigeKontext()}></dx-report></dx-dialog>`;
+    if (o5.kind === "ticket") return b2`<dx-dialog class="overlay wide" data-kind="ticket" heading=${t3("ticket.title")}><dx-ticket .api=${this.api} .nr=${o5.nr}></dx-ticket></dx-dialog>`;
     const hasBack = "back" in o5 && !!o5.back;
     return b2`<dx-dialog class="overlay" data-kind=${o5.kind} heading=${tx("dialog.overlay", { kind: o5.kind })} ?back=${hasBack}>
         <div class="hint">${t3("dialog.placeholder")}</div>

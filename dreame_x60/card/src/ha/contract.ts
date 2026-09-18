@@ -201,6 +201,10 @@ export const SERVICES = {
   planStarten: { domain: 'script', service: 'heidi_plan_starten' }, // { plan: 1..4, variante: normal|schnell|leise }
   appSzene: { domain: 'script', service: 'heidi_app_szene' }, // { shortcut_id }
   prognoseReset: { domain: 'shell_command', service: 'heidi_prognose_reset' },
+  // Diagnose (F.2, PD-018): Dienste mit Antwort, args = base64 eines JSON-Objekts; heidi_ticket ist der einzige Schreibweg der Tickets
+  diagTail: { domain: 'shell_command', service: 'heidi_diag_tail' },
+  diagStatus: { domain: 'shell_command', service: 'heidi_diag_status' },
+  ticket: { domain: 'shell_command', service: 'heidi_ticket' },
   press: { domain: 'button', service: 'press' },
   selectOption: { domain: 'select', service: 'select_option' },
   inputSelectOption: { domain: 'input_select', service: 'select_option' },
@@ -219,7 +223,7 @@ export function historyPath(startIso: string, endIso: string): string {
 
 /** HA-Ereignisse, die die Karte feuert (S). `anzeige`: Diagnose-Protokoll Schicht 3 (Bauplan F.1, PD-017) – die Automation
  *  heidi_diagnose_protokoll schreibt es mit. Nur Admin-Benutzer dürfen Ereignisse feuern. */
-export const HA_EVENTS = { anzeige: 'dreame_x60_anzeige' } as const;
+export const HA_EVENTS = { anzeige: 'dreame_x60_anzeige', meldung: 'dreame_x60_meldung' } as const;
 
 /** REST-Pfad zum Feuern eines Ereignisses (POST). */
 export const eventPath = (type: string): string => `events/${type}`;

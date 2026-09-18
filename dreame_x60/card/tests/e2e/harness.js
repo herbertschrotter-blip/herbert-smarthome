@@ -76,7 +76,7 @@ export async function mount(browser, opts = {}) {
       callService: async (d, s, x) => { window._calls.push([d, s, x]); if ((failCalls || []).includes(d + '.' + s)) throw new Error('injiziert: ' + d + '.' + s); },
       callApi: async (m, p, d) => { window._api.push(p); if (m === 'POST' && p.startsWith('events/')) window._events.push([p, d]); return apiResponse ?? []; },
       user: user || undefined,
-      callWS: async (msg) => { window._ws.push(msg); const r = (window._wsResponses || {})[msg.type]; if (r === undefined) throw new Error('kein WS-Stub für ' + msg.type); return r; },
+      callWS: async (msg) => { window._ws.push(msg); const all = window._wsResponses || {}; const byService = all[msg.type + ":" + msg.service]; const byCmd = byService && msg.service_data && msg.service_data.args ? byService[JSON.parse(decodeURIComponent(escape(window.atob(msg.service_data.args)))).cmd] : undefined; const r = byCmd !== undefined ? byCmd : byService !== undefined && !(byService && byService.liste) ? byService : all[msg.type]; if (r === undefined) throw new Error('kein WS-Stub für ' + msg.type); return r; },
       connection: { subscribeEvents: async (cb, type) => { (window._subs = window._subs || {})[type] = cb; return () => { delete window._subs[type]; }; } },
     };
     document.body.appendChild(el);

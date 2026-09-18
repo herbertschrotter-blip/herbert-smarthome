@@ -1,4 +1,4 @@
-# dreame_x60 – Heidi-Karte v2 (Bauplan 1.3). Sechs Ansichten, jede zeigt dieselbe Karte mit einer anderen
+# dreame_x60 – Heidi-Karte v2 (Bauplan 1.3). Sieben Ansichten, jede zeigt dieselbe Karte mit einer anderen
 # Seite (page). start ist die normale Ansicht; die anderen sind Unteransichten mit Zurück-Pfeil nach start.
 # Die Karte navigiert selbst über das navigate-Ereignis von HA (URL /dreame-x60/<page>).
 title: Heidi v2
@@ -56,3 +56,13 @@ views:
       - type: custom:dreame-x60-panel
         page: einstellungen
         diagnose: true  # Diagnose-Protokoll Schicht 3 (Bauplan F.1, PD-017): Karte meldet ihre Anzeige an HA
+  # Seite „Dev“ (F.2b, PD-018): Diagnose-Protokoll, Tickets – die Karte zeigt sie nur Admin-Benutzern (alle anderen sehen die Übersicht)
+  - title: Dev
+    path: dev
+    subview: true
+    back_path: /dreame-x60/start
+    type: panel
+    cards:
+      - type: custom:dreame-x60-panel
+        page: dev
+        diagnose: true

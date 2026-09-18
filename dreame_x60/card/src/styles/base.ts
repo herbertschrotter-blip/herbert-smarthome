@@ -124,6 +124,10 @@ export const base = css`
   /* Einrichtungsprüfung (PD-014): nur die Symbole mit Befund zwischen Titel und Uhr; rot pulsiert; Klick springt zur Stelle */
   .topbar .setupicons { display: flex; align-items: center; gap: 8px; padding-right: 6px; } /* rechtsbündig, direkt links neben der Uhr */
   .topbar .si { width: 36px; height: 36px; border-radius: 50%; display: inline-grid; place-items: center; border: 1px solid transparent; cursor: pointer; padding: 0; }
+  /* „Fehler melden“ (F.2b, PD-018): links neben der Uhr, nur für Admin-Benutzer */
+  .topbar .report { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border-radius: 999px; background: var(--dx-warning-soft); border: 1px solid rgba(242, 181, 68, 0.5); color: var(--dx-warning); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; align-self: center; }
+  .topbar .report:hover { background: rgba(242, 181, 68, 0.25); }
+  .topbar .report ha-icon { --mdc-icon-size: 16px; width: 16px; height: 16px; }
   .topbar .si ha-icon { --mdc-icon-size: 20px; width: 20px; height: 20px; }
   .topbar .si.warn { background: color-mix(in srgb, var(--dx-warning) 22%, transparent); color: var(--dx-warning); border-color: var(--dx-warning); }
   .topbar .si.error { background: color-mix(in srgb, var(--dx-danger) 24%, transparent); color: var(--dx-danger); border-color: var(--dx-danger); animation: dx-setup-pulse 1.6s ease-in-out infinite; }
@@ -230,6 +234,7 @@ export const base = css`
     .topbar h1 { font-size: 22px; }
     /* Handy: Uhr/Zuhause/Nicht stören ausblenden, die Symbole der Einrichtungsprüfung bleiben (rechts neben dem Titel) */
     .topbar .meta .mi { display: none; }
+    .topbar .report > span { display: none; } .topbar .report { padding: 0 10px; }
     .topbar .meta { gap: 0; }
   }
 

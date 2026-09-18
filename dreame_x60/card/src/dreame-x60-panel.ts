@@ -7,8 +7,8 @@ import type { PropertyValues, TemplateResult } from 'lit';
 import type { HomeAssistant, PanelConfig } from './ha/types';
 import { DxApi } from './ha/api';
 import { device, deviceName, discoverDevice } from './ha/device';
-import { ENTITIES, HA_EVENTS, robotEntity } from './ha/contract';
-import { anzeigeDiff, anzeigeSnapshot } from './domain/anzeige';
+import { ENTITIES, HA_EVENTS, ROOM_VALUE_CODES, robotEntity } from './ha/contract';
+import { anzeigeDiff, anzeigeSnapshot, anzeigeWerte } from './domain/anzeige';
 import type { AnzeigeSnapshot } from './domain/anzeige';
 import { readProfile } from './ha/profile';
 import { setupChecks, setupProblems } from './domain/setup';
@@ -34,6 +34,9 @@ import './components/dx-auftrag';
 import './components/dx-dialog';
 import './components/dx-map-card';
 import './components/dx-quickstart';
+import './components/dx-dev';
+import './components/dx-report';
+import './components/dx-ticket';
 import { APP_SCENES } from './config';
 import { t, tx } from './i18n/t';
 import { askConfirm } from './shared/overlay';
@@ -50,6 +53,10 @@ const GREETING = (h: number): string => (h < 11 ? t('topbar.morning') : h < 18 ?
 
 /** Diagnose-Protokoll Schicht 3 (PD-017): frühestens so oft meldet die Karte ihre Anzeige (ms); Änderungen dazwischen werden gesammelt. */
 const ANZEIGE_MIN_MS = 1000;
+/** Lebenszeichen der Karte: alle Werte, auch ohne Änderung (ms) – die Auswertung erkennt daran stehende Anzeigen (Regel A1–A10, PULS_MAX_S 90 in diag_regeln.py). */
+const ANZEIGE_PULS_MS = 30_000;
+/** Übersetzung Anzeigetext → HA-Optionswert für die Werte-Knöpfe (Vertrag RV_HA). */
+const WERTE_TAB = { modus: ROOM_VALUE_CODES.RV_HA.modus, saug: ROOM_VALUE_CODES.RV_HA.saug, wasser: ROOM_VALUE_CODES.RV_HA.wasser };
 /** Kennung dieses Browserfensters im Protokoll (mehrere Geräte zeigen die Karte gleichzeitig). */
 const CLIENT = Math.random().toString(36).slice(2, 6);
 
@@ -89,6 +96,8 @@ export class DreameX60Panel extends LitElement {
   private _anzeige: AnzeigeSnapshot | null = null;
   private _anzeigeAt = 0;
   private _anzeigeTimer: ReturnType<typeof setTimeout> | null = null;
+  private _pulsTimer: ReturnType<typeof setInterval> | null = null;
+  private readonly _onHide = (): void => this.sendAnzeige({ ende: true });
   private _clockTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly _onKey = (e: KeyboardEvent): void => { if (e.key === 'Escape' && this._overlay) this.closeOverlay(); };
 
@@ -160,11 +169,16 @@ export class DreameX60Panel extends LitElement {
   override connectedCallback(): void {
     super.connectedCallback();
     window.addEventListener('keydown', this._onKey);
+    window.addEventListener('pagehide', this._onHide);
+    this._pulsTimer = setInterval(() => { if (this._config.diagnose && this._anzeige) this.sendAnzeige({ puls: true }); }, ANZEIGE_PULS_MS);
     this.tickClock();
   }
 
   override disconnectedCallback(): void {
     window.removeEventListener('keydown', this._onKey);
+    window.removeEventListener('pagehide', this._onHide);
+    if (this._pulsTimer) { clearInterval(this._pulsTimer); this._pulsTimer = null; }
+    if (this._config.diagnose && this._anzeige) this.sendAnzeige({ ende: true });
     if (this._clockTimer) { clearTimeout(this._clockTimer); this._clockTimer = null; }
     if (this._anzeigeTimer) { clearTimeout(this._anzeigeTimer); this._anzeigeTimer = null; }
     this._registryUnsub?.(); this._registryUnsub = null; this._registryConn = null;
@@ -185,13 +199,32 @@ export class DreameX60Panel extends LitElement {
    *  je ANZEIGE_MIN_MS, Änderungen dazwischen gehen gesammelt mit der nächsten Meldung. Nur mit `diagnose: true`. */
   private reportAnzeige(): void {
     if (!this.hass || this._anzeigeTimer) return;
-    const next = anzeigeSnapshot(readRobot(this.hass.states));
+    const next = this.snapshot();
+    if (!next) return;
     const geaendert = anzeigeDiff(this._anzeige, next);
     if (!geaendert.length) return;
     const wait = this._anzeigeAt + ANZEIGE_MIN_MS - Date.now();
     if (wait > 0) { this._anzeigeTimer = setTimeout(() => { this._anzeigeTimer = null; this.reportAnzeige(); }, wait); return; }
     this._anzeige = next; this._anzeigeAt = Date.now();
-    void this.api.fireEvent(HA_EVENTS.anzeige, { seite: this.page, version: VERSION, client: CLIENT, geaendert, werte: next });
+    this.sendAnzeige({ geaendert });
+  }
+
+  private snapshot(): AnzeigeSnapshot | null {
+    const s = this.hass?.states;
+    if (!s) return null;
+    const rooms = readAllRoomValues(s);
+    return anzeigeSnapshot(readRobot(s), (id) => rooms.rooms[id] ?? null, readProfile(s).rooms, WERTE_TAB);
+  }
+
+  /** Kontext jeder Meldung der Karte: Seite, Version, Fenster, alle sichtbaren Werte. */
+  private anzeigeKontext(): Record<string, unknown> {
+    const snap = this._anzeige ?? this.snapshot();
+    return { seite: this.page, version: VERSION, client: CLIENT, werte: snap ? anzeigeWerte(snap) : {} };
+  }
+
+  private sendAnzeige(extra: { geaendert?: string[]; puls?: boolean; ende?: boolean }): void {
+    if (!this._config.diagnose) return;
+    void this.api.fireEvent(HA_EVENTS.anzeige, { ...this.anzeigeKontext(), geaendert: extra.geaendert ?? [], ...(extra.puls ? { puls: true } : {}), ...(extra.ende ? { ende: true } : {}) });
   }
 
   // ───────── HA-Schnittstelle der Karte ─────────
@@ -232,14 +265,15 @@ export class DreameX60Panel extends LitElement {
     const s = this.hass?.states ?? {};
     const settings = readSettings(s);
     this.classList.toggle('light', !settings.dark);
-    const page = this.page;
+    const admin = !!this.hass?.user?.is_admin;
+    const page: Page = this.page === 'dev' && !admin ? 'start' : this.page; // „Dev“ gibt es nur für Admin-Benutzer
     const robot = readRobot(s);
     return html`
       <div class="root"><div class="app">
-        <dx-nav .page=${page} .prognoseAktiv=${readPrognose(s).aktiv} .version=${VERSION}></dx-nav>
+        <dx-nav .page=${page} .prognoseAktiv=${readPrognose(s).aktiv} .admin=${admin} .version=${VERSION}></dx-nav>
         <main class="content page" data-page=${page}>
           ${this.renderTopbar(page, robot)}
-          ${page === 'start' ? this.renderStart(s, robot) : page === 'reinigen' ? this.renderReinigen(s, robot) : this.renderPage(page, s)}
+          ${page === 'start' ? this.renderStart(s, robot) : page === 'reinigen' ? this.renderReinigen(s, robot) : page === 'dev' ? html`<dx-dev .api=${this.api}></dx-dev>` : this.renderPage(page, s)}
         </main>
       </div></div>
       ${this.renderOverlay()}
@@ -269,6 +303,7 @@ export class DreameX60Panel extends LitElement {
         <div><h1>${title}</h1><div class="sub">${sub}</div></div>
         <div class="meta">
           ${this.renderSetupIcons(robot)}
+          ${this.hass?.user?.is_admin ? html`<button class="report" data-report title=${t('report.title')} aria-label=${t('report.title')} @click=${() => this.openOverlay({ kind: 'report' })}><ha-icon icon="mdi:bug-outline"></ha-icon><span>${t('report.title')}</span></button>` : nothing}
           <div class="mi time"><ha-icon icon="mdi:clock-outline"></ha-icon><div><b>${now.toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' })}</b><small>${now.toLocaleDateString('de-AT', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' })}</small></div></div>
           <div class="mi home"><ha-icon icon="mdi:home-outline"></ha-icon><div><b>${home.length ? t('topbar.home') : t('topbar.nobody')}<span class="dot ${home.length ? 'on' : ''}"></span></b><small>${home.length ? t('topbar.present', { names: home.join(' · ') }) : t('topbar.allAway')}</small></div></div>
           <div class="mi dnd"><ha-icon icon="mdi:weather-night"></ha-icon><div><b>${robot.hero.dnd}</b><small>${t('topbar.dnd')}</small></div></div>
@@ -353,7 +388,7 @@ export class DreameX60Panel extends LitElement {
   }
 
   /** Unterseiten: bis zur jeweiligen Karte in Phase 4 ein Platzhalter mit einer Vorschau der Sichten, damit die Verdrahtung sichtbar ist. */
-  private renderPage(page: Exclude<Page, 'start'>, s: HomeAssistant['states']): TemplateResult {
+  private renderPage(page: Exclude<Page, 'start' | 'dev'>, s: HomeAssistant['states']): TemplateResult {
     const preview: string[] = [];
     const dash = t('common.dash');
     if (page === 'reinigen') { const m = readMap(s); preview.push(t('preview.mapPage', { karte: m.karte, chairs: m.chairs ? t('common.on') : t('common.off'), calib: Array.isArray(m.calibrationPoints) ? t('preview.calibPoints', { n: m.calibrationPoints.length }) : t('common.missing') })); }
@@ -382,6 +417,8 @@ export class DreameX60Panel extends LitElement {
     if (o.kind === 'confirm') {
       return html`<dx-dialog class="overlay" data-kind="confirm" variant="confirm" .text=${o.text} .subText=${o.sub ?? ''} .okLabel=${o.okLabel ?? t('common.ok')} ?danger=${!!o.danger}></dx-dialog>`;
     }
+    if (o.kind === 'report') return html`<dx-dialog class="overlay" data-kind="report" heading=${t('report.title')}><dx-report .api=${this.api} .kontext=${this.anzeigeKontext()}></dx-report></dx-dialog>`;
+    if (o.kind === 'ticket') return html`<dx-dialog class="overlay wide" data-kind="ticket" heading=${t('ticket.title')}><dx-ticket .api=${this.api} .nr=${o.nr}></dx-ticket></dx-dialog>`;
     const hasBack = 'back' in o && !!o.back;
     return html`<dx-dialog class="overlay" data-kind=${o.kind} heading=${tx('dialog.overlay', { kind: o.kind })} ?back=${hasBack}>
         <div class="hint">${t('dialog.placeholder')}</div>

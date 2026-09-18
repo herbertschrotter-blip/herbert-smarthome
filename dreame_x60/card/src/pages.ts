@@ -1,7 +1,7 @@
 // Seiten der Karte (config.page). Keine Fachlogik; die Texte kommen aus src/i18n/de.ts (4.14). Leerer Titel = Name des Roboters (deviceName(), PD-012).
 import { t, tx } from './i18n/t';
 
-export const PAGES = ['start', 'reinigen', 'planer', 'protokoll', 'prognose', 'einstellungen'] as const;
+export const PAGES = ['start', 'reinigen', 'planer', 'protokoll', 'prognose', 'einstellungen', 'dev'] as const; // dev nur für Admin-Benutzer (F.2b, PD-018)
 export type Page = (typeof PAGES)[number];
 
 export const PAGE_TITLE: Record<Page, { title: string; sub: string }> = {
@@ -11,12 +11,13 @@ export const PAGE_TITLE: Record<Page, { title: string; sub: string }> = {
   protokoll: { title: t('page.protokoll.title'), sub: t('page.protokoll.sub') },
   prognose: { title: t('page.prognose.title'), sub: t('page.prognose.sub') },
   einstellungen: { title: t('page.einstellungen.title'), sub: t('page.einstellungen.sub') },
+  dev: { title: t('page.dev.title'), sub: t('page.dev.sub') },
 };
 
 /** Platzhalter je Unterseite: welche Bausteine hier laut Bauplan Abschnitt 7 entstehen (Text `page.parts.<seite>`, mit `|` getrennt). */
-export const PAGE_PARTS: Record<Exclude<Page, 'start'>, string[]> = Object.fromEntries(
-  PAGES.filter((p) => p !== 'start').map((p) => [p, tx(`page.parts.${p}`).split('|')]),
-) as Record<Exclude<Page, 'start'>, string[]>;
+export const PAGE_PARTS: Record<Exclude<Page, 'start' | 'dev'>, string[]> = Object.fromEntries(
+  PAGES.filter((p) => p !== 'start' && p !== 'dev').map((p) => [p, tx(`page.parts.${p}`).split('|')]),
+) as Record<Exclude<Page, 'start' | 'dev'>, string[]>;
 
 /** Flächen der Bento-Übersicht (Bauplan 4.0) in Dokumentreihenfolge; `span` = Spalten im 12er-Raster (leer = in der rechten Spalte). */
 export interface StartSlot { slot: string; title: string; span: string; part: string; task: string }

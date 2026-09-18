@@ -234,7 +234,7 @@ await page.close();
   const setBatt = (v) => m.page.evaluate((val) => { const el = document.querySelector('dreame-x60-panel'); const s = el.hass.states; el.hass = { ...el.hass, states: { ...s, 'sensor.heidi_battery_level': { ...s['sensor.heidi_battery_level'], state: String(val) } } }; }, v);
   let ev = await events();
   H.checkEqual('Diagnose: erste Meldung nach dem Laden, Pfad events/dreame_x60_anzeige', ev.map((e) => e[0]), ['events/dreame_x60_anzeige']);
-  H.checkEqual('Diagnose: Seite, Version und alle Werte als geändert', [ev[0][1].seite, ev[0][1].version, ev[0][1].geaendert], ['start', H.VERSION, ['kopf', 'schritt', 'hinweis', 'akku', 'fortschritt', 'zustand']]);
+  H.checkEqual('Diagnose: Seite, Version und alle Werte als geändert', [ev[0][1].seite, ev[0][1].version, ev[0][1].geaendert], ['start', H.VERSION, ['kopf', 'schritt', 'hinweis', 'akku', 'fortschritt', 'zustand', 'knoepfe', 'laden', 'modus_ha', 'saug_ha', 'wasser_ha', 'jetzt', 'reihenfolge']]);
   const kopf = await m.page.evaluate(() => document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-hero').shadowRoot.querySelector('.st.big').textContent.replace(/\s+/g, ' ').trim());
   H.check('Diagnose: gemeldeter Kopf steht im sichtbaren Kopf', kopf.includes(ev[0][1].werte.kopf) && ev[0][1].werte.kopf !== '', { sichtbar: kopf, gemeldet: ev[0][1].werte });
   const irrelevant = Object.keys(m.states).find((id) => !id.includes('heidi') && !id.startsWith('person.')) || 'sun.sun';

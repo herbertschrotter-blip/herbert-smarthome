@@ -14,7 +14,7 @@ import { t } from '../i18n/t';
 
 export const NAV_ELEMENT = 'dx-nav';
 /** Höchstens so viele Einträge in der Tab-Leiste (Mockup). */
-const TAB_MAX = 6;
+const TAB_MAX = 7; // sechs Seiten + „Dev“ für Admin-Benutzer (F.2b)
 
 export class DxNav extends LitElement {
   // Keine eigenen Tokens: die --dx-*-Variablen kommen von der Shell (auch :host(.light)).
@@ -56,7 +56,8 @@ export class DxNav extends LitElement {
       .tabbar { grid-area: tab; display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); position: sticky; bottom: 0; z-index: 20;
         background: color-mix(in srgb, var(--dx-bg-elevated) 92%, transparent); backdrop-filter: blur(10px); border-top: 1px solid var(--dx-border);
         padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); }
-      .tabbar button { display: grid; justify-items: center; align-content: center; gap: 3px; height: 50px; border-radius: var(--dx-radius-sm); color: var(--dx-text-muted); font-size: 10px; font-weight: 500; }
+      .tabbar button span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .tabbar button { min-width: 0; display: grid; justify-items: center; align-content: center; gap: 3px; height: 50px; border-radius: var(--dx-radius-sm); color: var(--dx-text-muted); font-size: 10px; font-weight: 500; }
       .tabbar button[aria-current] { color: var(--dx-accent); background: var(--dx-accent-soft); }
     }
     @media (hover: none) { .navlist button:hover { background: transparent; } }
@@ -65,22 +66,26 @@ export class DxNav extends LitElement {
   static override properties = {
     page: { type: String },
     prognoseAktiv: { type: Boolean, attribute: 'prognose-aktiv' },
+    admin: { type: Boolean },
     version: { type: String },
   };
 
   declare page: Page;
   declare prognoseAktiv: boolean;
+  /** Admin-Benutzer sehen zusätzlich „Dev“ (F.2b, PD-018) */
+  declare admin: boolean;
   declare version: string;
 
   constructor() {
     super();
     this.page = 'start';
     this.prognoseAktiv = false;
+    this.admin = false;
     this.version = '';
   }
 
   /** Sichtbare Einträge: Prognose nur bei aktiver Prognose. */
-  get entries(): NavEntry[] { return NAV.filter((e) => e.onlyWhen !== 'prognose' || this.prognoseAktiv); }
+  get entries(): NavEntry[] { return NAV.filter((e) => (e.onlyWhen !== 'prognose' || this.prognoseAktiv) && (e.onlyWhen !== 'admin' || this.admin)); }
 
   private pick(e: NavEntry): void {
     if (e.overlay === 'rooms') emit<Overlay>(this, EVENTS.openOverlay, { kind: 'rooms', mode: 'robot' });

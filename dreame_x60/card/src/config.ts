@@ -7,7 +7,7 @@ import { t } from './i18n/t';
 export type { RoomInfo } from './domain/rooms';
 
 /** Navigationseintrag (Bauplan 4.0): `page` = Ziel, `overlay` = öffnet ein Overlay statt zu navigieren; `tab` = auch in der Tab-Leiste. */
-export interface NavEntry { key: string; label: string; icon: string; page?: Page; overlay?: 'rooms'; onlyWhen?: 'prognose'; tab: boolean }
+export interface NavEntry { key: string; label: string; icon: string; page?: Page; overlay?: 'rooms'; onlyWhen?: 'prognose' | 'admin'; tab: boolean }
 
 /** Reihenfolge wie im Mockup bento.html; Prognose nur bei aktiver Prognose; „Räume“ nur in Seiten-/Symbolleiste. */
 export const NAV: readonly NavEntry[] = [
@@ -18,6 +18,7 @@ export const NAV: readonly NavEntry[] = [
   { key: 'protokoll', label: t('nav.protokoll'), icon: 'mdi:format-list-bulleted', page: 'protokoll', tab: true },
   { key: 'prognose', label: t('nav.prognose'), icon: 'mdi:chart-line', page: 'prognose', onlyWhen: 'prognose', tab: true },
   { key: 'einstellungen', label: t('nav.einstellungen'), icon: 'mdi:cog-outline', page: 'einstellungen', tab: true },
+  { key: 'dev', label: t('nav.dev'), icon: 'mdi:code-tags', page: 'dev', onlyWhen: 'admin', tab: true }, // F.2b: auch in der Tab-Leiste (Herbert, 18.09.)
 ];
 
 /** App-Szenen der Dreame-App (IDs wie v1); Name und Untertitel aus den Texten. */

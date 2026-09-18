@@ -7,6 +7,8 @@ export type Overlay =
   | { kind: 'rooms'; mode: 'robot' | 'plan'; n?: PlanNumber; back?: Overlay }
   | { kind: 'estimate'; n: PlanNumber; back?: Overlay }
   | { kind: 'zones'; type: 'zones' | 'no_mops' | 'walls' }
+  | { kind: 'report' } // „Fehler melden“ (F.2b, PD-018)
+  | { kind: 'ticket'; nr: string } // Ticket-Ansicht (F.2b)
   | { kind: 'confirm'; text: string; sub?: string; okLabel?: string; danger?: boolean; onOk: () => void; back?: Overlay };
 
 export type OverlayKind = Overlay['kind'];
