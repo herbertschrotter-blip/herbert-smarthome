@@ -101,6 +101,11 @@ Minute die Debug-Zeilen der Dreame-Integration aus dem HA-Log (Supervisor-Schnit
 configuration.yaml) nach `dreame_debug-<Tag>.log` (14 Tage). Auswertung am PC: `node tools\diag.js`
 (`--von HH:MM --bis HH:MM --debug`). Tests auf dem Pi: Dienst `shell_command.heidi_diag_test`. Abschalten:
 Automation „Heidi: Diagnose-Protokoll“ deaktivieren. Getrennt von `runlog.csv` (Lernwerte). Dateien nie ins Repo.
+**Auswertung und Tickets (F.2a):** `diag_regeln.py` prüft alle 10 min 23 Regeln (Anzeige gegen Roboter, Bedienung und Planer,
+Roboter und Technik); jeder Fund ab „Hinweis“ und jede Meldung aus der Karte wird ein Ticket `HT-NNNN` in
+`/config/prognose/diag/tickets.json` (`diag_tickets.py`; ein Ticket je Problem, Beweise gesichert, Status neu → angenommen →
+in_arbeit → geloest → geschlossen / verworfen). Einziger Schreibweg: Dienst `shell_command.heidi_ticket` (args = base64-JSON,
+`return_response`). Lesen am PC: `node tools\diag.js --tickets alle`. Nichts geschieht automatisch außer Anlegen und Zählen.
 
 ## Prognose (ha/prognose/presence.py)
 Automation protokolliert alle N Minuten (Helfer `heidi_prognose_intervall`) home/not_home je

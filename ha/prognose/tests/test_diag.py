@@ -34,6 +34,7 @@ class DiagTest(unittest.TestCase):
         diag.DIR = os.path.join(self.tmp.name, "diag")
         diag.STATE = os.path.join(diag.DIR, "debuglog_state.json")
         diag.CTX = os.path.join(diag.DIR, "ctx_cache.json")
+        diag.TICKETS, diag.LOCK = os.path.join(diag.DIR, "tickets.json"), os.path.join(diag.DIR, "tickets.lock")
 
     def tearDown(self):
         self.tmp.cleanup()

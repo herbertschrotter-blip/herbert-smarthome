@@ -7,6 +7,8 @@
 //   node tools\diag.js --von 09:25 --bis 09:40          Zeitleiste des Fensters (Zustände, Dienste, Automationen)
 //   node tools\diag.js --von 09:25 --bis 09:40 --debug  dazu die Rohmeldungen der Integration (ohne „Device update“)
 //   node tools\diag.js --ent vacuum.heidi               nur Zeilen, deren Entität/Dienst den Text enthält
+//   node tools\diag.js --tickets [alle]                 Tickets HT-NNNN (offene; „alle“ = auch gelöste) – nur lesen,
+//                                                       Status ändern nur über den Dienst shell_command.heidi_ticket
 //   node tools\diag.js --ordner <pfad>                  anderer Ordner (Standard H:\prognose\diag)
 const fs = require("node:fs");
 const path = require("node:path");
@@ -25,6 +27,17 @@ const START_FENSTER_S = 90; // so lange vor dem Wechsel auf „cleaning“ gilt 
 function readLines(file) {
   try { return fs.readFileSync(path.join(dir, file), "utf8").split(/\r?\n/).filter(Boolean); }
   catch { return []; }
+}
+
+if (flag("tickets")) {
+  let store = { tickets: [] };
+  try { store = JSON.parse(fs.readFileSync(path.join(dir, "tickets.json"), "utf8")); } catch { console.log("Noch keine Tickets."); process.exit(0); }
+  const alle = opt("tickets") === "alle";
+  const offen = ["neu", "angenommen", "in_arbeit"];
+  const list = store.tickets.filter((t) => alle || offen.includes(t.status)).sort((a, b) => (a.nr < b.nr ? 1 : -1));
+  for (const t of list) console.log(`${t.nr}  ${t.status.padEnd(11)} ${String(t.anzahl).padStart(4)}×  ${(t.regel || "Meldung").padEnd(7)} ${t.titel.slice(0, 110)}${t.dx ? "  [" + t.dx + "]" : ""}`);
+  console.log(`\n${list.length} Tickets${alle ? "" : " offen"} · bearbeiten in Claude Code: ticket HT-NNNN`);
+  process.exit(0);
 }
 
 const rows = readLines(`heidi_diag-${tag}.jsonl`).flatMap((l) => { try { return [JSON.parse(l)]; } catch { return []; } });

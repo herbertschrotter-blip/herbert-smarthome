@@ -383,7 +383,12 @@ shell_command:
   heidi_diag: "python3 /config/prognose/diag.py log {{ zeile }}"
   heidi_diag_debuglog: python3 /config/prognose/diag.py debuglog
   heidi_diag_status: python3 /config/prognose/diag.py status
-  heidi_diag_test: python3 -m unittest discover -s /config/prognose/tests -p test_diag.py
+  heidi_diag_test: python3 -m unittest discover -s /config/prognose/tests -p "test_diag*.py"
+  # F.2a (DX-069): Auszug für die Seite Dev, Auswertung (23 Regeln → Tickets), Tickets HT-NNNN. args = base64 eines JSON-Objekts;
+  # Antwort (JSON) kommt über return_response. Einziger Schreibweg der Tickets – Karte und Claude Code benutzen denselben Dienst.
+  heidi_diag_tail: "python3 /config/prognose/diag.py tail {{ args }}"
+  heidi_diag_auswertung: python3 /config/prognose/diag.py auswertung
+  heidi_ticket: "python3 /config/prognose/diag.py ticket {{ args }}"
 
 command_line:
   - sensor:

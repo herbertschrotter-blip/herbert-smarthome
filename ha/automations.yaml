@@ -299,6 +299,10 @@
     - trigger: event
       event_type: dreame_x60_anzeige
       id: anzeige
+    # F.2 (PD-018): „Fehler melden“ in der Karte → Zeile „meldung“ → diag.py legt das Ticket an
+    - trigger: event
+      event_type: dreame_x60_meldung
+      id: meldung
   conditions:
     # Die eigenen Diagnose-Automationen (heidi_diag…) bleiben draußen, sonst protokolliert sich das Protokoll selbst.
     - condition: template
@@ -314,7 +318,7 @@
           {{ d.domain not in ['shell_command', 'logger', 'system_log']
              and ('heidi' in s or 'stuehle_am_boden' in s or (ziel | select('in', geraet) | list | count) > 0)
              and 'heidi_diag' not in s }}
-        {% elif trigger.id == 'anzeige' %}
+        {% elif trigger.id in ['anzeige', 'meldung'] %}
           {{ true }}
         {% else %}
           {% set ent = d.entity_id | default('') %}
@@ -360,7 +364,7 @@
               {% set ns.d = dict(ns.d, **{(k | string): w}) %}
             {% endfor %}
             {{ dict(basis, dienst=d.domain ~ '.' ~ d.service, daten=ns.d) | to_json | base64_encode }}
-          {% elif trigger.id == 'anzeige' %}
+          {% elif trigger.id in ['anzeige', 'meldung'] %}
             {% set ns = namespace(d={}) %}
             {% for k, w in (d.werte | default({}, true)).items() %}
               {% set w = w if (w is none or w is boolean or w is number) else (w | string)[:300] %}
@@ -368,10 +372,29 @@
             {% endfor %}
             {{ dict(basis, seite=d.seite | default('') | string, version=d.version | default('') | string,
                     client=d.client | default('') | string, geaendert=(d.geaendert | default([]) | map('string') | list)[:10],
+                    puls=d.puls | default(false) | bool, ende=d.ende | default(false) | bool,
+                    text=(d.text | default('') | string)[:1000], stichworte=(d.stichworte | default([]) | map('string') | list)[:10],
                     werte=ns.d) | to_json | base64_encode }}
           {% else %}
             {{ dict(basis, ent=d.entity_id, name=d.name | default(''), ausloeser=d.source | default('')) | to_json | base64_encode }}
           {% endif %}
+
+- id: heidi_diagnose_auswertung
+  alias: "Heidi: Diagnose – Auswertung und Tickets"
+  description: >-
+    Lässt alle 10 Minuten die Auswertung über das Diagnose-Protokoll laufen (diag.py auswertung, 23 Regeln in
+    diag_regeln.py). Jede Auffälligkeit ab „Hinweis“ wird ein Ticket HT-NNNN in /config/prognose/diag/tickets.json –
+    ein Ticket je Problem, Wiederholungen zählen hoch. Statuswechsel macht nur Herbert (Karte) oder Claude Code
+    (Skill ticket), nichts automatisch. Bauplan F.2a (DX-069), 18.09.2026.
+  mode: single
+  max_exceeded: silent
+  trace:
+    stored_traces: 1
+  triggers:
+    - trigger: time_pattern
+      minutes: "/10"
+  actions:
+    - action: shell_command.heidi_diag_auswertung
 
 - id: heidi_diagnose_debuglog
   alias: "Heidi: Diagnose – Debuglog der Integration sichern"

@@ -8,9 +8,14 @@ Aufrufe (aus Home Assistant per shell_command):
                            (Automation heidi_diagnose_debuglog, jede Minute; HA-Log über die Supervisor-Schnittstelle,
                            eine Datei home-assistant.log gibt es unter HA OS nicht mehr)
   diag.py status           JSON mit Dateien, Größen und letzter Zeile (zum Prüfen)
+  diag.py tail <base64>    letzte Zeilen für die Seite Dev: {"n": 200, "vor": "<ts>"} → {"zeilen": […], "aelter": bool}
+  diag.py auswertung       Regeln (diag_regeln.py) über gestern + heute, Funde von heute → Tickets (diag_tickets.py);
+                           Automation heidi_diagnose_auswertung alle 10 min; Ausgabe JSON (Funde, Tickets, Zähler, Starts)
+  diag.py ticket <base64>  einziger Schreibweg der Tickets: {"cmd": liste|zeige|text|status|notiz|verwerfen, …}
 
 Dateien: /config/prognose/diag/heidi_diag-JJJJ-MM-TT.jsonl  (Schicht 1: Zustände, Dienste, Automationen, Skripte)
          /config/prognose/diag/dreame_debug-JJJJ-MM-TT.log   (Schicht 2: Rohmeldungen der Integration)
+         /config/prognose/diag/tickets.json                 (Tickets HT-NNNN, werden nie automatisch gelöscht)
 Beide mit Ortszeit und Millisekunden → per Zeitstempel zusammenführbar (tools/diag.js). Tagesdateien älter als
 KEEP_DAYS werden gelöscht. Nie ins Repo. runlog.csv (Lernwerte) bleibt davon getrennt.
 
@@ -20,19 +25,29 @@ ctx, user_id, parent_id; dazu je Art: ent, alt, neu, attr {name: [alt, neu]} · 
 Schicht 3 (PD-017): art anzeige = die Karte meldet, was sie zeigt (Ereignis dreame_x60_anzeige): seite, version,
 client (Browserfenster), geaendert [Namen], werte {kopf, schritt, hinweis, akku, fortschritt, zustand}.
 """
-import base64, json, os, re, sys, urllib.request
+import base64, json, os, re, sys, time, urllib.request
 from datetime import datetime, timedelta
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import diag_regeln  # noqa: E402
+import diag_tickets  # noqa: E402
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 DIR = os.path.join(BASE, "diag")
 STATE = os.path.join(DIR, "debuglog_state.json")
 CTX = os.path.join(DIR, "ctx_cache.json")
+TICKETS = os.path.join(DIR, "tickets.json")
+LOCK = os.path.join(DIR, "tickets.lock")
+PROJEKT = "herbert-smarthome · Branch dreame_x60 · Roboter vacuum.heidi"
+BEWEIS_S = 60         # Auszug der Zeitleiste: so viele Sekunden vor und nach dem Fund
+BEWEIS_ZEILEN = 60    # höchstens so viele Zeilen je Auszug
+TAIL_MAX = 500
 CTX_KEEP = 300       # so viele Automations-/Skriptläufe merkt sich die Zuordnung Kontext → Name
 KEEP_DAYS = {"heidi_diag": 30, "dreame_debug": 14}  # Aufbewahrung der Tagesdateien (Debuglog ≈ 2 MB je Tag im Leerlauf)
 LOG_LINES = 3000     # Fenster je Abruf des HA-Logs (jede Minute); reicht es nicht, steht eine Lücken-Marke in der Datei
 LOG_FILTER = "dreame_vacuum"
 DAY_FILE = re.compile(r"^(heidi_diag|dreame_debug)-(\d{4}-\d{2}-\d{2})\.(jsonl|log)$")
-LOG_HEAD = re.compile(r"^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}\.\d{3}) (\w+) \(([^)]*)\) \[([^\]]+)\] ")
+LOG_HEAD = re.compile(r"^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}\.\d{3}) (\w+) \(((?:[^()]|\([^)]*\))*)\) \[([^\]]+)\] ")  # Thread-Namen mit Klammern: (Thread-5 (_client_task))
 ANSI = re.compile(r"\x1b\[[0-9;]*m")
 SIGNED = re.compile(r"\?Expires=[^\s'\"]+")  # signierte Cloud-Adressen (Schlüssel-ID, Signatur) gehören nicht in die Datei
 
@@ -75,8 +90,188 @@ def cmd_log(args):
     if classify(d, cache):
         with open(CTX, "w", encoding="utf-8") as f:
             json.dump(cache, f, ensure_ascii=False)
+    if d.get("art") == "meldung":  # „Fehler melden“ in der Karte → Ticket; die Nummer steht dann auch in der Protokollzeile
+        try:
+            with tickets() as store:
+                werte = d.get("werte") or {}
+                meta = {"seite": d.get("seite"), "version": d.get("version"), "client": d.get("client")}
+                meta.update({"zeigt_" + k: v for k, v in werte.items()})
+                t = diag_tickets.melden(store, d.get("text"), d["ts"], wer=d.get("wer") or "", stichworte=d.get("stichworte"),
+                                        meta=meta, beweise=beweise({"von": d["ts"], "bis": d["ts"], "regel": "B"}))
+            d["ticket"] = t["nr"]
+        except ValueError as e:
+            d["ticket_fehler"] = str(e)
     with open(day_file("heidi_diag", str(d["ts"])[:10], "jsonl"), "a", encoding="utf-8") as f:
         f.write(json.dumps(d, ensure_ascii=False, separators=(",", ":")) + "\n")
+
+
+class tickets:
+    """Tickets laden, ändern, speichern – unter einer Sperrdatei, weil Karte, Auswertung und Claude Code gleichzeitig kommen können."""
+
+    def __enter__(self):
+        os.makedirs(DIR, exist_ok=True)
+        for _ in range(100):
+            try:
+                self.fd = os.open(LOCK, os.O_CREAT | os.O_EXCL | os.O_WRONLY); break
+            except FileExistsError:
+                try:
+                    if time.time() - os.path.getmtime(LOCK) > 30:  # liegengebliebene Sperre
+                        os.remove(LOCK)
+                except OSError:
+                    pass
+                time.sleep(0.05)
+        else:
+            raise RuntimeError("Tickets sind gesperrt")
+        try:
+            with open(TICKETS, encoding="utf-8") as f:
+                self.store = json.load(f)
+        except FileNotFoundError:
+            self.store = diag_tickets.leer()
+        return self.store
+
+    def __exit__(self, typ, *_):
+        try:
+            if typ is None:
+                tmp = TICKETS + ".tmp"
+                with open(tmp, "w", encoding="utf-8") as f:
+                    json.dump(self.store, f, ensure_ascii=False, indent=1)
+                os.replace(tmp, TICKETS)
+        finally:
+            os.close(self.fd); os.remove(LOCK)
+
+
+def read_day(day):
+    """(Protokollzeilen, Debuglog-Zeilen) eines Tages; fehlende Dateien = leer."""
+    rows, dbg = [], []
+    try:
+        with open(os.path.join(DIR, "heidi_diag-%s.jsonl" % day), encoding="utf-8") as f:
+            for line in f:
+                try:
+                    rows.append(json.loads(line))
+                except ValueError:
+                    pass
+    except FileNotFoundError:
+        pass
+    try:
+        with open(os.path.join(DIR, "dreame_debug-%s.log" % day), encoding="utf-8") as f:
+            dbg = f.read().splitlines()
+    except FileNotFoundError:
+        pass
+    return rows, dbg
+
+
+def zeile_text(r):
+    """Eine Protokollzeile lesbar (wie tools/diag.js)."""
+    q = r.get("quelle", "")
+    wer = "Benutzer %s" % (r.get("wer") or "") if q == "benutzer" else ("Automation %s" % r.get("durch", "")).strip() if q == "automation" else q
+    art = r.get("art")
+    if art == "zustand":
+        attr = "; ".join("%s: %s → %s" % (k, v[0], v[1]) for k, v in (r.get("attr") or {}).items())
+        tx = "%s  %s%s" % (r.get("ent"), "" if r.get("alt") == r.get("neu") else "%s → %s" % (r.get("alt"), r.get("neu")), "  {%s}" % attr if attr else "")
+    elif art == "dienst":
+        tx = "Dienst %s %s" % (r.get("dienst"), json.dumps(r.get("daten") or {}, ensure_ascii=False))
+    elif art == "anzeige":
+        w = r.get("werte") or {}
+        tx = "Karte [%s · %s] zeigt %s" % (r.get("seite"), r.get("client"), "; ".join("%s: %s" % (k, w.get(k)) for k in (r.get("geaendert") or [])))
+    elif art == "meldung":
+        tx = "MELDUNG %s „%s“" % (r.get("ticket", ""), r.get("text", ""))
+    else:
+        tx = "%s %s%s" % (str(art).upper(), r.get("name") or r.get("ent"), " (%s)" % r["ausloeser"] if r.get("ausloeser") else "")
+    return ("%s  %-26s  %s" % (str(r.get("ts"))[11:23], wer[:26], tx))[:400]
+
+
+def beweise(fund, rows=None, dbg=None):
+    """Gesicherter Auszug zu einem Fund: Zeitleiste ± BEWEIS_S, Rohmeldungen im selben Fenster, „Wo suchen“."""
+    day = str(fund["von"])[:10]
+    if rows is None:
+        rows, dbg = read_day(day)
+    if (diag_regeln.zeit(fund["bis"]) - diag_regeln.zeit(fund["von"])).total_seconds() > 10 * BEWEIS_S:
+        fund = dict(fund, von=fund["bis"])  # gezählte Funde über Stunden (T4): Auszug um das letzte Vorkommen
+        day = str(fund["von"])[:10]
+    von = (diag_regeln.zeit(fund["von"]) - timedelta(seconds=BEWEIS_S)).isoformat(timespec="milliseconds")
+    bis = (diag_regeln.zeit(fund["bis"]) + timedelta(seconds=BEWEIS_S)).isoformat(timespec="milliseconds")
+    zl = [zeile_text(r) for r in rows if von <= str(r.get("ts")) <= bis]
+    if len(zl) > BEWEIS_ZEILEN:
+        zl = zl[:BEWEIS_ZEILEN // 2] + ["… %d Zeilen ausgelassen …" % (len(zl) - BEWEIS_ZEILEN)] + zl[-(BEWEIS_ZEILEN // 2):]
+    dl, ts = [], ""
+    for line in dbg or []:
+        m = LOG_HEAD.match(line)
+        if m:
+            ts = m.group(1) + "T" + m.group(2)
+        if ts and von <= ts <= bis and not re.search(r"Device update: \d+$", line):
+            dl.append(line[:300])
+    return {"fenster": "%s – %s" % (von[11:19], bis[11:19]), "zeitleiste": zl, "debug": dl[:BEWEIS_ZEILEN],
+            "suchen": diag_regeln.SUCHEN.get(str(fund.get("regel", "B"))[:1], [])
+            + ["Zeitfenster nachlesen: node tools\\diag.js --tag %s --von %s --bis %s --debug" % (day, von[11:16], bis[11:16])]}
+
+
+def cmd_tail(args):
+    try:
+        q = json.loads(base64.b64decode(args[0]).decode("utf-8")) if args else {}
+    except Exception:
+        q = {}
+    n, vor = max(1, min(int(q.get("n", 200)), TAIL_MAX)), str(q.get("vor") or "9999")
+    out, day = [], datetime.now()
+    for _ in range(KEEP_DAYS["heidi_diag"]):
+        rows, _dbg = read_day(day.strftime("%Y-%m-%d"))
+        out = [r for r in rows if str(r.get("ts")) < vor] + out
+        if len(out) >= n + 1:
+            break
+        day -= timedelta(days=1)
+    print(json.dumps({"zeilen": out[-n:], "aelter": len(out) > n}, ensure_ascii=False))
+
+
+def starts(rows):
+    """Starts des Tages mit Quelle (gleiche Regel wie tools/diag.js und T1)."""
+    out = []
+    for i, r in enumerate(rows):
+        if r.get("art") != "zustand" or not str(r.get("ent", "")).startswith("vacuum.") or r.get("neu") != "cleaning" or r.get("alt") in diag_regeln.RUN:
+            continue
+        t = diag_regeln.zeit(r["ts"])
+        ruf = next((c for c in reversed(rows[:i]) if c.get("art") == "dienst" and diag_regeln.START_DIENSTE.match(c.get("dienst", ""))
+                    and (t - diag_regeln.zeit(c["ts"])).total_seconds() <= diag_regeln.START_FENSTER_S), None)
+        q = r if r.get("quelle") != "extern" or not ruf else ruf
+        out.append({"ts": r["ts"], "quelle": q.get("quelle"), "wer": q.get("wer") or q.get("durch") or "", "dienst": (ruf or {}).get("dienst", "")})
+    return out
+
+
+def cmd_auswertung(args):
+    now = datetime.now()
+    heute, gestern = now.strftime("%Y-%m-%d"), (now - timedelta(days=1)).strftime("%Y-%m-%d")
+    rows_g, _ = read_day(gestern)
+    rows_h, dbg_h = read_day(heute)
+    funde = diag_regeln.auswerten(rows_g + rows_h, dbg_h, jetzt=now, ab=heute)
+    with tickets() as store:
+        res = diag_tickets.aufnehmen(store, funde, heute, now.strftime("%Y-%m-%dT%H:%M:%S"), lambda f: beweise(f, rows_g + rows_h, dbg_h))
+        zahl = diag_tickets.zaehler(store)
+    print(json.dumps({"funde": len(funde), "info": [f for f in funde if f["schwere"] == "info"][-10:], "tickets": res, "zaehler": zahl,
+                      "starts": starts(rows_h), "zeilen_heute": len(rows_h)}, ensure_ascii=False))
+
+
+def cmd_ticket(args):
+    try:
+        q = json.loads(base64.b64decode(args[0]).decode("utf-8")) if args else {}
+        cmd, jetzt = q.get("cmd", "liste"), datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+        with tickets() as store:
+            if cmd == "liste":
+                out = {"tickets": diag_tickets.liste(store, q.get("welche", "offen")), "zaehler": diag_tickets.zaehler(store)}
+            elif cmd in ("zeige", "text"):
+                t = diag_tickets.finde(store, q.get("nr"))
+                if t is None:
+                    raise ValueError("Ticket %s gibt es nicht" % q.get("nr"))
+                out = {"ticket": t, "text": diag_tickets.als_text(t, PROJEKT)}
+            elif cmd == "status":
+                out = {"ticket": diag_tickets.setze_status(store, q.get("nr"), q.get("status"), jetzt, q.get("wer", ""), q.get("dx", ""),
+                                                           q.get("commit", ""), q.get("version", ""), q.get("grund", ""))}
+            elif cmd == "verwerfen":
+                out = {"ticket": diag_tickets.setze_status(store, q.get("nr"), "verworfen", jetzt, q.get("wer", ""), grund=q.get("grund", ""))}
+            elif cmd == "notiz":
+                out = {"ticket": diag_tickets.notiz(store, q.get("nr"), q.get("text"), jetzt, q.get("wer", ""))}
+            else:
+                raise ValueError("Befehl „%s“ gibt es nicht" % cmd)
+        print(json.dumps(dict(out, ok=True), ensure_ascii=False))
+    except (ValueError, RuntimeError) as e:
+        print(json.dumps({"ok": False, "fehler": str(e)}, ensure_ascii=False))
 
 
 def classify(d, cache):
@@ -182,7 +377,7 @@ def cmd_status(args):
 
 
 if __name__ == "__main__":
-    cmds = {"log": cmd_log, "debuglog": cmd_debuglog, "status": cmd_status}
+    cmds = {"log": cmd_log, "debuglog": cmd_debuglog, "status": cmd_status, "tail": cmd_tail, "auswertung": cmd_auswertung, "ticket": cmd_ticket}
     if len(sys.argv) < 2 or sys.argv[1] not in cmds:
-        print("Aufruf: diag.py log <base64> | debuglog | status"); sys.exit(1)
+        print("Aufruf: diag.py log <base64> | debuglog | status | tail <base64> | auswertung | ticket <base64>"); sys.exit(1)
     cmds[sys.argv[1]](sys.argv[2:])
