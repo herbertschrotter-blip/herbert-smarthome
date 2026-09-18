@@ -73,6 +73,7 @@ h1, h2 { margin: 0; letter-spacing: -.02em; }
 .report:hover { background: rgba(242,181,68,.25); }
 .report svg { width: 15px; height: 15px; }
 .tabbar { display: none; }
+.ph { border: 1px dashed var(--dx-border-strong); border-radius: var(--dx-radius-lg); min-height: 380px; display: grid; place-items: center; color: var(--faint); font-size: 13px; text-align: center; padding: var(--dx-space-5); }
 
 .bento { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--dx-space-4); grid-auto-rows: min-content; }
 .b { background: var(--s1); border: 1px solid var(--line); border-radius: var(--dx-radius-lg); padding: var(--dx-space-4); min-width: 0; display: flex; flex-direction: column; gap: var(--dx-space-3); }
@@ -146,8 +147,9 @@ h1, h2 { margin: 0; letter-spacing: -.02em; }
   .side { display: none; }
   .content { padding: var(--dx-space-4); }
   .topbar h1 { font-size: 22px; }
-  .tabbar { display: grid; grid-template-columns: repeat(5, 1fr); border-top: 1px solid var(--line); background: var(--dx-bg-elevated); padding: 6px 4px 14px; }
-  .tabbar button { display: grid; justify-items: center; gap: 2px; font-size: 10px; color: var(--muted); min-height: 44px; }
+  .topbar > div:nth-child(2) { order: 3; flex-basis: 100%; } /* Zeile 1: Zurück … Fehler melden; Zeile 2: Titel */
+  .tabbar { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); border-top: 1px solid var(--line); background: var(--dx-bg-elevated); padding: 6px 4px 14px; }
+  .tabbar button { display: grid; justify-items: center; gap: 2px; font-size: 9.5px; color: var(--muted); min-height: 44px; }
   .tabbar button.on { color: var(--accent); }
   .c4 { grid-column: span 12; }
   .ev { grid-template-columns: 62px minmax(0, 1fr); row-gap: 2px; }
@@ -165,6 +167,7 @@ h1, h2 { margin: 0; letter-spacing: -.02em; }
     <button class="on" data-s="dev">Seite Dev</button>
     <button data-s="report">„Fehler melden“ offen</button>
     <button data-s="sent">Nach dem Senden</button>
+    <button data-s="other">Knopf auf jeder Seite (Beispiel Übersicht)</button>
     <button data-s="guest">Benutzer ohne Admin-Recht</button>
   </span>
   <span class="note">Zeile antippen = Einzelheiten · Filter und „Live“ sind bedienbar · Tokens = tokens.ts</span>
@@ -173,7 +176,7 @@ h1, h2 { margin: 0; letter-spacing: -.02em; }
 <div class="legend">
   <b>Was neu ist:</b> (1) Seite <b>Dev</b> – siebte Seite der Karte, nur für Admin-Benutzer: Zustand des Protokolls, Starts des Tages mit Auslöser, deine Meldungen und die <b>Zeitleiste live</b>
   (Roboter, Dienste mit Auslöser, Automationen und – grau – was die Karte angezeigt hat). (2) Knopf <b>„Fehler melden“</b> in der Kopfzeile <b>jeder</b> Seite: kurzer Text, Senden → gelbe Marke im Protokoll
-  samt Schnappschuss von Anzeige und Roboter-Zustand. Am Handy bleibt die Tab-Leiste unverändert (fünf Plätze); Dev erreichst du dort über <b>Einstellungen → Dev</b>.
+  samt Schnappschuss von Anzeige und Roboter-Zustand. Er steht <b>links neben der Uhr</b>; am Handy ist die Uhr ausgeblendet (wie heute), dort steht der Knopf als Symbol an ihrer Stelle. <b>Dev ist auch am Handy in der Tab-Leiste</b> (sechster Platz, nur für Admin – alle anderen sehen weiter fünf). <i>Änderung nach Herberts Rückmeldung 18.09.</i>
 </div>
 
 <div class="stage">
@@ -186,7 +189,7 @@ h1, h2 { margin: 0; letter-spacing: -.02em; }
     <aside class="side">
       <div class="brand">Heidi</div>
       <nav class="navlist">
-        <button><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Übersicht</button>
+        <button class="startnav"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Übersicht</button>
         <button><svg viewBox="0 0 24 24"><path d="M9 4l-6 2v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg>Karte</button>
         <button><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Planer</button>
         <button><svg viewBox="0 0 24 24"><path d="M12 7v5l3 2"/><circle cx="12" cy="12" r="9"/></svg>Verlauf</button>
@@ -260,14 +263,16 @@ h1, h2 { margin: 0; letter-spacing: -.02em; }
           <div class="bar"><button class="btn sm">Ältere laden</button><span class="hint">Die Karte holt je Abruf 200 Zeilen (Dienst mit Antwort an diag.py) – keine Datei im öffentlichen Ordner.</span></div>
         </section>
       </div>
+      <div class="ph" data-ph hidden>Inhalt der Seite unverändert –<br>neu ist nur der Knopf „Fehler melden“ links neben der Uhr (auf jeder Seite gleich).</div>
     </main>
 
     <nav class="tabbar">
-      <button><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Übersicht</button>
+      <button class="starttab"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Übersicht</button>
       <button><svg viewBox="0 0 24 24"><path d="M9 4l-6 2v14l6-2 6 2 6-2V4l-6 2z"/></svg>Karte</button>
       <button><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18"/></svg>Planer</button>
       <button><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Verlauf</button>
-      <button class="on"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/></svg>Einstell.</button>
+      <button><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/></svg>Einstell.</button>
+      <button class="on devtab"><svg viewBox="0 0 24 24"><path d="M8 6l-6 6 6 6M16 6l6 6-6 6M14 4l-4 16"/></svg>Dev</button>
     </nav>
   </div>
 
@@ -289,19 +294,20 @@ h1, h2 { margin: 0; letter-spacing: -.02em; }
 const frames = [document.getElementById('fd'), document.getElementById('fp')];
 const tpl = document.getElementById('tpl');
 frames.forEach((f) => f.appendChild(tpl.content.cloneNode(true)));
-frames[1].querySelector('.backtxt').textContent = 'Einstellungen'; // Handy: Dev liegt unter Einstellungen
 
 function setState(s) {
   document.querySelectorAll('#state button').forEach((b) => b.classList.toggle('on', b.dataset.s === s));
   frames.forEach((f) => {
-    const guest = s === 'guest';
+    const guest = s === 'guest', other = s === 'other', start = guest || other;
     f.querySelector('[data-scrim]').hidden = s !== 'report';
     f.querySelector('.report').hidden = guest;
-    f.querySelector('.devnav').hidden = guest;
-    f.querySelector('.bento').hidden = guest;
-    f.querySelector('.topbar h1').textContent = guest ? 'Übersicht' : 'Dev';
-    f.querySelector('.topbar .sub').textContent = guest ? 'Ohne Admin-Recht: kein Tab „Dev“, kein Knopf „Fehler melden“ – die Karte sonst unverändert.' : 'Diagnose-Protokoll – was war wann, und wer hat es ausgelöst';
-    f.querySelector('.back').hidden = guest;
+    f.querySelector('.devnav').hidden = guest; f.querySelector('.devtab').hidden = guest;
+    f.querySelector('.devnav').classList.toggle('on', !start); f.querySelector('.devtab').classList.toggle('on', !start);
+    f.querySelector('.startnav').classList.toggle('on', start); f.querySelector('.starttab').classList.toggle('on', start);
+    f.querySelector('.bento').hidden = start; f.querySelector('[data-ph]').hidden = !other;
+    f.querySelector('.topbar h1').textContent = guest ? 'Übersicht' : other ? 'Guten Abend, Herbert' : 'Dev';
+    f.querySelector('.topbar .sub').textContent = guest ? 'Ohne Admin-Recht: kein Tab „Dev“, kein Knopf „Fehler melden“ – die Karte sonst unverändert.' : other ? 'Heidi ist bereit' : 'Diagnose-Protokoll – was war wann, und wer hat es ausgelöst';
+    f.querySelector('.back').hidden = start;
     const sent = f.querySelector('[data-sent]');
     if (s === 'sent' && !sent) addReport(f, 'Kopf zeigt Bereit, Heidi fährt aber');
     if (s !== 'sent' && sent) { sent.remove(); f.querySelector('[data-sentrow]')?.remove(); f.querySelector('#rcount').textContent = '1'; }
