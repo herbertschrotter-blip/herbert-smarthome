@@ -119,6 +119,11 @@ h1, h2 { margin: 0; letter-spacing: -.02em; }
 .btn.xs { height: 32px; padding: 0 10px; font-size: 12px; border-radius: var(--dx-radius-sm); white-space: nowrap; }
 .btn.xs svg { width: 14px; height: 14px; }
 .lbl .btn.xs { margin-left: auto; text-transform: none; letter-spacing: 0; }
+.rules { border-top: 1px solid var(--line); padding-top: 10px; font-size: 12px; color: var(--muted); }
+.rules summary { cursor: pointer; font-weight: 600; color: var(--text); min-height: 32px; display: flex; align-items: center; }
+.rules .rgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 8px; }
+.rules b { color: var(--text); } .rules .m { color: var(--faint); } .rules ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 4px; line-height: 1.4; }
+.rules .chip { height: 20px; font-size: 10px; padding: 0 6px; }
 .dlg.wide { width: min(760px, calc(100% - 32px)); }
 .prompt { font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; max-height: 430px; overflow: auto; background: var(--bg); border: 1px solid var(--line); border-radius: var(--dx-radius-md); padding: 12px; color: var(--text); margin: 0; }
 .prompt .h { color: var(--accent); font-weight: 700; } .prompt .m { color: var(--muted); }
@@ -261,7 +266,18 @@ h1, h2 { margin: 0; letter-spacing: -.02em; }
             <div class="row link find" data-jump="20:41:25"><span class="sev bad"></span><div><div class="t">Integration meldet Fehler: Map render Failed – 'Segment' object has no attribute 'area'</div><div class="s wrap">37× heute, zuletzt 20:39:12 · Quelle Debuglog dreame_vacuum.dreame.map</div></div><button class="btn xs" data-act="prompt">Prompt für Claude</button></div>
             <div class="row link find" data-jump="20:39:07"><span class="sev info"></span><div><div class="t">Start ohne HA-Auslöser (extern) – „Angepasste Reinigung“ wurde dabei ausgeschaltet</div><div class="s wrap">20:39:07 · switch.heidi_customized_cleaning on → off · wird nach dem Lauf automatisch wieder eingeschaltet</div></div><button class="btn xs" data-act="prompt">Prompt für Claude</button></div>
           </div>
-          <div class="hint">Regeln der Auswertung (diag.py): Anzeige ≠ Roboter länger als 10 s · Werte-Knöpfe (Modus, Saugstufe, Wasser) ≠ gültige Werte des Laufs · angekündigte Reihenfolge ≠ gefahrene Räume · Dienstaufruf ohne Zustandswechsel in 30 s · Fehler/Traceback der Integration · Roboter-Entität länger als 10 min nicht verfügbar · Start ohne HA-Auslöser · Warnung oder Fehler des Roboters · Lücke im Protokoll.</div>
+          <details class="rules">
+            <summary>Alle Regeln der Auswertung (23) – was automatisch bemerkt wird</summary>
+            <div class="rgrid">
+              <div><b>Anzeige gegen Roboter</b> <span class="m">(die Karte meldet, was sie zeigt)</span>
+                <ul><li>Kopf / Arbeitsschritt ≠ Roboter länger als 10 s</li><li>Werte-Knöpfe Modus, Saugstufe, Wasser ≠ gültige Werte des Laufs</li><li>angekündigte Reihenfolge ≠ gefahrene Räume</li><li>Raum-Chip / „Jetzt“ ≠ aktueller Raum</li><li>Knöpfe passen nicht zum Zustand (z. B. „Start“, obwohl Heidi fährt)</li><li>Akku oder Lade-Blitz ≠ Roboter</li><li>Fortschritt außerhalb eines Laufs</li><li>Station: Karte „Bereit“, während gewaschen, getrocknet oder abgesaugt wird <span class="chip dim">ab Modul C</span></li><li>Warnung des Roboters (Tank, Beutel …) ohne Chip</li><li>Karte bekommt keine Daten mehr (Roboter ändert sich, Anzeige bleibt stehen)</li></ul></div>
+              <div><b>Bedienung und Planer</b> <span class="m">(nur aus dem Protokoll)</span>
+                <ul><li>Knopf / Dienstaufruf ohne Wirkung in 30 s</li><li>gewählte Räume ≠ Auftrag des Roboters</li><li>Planer sagt „startet“, aber kein Start</li><li>Lauf fertig, „heute erledigt“ nicht gesetzt</li><li>Start zur falschen Uhrzeit oder obwohl eine „stört“-Person zu Hause ist</li><li>Raum-Werte nach dem Lauf nicht wiederhergestellt</li><li>„Angepasste Reinigung“ bleibt nach dem Lauf aus</li><li>geschätzte Dauer weicht mehr als 30 % ab <span class="chip dim">ab 4.8</span></li></ul></div>
+              <div><b>Roboter und Technik</b>
+                <ul><li>Start ohne HA-Auslöser (App, Knopf, App-Zeitplan) – Info</li><li>Warnung oder Fehler des Roboters</li><li>Roboter oder Entität länger als 10 min nicht erreichbar</li><li>Fehler / Traceback der Dreame-Integration</li><li>Lücke im Protokoll</li></ul>
+                <div class="m" style="margin-top:8px">Nicht automatisch prüfbar: was die Dreame-App selbst anzeigt – dafür ist der Knopf „Fehler melden“.</div></div>
+            </div>
+          </details>
         </section>
 
         <section class="b c12">
