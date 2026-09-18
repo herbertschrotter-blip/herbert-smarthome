@@ -61,7 +61,7 @@ Für den Skill tracker (projektneutral): Projektkennung statt Memory-Eintrag.
 - Projekt: heidi
 - Skill-Repo (OneDrive-relativ): Dokumente\02 Arbeit\05 Vorlagen - Scripte\00_claude-skills-bpm (OneDrive liegt auf diesem PC unter `D:\OneDrive` – Benutzer-Umgebungsvariable `OneDrive`)
 - Projekt-Config: projects/heidi/ (Liste, Status-Werte, Nummernschema, Custom Fields wie BPM, Chat-Anker)
-- ClickUp: Space Smart Home 1200660000001609, Liste dreame_x60 – Bauplan 1200660000004100
+- ClickUp: Space Smart Home 1200660000001609, Liste dreame_x60 – Bauplan 1200660000004100 (Bauschritte, DX-NNN); Liste dreame_x60 – Tickets 1200660000004800 (Fehler-Tickets, HT-NNNN, siehe Ticket-Profil)
 - Status-Übergänge: tracker start → in development; tracker done → testing (Abnahme auf shipped macht Herbert)
 - Nummernschema: `DX-NNN | KÜRZEL | Kurztitel` (Kürzel KARTE/BACKEND/DOKU/TOOLS wie Commit-Profil); Kurztitel beginnt mit der Bauplan-Nummer (z. B. 4.3e) oder „Post-2.0:“; Phasen sind Parents ohne Nummer. **Nächste freie Nummer: DX-073** (nach jedem tracker neu +1)
 
@@ -71,7 +71,7 @@ Für den Skill ticket (projektneutral). Tickets = Meldungen aus der Karte („Fe
 - Befehle (einziger Schreibweg, Dienst `shell_command.heidi_ticket`): `.\tools\ticket.ps1 liste [alle]` · `zeige <nr>` (Ticket als Text mit gesicherten Beweisen) · `status <nr> <status> [-Dx DX-NNN] [-Commit <hash>] [-Version <ver>]` · `notiz <nr> "<text>"` · `verwerfen <nr> "<grund>"` · `auswertung` (sonst alle 10 min)
 - Status: `neu → angenommen → in_arbeit → geloest → geschlossen`, daneben `verworfen`; ein gelöstes Ticket öffnet sich selbst neu, wenn der Fund wieder auftritt
 - Pflichtangaben: angenommen → `-Dx`; geloest → `-Commit` (+ `-Version`); verworfen → Grund; geschlossen erst nach Herberts Prüfung
-- Aufgaben: über tracker (`DX-NNN | KÜRZEL | HT-NNNN: Kurztitel`), Ticket-Text in die Beschreibung, Akzeptanz = Fund tritt nicht mehr auf + neuer Test; Commit-Kurztitel beginnt mit der Ticketnummer
+- Aufgaben (Entscheidung Herbert 19.09.2026 – Bugs fluten die DX-Liste nicht): über tracker in die eigene ClickUp-Liste **dreame_x60 – Tickets** (`1200660000004800`), Titel `HT-NNNN | KÜRZEL | Kurztitel` – die Ticketnummer ist die Aufgabennummer, **kein DX-Zähler**; Kennzeichnung Tag `bug` (Aufgabentyp „Bug“, sobald es ihn im Workspace gibt); `-Dx` am Ticket = ClickUp-Task-ID; Status wie Bauplan-Liste (start → in development, done → testing); die Zusatzfelder der Bauplan-Liste fehlen in dieser Liste noch – bis dahin Commit/Version als Kommentar; Ticket-Text in die Beschreibung, Akzeptanz = Fund tritt nicht mehr auf + neuer Test; Commit-Kurztitel beginnt mit der Ticketnummer
 - Beweise nachlesen: `node tools\diag.js --tag <Tag> --von <HH:MM> --bis <HH:MM> --debug`; Seite „Dev“ der Karte (nur Admin)
 - Regeln der Auswertung: `ha/prognose/diag_regeln.py` (23 Regeln, Schwellen als Konstanten), Tests `ha/prognose/tests/test_diag_regeln.py`; liegt die Ursache in einer Regel, wird die Regel mit Gegenprobe korrigiert
 - Doku: Befund und Entscheidung → `docs/dreame_x60/BAUPLAN.md` Abschnitt 10 (Aufgabe = Ticketnummer), Stand → `docs/HANDOFF.md` 3e/4

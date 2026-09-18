@@ -16,7 +16,7 @@ export interface AnzeigeSnapshot {
   hinweis: string;
   /** Akku in % */
   akku: number;
-  /** Fortschritt in % vom Roboter; null außerhalb eines Laufs */
+  /** Fortschritt in % vom Roboter, wie ihn der Balken zeigt; null, solange der Roboter nicht unterwegs ist (cleaning/paused, nicht angedockt) */
   fortschritt: number | null;
   /** Zustand von vacuum.* (bestimmt Knöpfe und Statuspunkt) */
   zustand: string;
@@ -58,7 +58,7 @@ export function anzeigeSnapshot(r: AnzeigeInput, roomValues: (id: number) => Roo
     schritt: r.hero.sub,
     hinweis: r.hero.errorChip?.text ?? '',
     akku: r.battery,
-    fortschritt: r.progress === null ? null : Math.round(r.progress),
+    fortschritt: unterwegs && r.progress !== null ? Math.round(r.progress) : null, // nur melden, was zu sehen ist: der Balken steht nur im Lauf (HT-0005)
     zustand: r.vac,
     knoepfe: r.hero.buttons.map((b) => b.service),
     laden: r.charging,

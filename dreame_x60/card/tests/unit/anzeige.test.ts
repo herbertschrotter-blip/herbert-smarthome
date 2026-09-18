@@ -23,6 +23,12 @@ test('anzeigeSnapshot: Kernwerte, Fortschritt gerundet, Chip-Kurztext, Knöpfe u
   assert.deepEqual([s.kopf, s.schritt, s.hinweis, s.akku, s.fortschritt, s.zustand, s.knoepfe, s.laden], ['Tägliches Saugen', 'Saugt Küche', '', 87, 37, 'cleaning', ['pause', 'stop', 'return_to_base'], false]);
   const d = anzeigeSnapshot({ ...BASE, vac: 'docked', docked: true, charging: true, progress: null, hero: { big: 'Bereit', sub: '', errorChip: { text: 'Staubbeutel voll' }, buttons: BTN('start', 'locate') } });
   assert.deepEqual([d.fortschritt, d.hinweis, d.zustand, d.laden, d.knoepfe, d.reihenfolge, d.jetzt], [null, 'Staubbeutel voll', 'docked', true, ['start', 'locate'], [], null]);
+  // HT-0005: beim Start setzt der Roboter den Fortschritt sofort auf 0, steht aber noch ~14 s als docked/idle in der Station –
+  // der Balken ist dann nicht zu sehen (dx-auftrag), also meldet die Karte auch keinen Fortschritt
+  for (const [vac, docked] of [['docked', true], ['idle', false], ['returning', false], ['cleaning', true]] as const) {
+    assert.equal(anzeigeSnapshot({ ...BASE, vac, docked, progress: 0, hero: { ...BASE.hero, buttons: BTN('start', 'locate') } }).fortschritt, null, `${vac}/${docked}`);
+  }
+  assert.equal(anzeigeSnapshot({ ...BASE, vac: 'paused', progress: 0 }).fortschritt, 0);
 });
 
 test('anzeigeSnapshot im Lauf: Werte-Knöpfe als HA-Werte, „Jetzt“ und angekündigte Reihenfolge', () => {

@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.36 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.37 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -2061,7 +2061,8 @@ function anzeigeSnapshot(r4, roomValues = () => null, rooms = [], tab) {
     schritt: r4.hero.sub,
     hinweis: r4.hero.errorChip?.text ?? "",
     akku: r4.battery,
-    fortschritt: r4.progress === null ? null : Math.round(r4.progress),
+    fortschritt: unterwegs && r4.progress !== null ? Math.round(r4.progress) : null,
+    // nur melden, was zu sehen ist: der Balken steht nur im Lauf (HT-0005)
     zustand: r4.vac,
     knoepfe: r4.hero.buttons.map((b3) => b3.service),
     laden: r4.charging,
@@ -3060,7 +3061,7 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.36";
+var VERSION = "2.0.0-alpha.37";
 
 // src/config.ts
 var NAV = [
