@@ -271,9 +271,11 @@ Uhr (10:15). Einrichten im Ordner `heidi/tests`: `npm i` und dann `npx playwrigh
 - **4.14 Texte zentral (17.09., Modul R, DX-066):** `src/i18n/de.ts` (619 Schlüssel) + `src/i18n/t.ts` (`t`, `tx`, `lookup`); alle festen Texte der Karte aus Bausteinen, Shell, Selektoren und Domäne dorthin, Wortlaut unverändert (alle bisherigen Tests grün); Fehlercodes mit Kurz- und Langtext für alle 142 Codes der Integration; Scan-Test gegen neue feste Wörter im Code. Version 2.0.0-alpha.29 eingespielt. Sichtbar: nichts (außer deutschen Kurztexten für bisher rohe Fehlercodes). Sprachumschaltung Post-2.0 (DX-067).
 - **PD-015 Warnungs-Chip gebaut (17.09., 4.1-Nachtrag, DX-026):** gelber Chip = Warnung mit ✕ (`button.press` auf `clear_warning`, nur wenn der Knopf verfügbar ist), rot = Fehler ohne ✕; Kurztext im Chip, Langtext beim Verweilen (`src/shared/dx-tip.ts`), Antippen → more-info. Neu im Vertrag: `clearWarning`. Version 2.0.0-alpha.30 eingespielt. Stolperstein: HA-Knöpfe sind mit Zustand `unknown` verfügbar, nur `unavailable` sperrt.
 - **PD-016 Fortschrittsbalken gebaut (17.09., 4.1-Nachtrag, DX-026):** Balken der Auftrag-Kachel = `sensor.<gerät>_cleaning_progress` (Roboter-Prozent, nur im Lauf), sonst Raumzählung. Neu im Vertrag: `cleaningProgress`. Version 2.0.0-alpha.31 eingespielt. Herbert geht die Roboter-Entitäten der Reihe nach durch (ENTITAETEN.md), Stand: 2 von 15 der Gruppe „Zustand und Lauf“ (clear_warning, cleaning_progress).
+- **Sitzung 17./18.09. (Teil 5, Claude Code):** Modul R „Roboter-Panel“ vor Modul A gestellt (4.6 in 4.6a/4.6b geteilt); ENTITAETEN.md mit Spalten Art, Kurzbeschreibung, Integriert und der vollständigen Warnungs-/Fehlerliste (142 Codes); 4.14 Texte zentral (alpha.29), PD-015 Warnungs-Chip (alpha.30), PD-016 Fortschrittsbalken (alpha.31); Mockup `dreame_x60/mockups/warnung.html` abgenommen. ClickUp: DX-064…DX-067 neu, DX-066 + DX-026 in testing; DX-068 von Herbert angelegt. Arbeitsweise bestätigt: ein Chat je Arbeitsblock, am Ende doc-pflege Modus 8, dann neuer Chat.
+- **Zuerst im nächsten Chat (Herbert, 18.09.): DX-068 / F.1 Diagnose-Protokoll** (Backend, Schicht 1 + 2 zuerst); danach weiter in Modul R.
 - **Nächstes:** Modul R – 4.1 Sichtprüfung `dx-hero`/`dx-auftrag` durch Herbert (DX-026; Herbert geht die Roboter-Entitäten einzeln durch – 1. `clear_warning`: Hinweis-Chip mit ✕, Kurz-/Langtext, PD-015, Mockup `warnung.html` abgenommen 17.09.; Liste aller 142 Codes in ENTITAETEN.md), 4.14 Texte zentral erledigt (DX-066, Sichtprüfung offen), 4.6a Räume-Dialog Roboter-Modus (DX-033, legt `tests/e2e/widths.js` an); dann Modul A Planer – 4.4 `dx-planer` (DX-031), 4.5 Editor + Uhr (DX-032), 4.6b (DX-065), 4.8, 6.1; später Heidi-Karte: Zoom, Zone/Punkt/Hinfahren als Gesten, Sperrzonen (4.12) auf derselben Ebene. Offene Entscheidungen: Bauplan Abschnitt 10 und ClickUp.
 
-## 4. Offene Punkte (Stand 16.09.2026, Claude-Code-Sitzung; ClickUp-Bezug je Punkt, Audit 16.09.)
+## 4. Offene Punkte (Stand 18.09.2026, Claude-Code-Sitzung Teil 5; ClickUp-Bezug je Punkt, Audit 16.09.)
 Erledigt:
 - [x] HA neu gestartet (14.09. 06:33), v1.3.1 + v2-Helfer aktiv, Repo = `H:\`.
 - [x] Große Dateien sind im Repo.
@@ -299,6 +301,10 @@ Offen:
       (nichts verweist mehr darauf; HACS räumt Ressource + `www/community`-Ordner mit weg) und
       `H:\www\_deploy_yamls.txt.old`, `H:\www\heidi-panel-v1.1.0.bak.b64` löschen (Modul F).
 - ~~Optional: Remote Control in Claude Code einrichten~~ gestrichen (Herbert, 16.09.; kein Projektpunkt).
+- [ ] **DX-068 (F.1) Diagnose-Protokoll – als Nächstes (Herbert, 18.09.):** Karte in Bauplan Abschnitt 8; in ClickUp fehlen noch Bauplan-Nummer im Titel, Template und Custom Fields → beim `tracker start` nachziehen.
+- [ ] **Entitäten-Durchgang (Modul R, ohne eigene ClickUp-Aufgabe, läuft unter DX-026/DX-064):** stehen geblieben bei `sensor.heidi_mapping_time` (Entscheidung offen, Empfehlung „nicht integrieren“), danach `sensor.heidi_relocation_status`; Stand in ENTITAETEN.md (Kopf) und Bauplan Abschnitt 10 (18.09.).
+- [ ] **Sichtprüfung Herbert nach Strg+F5 (Version 2.0.0-alpha.31):** Roboter-Panel (DX-026), Texte unverändert nach 4.14 (DX-066); Warnungs-Chip mit ✕ und Fortschrittsbalken erst beim nächsten echten Fall bzw. Lauf sichtbar – dabei prüfen, wie der Roboter den Fortschritt bei Raumaufträgen rechnet (PD-016).
+- [ ] **DX-033 (4.6a) Räume-Dialog Roboter-Modus** – letzter Baustein von Modul R, legt `tests/e2e/widths.js` an.
 - Übersicht aller offenen Bauschritte: Bauplan Abschnitt 1a (Module) und ClickUp-Liste „dreame_x60 – Bauplan“ (DX-Aufgaben).
 
 ## 5. Referenzen

@@ -2,6 +2,8 @@
 
 Stand 2026-09-15, aus dem Entitäts-Register (239 Entitäten, Integration dreame-vacuum 2.0.0b25). Kategorien sind ein Vorschlag zur Einordnung (Herbert + Claude, 15.09.).
 
+**Durchgang Herbert (der Reihe nach, seit 17.09.):** 1. `button.heidi_clear_warning` ✔ gebaut (PD-015), 2. `sensor.heidi_cleaning_progress` ✔ gebaut (PD-016); **stehen geblieben bei 3. `sensor.heidi_mapping_time`** (Bewertung liegt vor, Empfehlung „nicht integrieren“, Entscheidung offen), danach `sensor.heidi_relocation_status`. Stand und Ablauf: Bauplan Abschnitt 10 (18.09.).
+
 Spalten: **Art** = HA-Entitätstyp (Staubsauger, Sensor, Ja/Nein-Sensor, Schalter, Auswahl, Zahl, Knopf, Uhrzeit, Kamera). **Kurzbeschreibung** = was die Entität zeigt oder schaltet (ergänzt 17.09.2026 aus der Integration und der Dreame-App; Wirkung am Gerät nicht einzeln geprüft). **Kat.** = HA-Kategorie der Integration (config = Einstellung, diagnostic = Diagnose). **aus** = im Register deaktiviert. **Integriert (alpha.28)** = wo die Karte v2 die Entität heute zeigt oder schaltet (Stand 2.0.0-alpha.28, 17.09.2026, aus `selectors.ts`/`api.ts`/Bausteinen abgeleitet); „Sicht … vorhanden; … offen“ = Selektor gebaut, Baustein fehlt noch (Modul in Bauplan Abschnitt 1a); „Im Vertrag, noch ohne Sicht“ = nur in `contract.ts`; „–“ = nicht genutzt. Die frühere Spalte „v2“ (im Vertrag) ist am 17.09. entfallen – ob und wo eine Entität genutzt wird, steht in „Integriert“.
 
 ## Roboter: Zustand und Lauf (15)
