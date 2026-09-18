@@ -223,6 +223,36 @@ await setStates(docked);
 
 H.check('keine Seiten-/Konsolenfehler', errs.length === 0, errs);
 await H.screenshot(page, 'hero-idle.png');
+H.checkEqual('Diagnose: ohne diagnose: true feuert die Karte kein Ereignis', await page.evaluate(() => window._events.length), 0);
 await page.close();
+
+// ── Diagnose-Protokoll Schicht 3 (PD-017): Karte meldet ihre Anzeige als HA-Ereignis dreame_x60_anzeige ──
+{
+  const admin = { name: 'Herbert', is_admin: true };
+  const m = await H.mount(b, { page: 'start', config: { page: 'start', diagnose: true }, user: admin });
+  const events = () => m.page.evaluate(() => window._events);
+  const setBatt = (v) => m.page.evaluate((val) => { const el = document.querySelector('dreame-x60-panel'); const s = el.hass.states; el.hass = { ...el.hass, states: { ...s, 'sensor.heidi_battery_level': { ...s['sensor.heidi_battery_level'], state: String(val) } } }; }, v);
+  let ev = await events();
+  H.checkEqual('Diagnose: erste Meldung nach dem Laden, Pfad events/dreame_x60_anzeige', ev.map((e) => e[0]), ['events/dreame_x60_anzeige']);
+  H.checkEqual('Diagnose: Seite, Version und alle Werte als geändert', [ev[0][1].seite, ev[0][1].version, ev[0][1].geaendert], ['start', H.VERSION, ['kopf', 'schritt', 'hinweis', 'akku', 'fortschritt', 'zustand']]);
+  const kopf = await m.page.evaluate(() => document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-hero').shadowRoot.querySelector('.st.big').textContent.replace(/\s+/g, ' ').trim());
+  H.check('Diagnose: gemeldeter Kopf steht im sichtbaren Kopf', kopf.includes(ev[0][1].werte.kopf) && ev[0][1].werte.kopf !== '', { sichtbar: kopf, gemeldet: ev[0][1].werte });
+  const irrelevant = Object.keys(m.states).find((id) => !id.includes('heidi') && !id.startsWith('person.')) || 'sun.sun';
+  for (let i = 0; i < 20; i++) {
+    await m.page.evaluate(({ id, i }) => { const el = document.querySelector('dreame-x60-panel'); const s = el.hass.states; const cur = s[id] ?? { entity_id: id, state: '0', attributes: {} }; el.hass = { ...el.hass, states: { ...s, [id]: { ...cur, state: String(i) } } }; }, { id: irrelevant, i });
+  }
+  await m.page.waitForTimeout(1100);
+  H.checkEqual('Diagnose: 20 irrelevante Ticks → kein weiteres Ereignis', (await events()).length, 1);
+  await setBatt(41); await setBatt(40); // zwei schnelle Änderungen → jede Anzeige höchstens einmal je Sekunde, am Ende steht der letzte Wert
+  await m.page.waitForTimeout(1300);
+  ev = await events();
+  H.check('Diagnose: Akkuwechsel → höchstens zwei weitere Meldungen, nur „akku“ geändert, letzter Wert 40', ev.length >= 2 && ev.length <= 3 && ev.slice(1).every((e) => JSON.stringify(e[1].geaendert) === '["akku"]') && ev.at(-1)[1].werte.akku === 40, ev.slice(1));
+  H.check('Diagnose: keine Seiten-/Konsolenfehler', m.errs.length === 0, m.errs);
+  await m.page.close();
+  const gast = await H.mount(b, { page: 'start', config: { page: 'start', diagnose: true }, user: { name: 'Nicole', is_admin: false } });
+  await gast.page.waitForTimeout(200);
+  H.checkEqual('Diagnose: Benutzer ohne Admin-Recht → kein Ereignis, kein Fehler', [await gast.page.evaluate(() => window._events.length), gast.errs.length], [0, 0]);
+  await gast.page.close();
+}
 await b.close();
 H.summary();

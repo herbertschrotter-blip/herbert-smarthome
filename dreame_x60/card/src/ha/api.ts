@@ -1,6 +1,6 @@
 // Schreibzugriffe (Bauplan 3.2): einzige Stelle, die hass.callService/callApi aufruft. Dienste und Payloads wie v1
 // (Abschnitt 6). Mehrteilige Schreibvorgänge melden Teilfehler (Regel 20) statt still zu scheitern.
-import { ENTITIES, HA_OPTIONS, ROOM_VALUE_CODES, SERVICES, historyPath, planEntity, roomEntity } from './contract';
+import { ENTITIES, HA_OPTIONS, ROOM_VALUE_CODES, SERVICES, eventPath, historyPath, planEntity, roomEntity } from './contract';
 import { readProfile } from './profile';
 import type { PlanNumber, RoomId, RoomValueKey } from './contract';
 import type { HomeAssistant } from './types';
@@ -163,6 +163,17 @@ export class DxApi {
 
   prognoseReset(): Promise<unknown> {
     return this.call(SERVICES.prognoseReset.domain, SERVICES.prognoseReset.service, {});
+  }
+
+  // ───────── Ereignisse ─────────
+  /**
+   * HA-Ereignis feuern (Diagnose-Protokoll Schicht 3, PD-017). HA erlaubt das nur Admin-Benutzern – bei allen anderen
+   * (und ohne REST-Zugang) passiert nichts. Liefert, ob gesendet wurde; Fehler beim Senden stören die Karte nicht.
+   */
+  async fireEvent(type: string, data: Record<string, unknown>): Promise<boolean> {
+    const h = this.getHass();
+    if (!h?.callApi || !h.user?.is_admin) return false;
+    try { await h.callApi('POST', eventPath(type), data); return true; } catch { return false; }
   }
 
   // ───────── Lesen über die REST-API ─────────

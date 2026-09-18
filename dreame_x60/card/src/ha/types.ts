@@ -20,7 +20,7 @@ export interface HomeAssistant {
   language?: string;
   themes?: { darkMode?: boolean };
   /** Angemeldeter Benutzer (für den Tagesgruß der Übersicht, Bauplan 4.0). */
-  user?: { name?: string };
+  user?: { name?: string; is_admin?: boolean };
   /** Entitäts-Register des Frontends (Geräteerkennung, device.ts): Plattform und Gerät je Entität. */
   entities?: Record<string, { entity_id: string; platform?: string; device_id?: string; name?: string } | undefined>;
   /** Geräte-Register des Frontends: Anzeigename des Roboters. */
@@ -33,4 +33,6 @@ export interface PanelConfig {
   page?: string;
   /** Roboter-Entität (vacuum.*), wenn es mehrere Dreame-Roboter gibt; sonst automatische Erkennung (device.ts). */
   robot?: string;
+  /** Diagnose-Protokoll Schicht 3 (PD-017): Karte meldet ihre Anzeige als HA-Ereignis (nur bei Admin-Benutzern). */
+  diagnose?: boolean;
 }

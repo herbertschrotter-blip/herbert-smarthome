@@ -217,6 +217,13 @@ export function historyPath(startIso: string, endIso: string): string {
   return `history/period/${startIso}?filter_entity_id=${ENTITIES.phase},${ENTITIES.vac}&end_time=${encodeURIComponent(endIso)}&minimal_response&no_attributes`;
 }
 
+/** HA-Ereignisse, die die Karte feuert (S). `anzeige`: Diagnose-Protokoll Schicht 3 (Bauplan F.1, PD-017) – die Automation
+ *  heidi_diagnose_protokoll schreibt es mit. Nur Admin-Benutzer dürfen Ereignisse feuern. */
+export const HA_EVENTS = { anzeige: 'dreame_x60_anzeige' } as const;
+
+/** REST-Pfad zum Feuern eines Ereignisses (POST). */
+export const eventPath = (type: string): string => `events/${type}`;
+
 /** IDs des Roboters (Dreame-Integration): feste Merkmale plus Raum-Selects der übergebenen Räume. */
 export function robotIds(roomIds: readonly number[] = []): string[] {
   const ids = (Object.keys(ROBOT_FEATURES) as RobotKey[]).map((k) => ENTITIES[k]);

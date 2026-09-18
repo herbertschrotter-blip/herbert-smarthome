@@ -40,6 +40,10 @@ function text(r) {
     return `${r.ent}  ${r.alt === r.neu ? "" : `${r.alt} → ${r.neu}`}${attr ? `  {${attr}}` : ""}`;
   }
   if (r.art === "dienst") return `DIENST ${r.dienst} ${JSON.stringify(r.daten || {})}`;
+  if (r.art === "anzeige") { // Schicht 3: was die Karte zeigt (nur die geänderten Werte)
+    const w = r.werte || {};
+    return `ANZEIGE [${r.seite} · ${r.client}]  ${(r.geaendert || []).map((k) => `${k}: ${w[k]}`).join("; ")}`;
+  }
   return `${r.art.toUpperCase()} ${r.name || r.ent}${r.ausloeser ? ` (${r.ausloeser})` : ""}`;
 }
 

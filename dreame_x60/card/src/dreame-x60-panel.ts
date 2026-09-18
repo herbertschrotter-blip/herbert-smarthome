@@ -7,7 +7,9 @@ import type { PropertyValues, TemplateResult } from 'lit';
 import type { HomeAssistant, PanelConfig } from './ha/types';
 import { DxApi } from './ha/api';
 import { device, deviceName, discoverDevice } from './ha/device';
-import { ENTITIES, robotEntity } from './ha/contract';
+import { ENTITIES, HA_EVENTS, robotEntity } from './ha/contract';
+import { anzeigeDiff, anzeigeSnapshot } from './domain/anzeige';
+import type { AnzeigeSnapshot } from './domain/anzeige';
 import { readProfile } from './ha/profile';
 import { setupChecks, setupProblems } from './domain/setup';
 import type { SetupAction, SetupCheck } from './domain/setup';
@@ -46,6 +48,11 @@ const TOAST_MS = 1900;
 /** Tagesgruß der Übersicht: bis 11 Uhr Morgen, bis 18 Uhr Tag, danach Abend. */
 const GREETING = (h: number): string => (h < 11 ? t('topbar.morning') : h < 18 ? t('topbar.day') : t('topbar.evening'));
 
+/** Diagnose-Protokoll Schicht 3 (PD-017): frühestens so oft meldet die Karte ihre Anzeige (ms); Änderungen dazwischen werden gesammelt. */
+const ANZEIGE_MIN_MS = 1000;
+/** Kennung dieses Browserfensters im Protokoll (mehrere Geräte zeigen die Karte gleichzeitig). */
+const CLIENT = Math.random().toString(36).slice(2, 6);
+
 /** Marke „noch nie gesehen“ für den Vergleich von hass.entities (auch `undefined` ist ein gültiger erster Wert). */
 const UNSET: unknown = Symbol('unset');
 
@@ -78,6 +85,10 @@ export class DreameX60Panel extends LitElement {
   /** Schreibzugriffe – eine Instanz je Shell, liest hass zur Laufzeit. */
   readonly api = new DxApi(() => this.hass);
   private _toastTimer: ReturnType<typeof setTimeout> | null = null;
+  /** Diagnose (PD-017): zuletzt gemeldete Anzeige, Zeitpunkt, Sammel-Timer */
+  private _anzeige: AnzeigeSnapshot | null = null;
+  private _anzeigeAt = 0;
+  private _anzeigeTimer: ReturnType<typeof setTimeout> | null = null;
   private _clockTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly _onKey = (e: KeyboardEvent): void => { if (e.key === 'Escape' && this._overlay) this.closeOverlay(); };
 
@@ -155,6 +166,7 @@ export class DreameX60Panel extends LitElement {
   override disconnectedCallback(): void {
     window.removeEventListener('keydown', this._onKey);
     if (this._clockTimer) { clearTimeout(this._clockTimer); this._clockTimer = null; }
+    if (this._anzeigeTimer) { clearTimeout(this._anzeigeTimer); this._anzeigeTimer = null; }
     this._registryUnsub?.(); this._registryUnsub = null; this._registryConn = null;
     super.disconnectedCallback();
   }
@@ -164,6 +176,22 @@ export class DreameX60Panel extends LitElement {
     this._now = Date.now();
     this.refreshSetup(true); // jede Minute neu (drei leichte WS-Abfragen), damit Befunde ohne F5 verschwinden
     this._clockTimer = setTimeout(() => this.tickClock(), 60_000 - (Date.now() % 60_000) + 50);
+  }
+
+  // ───────── Diagnose-Protokoll Schicht 3 (PD-017) ─────────
+  override updated(): void { if (this._config.diagnose) this.reportAnzeige(); }
+
+  /** Meldet die sichtbaren Kernwerte des Roboter-Panels als HA-Ereignis, wenn sie sich geändert haben – höchstens einmal
+   *  je ANZEIGE_MIN_MS, Änderungen dazwischen gehen gesammelt mit der nächsten Meldung. Nur mit `diagnose: true`. */
+  private reportAnzeige(): void {
+    if (!this.hass || this._anzeigeTimer) return;
+    const next = anzeigeSnapshot(readRobot(this.hass.states));
+    const geaendert = anzeigeDiff(this._anzeige, next);
+    if (!geaendert.length) return;
+    const wait = this._anzeigeAt + ANZEIGE_MIN_MS - Date.now();
+    if (wait > 0) { this._anzeigeTimer = setTimeout(() => { this._anzeigeTimer = null; this.reportAnzeige(); }, wait); return; }
+    this._anzeige = next; this._anzeigeAt = Date.now();
+    void this.api.fireEvent(HA_EVENTS.anzeige, { seite: this.page, version: VERSION, client: CLIENT, geaendert, werte: next });
   }
 
   // ───────── HA-Schnittstelle der Karte ─────────

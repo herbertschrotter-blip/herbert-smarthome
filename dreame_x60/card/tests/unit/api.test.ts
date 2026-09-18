@@ -170,3 +170,19 @@ test('setZones: Fehler wird benannt; history ruft den v1-Pfad; ohne hass wirft c
   const none = new DxApi(() => undefined);
   await assert.rejects(() => none.vacuum('start'), /Keine Verbindung/);
 });
+
+test('fireEvent (PD-017): Admin → POST events/<typ>; ohne Admin-Recht, ohne REST oder bei Fehler kein Wurf', async () => {
+  const posts: [string, string, unknown][] = [];
+  const mk = (user: HomeAssistant['user'], fail = false): HomeAssistant => ({
+    states: {}, ...(user ? { user } : {}), callService: async () => undefined,
+    callApi: async <T,>(m: 'GET' | 'POST', p: string, d?: Record<string, unknown>) => { posts.push([m, p, d]); if (fail) throw new Error('403'); return {} as T; },
+  });
+  assert.equal(await new DxApi(() => mk({ name: 'Herbert', is_admin: true })).fireEvent('dreame_x60_anzeige', { seite: 'start' }), true);
+  assert.deepEqual(posts, [['POST', 'events/dreame_x60_anzeige', { seite: 'start' }]]);
+  assert.equal(await new DxApi(() => mk({ name: 'Nicole', is_admin: false })).fireEvent('dreame_x60_anzeige', {}), false);
+  assert.equal(await new DxApi(() => mk(undefined)).fireEvent('dreame_x60_anzeige', {}), false);
+  assert.equal(posts.length, 1);
+  assert.equal(await new DxApi(() => mk({ is_admin: true }, true)).fireEvent('dreame_x60_anzeige', {}), false);
+  assert.equal(await new DxApi(() => undefined).fireEvent('dreame_x60_anzeige', {}), false);
+  assert.equal(await new DxApi(() => ({ states: {}, user: { is_admin: true }, callService: async () => undefined })).fireEvent('x', {}), false);
+});

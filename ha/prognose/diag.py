@@ -17,6 +17,8 @@ KEEP_DAYS werden gelöscht. Nie ins Repo. runlog.csv (Lernwerte) bleibt davon ge
 Zeile Schicht 1 (v = Formatversion): ts, v, art (zustand|dienst|automation|skript), quelle
 (benutzer|automation|system|extern, siehe classify), wer (Name zur user_id), durch (Name der Automation/des Skripts),
 ctx, user_id, parent_id; dazu je Art: ent, alt, neu, attr {name: [alt, neu]} · dienst, daten · ent, name, ausloeser.
+Schicht 3 (PD-017): art anzeige = die Karte meldet, was sie zeigt (Ereignis dreame_x60_anzeige): seite, version,
+client (Browserfenster), geaendert [Namen], werte {kopf, schritt, hinweis, akku, fortschritt, zustand}.
 """
 import base64, json, os, re, sys, urllib.request
 from datetime import datetime, timedelta

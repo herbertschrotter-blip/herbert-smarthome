@@ -48,8 +48,9 @@ const PAGE_HTML = `<!doctype html><html><head><meta charset="utf-8"><title>dx te
 
 /**
  * Seite mit der Karte aufbauen.
- * opts: { fixture, states, page, viewport, config, failCalls: ['domain.service'], apiResponse }
- * Liefert { page, errs, states }. Im Browser: window._calls (Call-Log), window._api (callApi-Pfade).
+ * opts: { fixture, states, page, viewport, config, failCalls: ['domain.service'], apiResponse, user }
+ * Liefert { page, errs, states }. Im Browser: window._calls (Call-Log), window._api (callApi-Pfade),
+ * window._events (gefeuerte HA-Ereignisse [Pfad, Daten], Diagnose PD-017).
  */
 export async function mount(browser, opts = {}) {
   const page = await browser.newPage({ viewport: opts.viewport || { width: 1200, height: 1400 } });
@@ -66,19 +67,20 @@ export async function mount(browser, opts = {}) {
   const states = opts.states || loadFixture(opts.fixture);
   await page.addScriptTag({ content: js, type: 'module' });
   await page.waitForFunction(() => !!customElements.get('dreame-x60-panel'));
-  await page.evaluate(({ states, config, failCalls, apiResponse, wsResponses }) => {
-    window._calls = []; window._api = []; window._ws = []; window._wsResponses = wsResponses || null;
+  await page.evaluate(({ states, config, failCalls, apiResponse, wsResponses, user }) => {
+    window._calls = []; window._api = []; window._ws = []; window._events = []; window._wsResponses = wsResponses || null;
     const el = document.createElement('dreame-x60-panel');
     el.setConfig(config);
     el.hass = {
       states,
       callService: async (d, s, x) => { window._calls.push([d, s, x]); if ((failCalls || []).includes(d + '.' + s)) throw new Error('injiziert: ' + d + '.' + s); },
-      callApi: async (m, p) => { window._api.push(p); return apiResponse ?? []; },
+      callApi: async (m, p, d) => { window._api.push(p); if (m === 'POST' && p.startsWith('events/')) window._events.push([p, d]); return apiResponse ?? []; },
+      user: user || undefined,
       callWS: async (msg) => { window._ws.push(msg); const r = (window._wsResponses || {})[msg.type]; if (r === undefined) throw new Error('kein WS-Stub für ' + msg.type); return r; },
       connection: { subscribeEvents: async (cb, type) => { (window._subs = window._subs || {})[type] = cb; return () => { delete window._subs[type]; }; } },
     };
     document.body.appendChild(el);
-  }, { states, config: opts.config || { page: pg }, failCalls: opts.failCalls || [], apiResponse: opts.apiResponse ?? null, wsResponses: opts.wsResponses || null });
+  }, { states, config: opts.config || { page: pg }, failCalls: opts.failCalls || [], apiResponse: opts.apiResponse ?? null, wsResponses: opts.wsResponses || null, user: opts.user || null });
   await page.waitForTimeout(150);
   return { page, errs, states };
 }

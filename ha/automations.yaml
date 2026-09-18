@@ -294,6 +294,10 @@
     - trigger: event
       event_type: script_started
       id: skript
+    # Schicht 3 (PD-017): die Karte meldet, was sie anzeigt (nur mit „diagnose: true“ im Dashboard, nur Admin-Benutzer)
+    - trigger: event
+      event_type: dreame_x60_anzeige
+      id: anzeige
   conditions:
     # Die eigenen Diagnose-Automationen (heidi_diag…) bleiben draußen, sonst protokolliert sich das Protokoll selbst.
     - condition: template
@@ -303,6 +307,8 @@
           {% set s = d | string %}
           {{ d.domain not in ['shell_command', 'logger', 'system_log'] and ('heidi' in s or 'stuehle_am_boden' in s)
              and 'heidi_diag' not in s }}
+        {% elif trigger.id == 'anzeige' %}
+          {{ true }}
         {% else %}
           {% set ent = d.entity_id | default('') %}
           {# Automationen ändern bei jedem Lauf nur Zähler und „zuletzt ausgelöst“ – das steht schon in der Zeile
@@ -347,6 +353,15 @@
               {% set ns.d = dict(ns.d, **{(k | string): w}) %}
             {% endfor %}
             {{ dict(basis, dienst=d.domain ~ '.' ~ d.service, daten=ns.d) | to_json | base64_encode }}
+          {% elif trigger.id == 'anzeige' %}
+            {% set ns = namespace(d={}) %}
+            {% for k, w in (d.werte | default({}, true)).items() %}
+              {% set w = w if (w is none or w is boolean or w is number) else (w | string)[:300] %}
+              {% set ns.d = dict(ns.d, **{(k | string): w}) %}
+            {% endfor %}
+            {{ dict(basis, seite=d.seite | default('') | string, version=d.version | default('') | string,
+                    client=d.client | default('') | string, geaendert=(d.geaendert | default([]) | map('string') | list)[:10],
+                    werte=ns.d) | to_json | base64_encode }}
           {% else %}
             {{ dict(basis, ent=d.entity_id, name=d.name | default(''), ausloeser=d.source | default('')) | to_json | base64_encode }}
           {% endif %}

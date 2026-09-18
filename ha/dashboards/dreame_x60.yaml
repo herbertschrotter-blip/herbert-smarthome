@@ -10,6 +10,7 @@ views:
     cards:
       - type: custom:dreame-x60-panel
         page: start
+        diagnose: true  # Diagnose-Protokoll Schicht 3 (Bauplan F.1, PD-017): Karte meldet ihre Anzeige an HA
   - title: Karte
     path: reinigen
     subview: true
@@ -18,6 +19,7 @@ views:
     cards:
       - type: custom:dreame-x60-panel
         page: reinigen
+        diagnose: true  # Diagnose-Protokoll Schicht 3 (Bauplan F.1, PD-017): Karte meldet ihre Anzeige an HA
   - title: Planer
     path: planer
     subview: true
@@ -26,6 +28,7 @@ views:
     cards:
       - type: custom:dreame-x60-panel
         page: planer
+        diagnose: true  # Diagnose-Protokoll Schicht 3 (Bauplan F.1, PD-017): Karte meldet ihre Anzeige an HA
   - title: Verlauf
     path: protokoll
     subview: true
@@ -34,6 +37,7 @@ views:
     cards:
       - type: custom:dreame-x60-panel
         page: protokoll
+        diagnose: true  # Diagnose-Protokoll Schicht 3 (Bauplan F.1, PD-017): Karte meldet ihre Anzeige an HA
   - title: Prognose
     path: prognose
     subview: true
@@ -42,6 +46,7 @@ views:
     cards:
       - type: custom:dreame-x60-panel
         page: prognose
+        diagnose: true  # Diagnose-Protokoll Schicht 3 (Bauplan F.1, PD-017): Karte meldet ihre Anzeige an HA
   - title: Einstellungen
     path: einstellungen
     subview: true
@@ -50,3 +55,4 @@ views:
     cards:
       - type: custom:dreame-x60-panel
         page: einstellungen
+        diagnose: true  # Diagnose-Protokoll Schicht 3 (Bauplan F.1, PD-017): Karte meldet ihre Anzeige an HA

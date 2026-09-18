@@ -82,6 +82,14 @@ class DiagTest(unittest.TestCase):
         self.assertEqual(r[2]["durch"], "Heidi: Plan starten")
         self.assertNotIn("durch", r[4])
 
+    def test_anzeige_der_karte_ist_benutzerzeile(self):
+        """Schicht 3 (PD-017): Ereignis der Karte kommt mit user_id → quelle benutzer, Werte bleiben erhalten."""
+        diag.cmd_log([b64({"ts": "2026-09-18T21:00:00.000", "art": "anzeige", "ctx": "K1", "user_id": "u1", "parent_id": None,
+                           "wer": "Herbert", "seite": "start", "version": "2.0.0-alpha.32", "client": "ab12",
+                           "geaendert": ["akku"], "werte": {"kopf": "Bereit", "akku": 97, "fortschritt": None}})])
+        r = self.rows("2026-09-18")[0]
+        self.assertEqual([r["quelle"], r["werte"]["akku"], r["geaendert"]], ["benutzer", 97, ["akku"]])
+
     def test_kontext_speicher_bleibt_begrenzt(self):
         cache = {"c%d" % i: "x" for i in range(diag.CTX_KEEP)}
         self.assertTrue(diag.classify({"art": "automation", "ctx": "neu", "name": "N"}, cache))

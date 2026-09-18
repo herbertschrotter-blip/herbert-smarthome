@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.31 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.32 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -772,6 +772,8 @@ var SERVICES = {
 function historyPath(startIso, endIso) {
   return `history/period/${startIso}?filter_entity_id=${ENTITIES.phase},${ENTITIES.vac}&end_time=${encodeURIComponent(endIso)}&minimal_response&no_attributes`;
 }
+var HA_EVENTS = { anzeige: "dreame_x60_anzeige" };
+var eventPath = (type) => `events/${type}`;
 function robotIds(roomIds = []) {
   const ids = Object.keys(ROBOT_FEATURES).map((k2) => ENTITIES[k2]);
   for (const r4 of roomIds) for (const f3 of ROOM_SELECT_FIELDS) ids.push(roomEntity(r4, f3));
@@ -1839,6 +1841,21 @@ var DxApi = class {
   prognoseReset() {
     return this.call(SERVICES.prognoseReset.domain, SERVICES.prognoseReset.service, {});
   }
+  // ───────── Ereignisse ─────────
+  /**
+   * HA-Ereignis feuern (Diagnose-Protokoll Schicht 3, PD-017). HA erlaubt das nur Admin-Benutzern – bei allen anderen
+   * (und ohne REST-Zugang) passiert nichts. Liefert, ob gesendet wurde; Fehler beim Senden stören die Karte nicht.
+   */
+  async fireEvent(type, data) {
+    const h3 = this.getHass();
+    if (!h3?.callApi || !h3.user?.is_admin) return false;
+    try {
+      await h3.callApi("POST", eventPath(type), data);
+      return true;
+    } catch {
+      return false;
+    }
+  }
   // ───────── Lesen über die REST-API ─────────
   /** Historie der Phase (Paket) und des Roboters im Fenster (Sekunden). */
   history(startSec, endSec) {
@@ -1847,6 +1864,22 @@ var DxApi = class {
     return h3.callApi("GET", historyPath(new Date(startSec * 1e3).toISOString(), new Date(endSec * 1e3).toISOString()));
   }
 };
+
+// src/domain/anzeige.ts
+function anzeigeSnapshot(r4) {
+  return {
+    kopf: r4.hero.big,
+    schritt: r4.hero.sub,
+    hinweis: r4.hero.errorChip?.text ?? "",
+    akku: r4.battery,
+    fortschritt: r4.progress === null ? null : Math.round(r4.progress),
+    zustand: r4.vac
+  };
+}
+function anzeigeDiff(prev, next) {
+  const keys = Object.keys(next);
+  return prev ? keys.filter((k2) => prev[k2] !== next[k2]) : keys;
+}
 
 // src/domain/setup.ts
 var ok = (key, icon, label) => ({ key, icon, label, level: "ok", text: label });
@@ -2821,7 +2854,7 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.31";
+var VERSION = "2.0.0-alpha.32";
 
 // src/config.ts
 var NAV = [
@@ -4111,6 +4144,8 @@ if (!customElements.get(QUICKSTART_ELEMENT)) customElements.define(QUICKSTART_EL
 var ELEMENT = "dreame-x60-panel";
 var TOAST_MS = 1900;
 var GREETING = (h3) => h3 < 11 ? t3("topbar.morning") : h3 < 18 ? t3("topbar.day") : t3("topbar.evening");
+var ANZEIGE_MIN_MS = 1e3;
+var CLIENT = Math.random().toString(36).slice(2, 6);
 var UNSET = Symbol("unset");
 var DreameX60Panel = class extends i4 {
   constructor() {
@@ -4123,6 +4158,10 @@ var DreameX60Panel = class extends i4 {
     /** Schreibzugriffe – eine Instanz je Shell, liest hass zur Laufzeit. */
     this.api = new DxApi(() => this.hass);
     this._toastTimer = null;
+    /** Diagnose (PD-017): zuletzt gemeldete Anzeige, Zeitpunkt, Sammel-Timer */
+    this._anzeige = null;
+    this._anzeigeAt = 0;
+    this._anzeigeTimer = null;
     this._clockTimer = null;
     this._onKey = (e4) => {
       if (e4.key === "Escape" && this._overlay) this.closeOverlay();
@@ -4222,6 +4261,10 @@ var DreameX60Panel = class extends i4 {
       clearTimeout(this._clockTimer);
       this._clockTimer = null;
     }
+    if (this._anzeigeTimer) {
+      clearTimeout(this._anzeigeTimer);
+      this._anzeigeTimer = null;
+    }
     this._registryUnsub?.();
     this._registryUnsub = null;
     this._registryConn = null;
@@ -4232,6 +4275,29 @@ var DreameX60Panel = class extends i4 {
     this._now = Date.now();
     this.refreshSetup(true);
     this._clockTimer = setTimeout(() => this.tickClock(), 6e4 - Date.now() % 6e4 + 50);
+  }
+  // ───────── Diagnose-Protokoll Schicht 3 (PD-017) ─────────
+  updated() {
+    if (this._config.diagnose) this.reportAnzeige();
+  }
+  /** Meldet die sichtbaren Kernwerte des Roboter-Panels als HA-Ereignis, wenn sie sich geändert haben – höchstens einmal
+   *  je ANZEIGE_MIN_MS, Änderungen dazwischen gehen gesammelt mit der nächsten Meldung. Nur mit `diagnose: true`. */
+  reportAnzeige() {
+    if (!this.hass || this._anzeigeTimer) return;
+    const next = anzeigeSnapshot(readRobot(this.hass.states));
+    const geaendert = anzeigeDiff(this._anzeige, next);
+    if (!geaendert.length) return;
+    const wait = this._anzeigeAt + ANZEIGE_MIN_MS - Date.now();
+    if (wait > 0) {
+      this._anzeigeTimer = setTimeout(() => {
+        this._anzeigeTimer = null;
+        this.reportAnzeige();
+      }, wait);
+      return;
+    }
+    this._anzeige = next;
+    this._anzeigeAt = Date.now();
+    void this.api.fireEvent(HA_EVENTS.anzeige, { seite: this.page, version: VERSION, client: CLIENT, geaendert, werte: next });
   }
   // ───────── HA-Schnittstelle der Karte ─────────
   setConfig(config) {
