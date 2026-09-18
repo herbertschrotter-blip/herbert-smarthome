@@ -111,6 +111,18 @@ h1, h2 { margin: 0; letter-spacing: -.02em; }
 .btn.sm { height: 40px; padding: 0 12px; font-size: 13px; }
 .btn.live.on { border-color: rgba(57,217,138,.45); color: var(--good); }
 
+/* ───────── Auffälligkeiten (automatische Auswertung) + Prompt für Claude ───────── */
+.sev { width: 10px; height: 10px; border-radius: 50%; flex: none; background: var(--muted); }
+.sev.bad { background: var(--bad); } .sev.warn { background: var(--warn); } .sev.info { background: var(--accent); }
+.row .sev + div { flex: 1; min-width: 0; }
+.row .s.wrap { white-space: normal; }
+.btn.xs { height: 32px; padding: 0 10px; font-size: 12px; border-radius: var(--dx-radius-sm); white-space: nowrap; }
+.btn.xs svg { width: 14px; height: 14px; }
+.lbl .btn.xs { margin-left: auto; text-transform: none; letter-spacing: 0; }
+.dlg.wide { width: min(760px, calc(100% - 32px)); }
+.prompt { font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; max-height: 430px; overflow: auto; background: var(--bg); border: 1px solid var(--line); border-radius: var(--dx-radius-md); padding: 12px; color: var(--text); margin: 0; }
+.prompt .h { color: var(--accent); font-weight: 700; } .prompt .m { color: var(--muted); }
+
 /* ───────── Zeitleiste ───────── */
 .tl { display: grid; font-variant-numeric: tabular-nums; }
 .ev { display: grid; grid-template-columns: 92px 150px minmax(0, 1fr); gap: 10px; align-items: baseline; padding: 7px 8px; border-top: 1px solid var(--line); border-radius: 6px; cursor: pointer; }
@@ -131,6 +143,7 @@ h1, h2 { margin: 0; letter-spacing: -.02em; }
 /* ───────── Dialog „Fehler melden“ (dx-dialog: modal, < 640 px sheet) ───────── */
 .scrim { position: absolute; inset: 0; background: rgba(3,5,7,.6); display: grid; place-items: center; z-index: 10; }
 .dlg { width: min(460px, calc(100% - 32px)); background: var(--dx-bg-elevated); border: 1px solid var(--dx-border-strong); border-radius: var(--dx-radius-xl); box-shadow: var(--dx-shadow-float); padding: var(--dx-space-5); display: grid; gap: var(--dx-space-3); }
+.dlg { max-height: calc(100% - 24px); overflow: auto; }
 .dlg h2 { font-size: 20px; }
 .dlg textarea { width: 100%; min-height: 96px; resize: vertical; padding: 10px 12px; border-radius: var(--dx-radius-md); background: var(--bg); border: 1px solid var(--line); }
 .dlg .quick .chip { height: 32px; font-size: 12px; cursor: pointer; }
@@ -156,6 +169,8 @@ h1, h2 { margin: 0; letter-spacing: -.02em; }
   .ev .src { grid-column: 2; grid-row: 1; } .ev .tx { grid-column: 2; white-space: normal; } .ev .more { grid-column: 1 / -1; }
   .report span { display: none; } .report { padding: 0 10px; }
   .mi.clock { display: none; }
+  .row.find { flex-wrap: wrap; } .row.find .btn.xs { margin-left: 20px; }
+  .prompt { max-height: 300px; font-size: 10.5px; }
 }
 </style>
 </head>
@@ -167,6 +182,7 @@ h1, h2 { margin: 0; letter-spacing: -.02em; }
     <button class="on" data-s="dev">Seite Dev</button>
     <button data-s="report">„Fehler melden“ offen</button>
     <button data-s="sent">Nach dem Senden</button>
+    <button data-s="prompt">„Prompt für Claude“ offen</button>
     <button data-s="other">Knopf auf jeder Seite (Beispiel Übersicht)</button>
     <button data-s="guest">Benutzer ohne Admin-Recht</button>
   </span>
@@ -176,7 +192,7 @@ h1, h2 { margin: 0; letter-spacing: -.02em; }
 <div class="legend">
   <b>Was neu ist:</b> (1) Seite <b>Dev</b> – siebte Seite der Karte, nur für Admin-Benutzer: Zustand des Protokolls, Starts des Tages mit Auslöser, deine Meldungen und die <b>Zeitleiste live</b>
   (Roboter, Dienste mit Auslöser, Automationen und – grau – was die Karte angezeigt hat). (2) Knopf <b>„Fehler melden“</b> in der Kopfzeile <b>jeder</b> Seite: kurzer Text, Senden → gelbe Marke im Protokoll
-  samt Schnappschuss von Anzeige und Roboter-Zustand. Er steht <b>links neben der Uhr</b>; am Handy ist die Uhr ausgeblendet (wie heute), dort steht der Knopf als Symbol an ihrer Stelle. <b>Dev ist auch am Handy in der Tab-Leiste</b> (sechster Platz, nur für Admin – alle anderen sehen weiter fünf). <i>Änderung nach Herberts Rückmeldung 18.09.</i>
+  samt Schnappschuss von Anzeige und Roboter-Zustand. Er steht <b>links neben der Uhr</b>; am Handy ist die Uhr ausgeblendet (wie heute), dort steht der Knopf als Symbol an ihrer Stelle. <b>Dev ist auch am Handy in der Tab-Leiste</b> (sechster Platz, nur für Admin – alle anderen sehen weiter fünf). (3) <b>Auffälligkeiten</b>: die Auswertung sucht selbst nach Fehlern (Anzeige passt nicht zum Roboter, Dienst ohne Wirkung, Fehler der Integration, Entität lange nicht verfügbar, Start ohne HA-Auslöser …) und macht aus jedem Fund – und aus jeder deiner Meldungen – einen <b>fertigen Prompt für Claude</b>: Befund, Auszug der Zeitleiste, Rohmeldungen, wo im Code zu suchen ist. Ein Tipp auf „Kopieren“, in Claude einfügen, fertig. <i>Änderungen nach Herberts Rückmeldungen 18.09.</i>
 </div>
 
 <div class="stage">
@@ -231,9 +247,19 @@ h1, h2 { margin: 0; letter-spacing: -.02em; }
         <section class="b c4">
           <div class="lbl">Meine Meldungen <span class="r" id="rcount">1</span></div>
           <div class="list" data-reports>
-            <div class="row link" data-jump="20:41:30"><div><div class="t">20:41 · „Akku zeigt 99 %, App sagt 100 %“</div><div class="s">Seite Übersicht · alpha.32 · Herbert</div></div><span class="chip warn">Marke</span></div>
+            <div class="row link" data-jump="20:41:30"><div><div class="t">20:41 · „Akku zeigt 99 %, App sagt 100 %“</div><div class="s">Seite Übersicht · alpha.32 · Herbert</div></div><button class="btn xs" data-act="prompt">Prompt</button></div>
           </div>
-          <div class="hint">Antippen springt in der Zeitleiste zur Stelle.</div>
+          <div class="hint">Antippen springt zur Stelle · „Prompt“ = fertiger Text für Claude.</div>
+        </section>
+
+        <section class="b c12">
+          <div class="lbl">Auffälligkeiten <span class="chip warn">3 heute</span><button class="btn xs" data-act="prompt"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>Tagesbericht als Prompt</button></div>
+          <div class="list">
+            <div class="row link find" data-jump="20:48:41"><span class="sev warn"></span><div><div class="t">Anzeige passt nicht zum Roboter: Karte zeigt „Fortschritt 0 %“, Heidi ist angedockt</div><div class="s wrap">seit 20:48:41 · Seite Übersicht · Regel: Fortschritt nur im Lauf (PD-016)</div></div><button class="btn xs" data-act="prompt">Prompt für Claude</button></div>
+            <div class="row link find" data-jump="20:41:25"><span class="sev bad"></span><div><div class="t">Integration meldet Fehler: Map render Failed – 'Segment' object has no attribute 'area'</div><div class="s wrap">37× heute, zuletzt 20:39:12 · Quelle Debuglog dreame_vacuum.dreame.map</div></div><button class="btn xs" data-act="prompt">Prompt für Claude</button></div>
+            <div class="row link find" data-jump="20:39:07"><span class="sev info"></span><div><div class="t">Start ohne HA-Auslöser (extern) – „Angepasste Reinigung“ wurde dabei ausgeschaltet</div><div class="s wrap">20:39:07 · switch.heidi_customized_cleaning on → off · wird nach dem Lauf automatisch wieder eingeschaltet</div></div><button class="btn xs" data-act="prompt">Prompt für Claude</button></div>
+          </div>
+          <div class="hint">Regeln der Auswertung (diag.py): Anzeige ≠ Roboter länger als 10 s · Dienstaufruf ohne Zustandswechsel in 30 s · Fehler/Traceback der Integration · Roboter-Entität länger als 10 min nicht verfügbar · Start ohne HA-Auslöser · Warnung oder Fehler des Roboters · Lücke im Protokoll.</div>
         </section>
 
         <section class="b c12">
@@ -286,6 +312,41 @@ h1, h2 { margin: 0; letter-spacing: -.02em; }
       <div class="foot"><button class="btn" data-act="close">Abbrechen</button><button class="btn primary" data-act="send">Senden</button></div>
     </div>
   </div>
+  <div class="scrim" data-pscrim hidden>
+    <div class="dlg wide" role="dialog" aria-modal="true" aria-label="Prompt für Claude">
+      <h2>Prompt für Claude</h2>
+      <div class="hint">Fertiger Text mit allem, was Claude braucht. Kopieren und in Claude Code einfügen.</div>
+<pre class="prompt"><span class="h">PROJEKT</span>  herbert-smarthome · Branch dreame_x60 · Karte 2.0.0-alpha.33 · HA OS 2026.7 · Roboter vacuum.heidi
+<span class="m">Lies zuerst: CLAUDE.md, docs/HANDOFF.md Abschnitt 3e, heidi/CLAUDE.md „Diagnose-Protokoll“.</span>
+
+<span class="h">BEFUND</span>  (automatisch erkannt, 18.09.2026 20:48:41, Regel „Anzeige ≠ Roboter“)
+Die Karte zeigt auf der Seite Übersicht „Fortschritt 0 %“, obwohl Heidi angedockt ist.
+Erwartet: kein Fortschritt außerhalb eines Laufs (PD-016).
+
+<span class="h">ZEITLEISTE</span>  (Auszug 20:48:13 – 20:48:45, heidi_diag-2026-09-18.jsonl)
+20:48:13.783  Benutzer Herbert   Dienst vacuum.start {entity_id: vacuum.heidi}
+20:48:13.894  Benutzer Herbert   vacuum.heidi docked → cleaning
+20:48:14.950  Karte Übersicht    zeigt Reinigt · Saugt Staub ab · Fortschritt 0 %
+20:48:32.411  Benutzer Herbert   Dienst vacuum.stop
+20:48:40.903  extern             vacuum.heidi docked → idle
+20:48:41.120  Karte Übersicht    zeigt Bereit · <b>Fortschritt 0 %</b>   ← Abweichung
+<span class="m">sensor.heidi_cleaning_progress: 0 (nicht „unavailable“) seit 20:48:14</span>
+
+<span class="h">ROHMELDUNGEN DER INTEGRATION</span>  (dreame_debug-2026-09-18.log, selbes Fenster)
+20:48:14.102  [dreame.device] Property changed: CLEANING_PROGRESS = 0
+20:48:40.880  [dreame.device] Property changed: STATE = 6 (charging)
+
+<span class="h">WO SUCHEN</span>
+- dreame_x60/card/src/ha/selectors.ts → readRobot, Feld progress
+- dreame_x60/card/src/components/dx-auftrag.ts → Balken (data-src robot|rooms)
+- Zustand prüfen: .\tools\ha.ps1 get states/sensor.heidi_cleaning_progress
+- Zeitfenster nachlesen: node tools\diag.js --tag 2026-09-18 --von 20:48 --bis 20:49 --debug
+
+<span class="h">AUFGABE</span>
+Ursache finden, Befund in docs/dreame_x60/BAUPLAN.md Abschnitt 10 eintragen, Fix mit Test vorschlagen.</pre>
+      <div class="foot"><button class="btn" data-act="pclose">Schließen</button><button class="btn primary" data-act="copy"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>Kopieren</button></div>
+    </div>
+  </div>
   <div class="toast" data-toast>Gemeldet 20:49:02 – Marke steht im Protokoll</div>
 </template>
 
@@ -300,6 +361,7 @@ function setState(s) {
   frames.forEach((f) => {
     const guest = s === 'guest', other = s === 'other', start = guest || other;
     f.querySelector('[data-scrim]').hidden = s !== 'report';
+    f.querySelector('[data-pscrim]').hidden = s !== 'prompt';
     f.querySelector('.report').hidden = guest;
     f.querySelector('.devnav').hidden = guest; f.querySelector('.devtab').hidden = guest;
     f.querySelector('.devnav').classList.toggle('on', !start); f.querySelector('.devtab').classList.toggle('on', !start);
@@ -311,7 +373,7 @@ function setState(s) {
     const sent = f.querySelector('[data-sent]');
     if (s === 'sent' && !sent) addReport(f, 'Kopf zeigt Bereit, Heidi fährt aber');
     if (s !== 'sent' && sent) { sent.remove(); f.querySelector('[data-sentrow]')?.remove(); f.querySelector('#rcount').textContent = '1'; }
-    f.querySelector('[data-toast]').classList.toggle('show', s === 'sent');
+    const to = f.querySelector('[data-toast]'); to.textContent = 'Gemeldet 20:49:02 – Marke steht im Protokoll'; to.classList.toggle('show', s === 'sent');
   });
 }
 function addReport(f, text) {
@@ -321,7 +383,7 @@ function addReport(f, text) {
   f.querySelector('[data-tl]').prepend(ev);
   const row = document.createElement('div');
   row.className = 'row link'; row.dataset.jump = '20:49:02'; row.dataset.sentrow = '1';
-  row.innerHTML = '<div><div class="t">20:49 · „' + text + '“</div><div class="s">Seite Dev · alpha.33 · Herbert</div></div><span class="chip warn">Marke</span>';
+  row.innerHTML = '<div><div class="t">20:49 · „' + text + '“</div><div class="s">Seite Dev · alpha.33 · Herbert</div></div><button class="btn xs" data-act="prompt">Prompt</button>';
   f.querySelector('[data-reports]').prepend(row);
   f.querySelector('#rcount').textContent = '2';
 }
@@ -332,6 +394,9 @@ frames.forEach((f) => f.addEventListener('click', (e) => {
   if (act === 'open') return setState('report');
   if (act === 'close') return setState('dev');
   if (act === 'send') return setState('sent');
+  if (act === 'prompt') return setState('prompt');
+  if (act === 'pclose') return setState('dev');
+  if (act === 'copy') { const tx = f.querySelector('.prompt').textContent; navigator.clipboard?.writeText(tx).catch(() => {}); const to = f.querySelector('[data-toast]'); to.textContent = 'Prompt kopiert – in Claude einfügen'; to.classList.add('show'); setTimeout(() => to.classList.remove('show'), 1900); return; }
   if (act === 'live') return e.target.closest('button').classList.toggle('on');
   const q = e.target.closest('[data-q]'); if (q) return q.classList.toggle('sel');
   const fb = e.target.closest('[data-filter] button');
