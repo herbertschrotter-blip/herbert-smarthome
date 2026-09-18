@@ -61,6 +61,12 @@ const wsArgs = (page, service) => page.evaluate((service) => window._ws.filter((
   await m.page.waitForTimeout(120);
   const tk = (fn) => m.page.evaluate((fn) => { const root = document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-dialog[data-kind=ticket] dx-ticket').shadowRoot; return new Function('root', fn)(root); }, fn);
   H.checkEqual('Ticket-Ansicht: Nummer, Status, ClickUp, gesicherter Text', await tk('return [root.querySelector(".nr").textContent, root.querySelector("[data-status]").textContent, root.querySelector(".chip.dim").textContent, root.querySelector("pre").textContent.includes("Map render Failed")]'), ['HT-0003', 'in Arbeit', 'ClickUp DX-080', true]);
+  // Kopieren: die Testseite läuft wie Herberts HA über http (kein navigator.clipboard) → der alte Weg muss greifen (echter Klick nötig)
+  await m.page.evaluate(() => { window._copied = null; document.addEventListener('copy', () => { const a = document.activeElement; window._copied = a && 'value' in a ? a.value.substring(a.selectionStart, a.selectionEnd) : String(document.getSelection()); }); });
+  await m.page.click('dx-ticket [data-copy]');
+  await m.page.waitForTimeout(80);
+  H.checkEqual('Kopieren über http: ganzer Ticket-Text in der Zwischenablage, Toast, keine Fehlermeldung', [await m.page.evaluate(() => [window.isSecureContext, window._copied]), await tk('return root.querySelector(".err") ? root.querySelector(".err").textContent : ""'), await shell(m.page, 'return root.querySelector(".toast") && root.querySelector(".toast").textContent')],
+    [[false, 'TICKET   HT-0003 · in_arbeit\nZEITLEISTE\n08:39:12 Map render Failed'], '', 'Ticket HT-0003 kopiert – in Claude einfügen']);
   H.checkEqual('Verwerfen ohne Grund → Hinweis, kein Aufruf', [await tk('root.querySelector("[data-reject]").click(); return new Promise((r) => setTimeout(() => r(root.querySelector(".err").textContent), 30))'), (await wsArgs(m.page, 'heidi_ticket')).filter((a) => a.cmd === 'verwerfen').length], ['Bitte zuerst einen Text eingeben.', 0]);
   await tk('const x = root.querySelector("textarea"); x.value = "bekannter Fehler der Integration"; x.dispatchEvent(new Event("input")); root.querySelector("[data-reject]").click()');
   await m.page.waitForTimeout(120);

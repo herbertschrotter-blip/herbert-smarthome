@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.33 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.34 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -991,7 +991,7 @@ var de = {
   "ticket.noted": "Notiz gespeichert",
   "ticket.copy": "Kopieren",
   "ticket.copied": "Ticket {nr} kopiert \u2013 in Claude einf\xFCgen",
-  "ticket.copyFailed": "Kopieren nicht m\xF6glich \u2013 Text bitte markieren.",
+  "ticket.copyFailed": "Der Browser l\xE4sst das Kopieren nicht zu \u2013 der Text ist markiert, bitte Strg+C dr\xFCcken.",
   "page.parts.reinigen": "dx-map-card full (4.3)|App-Szenen|St\xFChle am Boden|R\xE4ume (Roboter-Werte) \u2192 dx-rooms-dialog (4.6)",
   "page.parts.planer": "dx-planer (4.4)|dx-planer-editor + dx-clock-picker (4.5)|Automatik-Regeln|dx-estimate-dialog (4.8)",
   "page.parts.protokoll": "dx-history (4.7)|Lernwerte-Tabelle",
@@ -3058,7 +3058,7 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.33";
+var VERSION = "2.0.0-alpha.34";
 
 // src/config.ts
 var NAV = [
@@ -4687,6 +4687,40 @@ var DxReport = class extends i4 {
 };
 if (!customElements.get(REPORT_ELEMENT)) customElements.define(REPORT_ELEMENT, DxReport);
 
+// src/shared/clipboard.ts
+async function copyText(text) {
+  if (window.isSecureContext && navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+    }
+  }
+  const field = document.createElement("textarea");
+  field.value = text;
+  field.setAttribute("readonly", "");
+  field.setAttribute("aria-hidden", "true");
+  field.style.cssText = "position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;pointer-events:none";
+  document.body.appendChild(field);
+  field.select();
+  field.setSelectionRange(0, text.length);
+  let ok2 = false;
+  try {
+    ok2 = document.execCommand("copy");
+  } catch {
+    ok2 = false;
+  }
+  field.remove();
+  return ok2;
+}
+function selectContent(el) {
+  const range = document.createRange();
+  range.selectNodeContents(el);
+  const sel = window.getSelection();
+  sel?.removeAllRanges();
+  sel?.addRange(range);
+}
+
 // src/components/dx-ticket.ts
 var TICKET_ELEMENT = "dx-ticket";
 var STATUS_CHIP2 = { neu: "warn", angenommen: "acc", in_arbeit: "acc", geloest: "on", geschlossen: "on", verworfen: "dim" };
@@ -4743,12 +4777,14 @@ var DxTicket = class extends i4 {
     }
   }
   async copy() {
-    try {
-      await navigator.clipboard.writeText(this._text);
+    if (await copyText(this._text)) {
+      this._fehler = "";
       emit(this, EVENTS.toast, t3("ticket.copied", { nr: this.nr }));
-    } catch {
-      this._fehler = t3("ticket.copyFailed");
+      return;
     }
+    const pre = this.renderRoot.querySelector("pre");
+    if (pre) selectContent(pre);
+    this._fehler = t3("ticket.copyFailed");
   }
   render() {
     const k2 = this._t;

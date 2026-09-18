@@ -6,6 +6,7 @@ import type { DxApi } from '../ha/api';
 import type { Ticket } from '../domain/diag';
 import { t, tx } from '../i18n/t';
 import { EVENTS, emit } from '../shared/overlay';
+import { copyText, selectContent } from '../shared/clipboard';
 import { controls } from '../styles/controls';
 
 export const TICKET_ELEMENT = 'dx-ticket';
@@ -46,7 +47,11 @@ export class DxTicket extends LitElement {
   }
 
   private async copy(): Promise<void> {
-    try { await navigator.clipboard.writeText(this._text); emit(this, EVENTS.toast, t('ticket.copied', { nr: this.nr })); } catch { this._fehler = t('ticket.copyFailed'); }
+    // Über http (Heimnetz) gibt es navigator.clipboard nicht – copyText nimmt dann den alten Weg des Browsers
+    if (await copyText(this._text)) { this._fehler = ''; emit(this, EVENTS.toast, t('ticket.copied', { nr: this.nr })); return; }
+    const pre = this.renderRoot.querySelector('pre');
+    if (pre) selectContent(pre);
+    this._fehler = t('ticket.copyFailed');
   }
 
   override render(): TemplateResult {

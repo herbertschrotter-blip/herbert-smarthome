@@ -149,7 +149,7 @@ export const de = {
   'ticket.noted': 'Notiz gespeichert',
   'ticket.copy': 'Kopieren',
   'ticket.copied': 'Ticket {nr} kopiert – in Claude einfügen',
-  'ticket.copyFailed': 'Kopieren nicht möglich – Text bitte markieren.',
+  'ticket.copyFailed': 'Der Browser lässt das Kopieren nicht zu – der Text ist markiert, bitte Strg+C drücken.',
   'page.parts.reinigen': 'dx-map-card full (4.3)|App-Szenen|Stühle am Boden|Räume (Roboter-Werte) → dx-rooms-dialog (4.6)',
   'page.parts.planer': 'dx-planer (4.4)|dx-planer-editor + dx-clock-picker (4.5)|Automatik-Regeln|dx-estimate-dialog (4.8)',
   'page.parts.protokoll': 'dx-history (4.7)|Lernwerte-Tabelle',
