@@ -378,6 +378,12 @@ shell_command:
   # Mit Templates läuft shell_command ohne Shell (shlex) – JSON in einfachen Anführungszeichen ist sicher.
   heidi_runlog: "python3 /config/prognose/runlog.py log '{{ zeile }}'"
   heidi_schaetzung: "python3 /config/prognose/runlog.py schaetzung '{{ args }}'"
+  # Diagnose-Protokoll (Bauplan F.1): Zeile als base64 (Texte mit Hochkomma zerlegen den Aufruf sonst), Tagesdateien
+  # unter /config/prognose/diag/, 30 Tage. debuglog holt die Zeilen der Dreame-Integration aus dem HA-Log.
+  heidi_diag: "python3 /config/prognose/diag.py log {{ zeile }}"
+  heidi_diag_debuglog: python3 /config/prognose/diag.py debuglog
+  heidi_diag_status: python3 /config/prognose/diag.py status
+  heidi_diag_test: python3 -m unittest discover -s /config/prognose/tests -p test_diag.py
 
 command_line:
   - sensor:

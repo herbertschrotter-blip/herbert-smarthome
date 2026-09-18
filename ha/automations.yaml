@@ -267,6 +267,106 @@
               'carpet': states('select.heidi_carpet_cleaning'), 'mop_extend': states('switch.heidi_mop_extend'),
               'water_temp': states('select.heidi_water_temperature')} | to_json }}
 
+# ═══════════════════════ Diagnose-Protokoll (Bauplan F.1) ═══════════════════════
+- id: heidi_diagnose_protokoll
+  alias: "Heidi: Diagnose-Protokoll"
+  description: >-
+    Schreibt lückenlos mit, was Heidi betrifft: jede Zustands- und Attributänderung aller Entitäten mit „heidi“ im
+    Namen (Roboter und Paket, ohne Kamerabilder), jeden Dienstaufruf an sie, jede ausgelöste Heidi-Automation und
+    jedes gestartete Heidi-Skript – mit Auslöser (Benutzer in HA, Automation/Skript oder extern = Dreame-App,
+    Knopf am Roboter, App-Zeitplan). Eine JSON-Zeile je Ereignis in /config/prognose/diag/heidi_diag-<Tag>.jsonl
+    (diag.py, 30 Tage). Neue Entitäten des Roboters sind automatisch dabei. Abschalten: diese Automation
+    deaktivieren. Auswertung: tools/diag.js. Bauplan F.1 (DX-068), 18.09.2026.
+  mode: queued
+  max: 200
+  trace:
+    stored_traces: 1
+  triggers:
+    - trigger: event
+      event_type: state_changed
+      id: zustand
+    - trigger: event
+      event_type: call_service
+      id: dienst
+    - trigger: event
+      event_type: automation_triggered
+      id: automation
+    - trigger: event
+      event_type: script_started
+      id: skript
+  conditions:
+    # Die eigenen Diagnose-Automationen (heidi_diag…) bleiben draußen, sonst protokolliert sich das Protokoll selbst.
+    - condition: template
+      value_template: >-
+        {% set d = trigger.event.data %}
+        {% if trigger.id == 'dienst' %}
+          {% set s = d | string %}
+          {{ d.domain not in ['shell_command', 'logger', 'system_log'] and ('heidi' in s or 'stuehle_am_boden' in s)
+             and 'heidi_diag' not in s }}
+        {% else %}
+          {% set ent = d.entity_id | default('') %}
+          {# Automationen ändern bei jedem Lauf nur Zähler und „zuletzt ausgelöst“ – das steht schon in der Zeile
+             „automation“; von ihnen zählt nur an/aus. #}
+          {% set gleich = trigger.id == 'zustand' and d.old_state and d.new_state and d.old_state.state == d.new_state.state %}
+          {% set zaehler = gleich and ent.startswith('automation.') %}
+          {# rest_min zählt jede Minute herunter (reine Uhr) – nur das allein ist keine Zeile wert #}
+          {% set zaehler = zaehler or (gleich and ent == 'sensor.heidi_automatik_status'
+                           and (d.old_state.attributes.items() | rejectattr('0', 'eq', 'rest_min') | list)
+                            == (d.new_state.attributes.items() | rejectattr('0', 'eq', 'rest_min') | list)) %}
+          {{ (ent is match('(?!camera\\.)[a-z_]+\\.heidi(_|$)') or ent == 'input_boolean.stuehle_am_boden')
+             and 'heidi_diag' not in ent and ent != this.entity_id and not zaehler }}
+        {% endif %}
+  actions:
+    - action: shell_command.heidi_diag
+      data:
+        # Werte, die JSON nicht kennt (Datum, Listen, Objekte), werden Text; lange Texte auf 300 Zeichen gekürzt.
+        zeile: >-
+          {% set e = trigger.event %}{% set d = e.data %}
+          {% set uid = e.context.user_id %}{% set pid = e.context.parent_id %}
+          {% set wer = (states.person | selectattr('attributes.user_id', 'eq', uid) | map(attribute='name') | first | default('')) if uid else '' %}
+          {# „quelle“ und „durch“ ergänzt diag.py (zeitgesteuerte Automationen haben keinen Eltern-Kontext) #}
+          {% set basis = {'ts': (e.time_fired | as_local).strftime('%Y-%m-%dT%H:%M:%S.%f')[:23], 'v': 1, 'art': trigger.id,
+                          'wer': wer, 'ctx': e.context.id, 'user_id': uid, 'parent_id': pid} %}
+          {% if trigger.id == 'zustand' %}
+            {% set o = d.old_state %}{% set n = d.new_state %}
+            {% set oa = o.attributes if o else {} %}{% set na = n.attributes if n else {} %}
+            {% set ns = namespace(l=[]) %}
+            {% for k in ((oa.keys() | list) + (na.keys() | list)) | unique %}
+              {% if oa.get(k) != na.get(k) %}
+                {% set a = oa.get(k) %}{% set b = na.get(k) %}
+                {% set a = a if (a is none or a is boolean or a is number) else (a | string)[:300] %}
+                {% set b = b if (b is none or b is boolean or b is number) else (b | string)[:300] %}
+                {% set ns.l = ns.l + [[k, a, b]] %}
+              {% endif %}
+            {% endfor %}
+            {{ dict(basis, ent=d.entity_id, alt=(o.state if o else none), neu=(n.state if n else none), attr=ns.l) | to_json | base64_encode }}
+          {% elif trigger.id == 'dienst' %}
+            {% set ns = namespace(d={}) %}
+            {% for k, w in (d.service_data or {}).items() %}
+              {% set w = w if (w is none or w is boolean or w is number) else (w | string)[:300] %}
+              {% set ns.d = dict(ns.d, **{(k | string): w}) %}
+            {% endfor %}
+            {{ dict(basis, dienst=d.domain ~ '.' ~ d.service, daten=ns.d) | to_json | base64_encode }}
+          {% else %}
+            {{ dict(basis, ent=d.entity_id, name=d.name | default(''), ausloeser=d.source | default('')) | to_json | base64_encode }}
+          {% endif %}
+
+- id: heidi_diagnose_debuglog
+  alias: "Heidi: Diagnose – Debuglog der Integration sichern"
+  description: >-
+    Holt jede Minute die neuen Zeilen der Dreame-Integration (Debug-Stufe, logger in configuration.yaml) aus dem
+    HA-Log nach /config/prognose/diag/dreame_debug-<Tag>.log (diag.py debuglog, 30 Tage). Das HA-Log selbst läuft
+    über und wird nicht aufgehoben. Bauplan F.1 (DX-068), 18.09.2026.
+  mode: single
+  max_exceeded: silent
+  trace:
+    stored_traces: 1
+  triggers:
+    - trigger: time_pattern
+      minutes: "/1"
+  actions:
+    - action: shell_command.heidi_diag_debuglog
+
 # ═══════════════════════ Dashboard & Prognose ═══════════════════════
 - id: heidi_dark_mode
   alias: "Heidi: Dark Mode umschalten"

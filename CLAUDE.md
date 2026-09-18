@@ -18,7 +18,7 @@ Cowork-Sitzungen (was gebaut wurde, warum, bekannte Stolpersteine, offene Punkte
   (`.\tools\ha.ps1 post config/core/check_config`), dann HA neu starten
   (`.\tools\ha.ps1 post services/homeassistant/restart`). Dashboard danach mit Strg+F5 laden.
 - Nie ins Repo: `H:\.storage\`, `secrets.yaml`, Datenbanken, `prognose/presence_log.csv`,
-  `prognose/runlog.csv` (Laufprotokoll, wird nie gelöscht).
+  `prognose/runlog.csv` (Laufprotokoll, wird nie gelöscht), `prognose/diag/` (Diagnose-Protokoll, Tagesdateien).
 - Ohne Neustart neu laden: `services/automation/reload`, `template/reload`, `shell_command/reload`,
   `command_line/reload`, `input_*/reload`. Neustart nur für neue Helfer-Domänen oder configuration.yaml.
 
@@ -30,7 +30,9 @@ Cowork-Sitzungen (was gebaut wurde, warum, bekannte Stolpersteine, offene Punkte
   `docs/dreame_x60/BAUPLAN.md` (Statusliste = Wahrheit), Begründungen `docs/dreame_x60/ARCHITEKTUR-REVIEW.md`.
   Arbeit nur auf Branch `dreame_x60`; `main` bleibt das, was auf `H:` läuft.
 - `tools/ha.ps1` (API), `tools/deploy.ps1` (Kopieren nach H:\ + Kartenversion hochzählen),
-  `tools/ha-ws.js` (WebSocket-API für Personen/Entitäts-Register; JSON-Argumente über Git Bash).
+  `tools/ha-ws.js` (WebSocket-API für Personen/Entitäts-Register; JSON-Argumente über Git Bash),
+  `tools/diag.js` (Auswertung des Diagnose-Protokolls aus `H:\prognose\diag\`, Bauplan F.1; Beschreibung in
+  `heidi/CLAUDE.md`). Das HA-Log gibt es nicht mehr als Datei: `.\tools\ha.ps1 get "hassio/core/logs?lines=300"`.
 - Entitäts-IDs mit Umlaut im Namen: HA macht ö→o, ü→u (`heidi_nicht_storen`, nicht `_stoeren`).
   Vor dem Referenzieren die echte ID per `ha.ps1 get states/<id>` prüfen.
 - `docs/HANDOFF.md` – Übergabe aus dem Cowork-Chat, offene Punkte als Checkliste pflegen.

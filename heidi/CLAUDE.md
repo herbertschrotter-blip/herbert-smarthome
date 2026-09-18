@@ -92,6 +92,16 @@ Durchgang, Belag), `laden`, `waesche`. Karte: `_estimate(p, variante, uniform)` 
 Automatik: `shell_command.heidi_schaetzung` mit `response_variable` → Wahl voll/schnell/warten.
 Nicht gefahrene Einstellungen werden aus demselben Modus × Saugstufen-Faktor (0.8/1/1.25/1.6) geschätzt.
 
+## Diagnose-Protokoll (ha/prognose/diag.py, Bauplan F.1, seit 18.09.2026)
+Automation `heidi_diagnose_protokoll` (Ereignisse `state_changed`, `call_service`, `automation_triggered`,
+`script_started`; alles mit „heidi“ im Namen, ohne Kameras) → `shell_command.heidi_diag` (Zeile als base64) →
+`/config/prognose/diag/heidi_diag-<Tag>.jsonl` (30 Tage): ts, art, ent, alt → neu, geänderte Attribute, Kontext,
+`quelle` benutzer | automation (`durch` = Name) | system | extern. Automation `heidi_diagnose_debuglog` sichert jede
+Minute die Debug-Zeilen der Dreame-Integration aus dem HA-Log (Supervisor-Schnittstelle, `logger:` in
+configuration.yaml) nach `dreame_debug-<Tag>.log` (14 Tage). Auswertung am PC: `node tools\diag.js`
+(`--von HH:MM --bis HH:MM --debug`). Tests auf dem Pi: Dienst `shell_command.heidi_diag_test`. Abschalten:
+Automation „Heidi: Diagnose-Protokoll“ deaktivieren. Getrennt von `runlog.csv` (Lernwerte). Dateien nie ins Repo.
+
 ## Prognose (ha/prognose/presence.py)
 Automation protokolliert alle N Minuten (Helfer `heidi_prognose_intervall`) home/not_home je
 Person in `presence_log.csv`; `forecast` liefert JSON für `sensor.heidi_prognose` (tage,

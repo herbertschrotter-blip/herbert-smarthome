@@ -16,7 +16,7 @@ function Copy-Utf8($src, $dst) {
   [IO.File]::WriteAllText($dst, [IO.File]::ReadAllText($src, $utf8), $utf8); Write-Host "→ $dst"
 }
 $files = if ($OnlyCard) { @('www\dreame_x60.js') } else {
-  @('configuration.yaml','automations.yaml','scripts.yaml','packages\heidi.yaml','dashboards\dreame_x60.yaml','themes\heidi.yaml','www\dreame_x60.js','prognose\presence.py','prognose\runlog.py') }
+  @('configuration.yaml','automations.yaml','scripts.yaml','packages\heidi.yaml','dashboards\dreame_x60.yaml','themes\heidi.yaml','www\dreame_x60.js','prognose\presence.py','prognose\runlog.py','prognose\diag.py','prognose\tests\test_diag.py') }
 foreach ($f in $files) { $src = Join-Path $root "ha\$f"; if (Test-Path $src) { Copy-Utf8 $src (Join-Path $Target $f) } else { Write-Host "übersprungen (fehlt): ha\$f" } }
 
 # Ressourcen-Versionen anpassen
