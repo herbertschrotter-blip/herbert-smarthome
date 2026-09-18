@@ -272,7 +272,8 @@
   alias: "Heidi: Diagnose-Protokoll"
   description: >-
     Schreibt lückenlos mit, was Heidi betrifft: jede Zustands- und Attributänderung aller Entitäten mit „heidi“ im
-    Namen (Roboter und Paket, ohne Kamerabilder), jeden Dienstaufruf an sie, jede ausgelöste Heidi-Automation und
+    Namen und aller Entitäten des Roboter-Geräts, egal wie sie heißen (Roboter und Paket, ohne Kamerabilder),
+    jeden Dienstaufruf an sie, jede ausgelöste Heidi-Automation und
     jedes gestartete Heidi-Skript – mit Auslöser (Benutzer in HA, Automation/Skript oder extern = Dreame-App,
     Knopf am Roboter, App-Zeitplan). Eine JSON-Zeile je Ereignis in /config/prognose/diag/heidi_diag-<Tag>.jsonl
     (diag.py, 30 Tage). Neue Entitäten des Roboters sind automatisch dabei. Abschalten: diese Automation
@@ -303,9 +304,15 @@
     - condition: template
       value_template: >-
         {% set d = trigger.event.data %}
+        {# Erfasst wird nach Name („heidi“) und zusätzlich nach Gerät: alle Entitäten des Roboters, auch wenn sie
+           anders heißen oder umbenannt werden (Herbert, 18.09.) #}
+        {% set geraet = device_entities(device_id('vacuum.heidi')) %}
         {% if trigger.id == 'dienst' %}
           {% set s = d | string %}
-          {{ d.domain not in ['shell_command', 'logger', 'system_log'] and ('heidi' in s or 'stuehle_am_boden' in s)
+          {% set ziel = (d.service_data or {}).get('entity_id') or [] %}
+          {% set ziel = [ziel] if ziel is string else ziel %}
+          {{ d.domain not in ['shell_command', 'logger', 'system_log']
+             and ('heidi' in s or 'stuehle_am_boden' in s or (ziel | select('in', geraet) | list | count) > 0)
              and 'heidi_diag' not in s }}
         {% elif trigger.id == 'anzeige' %}
           {{ true }}
@@ -319,8 +326,8 @@
           {% set zaehler = zaehler or (gleich and ent == 'sensor.heidi_automatik_status'
                            and (d.old_state.attributes.items() | rejectattr('0', 'eq', 'rest_min') | list)
                             == (d.new_state.attributes.items() | rejectattr('0', 'eq', 'rest_min') | list)) %}
-          {{ (ent is match('(?!camera\\.)[a-z_]+\\.heidi(_|$)') or ent == 'input_boolean.stuehle_am_boden')
-             and 'heidi_diag' not in ent and ent != this.entity_id and not zaehler }}
+          {{ (ent is match('[a-z_]+\\.heidi(_|$)') or ent == 'input_boolean.stuehle_am_boden' or ent in geraet)
+             and not ent.startswith('camera.') and 'heidi_diag' not in ent and ent != this.entity_id and not zaehler }}
         {% endif %}
   actions:
     - action: shell_command.heidi_diag
