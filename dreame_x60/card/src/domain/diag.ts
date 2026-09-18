@@ -20,6 +20,16 @@ export interface Ticket extends TicketKurz { text: string; notizen: { ts: string
 export interface TicketZaehler { neu: number; in_arbeit: number; geloest: number }
 
 export const TICKET_OFFEN: readonly TicketStatus[] = ['neu', 'angenommen', 'in_arbeit'];
+/** Filter der Ticketliste → Status, die er zeigt (leer = alle). „Offen“ schließt „in Arbeit“ ein; verworfene stehen nur unter „Verworfen“ und „Alle“. */
+export const TICKET_FILTER = {
+  offen: TICKET_OFFEN,
+  arbeit: ['angenommen', 'in_arbeit'],
+  geloest: ['geloest', 'geschlossen'],
+  verworfen: ['verworfen'],
+  alle: [],
+} as const satisfies Record<string, readonly TicketStatus[]>;
+export type TicketFilter = keyof typeof TICKET_FILTER;
+export const ticketPasst = (f: TicketFilter, s: TicketStatus): boolean => !TICKET_FILTER[f].length || (TICKET_FILTER[f] as readonly TicketStatus[]).includes(s);
 export type ZeilenFilter = 'all' | 'robot' | 'call' | 'auto' | 'card' | 'report';
 
 /** Gruppe einer Zeile für den Filter der Zeitleiste. */
@@ -62,15 +72,22 @@ export function zeilenText(z: DiagZeile): { haupt: string; rest: string } {
 const RUN = ['cleaning', 'paused', 'returning'];
 /** Fenster, in dem ein HA-Dienstaufruf vor dem Start als Auslöser gilt (s) – gleiche Zahl wie START_FENSTER_S in diag_regeln.py. */
 export const START_FENSTER_S = 90;
+/** Kürzere Halte sind kein Laufende (Startfolge cleaning→docked→idle→cleaning) – gleiche Zahl wie GAP_S in diag_regeln.py und domain/timeline. */
+export const START_GAP_S = 45;
 const START_DIENST = /^(vacuum\.start|dreame_vacuum\.vacuum_clean_|script\.\w*(plan_starten|reinigung|app_szene))/;
 
 export interface DiagStart { ts: string; quelle: string; wer: string; dienst: string }
 /** Starts (Wechsel auf cleaning von außerhalb eines Laufs) mit Quelle – gleiche Regel wie tools/diag.js und diag.py. */
 export function starts(zeilen: readonly DiagZeile[], tag: string): DiagStart[] {
   const out: DiagStart[] = [];
+  let ende = 0;
   zeilen.forEach((z, i) => {
-    if (z.art !== 'zustand' || !z.ts.startsWith(tag) || !(z.ent ?? '').startsWith('vacuum.') || z.neu !== 'cleaning' || RUN.includes(z.alt ?? '')) return;
+    if (z.art !== 'zustand' || !(z.ent ?? '').startsWith('vacuum.') || z.alt === z.neu) return;
     const t0 = Date.parse(z.ts);
+    if (RUN.includes(z.alt ?? '') && !RUN.includes(z.neu ?? '')) ende = t0;
+    if (z.neu !== 'cleaning' || RUN.includes(z.alt ?? '')) return;
+    if (ende && t0 - ende <= START_GAP_S * 1000) return; // kurzer Halt: derselbe Lauf
+    if (!z.ts.startsWith(tag)) return;
     let ruf: DiagZeile | undefined;
     for (let k = i - 1; k >= 0 && !ruf; k--) {
       const c = zeilen[k]!;

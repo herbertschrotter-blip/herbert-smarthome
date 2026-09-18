@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.34 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.35 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -937,7 +937,9 @@ var de = {
   "dev.tickets.count": "{n}\xD7 \xB7 zuletzt {zeit}",
   "dev.tickets.again": "{n}\xD7 wieder aufgetreten",
   "dev.tfilter.offen": "Offen",
+  "dev.tfilter.arbeit": "In Arbeit",
   "dev.tfilter.geloest": "Gel\xF6st",
+  "dev.tfilter.verworfen": "Verworfen",
   "dev.tfilter.alle": "Alle",
   "dev.status.neu": "neu",
   "dev.status.angenommen": "angenommen",
@@ -3058,7 +3060,7 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.34";
+var VERSION = "2.0.0-alpha.35";
 
 // src/config.ts
 var NAV = [
@@ -4315,6 +4317,14 @@ if (!customElements.get(QUICKSTART_ELEMENT)) customElements.define(QUICKSTART_EL
 
 // src/domain/diag.ts
 var TICKET_OFFEN = ["neu", "angenommen", "in_arbeit"];
+var TICKET_FILTER = {
+  offen: TICKET_OFFEN,
+  arbeit: ["angenommen", "in_arbeit"],
+  geloest: ["geloest", "geschlossen"],
+  verworfen: ["verworfen"],
+  alle: []
+};
+var ticketPasst = (f3, s4) => !TICKET_FILTER[f3].length || TICKET_FILTER[f3].includes(s4);
 function zeilenGruppe(z2) {
   if (z2.art === "dienst") return "call";
   if (z2.art === "automation" || z2.art === "skript") return "auto";
@@ -4346,12 +4356,18 @@ function zeilenText(z2) {
 }
 var RUN = ["cleaning", "paused", "returning"];
 var START_FENSTER_S = 90;
+var START_GAP_S = 45;
 var START_DIENST = /^(vacuum\.start|dreame_vacuum\.vacuum_clean_|script\.\w*(plan_starten|reinigung|app_szene))/;
 function starts(zeilen, tag) {
   const out = [];
+  let ende = 0;
   zeilen.forEach((z2, i5) => {
-    if (z2.art !== "zustand" || !z2.ts.startsWith(tag) || !(z2.ent ?? "").startsWith("vacuum.") || z2.neu !== "cleaning" || RUN.includes(z2.alt ?? "")) return;
+    if (z2.art !== "zustand" || !(z2.ent ?? "").startsWith("vacuum.") || z2.alt === z2.neu) return;
     const t0 = Date.parse(z2.ts);
+    if (RUN.includes(z2.alt ?? "") && !RUN.includes(z2.neu ?? "")) ende = t0;
+    if (z2.neu !== "cleaning" || RUN.includes(z2.alt ?? "")) return;
+    if (ende && t0 - ende <= START_GAP_S * 1e3) return;
+    if (!z2.ts.startsWith(tag)) return;
     let ruf;
     for (let k2 = i5 - 1; k2 >= 0 && !ruf; k2--) {
       const c4 = zeilen[k2];
@@ -4369,7 +4385,7 @@ var DEV_ELEMENT = "dx-dev";
 var DEV_TAIL = 200;
 var DEV_LIVE_MS = 1e4;
 var FILTER = ["all", "robot", "call", "auto", "card", "report"];
-var TFILTER = ["offen", "geloest", "alle"];
+var TFILTER = Object.keys(TICKET_FILTER);
 var SRC_CLASS = (z2) => z2.art === "anzeige" ? "card" : z2.art === "meldung" ? "rep" : z2.quelle === "benutzer" ? "user" : z2.quelle === "automation" ? "auto" : z2.quelle === "extern" ? "ext" : "sys";
 var STATUS_CHIP = { neu: "warn", angenommen: "acc", in_arbeit: "acc", geloest: "on", geschlossen: "on", verworfen: "dim" };
 var zeilenKey = (z2) => z2.ts + z2.art + (z2.ent ?? z2.dienst ?? z2.client ?? "");
@@ -4383,6 +4399,7 @@ var DxDev = class extends i4 {
     super();
     this._timer = null;
     this._zeilen = [];
+    this._starts = null;
     this._aelter = false;
     this._tickets = [];
     this._zaehler = { neu: 0, in_arbeit: 0, geloest: 0 };
@@ -4446,6 +4463,7 @@ var DxDev = class extends i4 {
     this.properties = {
       api: { attribute: false },
       _zeilen: { state: true },
+      _starts: { state: true },
       _aelter: { state: true },
       _tickets: { state: true },
       _zaehler: { state: true },
@@ -4483,6 +4501,7 @@ var DxDev = class extends i4 {
       const alt = this._zeilen.filter((z2) => z2.ts < first);
       this._zeilen = [...alt, ...tail.zeilen];
       if (!alt.length) this._aelter = tail.aelter;
+      this._starts = tail.starts ?? null;
       this._tickets = tk.tickets;
       this._zaehler = tk.zaehler;
       const tag = heute();
@@ -4528,10 +4547,10 @@ var DxDev = class extends i4 {
   }
   render() {
     const tag = heute();
-    const st2 = starts(this._zeilen, tag);
+    const st2 = this._starts ?? starts(this._zeilen, tag);
     const last = this._zeilen.at(-1);
     const sek = last ? Math.max(0, Math.round((Date.now() - Date.parse(last.ts)) / 1e3)) : null;
-    const tks = this._tickets.filter((k2) => this._tfilter === "alle" || this._tfilter === "offen" === TICKET_OFFEN.includes(k2.status));
+    const tks = this._tickets.filter((k2) => ticketPasst(this._tfilter, k2.status));
     const rows = this.sichtbar();
     return b2`
       <div class="grid">

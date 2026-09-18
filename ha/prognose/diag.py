@@ -218,16 +218,23 @@ def cmd_tail(args):
         if len(out) >= n + 1:
             break
         day -= timedelta(days=1)
-    print(json.dumps({"zeilen": out[-n:], "aelter": len(out) > n}, ensure_ascii=False))
+    heute, _dbg = read_day(datetime.now().strftime("%Y-%m-%d"))  # Starts aus dem ganzen Tag, nicht nur aus dem Auszug
+    print(json.dumps({"zeilen": out[-n:], "aelter": len(out) > n, "starts": starts(heute)}, ensure_ascii=False))
 
 
 def starts(rows):
     """Starts des Tages mit Quelle (gleiche Regel wie tools/diag.js und T1)."""
-    out = []
+    out, ende = [], None
     for i, r in enumerate(rows):
-        if r.get("art") != "zustand" or not str(r.get("ent", "")).startswith("vacuum.") or r.get("neu") != "cleaning" or r.get("alt") in diag_regeln.RUN:
+        if r.get("art") != "zustand" or not str(r.get("ent", "")).startswith("vacuum.") or r.get("alt") == r.get("neu"):
             continue
         t = diag_regeln.zeit(r["ts"])
+        if r.get("alt") in diag_regeln.RUN and r.get("neu") not in diag_regeln.RUN:
+            ende = t
+        if r.get("neu") != "cleaning" or r.get("alt") in diag_regeln.RUN:
+            continue
+        if ende and (t - ende).total_seconds() <= diag_regeln.GAP_S:  # Startfolge cleaning→docked→idle→cleaning: derselbe Lauf
+            continue
         ruf = next((c for c in reversed(rows[:i]) if c.get("art") == "dienst" and diag_regeln.START_DIENSTE.match(c.get("dienst", ""))
                     and (t - diag_regeln.zeit(c["ts"])).total_seconds() <= diag_regeln.START_FENSTER_S), None)
         q = r if r.get("quelle") != "extern" or not ruf else ruf

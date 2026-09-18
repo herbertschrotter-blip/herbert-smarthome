@@ -10,7 +10,7 @@ import type { RoomValuesInput } from '../domain/raumwerte';
 import type { VacuumService } from '../domain/status';
 import type { Variante } from '../domain/estimate';
 import type { HistoryResponse } from '../domain/timeline';
-import type { DiagZeile, Ticket, TicketKurz, TicketZaehler } from '../domain/diag';
+import type { DiagStart, DiagZeile, Ticket, TicketKurz, TicketZaehler } from '../domain/diag';
 
 /** Ergebnis eines mehrteiligen Schreibvorgangs. */
 export interface WriteResult { ok: boolean; fehlgeschlagen: string[]; grund?: string }
@@ -191,7 +191,7 @@ export class DxApi {
   }
 
   /** Letzte Zeilen des Protokolls (neueste zuletzt); `vor` = nur Zeilen vor diesem Zeitstempel („Ältere laden“). */
-  diagTail(n: number, vor?: string): Promise<{ zeilen: DiagZeile[]; aelter: boolean }> {
+  diagTail(n: number, vor?: string): Promise<{ zeilen: DiagZeile[]; aelter: boolean; starts?: DiagStart[] }> {
     return this.respond(SERVICES.diagTail, vor ? { n, vor } : { n });
   }
 

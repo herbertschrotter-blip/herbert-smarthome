@@ -22,6 +22,7 @@ from datetime import datetime, timedelta
 
 # Schwellen (Sekunden) – Verhaltenszahlen mit Namen, wie in der Karte (Regel 16)
 TOL_S = 10            # so lange darf eine Anzeige dem Roboter hinterherhinken
+GAP_S = 45            # kürzere Halte sind kein Laufende (Startfolge cleaning→docked→idle→cleaning) – wie runlog.py und die Zeitleiste der Karte
 DIENST_WIRKUNG_S = 30  # so schnell muss ein Dienstaufruf den Roboter verändern
 AUFTRAG_S = 60        # Fenster Raumauftrag → active_segments
 START_FENSTER_S = 90  # HA-Dienstaufruf so kurz vor dem Start = Auslöser (sonst extern)
@@ -187,6 +188,7 @@ def auswerten(zeilen, debug=None, jetzt=None, ab=None):
     dienste = []       # offene Dienstaufrufe (B1) [(t, zeile)]
     auftrag = None     # letzter Raumauftrag aus HA (B2) (t, segments, ts)
     lauf = None        # laufender Lauf {von, auto, reihenfolge, gefahren, schaetzung, durch}
+    halt = None        # gerade beendeter Lauf {t, ts, lauf}: wird erst nach GAP_S wirklich abgeschlossen (kurzer Halt = derselbe Lauf)
     nach = None        # Fristen nach dem Andocken {t, ts, auto, erledigt_gesetzt}
     startet = None     # (t, ts) seit wann der Planer „startet“ sagt
     weg = {}           # ent → seit wann unavailable
@@ -196,8 +198,23 @@ def auswerten(zeilen, debug=None, jetzt=None, ab=None):
     def add(*a, **k):
         funde.append(_fund(*a, **k))
 
+    def abschliessen(h):
+        """Lauf endgültig beenden: Reihenfolge (A3), Schätzung (B8), Fristen nach dem Andocken."""
+        nonlocal nach
+        l = h["lauf"]
+        ank, gef = l["reihenfolge"], l["gefahren"]
+        if ank and len(gef) > 1 and [r for r in ank if r in gef] != gef:
+            add("A3", "fehler", "reihenfolge", "Reihenfolge passt nicht: Karte kündigte %s an, gefahren wurde %s" % (ank, gef), "Lauf %s – %s%s." % (l["von"][11:19], h["ts"][11:19], ", Start durch " + l["durch"] if l["durch"] else ""), l["von"], h["ts"])
+        dauer = (h["t"] - l["t"]).total_seconds() / 60
+        if l["schaetzung"] and dauer >= 5 and abs(dauer - l["schaetzung"]) / l["schaetzung"] * 100 > SCHAETZUNG_PCT:
+            add("B8", "hinweis", "schaetzung", "Dauer-Schätzung daneben: geschätzt %d min, gefahren %d min" % (l["schaetzung"], dauer), "Abweichung über %d %%." % SCHAETZUNG_PCT, l["von"], h["ts"])
+        nach = {"t": h["t"], "ts": h["ts"], "auto": l["auto"], "erledigt": h.get("erledigt", False)}
+
     def fristen(t):
-        nonlocal nach, startet
+        nonlocal nach, startet, halt
+        if halt and (t - halt["t"]).total_seconds() > GAP_S:
+            h, halt = halt, None
+            abschliessen(h)
         for c in [c for c in dienste if (t - c[0]).total_seconds() > DIENST_WIRKUNG_S]:
             dienste.remove(c)
             add("B1", "hinweis", c[1]["dienst"], "Dienstaufruf ohne Wirkung: %s" % c[1]["dienst"],
@@ -240,7 +257,9 @@ def auswerten(zeilen, debug=None, jetzt=None, ab=None):
                     weg[ent] = (t, z["ts"])
                 else:
                     weg.pop(ent, None)
-                if neu == "cleaning" and not vorher_run:  # Start eines Laufs
+                if neu == "cleaning" and not vorher_run and halt:  # kurzer Halt (< GAP_S): derselbe Lauf geht weiter, kein neuer Start
+                    lauf, halt = halt["lauf"], None
+                elif neu == "cleaning" and not vorher_run:  # Start eines Laufs
                     startet = None
                     ruf = next((c for c in reversed(zeilen[:zeilen.index(z)]) if c.get("art") == "dienst" and START_DIENSTE.match(c.get("dienst", ""))
                                 and 0 <= (t - zeit(c["ts"])).total_seconds() <= START_FENSTER_S), None)
@@ -268,17 +287,10 @@ def auswerten(zeilen, debug=None, jetzt=None, ab=None):
                     seg, aktiv = w.attr(w.vac, "current_segment"), liste(w.attr(w.vac, "active_segments"))
                     if seg not in LEER and (not aktiv or int(seg) in aktiv) and int(seg) not in lauf["gefahren"]:
                         lauf["gefahren"].append(int(seg))
-                if lauf and vorher_run and neu not in RUN:  # Ende des Laufs
-                    l, lauf = lauf, None
-                    ank, gef = l["reihenfolge"], l["gefahren"]
-                    if ank and len(gef) > 1 and [r for r in ank if r in gef] != gef:
-                        add("A3", "fehler", "reihenfolge", "Reihenfolge passt nicht: Karte kündigte %s an, gefahren wurde %s" % (ank, gef), "Lauf %s – %s%s." % (l["von"][11:19], z["ts"][11:19], ", Start durch " + l["durch"] if l["durch"] else ""), l["von"], z["ts"])
-                    dauer = (t - l["t"]).total_seconds() / 60
-                    if l["schaetzung"] and dauer >= 5 and abs(dauer - l["schaetzung"]) / l["schaetzung"] * 100 > SCHAETZUNG_PCT:
-                        add("B8", "hinweis", "schaetzung", "Dauer-Schätzung daneben: geschätzt %d min, gefahren %d min" % (l["schaetzung"], dauer), "Abweichung über %d %%." % SCHAETZUNG_PCT, l["von"], z["ts"])
-                    nach = {"t": t, "ts": z["ts"], "auto": l["auto"], "erledigt": False}
-            elif ent == w.e("input_datetime", "letzte_auto_reinigung") and nach:
-                nach["erledigt"] = True
+                if lauf and vorher_run and neu not in RUN:  # Halt: erst nach GAP_S ohne Weiterfahrt ist der Lauf zu Ende
+                    halt, lauf = {"t": t, "ts": z["ts"], "lauf": lauf}, None
+            elif ent == w.e("input_datetime", "letzte_auto_reinigung") and (nach or halt):
+                (nach or halt)["erledigt"] = True
             elif ent == w.e("sensor", "automatik_status"):
                 startet = (t, z["ts"]) if "startet" in str(neu) and w.zustand(w.vac) not in RUN else None
             elif ent == w.e("sensor", "battery_level"):

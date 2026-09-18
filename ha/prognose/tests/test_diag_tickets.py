@@ -131,6 +131,19 @@ class TicketSchreibweg(unittest.TestCase):
         self.assertEqual(self.ruf(diag.cmd_ticket, b64({"cmd": "liste"}))["tickets"], [])
         self.assertFalse(self.ruf(diag.cmd_ticket, b64({"cmd": "gibtsnicht"}))["ok"])
 
+    def test_starts_des_tages_mit_startfolge_und_unabhaengig_vom_auszug(self):
+        from datetime import datetime
+        tag = datetime.now().strftime("%Y-%m-%d")
+        v = lambda hms, alt, neu, **k: diag.cmd_log([b64(dict({"ts": "%sT%s" % (tag, hms), "art": "zustand", "ent": "vacuum.heidi", "alt": alt, "neu": neu, "ctx": hms}, **k))])
+        diag.cmd_log([b64({"ts": "%sT22:38:50.407" % tag, "art": "dienst", "dienst": "dreame_vacuum.vacuum_clean_segment", "daten": {"segments": "[5]"}, "user_id": "u", "wer": "Herbert", "ctx": "d"})])
+        v("22:38:50.520", "docked", "cleaning", user_id="u", wer="Herbert")
+        v("22:39:01.965", "cleaning", "docked"); v("22:39:02.927", "docked", "idle"); v("22:39:08.981", "idle", "cleaning")
+        for i in range(30):
+            diag.cmd_log([b64({"ts": "%sT22:40:%02d.000" % (tag, i), "art": "dienst", "dienst": "x.y", "ctx": str(i)})])
+        r = self.ruf(diag.cmd_tail, b64({"n": 5}))
+        self.assertEqual(len(r["zeilen"]), 5)
+        self.assertEqual([(s["ts"][11:19], s["quelle"], s["wer"]) for s in r["starts"]], [("22:38:50", "benutzer", "Herbert")])
+
     def test_tail_liefert_die_letzten_zeilen(self):
         from datetime import datetime
         tag = datetime.now().strftime("%Y-%m-%d")

@@ -22,6 +22,7 @@ const tag = opt("tag", `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(no
 const dir = opt("ordner", "H:\\prognose\\diag");
 const von = opt("von"), bis = opt("bis"), ent = opt("ent");
 const RUN = ["cleaning", "paused", "returning"];
+const GAP_S = 45; // wie diag_regeln.py
 const START_FENSTER_S = 90; // so lange vor dem Wechsel auf „cleaning“ gilt ein HA-Dienstaufruf als Auslöser
 
 function readLines(file) {
@@ -64,8 +65,12 @@ function text(r) {
 // letzte HA-Dienstaufruf an den Roboter kurz davor (der Roboter meldet „cleaning“ oft später als 5 s → Kontext weg).
 function starts() {
   const out = [];
+  let ende = 0; // Zeitpunkt des letzten Halts; Weiterfahrt innerhalb von GAP_S ist derselbe Lauf (Startfolge cleaning→docked→idle→cleaning)
   rows.forEach((r, i) => {
-    if (r.art !== "zustand" || !/^vacuum\./.test(r.ent) || r.neu !== "cleaning" || RUN.includes(r.alt)) return;
+    if (r.art !== "zustand" || !/^vacuum\./.test(r.ent) || r.alt === r.neu) return;
+    if (RUN.includes(r.alt) && !RUN.includes(r.neu)) ende = Date.parse(r.ts);
+    if (r.neu !== "cleaning" || RUN.includes(r.alt)) return;
+    if (ende && Date.parse(r.ts) - ende <= GAP_S * 1000) return;
     let quelle = who(r), beleg = "Kontext der Zustandsänderung";
     if (r.quelle === "extern") {
       const t = Date.parse(r.ts);

@@ -16,10 +16,12 @@ const ZEILEN = [
   { ts: ts('08:48:50.000'), art: 'zustand', ent: 'sensor.heidi_phase', alt: 'Saugt Staub ab', neu: 'Fährt zum Startpunkt', quelle: 'extern' },
 ];
 const TK = (nr, status, x = {}) => ({ nr, status, schwere: 'fehler', quelle: 'auswertung', regel: 'T4', titel: 'Integration meldet Fehler: map', anzahl: 104, angelegt: ts('07:54:40'), zuletzt: ts('08:39:12'), wieder: 0, dx: '', commit: '', version: '', ...x });
-const TICKETS = [TK('HT-0005', 'neu', { quelle: 'meldung', regel: '', schwere: 'hinweis', titel: 'Meldung: „Akku zeigt 99 %“', anzahl: 1 }), TK('HT-0003', 'in_arbeit', { dx: 'DX-080' }), TK('HT-0002', 'geloest', { commit: 'abc1234' })];
+const TICKETS = [TK('HT-0005', 'neu', { quelle: 'meldung', regel: '', schwere: 'hinweis', titel: 'Meldung: „Akku zeigt 99 %“', anzahl: 1 }), TK('HT-0003', 'in_arbeit', { dx: 'DX-080' }), TK('HT-0002', 'geloest', { commit: 'abc1234' }), TK('HT-0001', 'verworfen')];
+// Starts kommen vom Backend (aus dem ganzen Tag); der frühe Planerstart steht nicht mehr im geladenen Auszug
+const STARTS = [{ ts: ts('07:00:03.000'), quelle: 'automation', wer: 'Heidi: Planer', dienst: 'script.heidi_plan_starten' }, { ts: ts('08:39:07.848'), quelle: 'extern', wer: '', dienst: '' }, { ts: ts('08:48:13.894'), quelle: 'benutzer', wer: 'Herbert', dienst: 'vacuum.start' }];
 const out = (o) => ({ response: { stdout: JSON.stringify(o), returncode: 0 } });
 const WS = {
-  'call_service:heidi_diag_tail': out({ zeilen: ZEILEN, aelter: true }),
+  'call_service:heidi_diag_tail': out({ zeilen: ZEILEN, aelter: true, starts: STARTS }),
   'call_service:heidi_diag_status': out({ dateien: [{ datei: `heidi_diag-${TAG}.jsonl`, bytes: 86016 }, { zeilen_heute: 286 }], letzte: '' }),
   'call_service:heidi_ticket': {
     liste: out({ ok: true, tickets: TICKETS, zaehler: { neu: 1, in_arbeit: 1, geloest: 1 } }),
@@ -42,13 +44,11 @@ const wsArgs = (page, service) => page.evaluate((service) => window._ws.filter((
   H.checkEqual('Navigation: Eintrag „Dev“ ist da und aktiv', await shell(m.page, 'const n = root.querySelector("dx-nav").shadowRoot.querySelector(".side [data-nav=dev]"); return [!!n, n && n.getAttribute("aria-current")]'), [true, 'page']);
   H.checkEqual('Kacheln: Protokoll, Starts, Zähler, Tickets, Zeitleiste', await dev(m.page, 'return [...root.querySelectorAll("[data-tile]")].map((x) => x.dataset.tile)'), ['log', 'starts', 'counts', 'tickets', 'timeline']);
   H.checkEqual('Protokoll: 286 Zeilen heute, 84 KB', await dev(m.page, 'return [root.querySelector("[data-tile=log] .kv .v").textContent, root.querySelector("[data-tile=log] .kv .u").textContent]'), ['286', 'Zeilen heute · 84 KB']);
-  H.checkEqual('Starts heute: Dashboard-Start „Herbert“, App-Start „extern“ (neuester oben)', await dev(m.page, 'return [...root.querySelectorAll("[data-start]")].map((r) => [r.querySelector(".t").textContent.trim().slice(0, 5), r.querySelector(".chip").textContent.trim()])'), [['08:48', 'Herbert'], ['08:39', 'extern']]);
+  H.checkEqual('Starts heute vom Backend (ganzer Tag, neuester oben): Herbert, extern, Planer', await dev(m.page, 'return [...root.querySelectorAll("[data-start]")].map((r) => [r.querySelector(".t").textContent.trim().slice(0, 5), r.querySelector(".chip").textContent.trim()])'), [['08:48', 'Herbert'], ['08:39', 'extern'], ['07:00', 'Heidi: Planer']]);
   H.checkEqual('Ticket-Zähler neu 1', await dev(m.page, 'return root.querySelector("[data-count=neu]").textContent'), '1');
-  H.checkEqual('Ticketliste: Filter Offen zeigt 2, Alle 3, Gelöst 1', [
-    await dev(m.page, 'return root.querySelectorAll("[data-ticket]").length'),
-    await dev(m.page, 'root.querySelector("[data-tf=alle]").click(); return new Promise((r) => setTimeout(() => r(root.querySelectorAll("[data-ticket]").length), 30))'),
-    await dev(m.page, 'root.querySelector("[data-tf=geloest]").click(); return new Promise((r) => setTimeout(() => r(root.querySelectorAll("[data-ticket]").length), 30))'),
-  ], [2, 3, 1]);
+  const tf = (f) => dev(m.page, 'root.querySelector("[data-tf=" + arg + "]").click(); return new Promise((r) => setTimeout(() => r([...root.querySelectorAll("[data-ticket]")].map((x) => x.dataset.ticket)), 30))', f);
+  H.checkEqual('Ticket-Filter: Offen, In Arbeit, Gelöst, Verworfen, Alle', [await dev(m.page, 'return [...root.querySelectorAll("[data-tf]")].map((x) => x.textContent)'), await tf('offen'), await tf('arbeit'), await tf('geloest'), await tf('verworfen'), (await tf('alle')).length],
+    [['Offen', 'In Arbeit', 'Gelöst', 'Verworfen', 'Alle'], ['HT-0005', 'HT-0003'], ['HT-0003'], ['HT-0002'], ['HT-0001'], 4]);
   await dev(m.page, 'root.querySelector("[data-tf=offen]").click()');
   H.checkEqual('Zeitleiste: neueste oben, Lebenszeichen ausgeblendet (7 von 8 Zeilen)', await dev(m.page, 'const r = [...root.querySelectorAll(".ev")]; return [r.length, r[0].querySelector(".ts").textContent, r[0].querySelector(".tx b").textContent]'), [7, '08:48:50.000', 'sensor.heidi_phase']);
   H.checkEqual('Filter „Dienste“ → nur Dienstaufrufe; Quelle „Benutzer Herbert“', await dev(m.page, 'root.querySelector("[data-f=call]").click(); return new Promise((r) => setTimeout(() => r([...root.querySelectorAll(".ev")].map((e) => [e.dataset.k, e.querySelector(".src").textContent, e.querySelector(".tx b").textContent])), 30))'), [['call', 'Benutzer Herbert', 'Dienst vacuum.start']]);

@@ -4,8 +4,8 @@
 import { LitElement, html, css, nothing } from 'lit';
 import type { TemplateResult } from 'lit';
 import type { DxApi } from '../ha/api';
-import { TICKET_OFFEN, quelleText, starts, zeigbar, zeilenGruppe, zeilenText } from '../domain/diag';
-import type { DiagZeile, TicketKurz, TicketZaehler, ZeilenFilter } from '../domain/diag';
+import { TICKET_FILTER, quelleText, starts, ticketPasst, zeigbar, zeilenGruppe, zeilenText } from '../domain/diag';
+import type { DiagStart, DiagZeile, TicketFilter, TicketKurz, TicketZaehler, ZeilenFilter } from '../domain/diag';
 import { t, tx } from '../i18n/t';
 import { EVENTS, emit } from '../shared/overlay';
 import type { Overlay } from '../shared/overlay';
@@ -17,8 +17,7 @@ export const DEV_TAIL = 200;
 export const DEV_LIVE_MS = 10_000;
 
 const FILTER: readonly ZeilenFilter[] = ['all', 'robot', 'call', 'auto', 'card', 'report'];
-const TFILTER = ['offen', 'geloest', 'alle'] as const;
-type TicketFilter = (typeof TFILTER)[number];
+const TFILTER = Object.keys(TICKET_FILTER) as TicketFilter[];
 const SRC_CLASS = (z: DiagZeile): string => (z.art === 'anzeige' ? 'card' : z.art === 'meldung' ? 'rep' : z.quelle === 'benutzer' ? 'user' : z.quelle === 'automation' ? 'auto' : z.quelle === 'extern' ? 'ext' : 'sys');
 const STATUS_CHIP: Record<string, string> = { neu: 'warn', angenommen: 'acc', in_arbeit: 'acc', geloest: 'on', geschlossen: 'on', verworfen: 'dim' };
 /** Eindeutiger Schlüssel einer Zeile (Zeitstempel in Millisekunden + Art + Gegenstand). */
@@ -74,12 +73,14 @@ export class DxDev extends LitElement {
 
   static override properties = {
     api: { attribute: false },
-    _zeilen: { state: true }, _aelter: { state: true }, _tickets: { state: true }, _zaehler: { state: true }, _status: { state: true },
+    _zeilen: { state: true }, _starts: { state: true }, _aelter: { state: true }, _tickets: { state: true }, _zaehler: { state: true }, _status: { state: true },
     _filter: { state: true }, _tfilter: { state: true }, _suche: { state: true }, _live: { state: true }, _offen: { state: true }, _fehler: { state: true }, _geladen: { state: true },
   };
 
   declare api?: DxApi;
   declare private _zeilen: DiagZeile[];
+  /** Starts des Tages vom Backend (aus dem ganzen Tag gerechnet); null = Backend liefert sie nicht → aus den geladenen Zeilen */
+  declare private _starts: DiagStart[] | null;
   declare private _aelter: boolean;
   declare private _tickets: TicketKurz[];
   declare private _zaehler: TicketZaehler;
@@ -95,7 +96,7 @@ export class DxDev extends LitElement {
 
   constructor() {
     super();
-    this._zeilen = []; this._aelter = false; this._tickets = []; this._zaehler = { neu: 0, in_arbeit: 0, geloest: 0 };
+    this._zeilen = []; this._starts = null; this._aelter = false; this._tickets = []; this._zaehler = { neu: 0, in_arbeit: 0, geloest: 0 };
     this._status = { bytes: 0, zeilen: 0 }; this._filter = 'all'; this._tfilter = 'offen'; this._suche = ''; this._live = true; this._offen = ''; this._fehler = ''; this._geladen = 0;
   }
 
@@ -120,6 +121,7 @@ export class DxDev extends LitElement {
       const alt = this._zeilen.filter((z) => z.ts < first);
       this._zeilen = [...alt, ...tail.zeilen];
       if (!alt.length) this._aelter = tail.aelter;
+      this._starts = tail.starts ?? null;
       this._tickets = tk.tickets; this._zaehler = tk.zaehler;
       const tag = heute();
       this._status = { bytes: st.dateien.find((d) => d.datei === `heidi_diag-${tag}.jsonl`)?.bytes ?? 0, zeilen: st.dateien.find((d) => d.zeilen_heute !== undefined)?.zeilen_heute ?? 0 };
@@ -161,10 +163,10 @@ export class DxDev extends LitElement {
 
   override render(): TemplateResult {
     const tag = heute();
-    const st = starts(this._zeilen, tag);
+    const st = this._starts ?? starts(this._zeilen, tag);
     const last = this._zeilen.at(-1);
     const sek = last ? Math.max(0, Math.round((Date.now() - Date.parse(last.ts)) / 1000)) : null;
-    const tks = this._tickets.filter((k) => this._tfilter === 'alle' || (this._tfilter === 'offen') === TICKET_OFFEN.includes(k.status));
+    const tks = this._tickets.filter((k) => ticketPasst(this._tfilter, k.status));
     const rows = this.sichtbar();
     return html`
       <div class="grid">

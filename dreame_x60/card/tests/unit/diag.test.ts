@@ -2,7 +2,7 @@
 // DxApi-Dienste mit Antwort (base64-Argumente, Fehler werden geworfen) und „Fehler melden“.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { quelleText, starts, zeigbar, zeilenGruppe, zeilenText } from '../../src/domain/diag';
+import { quelleText, starts, ticketPasst, zeigbar, zeilenGruppe, zeilenText } from '../../src/domain/diag';
 import type { DiagZeile } from '../../src/domain/diag';
 import { DxApi, toBase64 } from '../../src/ha/api';
 import type { HomeAssistant } from '../../src/ha/types';
@@ -39,6 +39,25 @@ test('starts: extern ohne HA-Aufruf, Benutzer aus dem Kontext, später Roboter �
   ];
   assert.deepEqual(starts(zeilen, '2026-09-18').map((s) => [s.ts.slice(11, 16), s.quelle, s.wer, s.dienst]),
     [['20:39', 'extern', '', ''], ['20:48', 'benutzer', 'Herbert', 'vacuum.start'], ['21:00', 'automation', 'Heidi: Planer', 'script.heidi_plan_starten']]);
+});
+
+test('starts: Startfolge cleaning→docked→idle→cleaning (< 45 s) ist ein Lauf; ein Halt über 45 s trennt zwei Läufe', () => {
+  const folge = [
+    Z({ ts: '2026-09-18T22:38:50.407', art: 'dienst', dienst: 'dreame_vacuum.vacuum_clean_segment', quelle: 'benutzer', wer: 'Herbert' }),
+    VAC('2026-09-18T22:38:50.520', 'docked', 'cleaning', { quelle: 'benutzer', wer: 'Herbert' }),
+    VAC('2026-09-18T22:39:01.965', 'cleaning', 'docked'), VAC('2026-09-18T22:39:02.927', 'docked', 'idle'), VAC('2026-09-18T22:39:08.981', 'idle', 'cleaning'),
+    VAC('2026-09-18T22:45:00.000', 'cleaning', 'docked'), VAC('2026-09-18T22:47:00.000', 'docked', 'cleaning'),
+  ];
+  assert.deepEqual(starts(folge, '2026-09-18').map((s) => [s.ts.slice(11, 19), s.quelle, s.wer]), [['22:38:50', 'benutzer', 'Herbert'], ['22:47:00', 'extern', '']]);
+});
+
+test('Ticket-Filter: Offen schließt in Arbeit ein, Verworfen steht nicht unter Gelöst', () => {
+  const zeigt = (f: Parameters<typeof ticketPasst>[0]): string[] => (['neu', 'angenommen', 'in_arbeit', 'geloest', 'geschlossen', 'verworfen'] as const).filter((s) => ticketPasst(f, s));
+  assert.deepEqual(zeigt('offen'), ['neu', 'angenommen', 'in_arbeit']);
+  assert.deepEqual(zeigt('arbeit'), ['angenommen', 'in_arbeit']);
+  assert.deepEqual(zeigt('geloest'), ['geloest', 'geschlossen']);
+  assert.deepEqual(zeigt('verworfen'), ['verworfen']);
+  assert.equal(zeigt('alle').length, 6);
 });
 
 function mockWs(antwort: (msg: Record<string, unknown>) => unknown, user: HomeAssistant['user'] = { name: 'Herbert', is_admin: true }) {

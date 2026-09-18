@@ -174,6 +174,19 @@ class RoboterUndTechnik(unittest.TestCase):
         # Roboter meldet spät (Kontext weg), aber der Dienstaufruf steht im Protokoll → nicht extern
         self.assertEqual(funde(START + [dienst(10, "vacuum.start"), z(25, VAC, "docked", "cleaning")], "T1"), [])
 
+    def test_startfolge_ist_kein_zweiter_start(self):
+        """Heidi meldet beim Losfahren cleaning→docked→idle→cleaning (< 45 s): ein Lauf, kein „externer“ Start, kein vorzeitiges Laufende."""
+        folge = LAUF + [z(22, VAC, "cleaning", "docked"), z(23, VAC, "docked", "idle"), z(29, VAC, "idle", "cleaning")]
+        self.assertEqual(funde(folge, "T1"), [])
+        # Reihenfolge wird über den Halt hinweg gemerkt und erst am echten Ende beurteilt
+        lauf = folge[:4] + [karte(12, zustand="cleaning", reihenfolge=[6, 4])] + folge[4:] + [
+            z(40, VAC, "cleaning", "cleaning", {"active_segments": ["[]", "[6, 4]"], "current_segment": [None, 4]}),
+            z(200, VAC, "cleaning", "cleaning", {"current_segment": [4, 6]}), z(400, VAC, "cleaning", "docked")]
+        self.assertEqual(len(funde(lauf, "A3", nach=1200)), 1)
+        # ein Halt über 45 s ist ein echtes Ende – der nächste Start ohne HA-Aufruf ist extern
+        spaet = LAUF + [z(22, VAC, "cleaning", "docked"), z(200, VAC, "docked", "cleaning")]
+        self.assertEqual(len(funde(spaet, "T1")), 1)
+
     def test_t2_warnung_und_fehler(self):
         f = funde(START + [z(5, "sensor.heidi_error", "no_error", "dust_bag_full")], "T2")
         self.assertEqual([x["schwere"] for x in f], ["hinweis"])
