@@ -92,6 +92,11 @@ Durchgang, Belag), `laden`, `waesche`. Karte: `_estimate(p, variante, uniform)` 
 Automatik: `shell_command.heidi_schaetzung` mit `response_variable` → Wahl voll/schnell/warten.
 Nicht gefahrene Einstellungen werden aus demselben Modus × Saugstufen-Faktor (0.8/1/1.25/1.6) geschätzt.
 
+## Örtliche Korrektur an der Dreame-Integration (HT-0001, 18.09.2026)
+`H:\custom_components\dreame_vacuum\dreame\types.py`, `Segment.__init__`: Zeile `self.area = None  # HT-0001` – ohne sie bricht das Neuzeichnen
+des Kartenbilds ab, sobald es einen Raum ohne Koordinaten gibt (versteckter Raum 8). Ein HACS-Update überschreibt die Zeile:
+danach `.\tools\check-dreame-patch.ps1` (Exit 1 = fehlt, Anleitung in der Ausgabe). Fehlerbericht: `docs/dreame_x60/upstream/`.
+
 ## Diagnose-Protokoll (ha/prognose/diag.py, Bauplan F.1, seit 18.09.2026)
 Automation `heidi_diagnose_protokoll` (Ereignisse `state_changed`, `call_service`, `automation_triggered`,
 `script_started`; alles mit „heidi“ im Namen, ohne Kameras) → `shell_command.heidi_diag` (Zeile als base64) →

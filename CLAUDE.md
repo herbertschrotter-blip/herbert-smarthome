@@ -63,7 +63,7 @@ Für den Skill tracker (projektneutral): Projektkennung statt Memory-Eintrag.
 - Projekt-Config: projects/heidi/ (Liste, Status-Werte, Nummernschema, Custom Fields wie BPM, Chat-Anker)
 - ClickUp: Space Smart Home 1200660000001609, Liste dreame_x60 – Bauplan 1200660000004100
 - Status-Übergänge: tracker start → in development; tracker done → testing (Abnahme auf shipped macht Herbert)
-- Nummernschema: `DX-NNN | KÜRZEL | Kurztitel` (Kürzel KARTE/BACKEND/DOKU/TOOLS wie Commit-Profil); Kurztitel beginnt mit der Bauplan-Nummer (z. B. 4.3e) oder „Post-2.0:“; Phasen sind Parents ohne Nummer. **Nächste freie Nummer: DX-070** (nach jedem tracker neu +1)
+- Nummernschema: `DX-NNN | KÜRZEL | Kurztitel` (Kürzel KARTE/BACKEND/DOKU/TOOLS wie Commit-Profil); Kurztitel beginnt mit der Bauplan-Nummer (z. B. 4.3e) oder „Post-2.0:“; Phasen sind Parents ohne Nummer. **Nächste freie Nummer: DX-071** (nach jedem tracker neu +1)
 
 ## Ticket-Profil
 Für den Skill ticket (projektneutral). Tickets = Meldungen aus der Karte („Fehler melden“) und Auffälligkeiten der Auswertung (Bauplan F.2).
