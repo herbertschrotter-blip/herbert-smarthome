@@ -15,3 +15,6 @@ node_modules/
 *.png
 !heidi/mockups/*.png
 .env
+# Python-Cache
+__pycache__/
+*.pyc
