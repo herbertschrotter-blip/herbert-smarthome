@@ -91,6 +91,35 @@ class AnzeigeRegeln(unittest.TestCase):
         self.assertEqual(len(funde(LAUF + [karte(13, zustand="cleaning", reihenfolge=[6, 4])] + fahrt, "A3", nach=1200)), 1)
         self.assertEqual(funde(LAUF + [karte(13, zustand="cleaning", reihenfolge=[4, 6])] + fahrt, "A3", nach=1200), [])
 
+    def test_a3_durchfahrt_zaehlt_nicht_ht0012(self):
+        # Lauf 19.09. 13:35: Station im Büro (5), 7 s durch den Flur (4) ins Wohnzimmer (7); alle Räume aktiv (ganze Wohnung).
+        alle = "[7, 6, 5, 4, 3, 2, 1]"
+        fahrt = [z(12, VAC, "cleaning", "cleaning", {"active_segments": ["[]", alle], "current_segment": [None, 5]}),
+                 z(36, VAC, "cleaning", "cleaning", {"current_segment": [5, 4]}), z(43, VAC, "cleaning", "cleaning", {"current_segment": [4, 7]}),
+                 z(900, VAC, "cleaning", "cleaning", {"current_segment": [7, 6]}), z(1300, VAC, "cleaning", "cleaning", {"current_segment": [6, 4]}),
+                 z(1309, VAC, "cleaning", "cleaning", {"current_segment": [4, 5]}), z(1800, VAC, "cleaning", "cleaning", {"current_segment": [5, 4]}),
+                 z(2300, VAC, "cleaning", "docked")]
+        zeigt = [karte(13, zustand="cleaning", reihenfolge=[7, 6, 5, 4, 3, 2, 1])]
+        self.assertEqual(funde(LAUF + zeigt + fahrt, "A3", nach=3200), [])
+        # Gegenprobe: bleibt der Roboter zuerst 8 min im Flur (echte Reinigung), ist die Reihenfolge wirklich falsch
+        falsch = [fahrt[0], fahrt[1], z(520, VAC, "cleaning", "cleaning", {"current_segment": [4, 7]})] + fahrt[3:]
+        f = funde(LAUF + zeigt + falsch, "A3", nach=3200)
+        self.assertEqual(len(f), 1)
+        self.assertIn("[4, 7, 6, 5]", f[0]["titel"])
+        # Fortsetzung 15:27 mitten im Wohnzimmer (neuer Lauf ohne Raumwechsel): der Startraum zählt ab der Fortsetzung
+        weiter = [z(5000, VAC, "cleaning", "error"), z(9000, VAC, "error", "cleaning"), karte(9001, zustand="cleaning", reihenfolge=[7, 6, 5, 4, 3, 2, 1]),
+                  z(9080, VAC, "cleaning", "cleaning", {"current_segment": [7, 6]}), z(9300, VAC, "cleaning", "cleaning", {"current_segment": [6, 5]}), z(9900, VAC, "cleaning", "docked")]
+        self.assertEqual(funde(LAUF + zeigt + fahrt[:3] + weiter, "A3", nach=11000), [])
+        # Mopp-Wäsche vor dem Start: 5 min in der Station (docked) zählen nicht als Zeit im Raum der Station
+        wasch = [z(12, VAC, "cleaning", "cleaning", {"active_segments": ["[]", alle], "current_segment": [None, 5], "docked": [False, True]}),
+                 z(312, VAC, "cleaning", "cleaning", {"docked": [True, False]}), z(338, VAC, "cleaning", "cleaning", {"current_segment": [5, 4]}),
+                 z(345, VAC, "cleaning", "cleaning", {"current_segment": [4, 7]}), z(1200, VAC, "cleaning", "cleaning", {"current_segment": [7, 6]}),
+                 z(1600, VAC, "cleaning", "cleaning", {"current_segment": [6, 5]}), z(2100, VAC, "cleaning", "cleaning", {"current_segment": [5, 4]}), z(2600, VAC, "cleaning", "docked")]
+        self.assertEqual(funde(LAUF + zeigt + wasch, "A3", nach=3200), [])
+        # Halt durch Fehler mitten im Raum: der letzte Raum zählt mit seiner Zeit bis zum Halt
+        stopp = fahrt[:3] + [z(900, VAC, "cleaning", "error")]
+        self.assertEqual(funde(LAUF + zeigt + stopp, "A3", nach=3200), [])
+
     def test_a4_raum_durchfahren_zaehlt_nicht(self):
         seg = [z(12, VAC, "cleaning", "cleaning", {"active_segments": ["[]", "[6]"], "current_segment": [None, 6]})]
         self.assertEqual(len(funde(LAUF + seg + [karte(30, zustand="cleaning", jetzt=4)], "A4")), 1)

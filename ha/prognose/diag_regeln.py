@@ -36,6 +36,7 @@ RUN = ("cleaning", "paused", "returning")
 LEER = ("", "unknown", "unavailable", None)
 HA_START = "Home Assistant starting"  # Auslöser-Text der Automationen, die beim HA-Start laufen
 NEUSTART_S = 120  # so nah an einer Zeile „neustart“ gilt eine Start-Automation als derselbe Neustart
+DURCHFAHRT_S = 45      # A3: ein Raum zählt erst als gefahren, wenn der Roboter so lange darin unterwegs war (Durchfahrt; Ausfahrt aus der Station 19.09.: 26 s) – HT-0012
 ORTUNG_SUCHT = "locating"  # sensor.<gerät>_relocation_status, solange der Roboter seine Position auf der Karte sucht (PD-020)
 KEIN_FEHLER = ("no_error",) + LEER
 KNOEPFE = {"cleaning": ["pause", "stop", "return_to_base"], "paused": ["start", "stop", "return_to_base"],
@@ -219,6 +220,19 @@ def auswerten(zeilen, debug=None, jetzt=None, ab=None):
     def add(*a, **k):
         funde.append(_fund(*a, **k))
 
+    def raum_fertig(l, t):
+        """A3: den Raum, in dem der Roboter zuletzt war, erst beim Verlassen (oder Halt) werten – Durchfahrten unter DURCHFAHRT_S zählen nicht (HT-0012)."""
+        p = l.pop("im_raum", None)
+        if p and (t - p[1]).total_seconds() >= DURCHFAHRT_S and p[0] not in l["gefahren"]:
+            l["gefahren"].append(p[0])
+
+    def raum_betreten(l, t):
+        seg, aktiv = w.attr(w.vac, "current_segment"), liste(w.attr(w.vac, "active_segments"))
+        if w.attr(w.vac, "docked") in (True, "True", "true"):  # in der Station (auch Mopp-Wäsche vor dem Start) läuft keine Raumzeit
+            return
+        if seg not in LEER and str(seg).lstrip("-").isdigit() and (not aktiv or int(seg) in aktiv):
+            l["im_raum"] = (int(seg), t)
+
     def abschliessen(h):
         """Lauf endgültig beenden: Reihenfolge (A3), Schätzung (B8), Fristen nach dem Andocken."""
         nonlocal nach
@@ -287,6 +301,7 @@ def auswerten(zeilen, debug=None, jetzt=None, ab=None):
                     weg.pop(ent, None)
                 if neu == "cleaning" and not vorher_run and halt:  # kurzer Halt (< GAP_S): derselbe Lauf geht weiter, kein neuer Start
                     lauf, halt = halt["lauf"], None
+                    raum_betreten(lauf, t)
                 elif neu == "cleaning" and not vorher_run:  # Start eines Laufs
                     startet = None
                     ruf = next((c for c in reversed(zeilen[:zeilen.index(z)]) if c.get("art") == "dienst" and START_DIENSTE.match(c.get("dienst", ""))
@@ -306,16 +321,19 @@ def auswerten(zeilen, debug=None, jetzt=None, ab=None):
                             add("B5", "fehler", "stoerer", "Planerstart, obwohl eine „stört“-Person zu Hause ist: %s" % stoerer, "Attribut stoerer von %s war beim Start %s." % (plan, stoerer), z["ts"])
                     if auftrag and (t - auftrag[0]).total_seconds() <= AUFTRAG_S:
                         lauf["auftrag"] = auftrag
+                    raum_betreten(lauf, t)  # Fortsetzung mitten im Raum (nach Fehler/Stopp): der Raum zählt ab jetzt
                 if lauf and "active_segments" in (z.get("attr") or {}) and lauf.get("auftrag"):
                     ist = liste(w.attr(w.vac, "active_segments"))
                     soll = lauf.pop("auftrag")
                     if ist and sorted(ist) != sorted(soll[1]):
                         add("B2", "fehler", "segments", "Gewählte Räume ≠ Auftrag des Roboters: gewählt %s, Roboter %s" % (soll[1], ist), "Raumauftrag aus HA um %s, active_segments danach %s." % (soll[2][11:19], ist), soll[2])
                 if lauf and "current_segment" in (z.get("attr") or {}):
-                    seg, aktiv = w.attr(w.vac, "current_segment"), liste(w.attr(w.vac, "active_segments"))
-                    if seg not in LEER and (not aktiv or int(seg) in aktiv) and int(seg) not in lauf["gefahren"]:
-                        lauf["gefahren"].append(int(seg))
+                    raum_fertig(lauf, t)
+                    raum_betreten(lauf, t)
+                elif lauf and "docked" in (z.get("attr") or {}) and "im_raum" not in lauf:
+                    raum_betreten(lauf, t)  # Station verlassen: ab jetzt läuft die Zeit im Raum der Station
                 if lauf and vorher_run and neu not in RUN:  # Halt: erst nach GAP_S ohne Weiterfahrt ist der Lauf zu Ende
+                    raum_fertig(lauf, t)
                     halt, lauf = {"t": t, "ts": z["ts"], "lauf": lauf}, None
             elif ent == w.e("input_datetime", "letzte_auto_reinigung") and (nach or halt):
                 (nach or halt)["erledigt"] = True
