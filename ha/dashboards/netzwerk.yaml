@@ -1,0 +1,176 @@
+# Netzdiagnose – Dashboard im YAML-Modus. Daten: packages/netzwerk.yaml + /config/netzdiagnose/fritz_diag.py
+# In den Tabellen steht {%- … %} mit Bindestrich: sonst entstehen Leerzeilen und die Markdown-Tabelle zerfällt.
+title: Netzwerk
+views:
+  - title: Diagnose
+    path: diagnose
+    icon: mdi:lan-check
+    type: sections
+    max_columns: 4
+    sections:
+      # ── Überblick ──
+      - type: grid
+        column_span: 2
+        cards:
+          - type: heading
+            heading: Überblick
+            icon: mdi:lan-check
+          - type: tile
+            entity: sensor.netzdiag_status
+            name: Gesamtstand
+            grid_options: { columns: 6 }
+          - type: tile
+            entity: sensor.netzdiag_geraete
+            name: Geräte online
+            grid_options: { columns: 6 }
+          - type: tile
+            entity: binary_sensor.fritz_box_6860_5g_verbindung
+            name: Internet (FRITZ!Box)
+            grid_options: { columns: 6 }
+          - type: tile
+            entity: sensor.fritz_box_6860_5g_betriebszeit
+            name: FRITZ!Box läuft seit
+            grid_options: { columns: 6 }
+          - type: markdown
+            grid_options: { columns: full }
+            content: |
+              {%- set s = 'sensor.netzdiag_status' %}
+              {%- set pi = state_attr(s,'pi') or {} %}
+              {%- set n = state_attr(s,'heimnetz') or {} %}
+              {%- set d = state_attr(s,'dhcp_test') or {} %}
+              {%- set ja = '🟢' %}{% set nein = '🔴' %}
+              | Prüfung | Ergebnis |
+              |:--|:--|
+              | Pi → FRITZ!Box | {{ ja if pi.box else nein }} |
+              | Pi → Internet | {{ ja if pi.internet else nein }} |
+              | Pi → Namensauflösung (DNS) | {{ ja if pi.dns else nein }} |
+              | Heimnetz | Box {{ n.router }}, Maske {{ n.maske }} |
+              | DHCP verteilt automatisch | {{ n.dhcp_von }} – {{ n.dhcp_bis }}{{ '' if n.dhcp_an else ' (ausgeschaltet!)' }} |
+              | DHCP-Test ({{ (d.stand or '–')[11:16] }}) | {% if d.ok %}{{ d.server | count }} Server antwortet: {% for x in d.server %}{{ x.server }} (bietet {{ x.angebot }}, Router {{ x.router }}){{ ', ' if not loop.last }}{% endfor %}{% else %}{{ d.fehler or 'noch nicht gelaufen' }}{% endif %} |
+              | Hardware-Adresse der Box | {{ pi.gw_mac or '–' }} |
+              {%- for f in state_attr(s,'fehler') or [] %}
+              | ⚠️ Abfrage-Fehler | {{ f }} |
+              {%- endfor %}
+
+              Stand: {{ state_attr(s,'stand') }}
+
+      # ── Befunde ──
+      - type: grid
+        column_span: 2
+        cards:
+          - type: heading
+            heading: Befunde
+            icon: mdi:alert-circle-outline
+          - type: markdown
+            grid_options: { columns: full }
+            content: |
+              {%- set b = state_attr('sensor.netzdiag_status','befunde') or [] %}
+              {%- if not b %}
+              🟢 **Im Moment nichts Auffälliges.** Keine doppelte IP-Adresse, keine feste Adresse im DHCP-Bereich,
+              kein fremder DHCP-Server. Tritt ein Ausfall auf, steht er unten im Journal – mit Uhrzeit.
+              {%- endif %}
+              {%- for x in b %}
+
+              {{ x.s }} **{{ x.titel }}**
+              {{ x.text }}
+              {%- endfor %}
+          - type: heading
+            heading: Wichtige Ereignisse (Warnungen, IP-Wechsel, Ausfälle)
+            heading_style: subtitle
+          - type: markdown
+            grid_options: { columns: full }
+            content: |
+              {%- set e = state_attr('sensor.netzdiag_journal','wichtig') or [] %}
+              {%- if not e %}
+              Noch keine.
+              {%- else %}
+              | | Zeit | Ereignis |
+              |:--|:--|:--|
+              {%- for x in e %}
+              | {{ x.s }} | {{ x.t }} | {{ x.m }} |
+              {%- endfor %}
+              {%- endif %}
+
+      # ── Geräte ──
+      - type: grid
+        column_span: 2
+        cards:
+          - type: heading
+            heading: Geräte (nach IP-Adresse)
+            icon: mdi:devices
+          - type: markdown
+            grid_options: { columns: full }
+            content: |
+              {%- set g = state_attr('sensor.netzdiag_geraete','geraete') or [] %}
+              | | IP | Name | Anschluss | Adresse kommt von | Abbrüche 24 h |
+              |:--|:--|:--|:--|:--|:-:|
+              {%- for x in g %}
+              | {{ '🟢' if x.on else '⚪' }} | {{ x.ip }} | {{ x.name }}{{ ' 🎲' if x.zufall }} | {{ x.art }} | {{ x.quelle }} | {{ x.ab if x.ab else '' }} |
+              {%- endfor %}
+
+              🎲 = Zufalls-Hardware-Adresse (Handy/Tablet, „private WLAN-Adresse“) · „fest im Gerät“ = Adresse ist am Gerät
+              selbst eingetragen, nicht von der Box vergeben · {{ state_attr('sensor.netzdiag_geraete','bekannt') }} Geräte kennt die Box insgesamt.
+
+      # ── Journal ──
+      - type: grid
+        column_span: 2
+        cards:
+          - type: heading
+            heading: Journal – was hat sich geändert?
+            icon: mdi:timeline-alert
+          - type: markdown
+            grid_options: { columns: full }
+            content: |
+              {%- set e = state_attr('sensor.netzdiag_journal','eintraege') or [] %}
+              | | Zeit | Ereignis |
+              |:--|:--|:--|
+              {%- for x in e %}
+              | {{ x.s }} | {{ x.t }} | {{ x.m }} |
+              {%- endfor %}
+
+      # ── Protokoll der FRITZ!Box ──
+      - type: grid
+        column_span: 2
+        cards:
+          - type: heading
+            heading: FRITZ!Box – Internetverbindung
+            icon: mdi:web
+          - type: markdown
+            grid_options: { columns: full }
+            content: |
+              {%- set e = state_attr('sensor.netzdiag_fritzlog','internet') or [] %}
+              | Zeit | Meldung |
+              |:--|:--|
+              {%- for x in e %}
+              | {{ x.t }} | {{ x.m }} |
+              {%- endfor %}
+      - type: grid
+        column_span: 2
+        cards:
+          - type: heading
+            heading: FRITZ!Box – WLAN
+            icon: mdi:wifi
+          - type: markdown
+            grid_options: { columns: full }
+            content: |
+              {%- set e = state_attr('sensor.netzdiag_fritzlog','wlan') or [] %}
+              | Zeit | Meldung |
+              |:--|:--|
+              {%- for x in e %}
+              | {{ x.t }} | {{ x.m }} |
+              {%- endfor %}
+      - type: grid
+        column_span: 4
+        cards:
+          - type: heading
+            heading: FRITZ!Box – System, Heimnetz, Anmeldungen
+            icon: mdi:router-wireless
+          - type: markdown
+            grid_options: { columns: full }
+            content: |
+              {%- set e = state_attr('sensor.netzdiag_fritzlog','system') or [] %}
+              | Zeit | Meldung |
+              |:--|:--|
+              {%- for x in e %}
+              | {{ x.t }} | {{ x.m }} |
+              {%- endfor %}

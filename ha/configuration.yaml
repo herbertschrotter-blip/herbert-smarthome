@@ -36,6 +36,13 @@ lovelace:
       icon: mdi:robot-vacuum
       show_in_sidebar: true
       filename: dashboards/dreame_x60.yaml
+    # Netzdiagnose: FRITZ!Box-Protokoll, Gerätetabelle, Adress-Konflikte (packages/netzwerk.yaml, netzdiagnose/fritz_diag.py)
+    netz-diagnose:
+      mode: yaml
+      title: Netzwerk
+      icon: mdi:lan-check
+      show_in_sidebar: true
+      filename: dashboards/netzwerk.yaml
 
 # Helfer (Schalter) für Heidi
 input_boolean:

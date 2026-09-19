@@ -9,6 +9,8 @@ runlog.csv
 # Diagnose-Protokoll (Bauplan F.1): Tagesdateien bleiben auf dem Pi
 *.jsonl
 ha/prognose/diag/
+# Netzdiagnose: Gerätenamen, MAC-Adressen und Box-Protokoll bleiben auf dem Pi
+ha/netzdiagnose/data/
 config.json
 # Lokales
 node_modules/

@@ -1,0 +1,84 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Netzdiagnose – FRITZ!Box-Ereignisprotokoll, Gerätetabelle, Suche nach Adress-Konflikten
+# Skript: /config/netzdiagnose/fritz_diag.py (Beschreibung steht dort im Kopf), Dashboard: dashboards/netzwerk.yaml
+# Zugangsdaten nimmt das Skript aus der vorhandenen Integration „FRITZ!Box Tools“ – hier steht kein Kennwort.
+# Nach Änderungen an dieser Datei reicht: Entwicklerwerkzeuge → YAML → „Befehlszeilen-Entitäten“ neu laden.
+# ─────────────────────────────────────────────────────────────────────────────
+
+command_line:
+  # Sammler: fragt jede Minute die Box ab, schreibt die Dateien unter /config/netzdiagnose/data/ und meldet den Gesamtstand.
+  # Zustand: ok | warnung | kritisch | fehler
+  - sensor:
+      name: Netzdiag Status
+      unique_id: netzdiag_status
+      icon: mdi:lan-check
+      command: python3 /config/netzdiagnose/fritz_diag.py collect
+      scan_interval: 60
+      command_timeout: 50
+      value_template: "{{ value_json.status }}"
+      json_attributes:
+        - stand
+        - fehler
+        - befunde
+        - anzahl_kritisch
+        - anzahl_warnung
+        - geraete_online
+        - geraete_bekannt
+        - heimnetz
+        - dhcp_test
+        - pi
+  # Die drei folgenden lesen nur die fertigen Ansichten des Sammlers (schnell, keine Abfrage der Box).
+  - sensor:
+      name: Netzdiag Journal
+      unique_id: netzdiag_journal
+      icon: mdi:timeline-alert
+      command: python3 /config/netzdiagnose/fritz_diag.py show journal
+      scan_interval: 60
+      value_template: "{{ value_json.anzahl }}"
+      json_attributes: [stand, eintraege, wichtig]
+  - sensor:
+      name: Netzdiag Fritzlog
+      unique_id: netzdiag_fritzlog
+      icon: mdi:router-wireless
+      command: python3 /config/netzdiagnose/fritz_diag.py show fritzlog
+      scan_interval: 60
+      value_template: "{{ value_json.anzahl }}"
+      json_attributes: [stand, internet, wlan, system]
+  - sensor:
+      name: Netzdiag Geraete
+      unique_id: netzdiag_geraete
+      icon: mdi:devices
+      command: python3 /config/netzdiagnose/fritz_diag.py show geraete
+      scan_interval: 60
+      value_template: "{{ value_json.aktiv }}"
+      json_attributes: [stand, bekannt, geraete]
+
+# Lange Listen gehören nicht in die HA-Datenbank – die Geschichte steht in den Dateien des Skripts.
+recorder:
+  exclude:
+    entities:
+      - sensor.netzdiag_journal
+      - sensor.netzdiag_fritzlog
+      - sensor.netzdiag_geraete
+
+automation:
+  - id: netzdiag_meldung_kritisch
+    alias: "Netzdiagnose: kritischen Befund melden"
+    description: Zeigt eine Benachrichtigung in der Seitenleiste, sobald die Netzdiagnose einen kritischen Befund hat.
+    mode: single
+    trigger:
+      - platform: state
+        entity_id: sensor.netzdiag_status
+        to: kritisch
+    action:
+      - service: persistent_notification.create
+        data:
+          notification_id: netzdiag_kritisch
+          title: "Netzwerk: kritischer Befund"
+          message: >-
+            {% for b in state_attr('sensor.netzdiag_status','befunde') or [] if b.stufe == 'kritisch' %}
+            **{{ b.titel }}** – {{ b.text }}
+
+            {% else %}Der Pi erreicht das Internet nicht ({{ state_attr('sensor.netzdiag_status','stand') }}).
+            {% endfor %}
+            [Zum Dashboard](/netz-diagnose)
