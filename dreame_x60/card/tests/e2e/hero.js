@@ -140,6 +140,24 @@ const jetzt = v1.vektoren.find((v) => /Streifen · Jetzt/.test(v.name));
   H.checkEqual('Sensor unavailable → Balken aus der Raumzählung 1 / 3 = 33', await bar(), ['33', 'rooms', '33']);
 }
 
+// ── PD-020: Ortung (sensor.heidi_relocation_status) – „Sucht Position …“ als Arbeitsschritt, gelber Hinweis bei failed ──
+{
+  const s = statesFor(jetzt);
+  const rel = (state) => { s['sensor.heidi_relocation_status'] = { ...(s['sensor.heidi_relocation_status'] ?? { entity_id: 'sensor.heidi_relocation_status', attributes: {} }), state }; return setStates(s); };
+  const view = () => page.evaluate(() => { const h = document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-hero').shadowRoot; const c = h.querySelector('.chip.msg'); return [h.querySelector('.hint.sub')?.textContent.trim() ?? '', c ? c.textContent.replace(/\s+/g, ' ').trim() : null, c ? c.dataset.chip : null, !!h.querySelector('[data-ack]')]; });
+  await rel('located');
+  const vorher = await view();
+  H.check('Ortung located: Arbeitsschritt wie bisher, kein Hinweis', vorher[0] !== 'Sucht Position …' && vorher[1] === null, vorher);
+  await rel('locating');
+  H.checkEqual('Ortung locating: Arbeitsschritt „Sucht Position …“, kein Hinweis', await view(), ['Sucht Position …', null, null, false]);
+  H.checkEqual('… Bericht ans Protokoll: schritt', (await page.evaluate(() => document.querySelector('dreame-x60-panel').snapshot())).schritt, 'Sucht Position …');
+  await rel('failed');
+  H.checkEqual('Ortung failed: Arbeitsschritt wie vorher, gelber Hinweis „Position unbekannt“ ohne ✕', await view(), [vorher[0], 'Position unbekannt', 'relocation', false]);
+  await page.evaluate(() => { window._moreInfo = null; document.querySelector('dreame-x60-panel').addEventListener('hass-more-info', (e) => { window._moreInfo = e.detail.entityId; }, { once: true }); document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-hero').shadowRoot.querySelector('.chip.msg').click(); });
+  H.checkEqual('… Antippen öffnet more-info des Ortungs-Sensors', await page.evaluate(() => window._moreInfo), 'sensor.heidi_relocation_status');
+  await rel('located');
+}
+
 // ── Leerlauf: gemeinsame Werte („–“ bei unavailable), kein Streifen, kein Auftrag ──
 await setStates(docked);
 {

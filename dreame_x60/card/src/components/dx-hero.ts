@@ -112,8 +112,9 @@ export class DxHero extends LitElement {
    */
   private msgChip(r: RobotView, chip: NonNullable<RobotView['hero']['errorChip']>, long: string): TemplateResult {
     const ack = chip.level === 'warning' && r.warning.clearable;
-    const open = (): void => moreInfo(this, r.moreInfo.error);
-    return html`<dx-tip .text=${long}><span class="chip msg ${chip.level === 'danger' ? 'bad' : 'warn'} ${ack ? 'ack' : ''}" role="button" tabindex="0" data-chip="error" @click=${open} @keydown=${(e: KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } }}>
+    const from = r.hero.chipFrom ?? 'error'; // PD-020: Hinweis aus der Ortung öffnet deren Sensor
+    const open = (): void => moreInfo(this, r.moreInfo[from]);
+    return html`<dx-tip .text=${long}><span class="chip msg ${chip.level === 'danger' ? 'bad' : 'warn'} ${ack ? 'ack' : ''}" role="button" tabindex="0" data-chip=${from} @click=${open} @keydown=${(e: KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } }}>
       <span class="txt"><ha-icon icon=${chip.level === 'danger' ? 'mdi:alert' : 'mdi:information-outline'}></ha-icon>${chip.text}</span>${ack ? html`<button class="x" data-ack aria-label=${t('hero.ackTitle')} title=${t('hero.ackTitle')} @click=${(e: Event) => { e.stopPropagation(); void this.api?.press(r.warning.id); }}><ha-icon icon="mdi:close"></ha-icon></button>` : nothing}</span></dx-tip>`;
   }
 

@@ -100,3 +100,22 @@ test('Tabelle aus test-timeline.js', () => {
   assert.deepEqual(heroButtons('idle').map((b) => b.service), ['start', 'return_to_base', 'locate']);
   assert.ok(heroButtons('cleaning')[0]!.primary && !heroButtons('cleaning')[1]!.primary);
 });
+
+// PD-020: Ortung auf der Karte (sensor.<gerät>_relocation_status)
+test('PD-020 Ortung: „Sucht Position …“ als Arbeitsschritt, gelber Hinweis bei failed', () => {
+  const base: HeroInput = { vac: 'cleaning', status: 'cleaning', error: 'no_error', hasError: false, task: 'completed', phase: 'Saugt Küche', autoLauf: false, autoLetzterPlan: '', dndStart: '20:00:00', dndEnd: '07:00:00', room: '–' };
+  assert.equal(heroModel({ ...base, relocation: 'locating' }).sub, 'Sucht Position …');
+  assert.equal(heroModel({ ...base, vac: 'returning', relocation: 'locating' }).sub, 'Sucht Position …');
+  // Fall vom 19.09. 15:31: vorher und nachher „located“ → Arbeitsschritt wie bisher
+  for (const relocation of ['located', 'success', 'unavailable', '']) assert.equal(heroModel({ ...base, relocation }).sub, 'Saugt Küche', relocation);
+  assert.equal(heroModel(base).sub, 'Saugt Küche');
+  // nur unterwegs: in der Station und pausiert bleibt der Kopf, wie er ist
+  assert.deepEqual([heroModel({ ...base, vac: 'docked', relocation: 'locating' }).sub, heroModel({ ...base, vac: 'paused', relocation: 'locating' }).sub], ['', heroModel({ ...base, vac: 'paused' }).sub]);
+  const lost = heroModel({ ...base, relocation: 'failed' });
+  assert.deepEqual([lost.errorChip, lost.chipFrom, lost.sub], [{ text: 'Position unbekannt', level: 'warning' }, 'relocation', 'Saugt Küche']);
+  assert.match(lost.errorLong, /Position auf der Karte nicht gefunden/);
+  // ein Fehlercode des Roboters geht vor
+  const both = heroModel({ ...base, relocation: 'failed', error: 'brush_stuck', hasError: true });
+  assert.deepEqual([both.errorChip, both.chipFrom], [{ text: 'Bürste blockiert', level: 'danger' }, 'error']);
+  assert.deepEqual([heroModel(base).errorChip, heroModel(base).chipFrom], [null, null]);
+});

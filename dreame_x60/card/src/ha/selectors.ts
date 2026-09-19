@@ -61,7 +61,7 @@ export interface RobotView {
   persons: PersonView[];
   hero: HeroModel;
   /** Entitäten für more-info-Dialoge (Regel 1: IDs nur aus dem Vertrag, hier mitgeführt). */
-  moreInfo: { vac: string; battery: string; error: string };
+  moreInfo: { vac: string; battery: string; error: string; relocation: string };
   /** Warnung quittieren (PD-015): Knopf `button.<gerät>_clear_warning` ist nur verfügbar, solange eine Warnung ansteht */
   warning: { clearable: boolean; id: string };
   /** Fortschritt des Auftrags in % vom Roboter (PD-016); null, wenn der Sensor fehlt oder außerhalb eines Laufs unavailable ist */
@@ -69,7 +69,7 @@ export interface RobotView {
 }
 
 const VAC_ATTRS = ['has_error', 'current_segment', 'active_segments', 'cleaning_sequence', 'cleaned_area', 'charging', 'docked', 'mop_pad', 'paused', 'washing', 'drying', 'returning_to_wash', 'mapping', 'cruising'] as const;
-const ROBOT_IDS = (): string[] => [E.vac, E.status, E.error, E.taskStatus, E.battery, E.currentRoom, E.cleanedArea, E.cleaningTime, E.phase, E.autoLauf, E.autoLetzterPlan, E.laufReihenfolge, E.dndStart, E.dndEnd, E.raumnamen, E.ninaZaehlt, E.clearWarning, E.cleaningProgress, ...PERSONS.map((p) => p.id)];
+const ROBOT_IDS = (): string[] => [E.vac, E.status, E.error, E.taskStatus, E.battery, E.currentRoom, E.cleanedArea, E.cleaningTime, E.phase, E.autoLauf, E.autoLetzterPlan, E.laufReihenfolge, E.dndStart, E.dndEnd, E.raumnamen, E.ninaZaehlt, E.clearWarning, E.cleaningProgress, E.relocationStatus, ...PERSONS.map((p) => p.id)];
 
 const intList = (v: unknown): number[] => (Array.isArray(v) ? v.map((x) => parseInt(String(x), 10)).filter((x) => !isNaN(x)) : []);
 
@@ -84,7 +84,7 @@ export const readRobot: Selector<RobotView> = memoizeSelector(ROBOT_IDS, (s) => 
   const hero = heroModel({
     vac, status: st(s, E.status), error: st(s, E.error), hasError: !!attr(s, E.vac, 'has_error'), task: st(s, E.taskStatus), phase: st(s, E.phase),
     autoLauf: on(s, E.autoLauf), autoLetzterPlan: st(s, E.autoLetzterPlan), dndStart: st(s, E.dndStart), dndEnd: st(s, E.dndEnd),
-    room: roomName(st(s, E.currentRoom), deutsch),
+    room: roomName(st(s, E.currentRoom), deutsch), relocation: st(s, E.relocationStatus),
   });
   return {
     vac, running: ['cleaning', 'paused', 'returning'].includes(vac), hasError: !!attr(s, E.vac, 'has_error'), battery: num(s, E.battery, 0),
@@ -95,7 +95,7 @@ export const readRobot: Selector<RobotView> = memoizeSelector(ROBOT_IDS, (s) => 
     autoLauf: on(s, E.autoLauf), autoLetzterPlan: txt(s, E.autoLetzterPlan),
     laufReihenfolge: txt(s, E.laufReihenfolge).split(',').map((x) => parseInt(x, 10)).filter((x) => !isNaN(x)),
     room: roomName(st(s, E.currentRoom), deutsch), deutsch, persons, hero,
-    moreInfo: { vac: E.vac, battery: E.battery, error: E.error },
+    moreInfo: { vac: E.vac, battery: E.battery, error: E.error, relocation: E.relocationStatus },
     // Knopf-Entitäten haben als Zustand den letzten Druck oder „unknown“ (nie gedrückt) – nur „unavailable“ heißt gesperrt
     warning: { clearable: !!ent(s, E.clearWarning) && st(s, E.clearWarning) !== 'unavailable', id: E.clearWarning },
     progress: EMPTY.includes(st(s, E.cleaningProgress)) || isNaN(parseFloat(st(s, E.cleaningProgress))) ? null : Math.max(0, Math.min(100, parseFloat(st(s, E.cleaningProgress)))),

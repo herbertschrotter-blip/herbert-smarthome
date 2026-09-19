@@ -36,6 +36,7 @@ RUN = ("cleaning", "paused", "returning")
 LEER = ("", "unknown", "unavailable", None)
 HA_START = "Home Assistant starting"  # Auslöser-Text der Automationen, die beim HA-Start laufen
 NEUSTART_S = 120  # so nah an einer Zeile „neustart“ gilt eine Start-Automation als derselbe Neustart
+ORTUNG_SUCHT = "locating"  # sensor.<gerät>_relocation_status, solange der Roboter seine Position auf der Karte sucht (PD-020)
 KEIN_FEHLER = ("no_error",) + LEER
 KNOEPFE = {"cleaning": ["pause", "stop", "return_to_base"], "paused": ["start", "stop", "return_to_base"],
            "returning": ["pause", "stop", "locate"], "docked": ["start", "locate"]}
@@ -148,7 +149,8 @@ def pruefe_anzeige(w, t, m):
             out.append(("A1", "fehler", "zustand", "Anzeige passt nicht zum Roboter: Karte „%s“, Roboter „%s“" % (x.get("zustand"), zs),
                         "Die Karte meldete um %s den Zustand „%s“ (Kopf „%s“), der Roboter war „%s“ – länger als %d s." % (ts[11:19], x.get("zustand"), x.get("kopf"), zs, TOL_S)))
         phase = w.zustand(w.e("sensor", "phase"))
-        if zs in RUN and phase not in LEER and w.stabil(w.e("sensor", "phase"), t) and "kopf" in x and phase not in (x.get("kopf"), x.get("schritt")):
+        sucht = w.zustand(w.e("sensor", "relocation_status")) == ORTUNG_SUCHT  # PD-020: die Karte zeigt dann „Sucht Position …“ statt der Phase
+        if zs in RUN and not sucht and phase not in LEER and w.stabil(w.e("sensor", "phase"), t) and "kopf" in x and phase not in (x.get("kopf"), x.get("schritt")):
             out.append(("A1", "hinweis", "schritt", "Arbeitsschritt passt nicht: Karte „%s“, Roboter „%s“" % (x.get("schritt") or x.get("kopf"), phase),
                         "Die Karte zeigte um %s „%s · %s“, der Arbeitsschritt des Roboters war „%s“." % (ts[11:19], x.get("kopf"), x.get("schritt"), phase)))
         if "knoepfe" in x and texte(x["knoepfe"]) != KNOEPFE.get(zs, KNOEPFE_SONST):

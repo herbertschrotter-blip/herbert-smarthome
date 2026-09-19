@@ -31,6 +31,7 @@ export const ROBOT_FEATURES = {
   cleanedArea: ['sensor', 'cleaned_area'],
   cleaningTime: ['sensor', 'cleaning_time'],
   cleaningProgress: ['sensor', 'cleaning_progress'], // Fortschritt des Auftrags in % vom Roboter, nur im Lauf verfügbar (PD-016, 17.09.)
+  relocationStatus: ['sensor', 'relocation_status'], // Ortung auf der Karte: located | locating | failed | success (PD-020, 19.09.)
   cleaningHistory: ['sensor', 'cleaning_history'],
   cleaningCount: ['sensor', 'cleaning_count'],
   totalCleanedArea: ['sensor', 'total_cleaned_area'],

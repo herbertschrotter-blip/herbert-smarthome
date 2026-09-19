@@ -58,6 +58,20 @@ class AnzeigeRegeln(unittest.TestCase):
         self.assertEqual(len(funde(LAUF + phase + [karte(30, zustand="cleaning", kopf="Reinigt", schritt="Saugt Flur")], "A1")), 1)
         self.assertEqual(funde(LAUF + phase + [karte(30, zustand="cleaning", kopf="Tägliches Saugen", schritt="Saugt Küche")], "A1"), [])
 
+    def test_a1_arbeitsschritt_ortung_pd020(self):
+        # Fall 19.09. 15:31: Roboter sucht 24 s seine Position, die Karte zeigt „Sucht Position …“ statt „Saugt Küche“ → kein Fund
+        phase = [z(12, "sensor.heidi_phase", "Angedockt", "Saugt Küche")]
+        sucht = [z(20, "sensor.heidi_relocation_status", "located", "locating")]
+        zeigt = [karte(21, zustand="cleaning", kopf="Tägliches Saugen", schritt="Sucht Position …")]
+        self.assertEqual(funde(LAUF + phase + sucht + zeigt, "A1"), [])
+        # Gegenprobe 1: ohne Ortung ist derselbe Text ein Fund
+        self.assertEqual(len(funde(LAUF + phase + zeigt, "A1")), 1)
+        # Gegenprobe 2: Ortung beendet, die Karte bleibt länger als die Frist bei „Sucht Position …“ → Fund
+        fertig = [z(44, "sensor.heidi_relocation_status", "locating", "located"), karte(45, zustand="cleaning", kopf="Tägliches Saugen", schritt="Sucht Position …")]
+        self.assertEqual(len(funde(LAUF + phase + sucht + zeigt + fertig, "A1")), 1)
+        # … zieht die Karte rechtzeitig nach, bleibt es still
+        self.assertEqual(funde(LAUF + phase + sucht + zeigt + fertig + [karte(47, zustand="cleaning", kopf="Tägliches Saugen", schritt="Saugt Küche")], "A1"), [])
+
     def test_a2_werte_raum_und_global(self):
         raum = [z(2, "switch.heidi_customized_cleaning", "unknown", "on"), z(3, "select.heidi_room_6_suction_level", "unknown", "turbo"),
                 z(3, "select.heidi_room_6_cleaning_mode", "unknown", "sweeping")]

@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.39 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.40 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -623,6 +623,8 @@ var ROBOT_FEATURES = {
   cleaningTime: ["sensor", "cleaning_time"],
   cleaningProgress: ["sensor", "cleaning_progress"],
   // Fortschritt des Auftrags in % vom Roboter, nur im Lauf verfügbar (PD-016, 17.09.)
+  relocationStatus: ["sensor", "relocation_status"],
+  // Ortung auf der Karte: located | locating | failed | success (PD-020, 19.09.)
   cleaningHistory: ["sensor", "cleaning_history"],
   cleaningCount: ["sensor", "cleaning_count"],
   totalCleanedArea: ["sensor", "total_cleaned_area"],
@@ -1215,6 +1217,9 @@ var de = {
   "head.error": "Fehler",
   "head.paused": "Pausiert",
   "head.returning": "F\xE4hrt zur Station",
+  "head.locating": "Sucht Position \u2026",
+  "head.relocationFailed": "Position unbekannt",
+  "head.relocationFailedLong": "Der Roboter hat seine Position auf der Karte nicht gefunden \u2013 in einen offenen Bereich oder in die Station setzen und neu starten.",
   "button.pause": "Pause",
   "button.stop": "Stopp",
   "button.station": "Station",
@@ -2280,13 +2285,17 @@ function heroModel(i5) {
     big = job;
     sub = phaseOk ? i5.phase : "";
   }
+  if (i5.relocation === "locating" && (i5.vac === "cleaning" || i5.vac === "returning")) sub = t3("head.locating");
   if (sub === big) sub = "";
   const dot = i5.vac === "cleaning" ? "accent" : i5.vac === "returning" ? "warning" : i5.vac === "error" ? "danger" : "positive";
-  const errorChip = i5.error !== "no_error" && i5.error !== "unavailable" ? { text: errorText(i5.error), level: i5.hasError ? "danger" : "warning" } : null;
-  const errorLong = errorChip ? lookup("errorLong", i5.error) ?? "" : "";
+  const hasCode = i5.error !== "no_error" && i5.error !== "unavailable";
+  const lost = !hasCode && i5.relocation === "failed";
+  const errorChip = hasCode ? { text: errorText(i5.error), level: i5.hasError ? "danger" : "warning" } : lost ? { text: t3("head.relocationFailed"), level: "warning" } : null;
+  const errorLong = hasCode ? lookup("errorLong", i5.error) ?? "" : lost ? t3("head.relocationFailedLong") : "";
+  const chipFrom = hasCode ? "error" : lost ? "relocation" : null;
   const roomChip = i5.room !== t3("common.dash") && i5.vac === "cleaning" && !phaseOk ? i5.room : null;
   const dnd = `${(i5.dndStart || "").slice(0, 5)}\u2013${(i5.dndEnd || "").slice(0, 5)}`;
-  return { big, sub, dot, buttons: heroButtons(i5.vac), errorChip, errorLong, roomChip, dnd, phaseOk };
+  return { big, sub, dot, buttons: heroButtons(i5.vac), errorChip, errorLong, chipFrom, roomChip, dnd, phaseOk };
 }
 
 // src/domain/labels.ts
@@ -2327,7 +2336,7 @@ var available = (s4, id) => {
   return !!e4 && !EMPTY2.includes(e4.state);
 };
 var VAC_ATTRS = ["has_error", "current_segment", "active_segments", "cleaning_sequence", "cleaned_area", "charging", "docked", "mop_pad", "paused", "washing", "drying", "returning_to_wash", "mapping", "cruising"];
-var ROBOT_IDS = () => [E2.vac, E2.status, E2.error, E2.taskStatus, E2.battery, E2.currentRoom, E2.cleanedArea, E2.cleaningTime, E2.phase, E2.autoLauf, E2.autoLetzterPlan, E2.laufReihenfolge, E2.dndStart, E2.dndEnd, E2.raumnamen, E2.ninaZaehlt, E2.clearWarning, E2.cleaningProgress, ...PERSONS.map((p3) => p3.id)];
+var ROBOT_IDS = () => [E2.vac, E2.status, E2.error, E2.taskStatus, E2.battery, E2.currentRoom, E2.cleanedArea, E2.cleaningTime, E2.phase, E2.autoLauf, E2.autoLetzterPlan, E2.laufReihenfolge, E2.dndStart, E2.dndEnd, E2.raumnamen, E2.ninaZaehlt, E2.clearWarning, E2.cleaningProgress, E2.relocationStatus, ...PERSONS.map((p3) => p3.id)];
 var intList = (v2) => Array.isArray(v2) ? v2.map((x2) => parseInt(String(x2), 10)).filter((x2) => !isNaN(x2)) : [];
 var readRobot = memoizeSelector(ROBOT_IDS, (s4) => {
   const vac = st(s4, E2.vac);
@@ -2348,7 +2357,8 @@ var readRobot = memoizeSelector(ROBOT_IDS, (s4) => {
     autoLetzterPlan: st(s4, E2.autoLetzterPlan),
     dndStart: st(s4, E2.dndStart),
     dndEnd: st(s4, E2.dndEnd),
-    room: roomName(st(s4, E2.currentRoom), deutsch)
+    room: roomName(st(s4, E2.currentRoom), deutsch),
+    relocation: st(s4, E2.relocationStatus)
   });
   return {
     vac,
@@ -2375,7 +2385,7 @@ var readRobot = memoizeSelector(ROBOT_IDS, (s4) => {
     deutsch,
     persons,
     hero,
-    moreInfo: { vac: E2.vac, battery: E2.battery, error: E2.error },
+    moreInfo: { vac: E2.vac, battery: E2.battery, error: E2.error, relocation: E2.relocationStatus },
     // Knopf-Entitäten haben als Zustand den letzten Druck oder „unknown“ (nie gedrückt) – nur „unavailable“ heißt gesperrt
     warning: { clearable: !!ent(s4, E2.clearWarning) && st(s4, E2.clearWarning) !== "unavailable", id: E2.clearWarning },
     progress: EMPTY2.includes(st(s4, E2.cleaningProgress)) || isNaN(parseFloat(st(s4, E2.cleaningProgress))) ? null : Math.max(0, Math.min(100, parseFloat(st(s4, E2.cleaningProgress))))
@@ -3086,7 +3096,7 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.39";
+var VERSION = "2.0.0-alpha.40";
 
 // src/config.ts
 var NAV = [
@@ -3420,8 +3430,9 @@ var DxHero = class extends i4 {
    */
   msgChip(r4, chip, long) {
     const ack = chip.level === "warning" && r4.warning.clearable;
-    const open = () => moreInfo(this, r4.moreInfo.error);
-    return b2`<dx-tip .text=${long}><span class="chip msg ${chip.level === "danger" ? "bad" : "warn"} ${ack ? "ack" : ""}" role="button" tabindex="0" data-chip="error" @click=${open} @keydown=${(e4) => {
+    const from = r4.hero.chipFrom ?? "error";
+    const open = () => moreInfo(this, r4.moreInfo[from]);
+    return b2`<dx-tip .text=${long}><span class="chip msg ${chip.level === "danger" ? "bad" : "warn"} ${ack ? "ack" : ""}" role="button" tabindex="0" data-chip=${from} @click=${open} @keydown=${(e4) => {
       if (e4.key === "Enter" || e4.key === " ") {
         e4.preventDefault();
         open();

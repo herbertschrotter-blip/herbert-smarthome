@@ -24,6 +24,8 @@ export interface HeroInput {
   dndEnd: string;
   /** sensor.heidi_current_room, schon in Anzeigesprache („–“ wenn unbekannt) */
   room: string;
+  /** sensor.heidi_relocation_status (PD-020): located | locating | failed | success; fehlt oder leer = keine Aussage */
+  relocation?: string;
 }
 
 export type VacuumService = 'start' | 'pause' | 'stop' | 'return_to_base' | 'locate';
@@ -40,6 +42,8 @@ export interface HeroModel {
   errorChip: { text: string; level: 'danger' | 'warning' } | null;
   /** Langtext zum Chip (Tooltip / Detail, PD-015); leer ohne Chip oder ohne Eintrag */
   errorLong: string;
+  /** Woher der Chip kommt (bestimmt den more-info-Dialog): Fehlercode oder gescheiterte Ortung (PD-020); null ohne Chip */
+  chipFrom: 'error' | 'relocation' | null;
   /** Raum-Chip nur beim Reinigen ohne gültige Phase */
   roomChip: string | null;
   /** „HH:MM–HH:MM“ */
@@ -79,13 +83,19 @@ export function heroModel(i: HeroInput): HeroModel {
   else if (i.vac === 'paused') { big = t('head.paused'); sub = job; }
   else if (i.vac === 'returning') { big = t('head.returning'); sub = phaseOk && i.phase !== big ? i.phase : ''; }
   else if (i.vac === 'cleaning') { big = job; sub = phaseOk ? i.phase : ''; }
+  // PD-020: Solange der Roboter unterwegs seine Position auf der Karte sucht, ist das der Arbeitsschritt (statt „Saugt Küche“)
+  if (i.relocation === 'locating' && (i.vac === 'cleaning' || i.vac === 'returning')) sub = t('head.locating');
   if (sub === big) sub = '';
   const dot: DotLevel = i.vac === 'cleaning' ? 'accent' : i.vac === 'returning' ? 'warning' : i.vac === 'error' ? 'danger' : 'positive';
-  const errorChip = i.error !== 'no_error' && i.error !== 'unavailable'
+  const hasCode = i.error !== 'no_error' && i.error !== 'unavailable';
+  // Ein Fehlercode des Roboters geht vor; ohne Code meldet eine gescheiterte Ortung einen gelben Hinweis (PD-020)
+  const lost = !hasCode && i.relocation === 'failed';
+  const errorChip = hasCode
     ? { text: errorText(i.error), level: i.hasError ? 'danger' as const : 'warning' as const }
-    : null;
-  const errorLong = errorChip ? (lookup('errorLong', i.error) ?? '') : '';
+    : lost ? { text: t('head.relocationFailed'), level: 'warning' as const } : null;
+  const errorLong = hasCode ? (lookup('errorLong', i.error) ?? '') : lost ? t('head.relocationFailedLong') : '';
+  const chipFrom = hasCode ? 'error' as const : lost ? 'relocation' as const : null;
   const roomChip = i.room !== t('common.dash') && i.vac === 'cleaning' && !phaseOk ? i.room : null;
   const dnd = `${(i.dndStart || '').slice(0, 5)}–${(i.dndEnd || '').slice(0, 5)}`;
-  return { big, sub, dot, buttons: heroButtons(i.vac), errorChip, errorLong, roomChip, dnd, phaseOk };
+  return { big, sub, dot, buttons: heroButtons(i.vac), errorChip, errorLong, chipFrom, roomChip, dnd, phaseOk };
 }
