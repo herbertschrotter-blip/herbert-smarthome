@@ -101,7 +101,9 @@ danach `.\tools\check-dreame-patch.ps1` (Exit 1 = fehlt, Anleitung in der Ausgab
 Automation `heidi_diagnose_protokoll` (Ereignisse `state_changed`, `call_service`, `automation_triggered`,
 `script_started`; alles mit „heidi“ im Namen, ohne Kameras) → `shell_command.heidi_diag` (Zeile als base64) →
 `/config/prognose/diag/heidi_diag-<Tag>.jsonl` (30 Tage): ts, art, ent, alt → neu, geänderte Attribute, Kontext,
-`quelle` benutzer | automation (`durch` = Name) | system | extern. Automation `heidi_diagnose_debuglog` sichert jede
+`quelle` benutzer | automation (`durch` = Name) | system | extern. Beim HA-Start schreibt die Automation eine Zeile `art: neustart` mit
+Schnappschuss (`stand` = Zustände, `vac_attr` = Roboter-Attribute; HT-0008) – während HA startet, wird nicht mitgeschrieben, die
+Auswertung vergisst an dieser Zeile alle alten Werte (`Welt.neustart()`). Automation `heidi_diagnose_debuglog` sichert jede
 Minute die Debug-Zeilen der Dreame-Integration aus dem HA-Log (Supervisor-Schnittstelle, `logger:` in
 configuration.yaml) nach `dreame_debug-<Tag>.log` (14 Tage). Auswertung am PC: `node tools\diag.js`
 (`--von HH:MM --bis HH:MM --debug`). Tests auf dem Pi: Dienst `shell_command.heidi_diag_test`. Abschalten:

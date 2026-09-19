@@ -303,10 +303,16 @@
     - trigger: event
       event_type: dreame_x60_meldung
       id: meldung
+    # HT-0008: Während HA startet, schreibt niemand mit. Beim Start deshalb eine Zeile „neustart“ mit Schnappschuss
+    # (Zustände aller Heidi-Entitäten, Attribute des Roboters) – die Auswertung vergisst damit veraltete Werte.
+    - trigger: homeassistant
+      event: start
+      id: neustart
   conditions:
     # Die eigenen Diagnose-Automationen (heidi_diag…) bleiben draußen, sonst protokolliert sich das Protokoll selbst.
     - condition: template
       value_template: >-
+        {% if trigger.id == 'neustart' %}{{ true }}{% else %}
         {% set d = trigger.event.data %}
         {# Erfasst wird nach Name („heidi“) und zusätzlich nach Gerät: alle Entitäten des Roboters, auch wenn sie
            anders heißen oder umbenannt werden (Herbert, 18.09.) #}
@@ -333,11 +339,30 @@
           {{ (ent is match('[a-z_]+\\.heidi(_|$)') or ent == 'input_boolean.stuehle_am_boden' or ent in geraet)
              and not ent.startswith('camera.') and 'heidi_diag' not in ent and ent != this.entity_id and not zaehler }}
         {% endif %}
+        {% endif %}
   actions:
     - action: shell_command.heidi_diag
       data:
         # Werte, die JSON nicht kennt (Datum, Listen, Objekte), werden Text; lange Texte auf 300 Zeichen gekürzt.
         zeile: >-
+          {% if trigger.id == 'neustart' %}
+            {% set geraet = device_entities(device_id('vacuum.heidi')) %}
+            {% set ns = namespace(s={}, a={}) %}
+            {% for st in states %}
+              {% set ent = st.entity_id %}
+              {% if (ent is match('[a-z_]+\\.heidi(_|$)') or ent == 'input_boolean.stuehle_am_boden' or ent in geraet)
+                    and not ent.startswith('camera.') and not ent.startswith('automation.') and 'heidi_diag' not in ent %}
+                {% set ns.s = dict(ns.s, **{ent: (st.state | string)[:120]}) %}
+              {% endif %}
+            {% endfor %}
+            {% for k, w in (states.vacuum.heidi.attributes if states.vacuum.heidi else {}).items() %}
+              {% set w = w if (w is none or w is boolean or w is number) else (w | string)[:120] %}
+              {% set ns.a = dict(ns.a, **{(k | string): w}) %}
+            {% endfor %}
+            {{ {'ts': now().strftime('%Y-%m-%dT%H:%M:%S.%f')[:23], 'v': 1, 'art': 'neustart', 'wer': '', 'ctx': none, 'user_id': none,
+                'parent_id': none, 'name': 'Home Assistant neu gestartet', 'ausloeser': (ns.s | count) ~ ' Werte neu eingelesen',
+                'vac': 'vacuum.heidi', 'stand': ns.s, 'vac_attr': ns.a} | to_json | base64_encode }}
+          {% else %}
           {% set e = trigger.event %}{% set d = e.data %}
           {% set uid = e.context.user_id %}{% set pid = e.context.parent_id %}
           {% set wer = (states.person | selectattr('attributes.user_id', 'eq', uid) | map(attribute='name') | first | default('')) if uid else '' %}
@@ -377,6 +402,7 @@
                     werte=ns.d) | to_json | base64_encode }}
           {% else %}
             {{ dict(basis, ent=d.entity_id, name=d.name | default(''), ausloeser=d.source | default('')) | to_json | base64_encode }}
+          {% endif %}
           {% endif %}
 
 - id: heidi_diagnose_auswertung

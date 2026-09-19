@@ -107,6 +107,21 @@ class AnzeigeRegeln(unittest.TestCase):
         self.assertEqual(funde(START + wasch + [karte(30, zustand="docked", station="waescht")], "A8"), [])
         self.assertEqual(funde(START + wasch + [karte(30, zustand="docked")], "A8"), [])  # Baustein fehlt noch → Regel bleibt still
 
+    def test_ht0008_neustart_vergisst_alte_werte(self):
+        # HT-0008: 22:29 „lädt“, HA-Neustart, Akku wird währenddessen voll – der Wechsel fehlt im Protokoll
+        laedt = [z(2, VAC, "docked", "docked", {"charging": [False, True]})]
+        zeigt = lambda laden: [karte(100, zustand="docked", laden=laden)]
+        self.assertEqual(len(funde(START + laedt + zeigt(False), "A6")), 1)  # ohne Neustart: echte Abweichung
+        auto = lambda sek: [{"ts": ts(sek), "art": "automation", "name": "Heidi: Dark Mode umschalten", "ausloeser": "Home Assistant starting", "quelle": "system"}]
+        self.assertEqual(funde(START + laedt + auto(60) + zeigt(False), "A6"), [])  # altes Protokoll: Werte vergessen, Regel schweigt
+        self.assertEqual(funde(START + laedt + auto(60) + zeigt(True), "A1"), [])
+        snap = [{"ts": ts(60), "art": "neustart", "vac": VAC, "quelle": "system", "vac_attr": {"charging": False},
+                 "stand": {VAC: "docked", "sensor.heidi_battery_level": "100"}}]
+        self.assertEqual(funde(START + laedt + snap + zeigt(False), "A6"), [])  # Schnappschuss: Karte und Roboter stimmen überein
+        self.assertEqual(len(funde(START + laedt + snap + zeigt(True), "A6")), 1)  # … und es wird weiter geprüft
+        self.assertEqual(len(funde(START + laedt + snap + auto(62) + zeigt(True), "A6")), 1)  # Startzeile danach löscht den Schnappschuss nicht
+        self.assertEqual(len(funde(START + laedt + auto(58) + snap + zeigt(True), "A6")), 1)
+
     def test_a8_absaugen_nur_bei_active(self):
         # HT-0007: der Absaug-Sensor kennt idle, active, not_performed – nur active heißt „saugt ab“
         nicht = [z(2, "sensor.heidi_auto_empty_status", "idle", "not_performed")]

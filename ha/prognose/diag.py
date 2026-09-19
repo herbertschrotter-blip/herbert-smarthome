@@ -219,7 +219,8 @@ def cmd_tail(args):
             break
         day -= timedelta(days=1)
     heute, _dbg = read_day(datetime.now().strftime("%Y-%m-%d"))  # Starts aus dem ganzen Tag, nicht nur aus dem Auszug
-    print(json.dumps({"zeilen": out[-n:], "aelter": len(out) > n, "starts": starts(heute)}, ensure_ascii=False))
+    zeilen = [{k: v for k, v in r.items() if k not in ("stand", "vac_attr")} for r in out[-n:]]  # Schnappschuss der Zeile „neustart“ braucht die Karte nicht
+    print(json.dumps({"zeilen": zeilen, "aelter": len(out) > n, "starts": starts(heute)}, ensure_ascii=False))
 
 
 def starts(rows):

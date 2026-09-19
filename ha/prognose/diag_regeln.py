@@ -34,6 +34,8 @@ SCHAETZUNG_PCT = 30   # Abweichung der Dauer-Schätzung
 
 RUN = ("cleaning", "paused", "returning")
 LEER = ("", "unknown", "unavailable", None)
+HA_START = "Home Assistant starting"  # Auslöser-Text der Automationen, die beim HA-Start laufen
+NEUSTART_S = 120  # so nah an einer Zeile „neustart“ gilt eine Start-Automation als derselbe Neustart
 KEIN_FEHLER = ("no_error",) + LEER
 KNOEPFE = {"cleaning": ["pause", "stop", "return_to_base"], "paused": ["start", "stop", "return_to_base"],
            "returning": ["pause", "stop", "locate"], "docked": ["start", "locate"]}
@@ -98,6 +100,22 @@ class Welt:
             self.gut[ent] = z.get("neu")
         for k, (_, neu) in (z.get("attr") or {}).items():
             self.at.setdefault(ent, {})[k] = neu; self.seit[ent + "#" + k] = t
+
+    def neustart(self, z):
+        """HA-Neustart (HT-0008): Während HA startet, schreibt niemand mit – was sich in dieser Zeit ändert, fehlt im
+        Protokoll. Alte Werte gelten deshalb nicht mehr. Die Zeile „neustart“ bringt einen Schnappschuss mit (Zustände
+        aller Heidi-Entitäten, Attribute des Roboters); ohne ihn schweigen die Regeln, bis neue Werte gemeldet sind."""
+        t = zeit(z["ts"])
+        self.st, self.at, self.seit, self.gut = {}, {}, {}, {}
+        for ent, s in (z.get("stand") or {}).items():
+            if not self.vac and ent.startswith("vacuum."):
+                self.vac, self.p = ent, ent.split(".", 1)[1]
+            self.st[ent] = s; self.seit[ent] = t
+            if s not in LEER:
+                self.gut[ent] = s
+        vac = z.get("vac") or self.vac
+        for k, v in (z.get("vac_attr") or {}).items():
+            self.at.setdefault(vac, {})[k] = v; self.seit[vac + "#" + k] = t
 
     def zustand(self, ent):
         return self.st.get(ent)
@@ -184,6 +202,7 @@ def auswerten(zeilen, debug=None, jetzt=None, ab=None):
     zeilen = sorted((z for z in zeilen if z.get("ts")), key=lambda z: z["ts"])
     jetzt = jetzt or (zeit(zeilen[-1]["ts"]) if zeilen else datetime.now())
     w, funde = Welt(), []
+    schnappschuesse = [zeit(z["ts"]) for z in zeilen if z.get("art") == "neustart"]
     offen_a = {}       # (client, regel, signatur) → erster Treffer, wartet TOL_S auf Korrektur
     dienste = []       # offene Dienstaufrufe (B1) [(t, zeile)]
     auftrag = None     # letzter Raumauftrag aus HA (B2) (t, segments, ts)
@@ -242,6 +261,13 @@ def auswerten(zeilen, debug=None, jetzt=None, ab=None):
     for z in zeilen:
         t, art = zeit(z["ts"]), z.get("art")
         fristen(t)
+        # HA-Neustart: Zeile „neustart“ (mit Schnappschuss); ältere Protokolle kennen nur die Automationen mit Auslöser
+        # „Home Assistant starting“ – die zählen nur, wenn kein Schnappschuss in der Nähe liegt (sonst löschten sie ihn wieder)
+        if art == "neustart" or (art in ("automation", "skript") and z.get("ausloeser") == HA_START
+                                 and not any(abs((t - s).total_seconds()) <= NEUSTART_S for s in schnappschuesse)):
+            w.neustart(z if art == "neustart" else {"ts": z["ts"]})
+            offen_a.clear(); dienste.clear(); weg.clear(); startet = None
+            continue
         if art == "zustand":
             ent, alt, neu = z.get("ent", ""), z.get("alt"), z.get("neu")
             vorher_run = w.zustand(w.vac) in RUN if w.vac else False

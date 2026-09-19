@@ -144,6 +144,15 @@ class TicketSchreibweg(unittest.TestCase):
         self.assertEqual(len(r["zeilen"]), 5)
         self.assertEqual([(s["ts"][11:19], s["quelle"], s["wer"]) for s in r["starts"]], [("22:38:50", "benutzer", "Herbert")])
 
+    def test_tail_ohne_schnappschuss_ballast(self):
+        from datetime import datetime
+        tag = datetime.now().strftime("%Y-%m-%d")
+        diag.cmd_log([b64({"ts": "%sT09:00:00.000" % tag, "art": "neustart", "name": "Home Assistant neu gestartet", "ausloeser": "2 Werte",
+                           "vac": "vacuum.heidi", "stand": {"vacuum.heidi": "docked", "sensor.heidi_battery_level": "100"}, "vac_attr": {"charging": False}})])
+        z = self.ruf(diag.cmd_tail, b64({"n": 5}))["zeilen"][-1]
+        self.assertEqual((z["art"], z["quelle"], z["name"], "stand" in z, "vac_attr" in z), ("neustart", "system", "Home Assistant neu gestartet", False, False))
+        self.assertIn("NEUSTART Home Assistant neu gestartet (2 Werte)", diag.zeile_text(z))
+
     def test_tail_liefert_die_letzten_zeilen(self):
         from datetime import datetime
         tag = datetime.now().strftime("%Y-%m-%d")
