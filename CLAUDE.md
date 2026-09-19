@@ -85,7 +85,7 @@ Für den Skill code-erstellen (projektneutral).
 - Aufgabenquelle: BAUPLAN.md Abschnitt 8 (Aufgabenkarte: Ziel, Nicht ändern, Akzeptanz, Tests, Dateien) + ClickUp-Task DX-NNN; Akzeptanz-Zeilen = Testfälle
 - Schichten/Kopplung: `contract.ts` (IDs) → `device.ts`/`profile.ts` (Erkennung, Räume, Optionen) → `selectors.ts` (memoisierte Views) → Komponenten; Schreiben nach HA nur über `DxApi`; neue Entität/Dienst zuerst in Abschnitt 4 + contract.ts; nichts fest verdrahten, was Roboter oder HA liefern
 - Tests: `npm test` in `dreame_x60/card` (check + unit + build + E2E) und `npm run lint`; Exit-Code 0 ist Pflicht vor jedem Commit; Unit `tests/unit/*.test.ts`, E2E `tests/e2e/*.js` mit Harness-Stubs
-- Auslieferung: Karte `.\tools\deploy.ps1 -OnlyCard`, dann Ressourcen-Version `node tools/ha-ws.js lovelace/resources/update {...,"url":"/local/dreame_x60.js?v=<ver>"}`, Strg+F5; Backend: `check_config`, dann passender reload oder restart; Sichtprüfung durch Herbert benennen
+- Auslieferung: Karte `.\tools\deploy.ps1 -OnlyCard` (nur mit PowerShell 7, nie `powershell.exe`; Erfolg prüfen), **erst danach** Ressourcen-Version `node tools/ha-ws.js lovelace/resources/update {...,"url":"/local/dreame_x60.js?v=<ver>"}`, Strg+F5; Backend: `check_config`, dann passender reload oder restart; Sichtprüfung durch Herbert benennen
 - Mockup-Pflicht: ja bei großen UI-Umbauten (Modus Deep) – zuerst Mockup in `dreame_x60/mockups/`, Abnahme, dann bauen
 - Notiz-Ort für Befunde/Ideen ohne Task: BAUPLAN.md Abschnitt 10 (Abweichung → 10a als PD-Eintrag)
 - Pflicht-Branch: `dreame_x60` (Worktree `herbert-smarthome-v2`); `main` bleibt der Stand auf H:

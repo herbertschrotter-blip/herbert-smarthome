@@ -4,16 +4,26 @@
     dreame_x60.js?v=    aus "version" in dreame_x60\card\package.json     (Projekt dreame_x60)
   v1 (heidi-panel.js, dashboards\heidi.yaml) ist seit 15.09.2026 abgeschaltet; Referenz: heidi\archiv\.
   Danach: HA neu starten, Browser Strg+F5.
+  Jede Datei wird zuerst vollständig unter einem Hilfsnamen geschrieben, geprüft und dann in einem Zug umbenannt –
+  der Browser kann so nie eine halb kopierte Karten-Datei abrufen und wochenlang im Cache behalten (19.09.2026).
+  Braucht PowerShell 7 (pwsh); Windows PowerShell 5.1 liest die Datei falsch ein.
 
   Aufruf im Repo-Wurzelordner:  .\tools\deploy.ps1            (alles)
                                 .\tools\deploy.ps1 -OnlyCard  (nur die Karten-Datei)
 #>
 param([switch]$OnlyCard, [string]$Target = 'H:\')
+$ErrorActionPreference = 'Stop'
+if ($PSVersionTable.PSVersion.Major -lt 7) { throw 'deploy.ps1 braucht PowerShell 7 (pwsh).' }
 $root = Split-Path $PSScriptRoot -Parent
 $utf8 = New-Object System.Text.UTF8Encoding($false)
 function Copy-Utf8($src, $dst) {
   $dir = Split-Path $dst -Parent; if (-not (Test-Path $dir)) { New-Item -ItemType Directory $dir | Out-Null }
-  [IO.File]::WriteAllText($dst, [IO.File]::ReadAllText($src, $utf8), $utf8); Write-Host "→ $dst"
+  $bytes = $utf8.GetBytes([IO.File]::ReadAllText($src, $utf8))
+  $tmp = "$dst.deploy-tmp"
+  [IO.File]::WriteAllBytes($tmp, $bytes)
+  if ((Get-Item $tmp).Length -ne $bytes.Length) { Remove-Item $tmp -Force; throw "Unvollständig geschrieben: $dst" }
+  [IO.File]::Move($tmp, $dst, $true)  # Umbenennen ersetzt die alte Datei in einem Zug
+  Write-Host "→ $dst"
 }
 $files = if ($OnlyCard) { @('www\dreame_x60.js') } else {
   @('configuration.yaml','automations.yaml','scripts.yaml','packages\heidi.yaml','dashboards\dreame_x60.yaml','themes\heidi.yaml','www\dreame_x60.js','prognose\presence.py','prognose\runlog.py','prognose\diag.py','prognose\diag_regeln.py','prognose\diag_tickets.py','prognose\tests\test_diag.py','prognose\tests\test_diag_regeln.py','prognose\tests\test_diag_tickets.py','prognose\tests\test_diag_phase.py') }
