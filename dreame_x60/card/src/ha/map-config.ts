@@ -3,6 +3,7 @@
 // Liegt in der HA-Schicht, weil hier Entitäts-IDs aus dem Vertrag eingesetzt werden (Regel 1). Texte aus src/i18n (mapmode.*).
 import { ENTITIES } from './contract';
 import type { RoomShape } from './selectors';
+import type { PictureRatio } from './map-ratio';
 import { deviceName } from './device';
 import { t } from '../i18n/t';
 
@@ -53,7 +54,9 @@ export function buildMapConfig(kind: string, dark: boolean, mode: MapModeKey, ro
  * Nur Bild (wie v1) – auch die Variante `compact` der Übersicht (Live-Bild der Kamera, ohne Werkzeuge).
  * `camera_view: 'live'` (DX-071): HA zeigt den Bildstrom der Kamera statt alle 10 s ein Standbild; die Integration schickt
  * nur dann ein neues Bild, wenn sich die Karte geändert hat. Ist die Karte nicht sichtbar, beendet HA den Strom selbst.
+ * `aspect_ratio` (HT-0010): ohne Angabe nimmt HA im Live-Modus 16:9 und schneidet ein quadratisches Kartenbild unten ab –
+ * deshalb das gemessene Format des Bilds (ha/map-ratio.ts); ohne Messung bleibt es beim Rahmen von HA.
  */
-export function pictureConfig(): MapConfig {
-  return { type: 'picture-entity', entity: ENTITIES.map, camera_image: ENTITIES.map, camera_view: 'live', show_name: false, show_state: false };
+export function pictureConfig(ratio: PictureRatio | null = null): MapConfig {
+  return { type: 'picture-entity', entity: ENTITIES.map, camera_image: ENTITIES.map, camera_view: 'live', show_name: false, show_state: false, ...(ratio ? { aspect_ratio: `${ratio.w}:${ratio.h}` } : {}) };
 }

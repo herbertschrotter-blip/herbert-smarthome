@@ -10,6 +10,9 @@ import type { DxApi } from '../ha/api';
 import { MAP_MODES, buildMapConfig, hasModes, isHeidiKarte, pictureConfig } from '../ha/map-config';
 import './dx-heidi-map';
 import type { MapConfig, MapModeKey } from '../ha/map-config';
+import { lastPictureRatio, loadPictureRatio, sameRatio } from '../ha/map-ratio';
+import type { PictureRatio } from '../ha/map-ratio';
+import { MAP_COMPACT_MAX_HEIGHT_PX } from '../domain/constants';
 import { mapElements } from '../shared/caches';
 import { runOrder } from '../domain/strip';
 import { fmtDate } from '../domain/labels';
@@ -82,7 +85,7 @@ export class DxMapCard extends LitElement {
   static override properties = {
     hass: { attribute: false }, map: { attribute: false }, robot: { attribute: false }, history: { attribute: false }, api: { attribute: false },
     variant: { type: String }, dark: { type: Boolean },
-    _mode: { state: true }, _sel: { state: true }, _error: { state: true },
+    _mode: { state: true }, _sel: { state: true }, _error: { state: true }, _ratio: { state: true },
   };
 
   declare hass?: HomeAssistant;
@@ -95,7 +98,11 @@ export class DxMapCard extends LitElement {
   declare private _mode: MapModeKey;
   declare private _sel: Set<number>;
   declare private _error: string | null;
+  /** Format des Kartenbilds (nur `compact`, HT-0010); null bis zur ersten Messung */
+  declare private _ratio: PictureRatio | null;
   private _pending: string | null = null;
+  private _measured = '';
+  private _measuring = false;
 
   constructor() {
     super();
@@ -104,6 +111,7 @@ export class DxMapCard extends LitElement {
     this._mode = 'raeume';
     this._sel = new Set();
     this._error = null;
+    this._ratio = lastPictureRatio();
   }
 
   get mode(): MapModeKey { return this._mode; }
@@ -111,17 +119,32 @@ export class DxMapCard extends LitElement {
 
   /** Schlüssel des Modul-Caches: die Übersicht zeigt immer das Kamerabild, die Seite Reinigen je Darstellung und Modus. */
   cacheKey(): string {
-    if (this.variant === 'compact') return 'compact';
+    if (this.variant === 'compact') return this._ratio ? `compact|${this._ratio.w}:${this._ratio.h}` : 'compact';
     const kind = this.map?.karte ?? '';
     return hasModes(kind) ? `${kind}|${this._mode}` : `${kind}|${this.dark}`;
   }
 
-  override updated(): void { void this.mountMap(); }
+  override updated(): void { this.measure(); void this.mountMap(); }
+
+  /** Bildformat messen, sobald sich die Bildadresse ändert (neues Token, neue Karte); ein anderes Format erzeugt ein neues Karten-Element. */
+  private measure(): void {
+    const url = this.variant === 'compact' ? (this.map?.entityPicture ?? '') : '';
+    if (!url || url === this._measured) return;
+    this._measured = url;
+    this._measuring = true;
+    void loadPictureRatio(url).then((r) => {
+      this._measuring = false;
+      if (!r || sameRatio(r, this._ratio)) { this.requestUpdate(); return; }
+      mapElements.delete(this.cacheKey()); // das alte Format wird nicht mehr gebraucht
+      this._ratio = r;
+    });
+  }
 
   /** Karten-Element aus dem Cache in den Slot setzen (oder einmal erzeugen); `hass` bei jedem Tick durchreichen. */
   private async mountMap(): Promise<void> {
     const slot = this.renderRoot.querySelector<HTMLElement>('.slot');
     if (!slot || !this.map) return;
+    if (this.variant === 'compact' && this._measuring && !this._ratio) return; // erste Messung abwarten: kein Bild im falschen Rahmen, kein zweites Element
     const key = this.cacheKey();
     let el = mapElements.get(key) as CardEl | undefined;
     if (!el) {
@@ -130,7 +153,7 @@ export class DxMapCard extends LitElement {
       try {
         if (!window.loadCardHelpers) throw new Error(t('map.helpersMissing'));
         const helpers = await window.loadCardHelpers();
-        const cfg = this.variant === 'compact' ? pictureConfig() : buildMapConfig(this.map.karte, this.dark, this._mode, this.map.roomShapes);
+        const cfg = this.variant === 'compact' ? pictureConfig(this._ratio) : buildMapConfig(this.map.karte, this.dark, this._mode, this.map.roomShapes);
         el = helpers.createCardElement(cfg) as CardEl;
         mapElements.set(key, el);
         this._error = null;
@@ -178,6 +201,9 @@ export class DxMapCard extends LitElement {
   }
 
   private renderCompact(): TemplateResult {
+    // HT-0010: Rahmen im Format des Bilds, Höhe begrenzt – ein hohes Bild wird schmäler und steht mittig
+    const r = this._ratio;
+    const fit = r ? `max-width: calc(${MAP_COMPACT_MAX_HEIGHT_PX}px * ${r.w} / ${r.h}); margin-inline: auto; min-height: 0;` : '';
     return html`
       <div class="tabs">
         <button class="on"><ha-icon icon="mdi:map-outline"></ha-icon>${t('map.live')}</button>
@@ -186,7 +212,7 @@ export class DxMapCard extends LitElement {
         <button data-nav="protokoll" @click=${() => emit(this, EVENTS.navigate, { page: 'protokoll' })}><ha-icon icon="mdi:history"></ha-icon>${t('map.history')}</button>
       </div>
       <div class="map tap" title=${t('map.toMap')}>
-        <div class="slot"></div>
+        <div class="slot" style=${fit}></div>
         <div class="catch" @click=${this.goReinigen}></div>
         <div class="mtools"><button class="btn sm" @click=${this.goReinigen}><ha-icon icon="mdi:map-outline"></ha-icon>${t('map.open')}</button></div>
       </div>

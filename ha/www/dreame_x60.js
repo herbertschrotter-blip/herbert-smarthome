@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.40 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.41 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -3096,7 +3096,7 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.40";
+var VERSION = "2.0.0-alpha.41";
 
 // src/config.ts
 var NAV = [
@@ -3731,8 +3731,8 @@ function buildMapConfig(kind, dark, mode, rooms) {
   }
   return pictureConfig();
 }
-function pictureConfig() {
-  return { type: "picture-entity", entity: ENTITIES.map, camera_image: ENTITIES.map, camera_view: "live", show_name: false, show_state: false };
+function pictureConfig(ratio = null) {
+  return { type: "picture-entity", entity: ENTITIES.map, camera_image: ENTITIES.map, camera_view: "live", show_name: false, show_state: false, ...ratio ? { aspect_ratio: `${ratio.w}:${ratio.h}` } : {} };
 }
 
 // src/domain/calibration.ts
@@ -4051,6 +4051,26 @@ var DxHeidiMap = class extends i4 {
 };
 if (!customElements.get(HEIDI_MAP_ELEMENT)) customElements.define(HEIDI_MAP_ELEMENT, DxHeidiMap);
 
+// src/ha/map-ratio.ts
+var last = null;
+var lastPictureRatio = () => last;
+function loadPictureRatio(pictureUrl) {
+  if (!pictureUrl) return Promise.resolve(null);
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      if (img.naturalWidth > 0 && img.naturalHeight > 0) last = { w: img.naturalWidth, h: img.naturalHeight };
+      resolve(img.naturalWidth > 0 && img.naturalHeight > 0 ? last : null);
+    };
+    img.onerror = () => resolve(null);
+    img.src = pictureUrl;
+  });
+}
+var sameRatio = (a3, b3) => a3?.w === b3?.w && a3?.h === b3?.h;
+
+// src/domain/constants.ts
+var MAP_COMPACT_MAX_HEIGHT_PX = 420;
+
 // src/shared/caches.ts
 var mapElements = /* @__PURE__ */ new Map();
 
@@ -4090,11 +4110,14 @@ var DxMapCard = class extends i4 {
   constructor() {
     super();
     this._pending = null;
+    this._measured = "";
+    this._measuring = false;
     this.variant = "full";
     this.dark = true;
     this._mode = "raeume";
     this._sel = /* @__PURE__ */ new Set();
     this._error = null;
+    this._ratio = lastPictureRatio();
   }
   static {
     this.styles = [controls, i`
@@ -4157,7 +4180,8 @@ var DxMapCard = class extends i4 {
       dark: { type: Boolean },
       _mode: { state: true },
       _sel: { state: true },
-      _error: { state: true }
+      _error: { state: true },
+      _ratio: { state: true }
     };
   }
   get mode() {
@@ -4168,17 +4192,35 @@ var DxMapCard = class extends i4 {
   }
   /** Schlüssel des Modul-Caches: die Übersicht zeigt immer das Kamerabild, die Seite Reinigen je Darstellung und Modus. */
   cacheKey() {
-    if (this.variant === "compact") return "compact";
+    if (this.variant === "compact") return this._ratio ? `compact|${this._ratio.w}:${this._ratio.h}` : "compact";
     const kind = this.map?.karte ?? "";
     return hasModes(kind) ? `${kind}|${this._mode}` : `${kind}|${this.dark}`;
   }
   updated() {
+    this.measure();
     void this.mountMap();
+  }
+  /** Bildformat messen, sobald sich die Bildadresse ändert (neues Token, neue Karte); ein anderes Format erzeugt ein neues Karten-Element. */
+  measure() {
+    const url = this.variant === "compact" ? this.map?.entityPicture ?? "" : "";
+    if (!url || url === this._measured) return;
+    this._measured = url;
+    this._measuring = true;
+    void loadPictureRatio(url).then((r4) => {
+      this._measuring = false;
+      if (!r4 || sameRatio(r4, this._ratio)) {
+        this.requestUpdate();
+        return;
+      }
+      mapElements.delete(this.cacheKey());
+      this._ratio = r4;
+    });
   }
   /** Karten-Element aus dem Cache in den Slot setzen (oder einmal erzeugen); `hass` bei jedem Tick durchreichen. */
   async mountMap() {
     const slot = this.renderRoot.querySelector(".slot");
     if (!slot || !this.map) return;
+    if (this.variant === "compact" && this._measuring && !this._ratio) return;
     const key = this.cacheKey();
     let el = mapElements.get(key);
     if (!el) {
@@ -4187,7 +4229,7 @@ var DxMapCard = class extends i4 {
       try {
         if (!window.loadCardHelpers) throw new Error(t3("map.helpersMissing"));
         const helpers = await window.loadCardHelpers();
-        const cfg = this.variant === "compact" ? pictureConfig() : buildMapConfig(this.map.karte, this.dark, this._mode, this.map.roomShapes);
+        const cfg = this.variant === "compact" ? pictureConfig(this._ratio) : buildMapConfig(this.map.karte, this.dark, this._mode, this.map.roomShapes);
         el = helpers.createCardElement(cfg);
         mapElements.set(key, el);
         this._error = null;
@@ -4238,10 +4280,12 @@ var DxMapCard = class extends i4 {
       const rest = runOrder(r4).rest.map((id) => roomById(this.map?.roomOrder ?? [], id)?.short).filter(Boolean).join(", ");
       return b2`<b>${t3("map.live")}</b> · ${r4.room !== t3("common.dash") ? r4.room : t3("map.capAway")} · ${r4.cleanedArea} ${t3("unit.m2")}${rest ? b2` · ${t3("map.capRest", { rest })}` : A}`;
     }
-    const last = this.history?.entries[0];
-    return b2`<b>${t3("map.title")}</b> · ${t3("map.capStation", { name: deviceName() || t3("common.robot") })}${last ? b2` · ${t3("map.capLast", { time: fmtDate(last.ts * 1e3) })}` : A}`;
+    const last2 = this.history?.entries[0];
+    return b2`<b>${t3("map.title")}</b> · ${t3("map.capStation", { name: deviceName() || t3("common.robot") })}${last2 ? b2` · ${t3("map.capLast", { time: fmtDate(last2.ts * 1e3) })}` : A}`;
   }
   renderCompact() {
+    const r4 = this._ratio;
+    const fit = r4 ? `max-width: calc(${MAP_COMPACT_MAX_HEIGHT_PX}px * ${r4.w} / ${r4.h}); margin-inline: auto; min-height: 0;` : "";
     return b2`
       <div class="tabs">
         <button class="on"><ha-icon icon="mdi:map-outline"></ha-icon>${t3("map.live")}</button>
@@ -4250,7 +4294,7 @@ var DxMapCard = class extends i4 {
         <button data-nav="protokoll" @click=${() => emit(this, EVENTS.navigate, { page: "protokoll" })}><ha-icon icon="mdi:history"></ha-icon>${t3("map.history")}</button>
       </div>
       <div class="map tap" title=${t3("map.toMap")}>
-        <div class="slot"></div>
+        <div class="slot" style=${fit}></div>
         <div class="catch" @click=${this.goReinigen}></div>
         <div class="mtools"><button class="btn sm" @click=${this.goReinigen}><ha-icon icon="mdi:map-outline"></ha-icon>${t3("map.open")}</button></div>
       </div>
@@ -4588,8 +4632,8 @@ var DxDev = class extends i4 {
   render() {
     const tag = heute();
     const st2 = this._starts ?? starts(this._zeilen, tag);
-    const last = this._zeilen.at(-1);
-    const sek = last ? Math.max(0, Math.round((Date.now() - Date.parse(last.ts)) / 1e3)) : null;
+    const last2 = this._zeilen.at(-1);
+    const sek = last2 ? Math.max(0, Math.round((Date.now() - Date.parse(last2.ts)) / 1e3)) : null;
     const tks = this._tickets.filter((k2) => ticketPasst(this._tfilter, k2.status));
     const rows = this.sichtbar();
     return b2`

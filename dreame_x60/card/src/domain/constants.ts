@@ -33,3 +33,5 @@ export const DEFAULT_WAESCHE = { vor_start_min: 4, zwischen_min: 5, nach_m2: 25 
 export const DEFAULT_RUECKKEHR = '17:00';
 /** Rückkehr: Mindesttage der Prognose, wenn der Helfer keinen Wert hat. */
 export const DEFAULT_MINDESTTAGE = 14;
+/** Übersicht: größte Höhe des Kartenbilds in der kleinen Karten-Kachel in px (etwa die Höhe des Roboter-Panels); ein höheres Bild wird schmäler und steht mittig (HT-0010). */
+export const MAP_COMPACT_MAX_HEIGHT_PX = 420;

@@ -136,6 +136,19 @@ const tick = (page, ms = 80) => page.waitForTimeout(ms);
   await tick(page, 200);
   const c = await cards(page);
   H.check('compact: Kamerabild (picture-entity) in der Live-Ansicht (DX-071), genau eine Karte', c.length === 1 && c[0].type === 'picture-entity' && c[0].view === 'live', c);
+  // HT-0010: HA gibt dem Live-Bild ohne aspect_ratio einen 16:9-Rahmen und schneidet ein quadratisches Kartenbild unten ab →
+  // die Karte misst das Bild (Fixture map.png 1040 × 680) und gibt das Format mit; Höhe begrenzt auf 420 px
+  const frame = () => page.evaluate(() => { const s = document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-map-card').shadowRoot.querySelector('.slot'); const m = s.parentElement.getBoundingClientRect(), r = s.getBoundingClientRect(); return { ratios: window._cards.map((x) => x.aspect_ratio ?? null), maxWidth: Math.round(parseFloat(getComputedStyle(s).maxWidth)), mittig: Math.abs((r.left - m.left) - (m.right - r.right)) <= 2, breite: Math.round(r.width) }; });
+  let f = await frame();
+  H.check('HT-0010 Querformat: Format des Bilds als aspect_ratio 1040:680, Rahmen bis 642 px breit (420 px hoch)', JSON.stringify(f.ratios) === '["1040:680"]' && f.maxWidth === 642, f);
+  await page.route(H.ORIGIN + '/api/camera_proxy/camera.heidi_map?token=QUADRAT**', (route) => route.fulfill({ status: 200, contentType: 'image/png', body: H.png(64, 64) }));
+  await page.evaluate(() => { const el = document.querySelector('dreame-x60-panel'); const s = el.hass.states; el.hass = { ...el.hass, states: { ...s, 'camera.heidi_map': { ...s['camera.heidi_map'], attributes: { ...s['camera.heidi_map'].attributes, entity_picture: '/api/camera_proxy/camera.heidi_map?token=QUADRAT&v=2' } } } }; });
+  await tick(page, 300);
+  f = await frame();
+  H.check('HT-0010 quadratisches Bild: neues Karten-Element mit aspect_ratio 64:64, Rahmen höchstens 420 px breit (= 420 px hoch) und mittig', JSON.stringify(f.ratios) === '["1040:680","64:64"]' && f.maxWidth === 420 && f.breite <= 420 && f.mittig, f);
+  for (let i = 0; i < 20; i++) await page.evaluate((i) => { const el = document.querySelector('dreame-x60-panel'); const s = el.hass.states; el.hass = { ...el.hass, states: { ...s, 'input_boolean.stuehle_am_boden': { ...s['input_boolean.stuehle_am_boden'], last_updated: 'ht10-' + i } } }; }, i);
+  await tick(page);
+  H.check('HT-0010: 20 irrelevante Ticks → keine weitere Messung, kein neues Element', (await frame()).ratios.length === 2);
   const cap = await page.evaluate(() => document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-map-card').shadowRoot.querySelector('.mapcap').textContent.replace(/\s+/g, ' ').trim());
   H.check('compact: Bildunterschrift „Karte · Heidi in der Station · letzter Lauf …“', /^Karte · Heidi in der Station · letzter Lauf /.test(cap), cap);
   const nav = await page.evaluate(() => new Promise((resolve) => {
