@@ -20,6 +20,7 @@ import { loadSetupData } from './ha/setup-loader';
 import type { SetupData } from './ha/setup-loader';
 import { readAllRoomValues, readAutomatik, readConsumables, readDiagnostics, readHistory, readLearn, readMap, readPlans, readPrognose, readRobot, readRobotSettings, readSettings, readStation } from './ha/selectors';
 import type { RobotView } from './ha/selectors';
+import { wirksameWerte } from './domain/raumwerte';
 import { PAGES, PAGE_PARTS, PAGE_TITLE, START_SLOTS, startSlot, toPage } from './pages';
 import type { Page, StartSlot } from './pages';
 import { EVENTS } from './shared/overlay';
@@ -213,7 +214,7 @@ export class DreameX60Panel extends LitElement {
     const s = this.hass?.states;
     if (!s) return null;
     const rooms = readAllRoomValues(s);
-    return anzeigeSnapshot(readRobot(s), (id) => rooms.rooms[id] ?? null, readProfile(s).rooms, WERTE_TAB);
+    return anzeigeSnapshot(readRobot(s), (id) => wirksameWerte(rooms, id), readProfile(s).rooms, WERTE_TAB);
   }
 
   /** Kontext jeder Meldung der Karte: Seite, Version, Fenster, alle sichtbaren Werte. */

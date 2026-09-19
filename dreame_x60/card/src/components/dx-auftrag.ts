@@ -6,6 +6,7 @@ import type { TemplateResult } from 'lit';
 import type { RobotView, AllRoomValuesView } from '../ha/selectors';
 import type { DotLevel } from '../domain/status';
 import { runOrder } from '../domain/strip';
+import { wirksameWerte } from '../domain/raumwerte';
 import { roomById } from '../domain/rooms';
 import type { RoomInfo } from '../domain/rooms';
 import { t } from '../i18n/t';
@@ -45,7 +46,7 @@ export class DxAuftrag extends LitElement {
     const nextId = startpunkt ? order[0] : rest[0];
     const rl = this.roomOrder ?? [];
     const next = nextId !== undefined ? roomById(rl, nextId) : undefined;
-    const nextVals = next && this.rooms ? this.rooms.rooms[next.id] : null;
+    const nextVals = next && this.rooms ? wirksameWerte(this.rooms, next.id) : null;
     const short = (id: number): string => roomById(rl, id)?.short ?? String(id);
     const dash = t('common.dash');
     return html`

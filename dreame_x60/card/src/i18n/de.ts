@@ -194,6 +194,8 @@ export const de = {
   'hero.away': 'unterwegs',
   'hero.battery': 'Akku',
   'hero.mode': 'Modus',
+  'hero.globalValues': 'Allgemeine Werte',
+  'hero.globalTitle': '„Angepasste Reinigung“ ist aus – der Roboter fährt mit seinen allgemeinen Werten, nicht mit den Raum-Werten',
   'hero.modeTitle': 'Reinigungsmodus',
   'hero.suction': 'Saugstufe',
   'hero.suctionTitle': 'Saugleistung',

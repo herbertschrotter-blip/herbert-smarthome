@@ -13,6 +13,9 @@ const { page, errs, states: docked } = await H.mount(b, { page: 'start', viewpor
 const statesFor = (v) => {
   const s = { ...docked };
   delete s['camera.heidi_map']; // Parität: v1 kennt keinen Rückfall auf Kartendaten (PD-010 wird unten mit states-driving.json geprüft)
+  // Parität: v1 kennt keine „wirksamen Werte“ (PD-019, HT-0006 – unten eigens geprüft); die Fixture wurde mit ausgeschalteter
+  // „Angepasster Reinigung“ aufgenommen, für den v1-Vergleich gilt sie als an
+  s['vacuum.heidi'] = { ...s['vacuum.heidi'], attributes: { ...s['vacuum.heidi'].attributes, customized_cleaning: true } };
   for (const [id, o] of Object.entries(v.input.overrides ?? {})) {
     const cur = s[id] ?? { entity_id: id, state: 'unknown', attributes: {} };
     s[id] = { ...cur, state: o.state ?? cur.state, attributes: { ...cur.attributes, ...(o.attributes ?? {}) } };
@@ -105,6 +108,23 @@ const jetzt = v1.vektoren.find((v) => /Streifen · Jetzt/.test(v.name));
     return [t('.route'), t('.meter .p'), t('.row.next .t'), t('.row.next .tag')];
   });
   H.checkEqual('App-Lauf: Auftrag Küche → Flur, 0 / 2, nächster Raum Flur (Saugen)', a, ['Küche → Flur', '0 / 2', 'Flur', 'Saugen']);
+}
+
+// ── HT-0006 / PD-019: App-Lauf mit ausgeschalteter „Angepasster Reinigung“ (18.09. 22:02) → die Knöpfe zeigen die allgemeinen
+//    Werte des Roboters (Leise), nicht die des Raums (Standard); Hinweis „Allgemeine Werte“; Bericht ans Protokoll ebenso ──
+{
+  const s = H.loadFixture('states-driving.json');
+  const hint = () => page.evaluate(() => { const e = document.querySelector('dreame-x60-panel').shadowRoot.querySelector('dx-hero').shadowRoot.querySelector('[data-global]'); return e ? e.textContent.replace(/\s+/g, ' ').trim() : null; });
+  H.checkEqual('Angepasste Reinigung an: kein Hinweis „Allgemeine Werte“', await hint(), null);
+  s['vacuum.heidi'] = { ...s['vacuum.heidi'], attributes: { ...s['vacuum.heidi'].attributes, customized_cleaning: false } };
+  for (const [id, state] of [['select.heidi_cleaning_mode', 'sweeping'], ['select.heidi_suction_level', 'quiet'], ['select.heidi_cleaning_route', 'standard']]) s[id] = { ...(s[id] ?? { entity_id: id, attributes: {} }), state };
+  await setStates(s);
+  const got = await readHero();
+  H.checkEqual('Angepasste Reinigung aus: Knöpfe zeigen die allgemeinen Werte (Leise statt Standard)', got.params, ['Saugen', 'Leise', '–']);
+  H.checkEqual('… Streifen-Chips ebenso', norm(got.strip), 'Jetzt: Küche danach Flur SaugenLeise1×');
+  H.checkEqual('… Hinweis „Allgemeine Werte“', await hint(), 'Allgemeine Werte');
+  const snap = await page.evaluate(() => document.querySelector('dreame-x60-panel').snapshot());
+  H.checkEqual('… Bericht ans Protokoll: saug_ha quiet', [snap.modus_ha, snap.saug_ha], ['sweeping', 'quiet']);
 }
 
 // ── PD-016: Balken der Auftrag-Kachel = Prozent vom Roboter (sensor.heidi_cleaning_progress), sonst Raumzählung ──

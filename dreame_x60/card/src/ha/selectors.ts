@@ -204,17 +204,38 @@ export const readRoomValues = (id: RoomId): Selector<RoomValues | null> => {
 export interface AllRoomValuesView {
   rooms: Record<RoomId, RoomValues | null>;
   customized: boolean;
+  /** Allgemeine Werte des Roboters (globale Selects); null, solange der Modus nicht lesbar ist (bei „Angepasste Reinigung“ an sind sie unavailable) */
+  global: RoomValues | null;
+  /** „Angepasste Reinigung“ ist aus und die allgemeinen Werte sind lesbar → der Roboter fährt mit ihnen, nicht mit den Raum-Werten (HT-0006, PD-019) */
+  globalAktiv: boolean;
   /** Mindestens ein Raum ohne Werte (weder Selects noch Kartendaten) */
   anyUnavailable: boolean;
   /** Räume, deren Werte aus den Kartendaten kommen (Selects unavailable, PD-010) – dort ist Schreiben nicht möglich */
   vonKarte: RoomId[];
 }
-export const readAllRoomValues: Selector<AllRoomValuesView> = memoizeSelector((s) => [...profileIds(s), ...readProfile(s).roomIds.flatMap(roomSelectIds), E.customizedCleaning], (s) => {
+/** Allgemeine Werte des Roboters (deutsch) aus den globalen Selects; Wiederholungen gibt es dort nicht (immer 1). */
+export function globalValuesOf(s: States): RoomValues | null {
+  const g = (id: string): string | null => { const v = st(s, id); return EMPTY.includes(v) ? null : v; };
+  const m = g(E.cleaningMode); if (m === null) return null;
+  const saugRaw = g(E.suctionLevel), wasserRaw = g(E.mopPadHumidity), routeRaw = g(E.cleaningRoute);
+  return {
+    modus: (RV_HA.modus as Record<string, string>)[m] as RoomValues['modus'] ?? (m as RoomValues['modus']),
+    saug: ((saugRaw && (RV_HA.saug as Record<string, string>)[saugRaw]) || '–') as RoomValues['saug'],
+    wasser: wasserRaw ? (((RV_HA.wasser as Record<string, string>)[wasserRaw] ?? wasserRaw) as RoomValues['wasser']) : null,
+    route: routeRaw ? (((RV_HA.route as Record<string, string>)[routeRaw] ?? routeRaw) as RoomValues['route']) : null,
+    wdh: '1',
+  };
+}
+/** „Angepasste Reinigung“ aus? Im Lauf ist der Schalter unavailable – verlässlich ist das Attribut des Roboters; fehlt es, zählt der Schalter. */
+const customizedOff = (s: States): boolean => { const a = attr<unknown>(s, E.vac, 'customized_cleaning'); return typeof a === 'boolean' ? !a : st(s, E.customizedCleaning) === 'off'; };
+const customizedAttrOnly = (a: HassEntity | undefined, b: HassEntity | undefined): boolean => a?.attributes?.customized_cleaning === b?.attributes?.customized_cleaning;
+export const readAllRoomValues: Selector<AllRoomValuesView> = memoizeSelector((s) => [...profileIds(s), ...readProfile(s).roomIds.flatMap(roomSelectIds), E.customizedCleaning, E.vac, E.cleaningMode, E.suctionLevel, E.mopPadHumidity, E.cleaningRoute], (s) => {
   const ids = readProfile(s).roomIds;
   const rooms = Object.fromEntries(ids.map((id) => [id, readRoomValues(id)(s)])) as Record<RoomId, RoomValues | null>;
   const vonKarte = ids.filter((id) => rooms[id] !== null && EMPTY.includes(st(s, roomEntity(id, RV_ENT.modus))));
-  return { rooms, customized: on(s, E.customizedCleaning), anyUnavailable: ids.some((id) => rooms[id] === null), vonKarte };
-}, () => ({ [E.map]: mapRoomsOnly }));
+  const global = globalValuesOf(s);
+  return { rooms, customized: on(s, E.customizedCleaning), global, globalAktiv: global !== null && customizedOff(s), anyUnavailable: ids.some((id) => rooms[id] === null), vonKarte };
+}, () => ({ [E.map]: mapRoomsOnly, [E.vac]: customizedAttrOnly }));
 
 // ───────── Lernwerte ─────────
 export const readLearn: Selector<Lernwerte | null> = memoizeSelector(() => [E.lern], (s) => {

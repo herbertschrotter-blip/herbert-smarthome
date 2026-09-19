@@ -7,6 +7,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ALL_SELECTORS, readAllRoomValues, readAutomatik, readConsumables, readDiagnostics, readHistory, readLearn, readMap, readPlan, readPlans, readPrognose, readRobot, readRobotSettings, readRoomValues, readSettings, readStation, resetHistoryCache } from '../../src/ha/selectors';
 import type { States } from '../../src/ha/types';
+import { wirksameWerte } from '../../src/domain/raumwerte';
 import { discoverFromStates } from '../../src/ha/device';
 
 const FIX = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'fixtures');
@@ -128,6 +129,29 @@ test('Diagnose: Fixture ohne fehlende IDs; eine entfernte ID wird gemeldet', () 
   const d2 = readDiagnostics(s);
   assert.deepEqual(d2.missing, ['input_number.heidi_min_akku']);
   assert.ok(d2.groups[1]!.missing.includes('input_number.heidi_min_akku'), 'Paket-Gruppe');
+});
+
+test('Wirksame Werte (HT-0006, PD-019): „Angepasste Reinigung“ aus → allgemeine Werte des Roboters statt der Raum-Werte', () => {
+  resetAll(); const driving = JSON.parse(fs.readFileSync(path.join(FIX, 'states-driving.json'), 'utf8')) as States;
+  // Fixture: Angepasste Reinigung an, globale Selects unavailable → Raum-Werte wie bisher
+  const an = readAllRoomValues(driving);
+  assert.deepEqual([an.globalAktiv, an.global, wirksameWerte(an, 6)?.saug], [false, null, 'Standard']);
+  // Fall aus dem Ticket (App-Start 18.09. 22:02): Attribut customized_cleaning false, Schalter unavailable, global Saugen/Leise
+  let s: States = { ...driving, 'vacuum.heidi': { ...driving['vacuum.heidi']!, attributes: { ...driving['vacuum.heidi']!.attributes, customized_cleaning: false } } };
+  s = withState(s, 'select.heidi_cleaning_mode', 'sweeping'); s = withState(s, 'select.heidi_suction_level', 'quiet'); s = withState(s, 'select.heidi_cleaning_route', 'standard');
+  const aus = readAllRoomValues(s);
+  assert.equal(aus.globalAktiv, true);
+  assert.deepEqual(aus.global, { modus: 'Saugen', saug: 'Leise', wasser: null, route: 'Standard', wdh: '1' });
+  assert.deepEqual([wirksameWerte(aus, 6)?.saug, aus.rooms[6]?.saug], ['Leise', 'Standard'], 'wirksam = allgemein, Raum-Wert bleibt für „Räume einstellen“');
+  // Attribut fehlt (anderer Roboter): der Schalter zählt – off → allgemein, unavailable → Raum-Werte
+  const ohne: States = { ...s, 'vacuum.heidi': { ...s['vacuum.heidi']!, attributes: Object.fromEntries(Object.entries(s['vacuum.heidi']!.attributes).filter(([k]) => k !== 'customized_cleaning')) } };
+  assert.equal(readAllRoomValues(ohne).globalAktiv, false);
+  assert.equal(readAllRoomValues(withState(ohne, 'switch.heidi_customized_cleaning', 'off')).globalAktiv, true);
+  // aus, aber allgemeine Werte nicht lesbar → Raum-Werte (besser als nichts)
+  assert.equal(readAllRoomValues(withState(s, 'select.heidi_cleaning_mode', 'unavailable')).globalAktiv, false);
+  // andere Attribute des Roboters (Position, Fläche) lösen keinen Neuwert aus
+  const tick: States = { ...s, 'vacuum.heidi': { ...s['vacuum.heidi']!, attributes: { ...s['vacuum.heidi']!.attributes, cleaned_area: 99 } } };
+  assert.equal(readAllRoomValues(tick), readAllRoomValues(s), 'memoisiert');
 });
 
 test('Raumwerte im Lauf (PD-010): Modus-Select unavailable → Werte aus den Kartendaten; Kamera-Bild löst keinen Neuwert aus', () => {

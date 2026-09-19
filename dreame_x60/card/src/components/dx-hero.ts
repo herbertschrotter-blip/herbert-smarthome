@@ -11,6 +11,7 @@ import type { RoomId } from '../ha/contract';
 import type { RoomInfo } from '../domain/rooms';
 import type { DotLevel } from '../domain/status';
 import { stripModel } from '../domain/strip';
+import { wirksameWerte } from '../domain/raumwerte';
 import type { StripModel } from '../domain/strip';
 import { statusText } from '../domain/status';
 import { t } from '../i18n/t';
@@ -62,6 +63,8 @@ export class DxHero extends LitElement {
     .chip.msg .x { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; margin-left: 2px; color: var(--dx-warning); border: 1px solid rgba(242, 181, 68, 0.45); background: transparent; flex: none; }
     .chip.msg .x ha-icon { --mdc-icon-size: 12px; width: 12px; height: 12px; color: var(--dx-warning); }
     .chip.msg .x:hover { background: rgba(242, 181, 68, 0.25); }
+    .hint.global { display: flex; align-items: center; gap: 6px; margin-top: -4px; }
+    .hint.global ha-icon { --mdc-icon-size: 14px; width: 14px; height: 14px; }
     @container content (max-width: 640px) { .robotpic { max-width: 170px; } }
   `];
 
@@ -78,14 +81,14 @@ export class DxHero extends LitElement {
   /** Streifen aus Roboterzustand und Raumwerten (reine Funktion, billig). */
   get strip(): StripModel | null {
     const r = this.robot, rooms = this.rooms;
-    return r && rooms ? stripModel(r, (id: RoomId) => rooms.rooms[id] ?? null, this.roomOrder ?? []) : null;
+    return r && rooms ? stripModel(r, (id: RoomId) => wirksameWerte(rooms, id), this.roomOrder ?? []) : null;
   }
 
   /** Drei Werte: im Lauf die des aktuellen Raums, sonst der gemeinsame Wert aller Räume („–“ bei Abweichung oder unavailable). */
   private params(strip: StripModel | null): [string, string, string] {
     const rooms = this.rooms;
     const dash = t('common.dash');
-    const cur = strip && rooms ? rooms.rooms[strip.roomId] : null;
+    const cur = strip && rooms ? wirksameWerte(rooms, strip.roomId) : null;
     if (cur) return [cur.modus, cur.saug, cur.modus !== 'Saugen' && cur.wasser ? cur.wasser : dash];
     const vals = rooms ? Object.values(rooms.rooms).filter((v) => v !== null) : [];
     const common = (pick: (v: NonNullable<typeof vals[number]>) => string | null): string => {
@@ -141,6 +144,7 @@ export class DxHero extends LitElement {
         <button class="param" title=${t('hero.suctionTitle')} @click=${this.openRooms}><ha-icon icon="mdi:fan"></ha-icon><b>${saug}</b><span>${t('hero.suction')}</span></button>
         <button class="param" title=${t('hero.waterTitle')} @click=${this.openRooms}><ha-icon icon="mdi:water"></ha-icon><b>${wasser}</b><span>${t('hero.water')}</span></button>
       </div>
+      ${strip && this.rooms?.globalAktiv ? html`<div class="hint global" data-global title=${t('hero.globalTitle')}><ha-icon icon="mdi:tune-variant"></ha-icon>${t('hero.globalValues')}</div>` : nothing}
       <div class="ctl">${h.buttons.map((b) => html`<button class="btn ${b.primary ? 'primary' : ''}" data-svc=${b.service} @click=${() => this.api?.vacuum(b.service)}><ha-icon icon=${b.icon}></ha-icon>${b.label}</button>`)}</div>
       ${strip ? html`<button class="note strip" title=${t('hero.roomsTitle')} @click=${this.openRooms}><ha-icon icon=${strip.icon}></ha-icon><div><b>${strip.head}</b> <small>${strip.right}${strip.chips.length ? html` · ` : nothing}${strip.chips.map((c) => html`<span class="chip k">${c.icons.map((i) => html`<ha-icon icon=${i}></ha-icon>`)}${c.text}</span>`)}</small></div><ha-icon icon="mdi:chevron-right"></ha-icon></button>` : nothing}
     `;

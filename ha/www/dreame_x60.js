@@ -1,4 +1,4 @@
-// dreame_x60 – Heidi-Karte v2.0.0-alpha.38 (gebaut aus dreame_x60/card, nicht von Hand ändern)
+// dreame_x60 – Heidi-Karte v2.0.0-alpha.39 (gebaut aus dreame_x60/card, nicht von Hand ändern)
 
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
@@ -1033,6 +1033,8 @@ var de = {
   "hero.away": "unterwegs",
   "hero.battery": "Akku",
   "hero.mode": "Modus",
+  "hero.globalValues": "Allgemeine Werte",
+  "hero.globalTitle": "\u201EAngepasste Reinigung\u201C ist aus \u2013 der Roboter f\xE4hrt mit seinen allgemeinen Werten, nicht mit den Raum-Werten",
   "hero.modeTitle": "Reinigungsmodus",
   "hero.suction": "Saugstufe",
   "hero.suctionTitle": "Saugleistung",
@@ -1776,6 +1778,7 @@ var readProfile = memoizeSelector(
 
 // src/domain/raumwerte.ts
 var { RV } = ROOM_VALUE_CODES;
+var wirksameWerte = (v2, id) => v2.globalAktiv ? v2.global : v2.rooms[id] ?? null;
 function lookup2(table, code) {
   return code !== void 0 && Object.prototype.hasOwnProperty.call(table, code) ? table[code] : void 0;
 }
@@ -2479,12 +2482,34 @@ var readRoomValues = (id) => {
   }
   return sel;
 };
-var readAllRoomValues = memoizeSelector((s4) => [...profileIds(s4), ...readProfile(s4).roomIds.flatMap(roomSelectIds), E2.customizedCleaning], (s4) => {
+function globalValuesOf(s4) {
+  const g2 = (id) => {
+    const v2 = st(s4, id);
+    return EMPTY2.includes(v2) ? null : v2;
+  };
+  const m2 = g2(E2.cleaningMode);
+  if (m2 === null) return null;
+  const saugRaw = g2(E2.suctionLevel), wasserRaw = g2(E2.mopPadHumidity), routeRaw = g2(E2.cleaningRoute);
+  return {
+    modus: RV_HA.modus[m2] ?? m2,
+    saug: saugRaw && RV_HA.saug[saugRaw] || "\u2013",
+    wasser: wasserRaw ? RV_HA.wasser[wasserRaw] ?? wasserRaw : null,
+    route: routeRaw ? RV_HA.route[routeRaw] ?? routeRaw : null,
+    wdh: "1"
+  };
+}
+var customizedOff = (s4) => {
+  const a3 = attr(s4, E2.vac, "customized_cleaning");
+  return typeof a3 === "boolean" ? !a3 : st(s4, E2.customizedCleaning) === "off";
+};
+var customizedAttrOnly = (a3, b3) => a3?.attributes?.customized_cleaning === b3?.attributes?.customized_cleaning;
+var readAllRoomValues = memoizeSelector((s4) => [...profileIds(s4), ...readProfile(s4).roomIds.flatMap(roomSelectIds), E2.customizedCleaning, E2.vac, E2.cleaningMode, E2.suctionLevel, E2.mopPadHumidity, E2.cleaningRoute], (s4) => {
   const ids = readProfile(s4).roomIds;
   const rooms = Object.fromEntries(ids.map((id) => [id, readRoomValues(id)(s4)]));
   const vonKarte = ids.filter((id) => rooms[id] !== null && EMPTY2.includes(st(s4, roomEntity(id, RV_ENT2.modus))));
-  return { rooms, customized: on(s4, E2.customizedCleaning), anyUnavailable: ids.some((id) => rooms[id] === null), vonKarte };
-}, () => ({ [E2.map]: mapRoomsOnly2 }));
+  const global = globalValuesOf(s4);
+  return { rooms, customized: on(s4, E2.customizedCleaning), global, globalAktiv: global !== null && customizedOff(s4), anyUnavailable: ids.some((id) => rooms[id] === null), vonKarte };
+}, () => ({ [E2.map]: mapRoomsOnly2, [E2.vac]: customizedAttrOnly }));
 var readLearn = memoizeSelector(() => [E2.lern], (s4) => {
   const e4 = ent(s4, E2.lern);
   return e4 && !EMPTY2.includes(e4.state) && e4.attributes?.raten ? e4.attributes : null;
@@ -3061,7 +3086,7 @@ var shell = i`
 `;
 
 // src/version.ts
-var VERSION = "2.0.0-alpha.38";
+var VERSION = "2.0.0-alpha.39";
 
 // src/config.ts
 var NAV = [
@@ -3353,6 +3378,8 @@ var DxHero = class extends i4 {
     .chip.msg .x { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; margin-left: 2px; color: var(--dx-warning); border: 1px solid rgba(242, 181, 68, 0.45); background: transparent; flex: none; }
     .chip.msg .x ha-icon { --mdc-icon-size: 12px; width: 12px; height: 12px; color: var(--dx-warning); }
     .chip.msg .x:hover { background: rgba(242, 181, 68, 0.25); }
+    .hint.global { display: flex; align-items: center; gap: 6px; margin-top: -4px; }
+    .hint.global ha-icon { --mdc-icon-size: 14px; width: 14px; height: 14px; }
     @container content (max-width: 640px) { .robotpic { max-width: 170px; } }
   `];
   }
@@ -3365,13 +3392,13 @@ var DxHero = class extends i4 {
   /** Streifen aus Roboterzustand und Raumwerten (reine Funktion, billig). */
   get strip() {
     const r4 = this.robot, rooms = this.rooms;
-    return r4 && rooms ? stripModel(r4, (id) => rooms.rooms[id] ?? null, this.roomOrder ?? []) : null;
+    return r4 && rooms ? stripModel(r4, (id) => wirksameWerte(rooms, id), this.roomOrder ?? []) : null;
   }
   /** Drei Werte: im Lauf die des aktuellen Raums, sonst der gemeinsame Wert aller Räume („–“ bei Abweichung oder unavailable). */
   params(strip) {
     const rooms = this.rooms;
     const dash = t3("common.dash");
-    const cur = strip && rooms ? rooms.rooms[strip.roomId] : null;
+    const cur = strip && rooms ? wirksameWerte(rooms, strip.roomId) : null;
     if (cur) return [cur.modus, cur.saug, cur.modus !== "Saugen" && cur.wasser ? cur.wasser : dash];
     const vals = rooms ? Object.values(rooms.rooms).filter((v2) => v2 !== null) : [];
     const common = (pick) => {
@@ -3432,6 +3459,7 @@ var DxHero = class extends i4 {
         <button class="param" title=${t3("hero.suctionTitle")} @click=${this.openRooms}><ha-icon icon="mdi:fan"></ha-icon><b>${saug}</b><span>${t3("hero.suction")}</span></button>
         <button class="param" title=${t3("hero.waterTitle")} @click=${this.openRooms}><ha-icon icon="mdi:water"></ha-icon><b>${wasser}</b><span>${t3("hero.water")}</span></button>
       </div>
+      ${strip && this.rooms?.globalAktiv ? b2`<div class="hint global" data-global title=${t3("hero.globalTitle")}><ha-icon icon="mdi:tune-variant"></ha-icon>${t3("hero.globalValues")}</div>` : A}
       <div class="ctl">${h3.buttons.map((b3) => b2`<button class="btn ${b3.primary ? "primary" : ""}" data-svc=${b3.service} @click=${() => this.api?.vacuum(b3.service)}><ha-icon icon=${b3.icon}></ha-icon>${b3.label}</button>`)}</div>
       ${strip ? b2`<button class="note strip" title=${t3("hero.roomsTitle")} @click=${this.openRooms}><ha-icon icon=${strip.icon}></ha-icon><div><b>${strip.head}</b> <small>${strip.right}${strip.chips.length ? b2` · ` : A}${strip.chips.map((c4) => b2`<span class="chip k">${c4.icons.map((i5) => b2`<ha-icon icon=${i5}></ha-icon>`)}${c4.text}</span>`)}</small></div><ha-icon icon="mdi:chevron-right"></ha-icon></button>` : A}
     `;
@@ -3468,7 +3496,7 @@ var DxAuftrag = class extends i4 {
     const nextId = startpunkt ? order[0] : rest[0];
     const rl = this.roomOrder ?? [];
     const next = nextId !== void 0 ? roomById(rl, nextId) : void 0;
-    const nextVals = next && this.rooms ? this.rooms.rooms[next.id] : null;
+    const nextVals = next && this.rooms ? wirksameWerte(this.rooms, next.id) : null;
     const short = (id) => roomById(rl, id)?.short ?? String(id);
     const dash = t3("common.dash");
     return b2`
@@ -5012,7 +5040,7 @@ var DreameX60Panel = class extends i4 {
     const s4 = this.hass?.states;
     if (!s4) return null;
     const rooms = readAllRoomValues(s4);
-    return anzeigeSnapshot(readRobot(s4), (id) => rooms.rooms[id] ?? null, readProfile(s4).rooms, WERTE_TAB);
+    return anzeigeSnapshot(readRobot(s4), (id) => wirksameWerte(rooms, id), readProfile(s4).rooms, WERTE_TAB);
   }
   /** Kontext jeder Meldung der Karte: Seite, Version, Fenster, alle sichtbaren Werte. */
   anzeigeKontext() {

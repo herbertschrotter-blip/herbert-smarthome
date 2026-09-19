@@ -23,6 +23,11 @@ export interface RoomValues {
 /** Raumwerte je Raum-ID (beliebig viele Räume, IDs ≥ 1). */
 export type RaumMap = Partial<Record<RoomId, RoomValues>>;
 
+/** Teil der Sicht readAllRoomValues, den die Anzeige im Lauf braucht. */
+export interface WerteSicht { rooms: Record<RoomId, RoomValues | null>; global: RoomValues | null; globalAktiv: boolean }
+/** Werte, mit denen der Roboter einen Raum wirklich reinigt: Raum-Werte, bei ausgeschalteter „Angepasster Reinigung“ die allgemeinen (HT-0006, PD-019). */
+export const wirksameWerte = (v: WerteSicht, id: RoomId): RoomValues | null => (v.globalAktiv ? v.global : (v.rooms[id] ?? null));
+
 /** Eingabe für encodeRaum: darf unvollständig oder mit fremden Werten sein (Draft aus dem Editor). */
 export interface RoomValuesInput {
   modus?: string | null;
